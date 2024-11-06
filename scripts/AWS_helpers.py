@@ -64,6 +64,28 @@ def calculate_s3_storage_cost(bucket_name):
 
     return cost, total_size_gb
 
+def list_S3_objects(bucket_name):
+    """
+    Lists all objects in a specified S3 bucket.
+
+    Parameters:
+        bucket_name (str): The name of the S3 bucket.
+
+    Returns:
+        list: A list of object keys (paths) in the bucket, or an empty list if the bucket is empty.
+    """
+    s3 = boto3.client('s3')
+    file_list = []
+
+    # Use paginator to list all objects in the bucket
+    paginator = s3.get_paginator('list_objects_v2')
+    for page in paginator.paginate(Bucket=bucket_name):
+        for obj in page.get('Contents', []):
+            file_list.append(obj['Key'])  # Add each object's key to the list
+
+    # If the bucket is empty, return an empty list
+    return file_list
+    
 def get_instance_cost(instance_type, days=1):
     """
     Fetches the cost for a specific instance type over a specified number of days.
