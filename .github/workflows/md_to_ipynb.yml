@@ -1,0 +1,35 @@
+name: Convert Markdown to Jupyter Notebooks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: pip install nbformat pandoc
+
+      - name: Convert Markdown files to Jupyter Notebooks
+        run: python scripts/md_to_ipynb.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add notebooks/*.ipynb
+          git commit -m "Auto-generate Jupyter notebooks from Markdown" || echo "No changes to commit"
+          git push
