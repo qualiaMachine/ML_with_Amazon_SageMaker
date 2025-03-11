@@ -37,6 +37,12 @@
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/Training-models-in-SageMaker-notebooks.html</loc>
   </url>
   <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/aio.html</loc>
+  </url>
+  <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/images.html</loc>
+  </url>
+  <url>
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/index.html</loc>
   </url>
   <url>
@@ -79,16 +85,34 @@
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/Training-models-in-SageMaker-notebooks.html</loc>
   </url>
   <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/aio.html</loc>
+  </url>
+  <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/images.html</loc>
+  </url>
+  <url>
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/index.html</loc>
   </url>
   <url>
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/instances-for-ML.html</loc>
   </url>
   <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/instructor-notes.html</loc>
+  </url>
+  <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/key-points.html</loc>
+  </url>
+  <url>
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/profiles.html</loc>
   </url>
   <url>
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/reference.html</loc>
+  </url>
+  <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor-notes.html</loc>
+  </url>
+  <url>
+    <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/key-points.html</loc>
   </url>
   <url>
     <loc>https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/profiles.html</loc>
