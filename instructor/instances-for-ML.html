@@ -371,21 +371,21 @@ such as <code>ml.t3.medium</code>, may be eligible for the AWS Free
 Tier, which provides limited hours of usage per month. Free Tier
 eligibility can vary, so check <a href="https://aws.amazon.com/free/" class="external-link">AWS Free Tier details</a> before
 launching instances to avoid unexpected costs.</li>
-</ul><table class="table"><colgroup><col width="13%"><col width="23%"><col width="7%"><col width="13%"><col width="6%"><col width="20%"><col width="15%"></colgroup><thead><tr class="header"><th><strong>Dataset Size</strong></th>
+</ul><table class="table"><colgroup><col width="13%"><col width="23%"><col width="7%"><col width="13%"><col width="6%"><col width="20%"><col width="15%"></colgroup><thead><tr><th><strong>Dataset Size</strong></th>
 <th><strong>Recommended Instance Type</strong></th>
 <th><strong>vCPU</strong></th>
 <th><strong>Memory (GiB)</strong></th>
 <th><strong>GPU</strong></th>
 <th><strong>Price per Hour (USD)</strong></th>
 <th><strong>Suitable Tasks</strong></th>
-</tr></thead><tbody><tr class="odd"><td>&lt; 1GB</td>
+</tr></thead><tbody><tr><td>&lt; 1GB</td>
 <td><code>ml.t3.medium</code></td>
 <td>2</td>
 <td>4</td>
 <td>None</td>
 <td>$0.04</td>
 <td>Preprocessing, lightweight model training</td>
-</tr><tr class="even"><td>&lt; 1GB</td>
+</tr><tr><td>&lt; 1GB</td>
 <td><code>ml.m5.large</code></td>
 <td>2</td>
 <td>8</td>
@@ -393,7 +393,7 @@ launching instances to avoid unexpected costs.</li>
 <td>$0.10</td>
 <td>Preprocessing, regression, feature engineering, small model
 training</td>
-</tr><tr class="odd"><td>&lt; 1GB</td>
+</tr><tr><td>&lt; 1GB</td>
 <td>
 <code>g4dn.xlarge</code> (T4 GPU)</td>
 <td>4</td>
@@ -402,7 +402,7 @@ training</td>
 <td>$0.75</td>
 <td>GPU processing for small-scale deep learning, cost-effective GPU
 option</td>
-</tr><tr class="even"><td>&lt; 1GB</td>
+</tr><tr><td>&lt; 1GB</td>
 <td>
 <code>p3.2xlarge</code> (V100 GPU)</td>
 <td>8</td>
@@ -412,21 +412,21 @@ option</td>
 <td>High-performance GPU processing, faster training for deep learning
 models, higher cost but faster than <code>g4dn</code>
 </td>
-</tr><tr class="odd"><td>10GB</td>
+</tr><tr><td>10GB</td>
 <td><code>ml.c5.2xlarge</code></td>
 <td>8</td>
 <td>16</td>
 <td>None</td>
 <td>$0.34</td>
 <td>CPU-heavy processing, model training</td>
-</tr><tr class="even"><td>10GB</td>
+</tr><tr><td>10GB</td>
 <td><code>ml.m5.2xlarge</code></td>
 <td>8</td>
 <td>32</td>
 <td>None</td>
 <td>$0.38</td>
 <td>Preprocessing, feature engineering, model training</td>
-</tr><tr class="odd"><td>10GB</td>
+</tr><tr><td>10GB</td>
 <td>
 <code>g4dn.2xlarge</code> (T4 GPU)</td>
 <td>8</td>
@@ -434,7 +434,7 @@ models, higher cost but faster than <code>g4dn</code>
 <td>1x NVIDIA T4</td>
 <td>$0.94</td>
 <td>Moderate-scale deep learning, cost-effective GPU training</td>
-</tr><tr class="even"><td>10GB</td>
+</tr><tr><td>10GB</td>
 <td>
 <code>p3.2xlarge</code> (V100 GPU)</td>
 <td>8</td>
@@ -443,21 +443,21 @@ models, higher cost but faster than <code>g4dn</code>
 <td><strong>$3.83</strong></td>
 <td>Faster GPU processing for deep learning, better suited for larger
 models if budget allows</td>
-</tr><tr class="odd"><td>50GB</td>
+</tr><tr><td>50GB</td>
 <td><code>ml.c5.4xlarge</code></td>
 <td>16</td>
 <td>64</td>
 <td>None</td>
 <td>$0.77</td>
 <td>CPU-heavy processing, large model training</td>
-</tr><tr class="even"><td>50GB</td>
+</tr><tr><td>50GB</td>
 <td><code>ml.m5.4xlarge</code></td>
 <td>16</td>
 <td>64</td>
 <td>None</td>
 <td>$0.77</td>
 <td>Preprocessing, feature engineering, large model training</td>
-</tr><tr class="odd"><td>50GB</td>
+</tr><tr><td>50GB</td>
 <td>
 <code>g4dn.4xlarge</code> (T4 GPU)</td>
 <td>16</td>
@@ -465,7 +465,7 @@ models if budget allows</td>
 <td>1x NVIDIA T4</td>
 <td>$1.48</td>
 <td>Moderate-scale deep learning, balanced performance and cost</td>
-</tr><tr class="even"><td>100GB</td>
+</tr><tr><td>100GB</td>
 <td>
 <code>g4dn.8xlarge</code> (T4 GPU)</td>
 <td>32</td>
@@ -473,7 +473,7 @@ models if budget allows</td>
 <td>1x NVIDIA T4</td>
 <td><strong>$2.76</strong></td>
 <td>Large-scale model training with cost-effective GPU acceleration</td>
-</tr><tr class="odd"><td>100GB</td>
+</tr><tr><td>100GB</td>
 <td>
 <code>p3.8xlarge</code> (V100 GPU)</td>
 <td>32</td>
@@ -482,7 +482,7 @@ models if budget allows</td>
 <td><strong>$15.20</strong></td>
 <td>High-performance GPU processing for large deep learning models
 (e.g., transformers, CNNs)</td>
-</tr><tr class="even"><td>100GB</td>
+</tr><tr><td>100GB</td>
 <td>
 <code>p4d.24xlarge</code> (A100 GPU)</td>
 <td>96</td>
@@ -490,7 +490,7 @@ models if budget allows</td>
 <td>8x NVIDIA A100</td>
 <td><strong>$32.77</strong></td>
 <td>High-performance DL for large datasets with batch streaming</td>
-</tr><tr class="odd"><td>1TB+</td>
+</tr><tr><td>1TB+</td>
 <td>
 <code>p3.16xlarge</code> (V100 GPU)</td>
 <td>64</td>
@@ -498,7 +498,7 @@ models if budget allows</td>
 <td>8x NVIDIA V100</td>
 <td><strong>$30.40</strong></td>
 <td>Extreme-scale deep learning, large transformer training</td>
-</tr><tr class="even"><td>1TB+</td>
+</tr><tr><td>1TB+</td>
 <td>
 <code>p4d.24xlarge</code> (A100 GPU)</td>
 <td>96</td>
@@ -574,7 +574,7 @@ any links that you are not going to use.
   "identifier": "https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor/instances-for-ML.html",
   "dateCreated": "2024-10-31",
   "dateModified": "2025-03-10",
-  "datePublished": "2026-04-28"
+  "datePublished": "2026-05-05"
 }
 
   </script><script>
