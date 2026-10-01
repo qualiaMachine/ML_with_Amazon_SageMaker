@@ -109,6 +109,8 @@ In the AWS console:
    - `Project = your-team-name`  
    - `Name = your-name`  
    - `Purpose = RAG-demo`
+
+   These tags cover the bucket's storage costs only. Your notebook instance carries the tags you gave it when you created it, and in this episode those two resources are the only things being billed. Once we start launching jobs and calling Bedrock in later episodes, each of those needs its own tags as well.
 5. Once the bucket is created, you'll be brought to a page that shows all of your current buckets (and those on our shared account). We'll have to edit our bucket's policy to allow ourselves proper access to any files stored there (e.g., read from bucket, write to bucket). To set these permissions...
 
 a. Click on the name of your bucket to bring up additional options and settings.

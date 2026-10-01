@@ -94,6 +94,7 @@ Bedrock is not free of downsides; it's just that none of them are "you forgot an
 - **Model access and region availability.** Some models must be enabled in the console first, and the catalog varies by region. Plan for this before a workshop or deadline.
 - **Quotas.** On‑demand throughput is rate‑limited per model and per account. For large batch workloads, use the Bedrock batch inference API or request a quota increase rather than hammering the on‑demand endpoint.
 - **Data handling.** Bedrock does not use your prompts to train models and keeps data in‑region, but you should still check your institution's policy before sending sensitive documents to any hosted API.
+- **Cost tracking needs one extra step.** On‑demand Bedrock calls carry no tags. To attribute spend to a project you route calls through a tagged *application inference profile* (see "Tagging" below and the Bedrock episode). It is a one‑time setup, but skipping it leaves the usage anonymous on the bill.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -136,6 +137,25 @@ It is also the **most expensive option when traffic is low or bursty**, because 
 
 **Use it for:** production systems with steady traffic that require a custom or open‑weight model. We do not build one hands‑on in this lesson.
 
+## Tagging: Every Billable Resource Needs Its Own Tags
+
+Cost tracking in this workshop relies on three tags — `Name`, `Project`, `Purpose` — so that Cost Explorer can break the shared bill down by team. The part that trips people up is that **tags never propagate**. Tagging your notebook instance tags the notebook instance and nothing else. Every other resource you create is a separate line item that is anonymous unless you tag it yourself at creation time.
+
+| Resource | What it bills | How it gets tagged |
+|---|---|---|
+| Notebook instance | Hourly, while running | Tags you set in the console when creating it |
+| S3 bucket | Storage + requests | Tags you set in the console when creating it |
+| Training / tuning job | Hourly, while the job runs | `tags=` argument on the estimator or tuner, **every job** |
+| Processing job | Hourly, while the job runs | `tags=` argument on the processor, **every job** |
+| Inference endpoint | Hourly, while deployed | `tags=` argument on `deploy()` |
+| Bedrock on‑demand call | Per token | **Cannot be tagged directly.** Create an *application inference profile* with tags and pass its ARN as `modelId` instead of the model ID |
+
+Three things follow from this:
+
+1. **Each job gets its own tags.** A SageMaker job launched from a tagged notebook does not inherit the notebook's tags. Pass `tags=job_tags` on every estimator, tuner, and processor, exactly as the training, tuning, and Processing‑job episodes do. Vary `Purpose` per job so the bill tells you what the money went to.
+2. **Bedrock is tagged through a profile, not a call.** `invoke_model` and `converse` have no tags parameter. An application inference profile is a free, model‑specific wrapper that carries tags; usage routed through it is attributed to those tags. One profile per base model (so one for the embedding model and one for the generation model). Note that Bedrock's tag format is lowercase `key`/`value`, while SageMaker's is `Key`/`Value`; the tag *names* stay the same.
+3. **Tags only show up on the bill once the keys are activated.** An account administrator has to activate `Name`, `Project`, and `Purpose` as cost allocation tags in the Billing console, once per account. Until then the tags exist on the resources but are not available as filters in Cost Explorer. On a shared workshop account the organizers handle this; on your own account, do it before you start.
+
 ## When Do You Use Which Approach?
 
 | Your situation | Recommended route |
@@ -166,6 +186,7 @@ When you build your own RAG system afterward, start from the Bedrock episode.
 - Self‑managed GPU compute (Processing Jobs, notebook GPUs, inference endpoints) is justified when you need a model Bedrock doesn't offer or when very large batch volumes make per‑token pricing uncompetitive — not as a starting point.
 - Among the GPU options, Processing Jobs are the safest because the instance terminates itself; notebook GPUs and endpoints bill by the hour until you stop them.
 - A forgotten GPU instance costs tens of dollars overnight and hundreds to thousands over a month; a full WattBot run on Bedrock costs well under a dollar.
+- Tags never propagate: tag every job at launch, and route Bedrock calls through a tagged application inference profile, or the spend is untraceable.
 - Later episodes walk through each pattern hands‑on, in teaching order (notebook GPU → Processing Jobs → Bedrock).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
