@@ -20,15 +20,6 @@ exercises: 10
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Initial setup 
-
-#### Open .ipynb notebook
-Once your newly created *instance* shows as `InService`, open the instance in Jupyter Lab. From there, we can create as many Jupyter notebooks as we would like within the instance environment. 
-
-We will then select the standard python3 environment (conda_python3) to start our first .ipynb notebook (Jupyter notebook). We can use the standard conda_python3 environment since we aren't doing any training/tuning just yet.
-
-After opening, you can right-click the Jupyter notebook name to "Rename" it to: `Interacting-with-S3.ipynb`, since interacting with S3 will be our focus for now.
-
 #### Set up AWS environment
 To begin each notebook, it's important to set up an AWS environment that will allow seamless access to the necessary cloud resources. Here's what we'll do to get started:
 
@@ -36,7 +27,7 @@ To begin each notebook, it's important to set up an AWS environment that will al
 
 2. **Initialize the SageMaker Session**: Next, we'll create a `sagemaker.Session()` object, which will help manage and track the resources and operations we use in SageMaker, such as training jobs and model artifacts. The session acts as a bridge between the SageMaker SDK commands in our notebook and AWS services.
 
-3. **Set Up an S3 Client**: Using `boto3`, we'll initialize an S3 client for accessing S3 buckets directly. This client enables us to handle data storage, retrieve datasets, and manage files in S3, which will be essential as we work through various machine learning tasks.
+3. **Set Up an S3 Client using boto3**: Using `boto3`, we'll initialize an S3 client for accessing S3 buckets directly. Boto3 is the official AWS SDK for Python, allowing developers to interact programmatically with AWS services like S3, EC2, and Lambda.
 
 Starting with these initializations prepares our notebook environment to efficiently interact with AWS resources for model development, data management, and deployment.
 
@@ -56,8 +47,7 @@ Preview variable details.
 
 ```python
 # Print relevant details 
-role_name = role.split("/")[-1]  # Extracts the last role (the actual name)
-print(f"Execution Role: {role_name}")  # Displays the IAM role being used
+print(f"Execution Role: {role}")  # Displays the IAM role being used
 bucket_names = [bucket["Name"] for bucket in s3.list_buckets()["Buckets"]]
 print(f"Available S3 Buckets: {bucket_names}")  # Shows the default S3 bucket assigned to SageMaker
 print(f"AWS Region: {session.boto_region_name}")  # Prints the region where the SageMaker session is running
@@ -82,12 +72,12 @@ This is the recommended approach for most workflows. By keeping data in S3 and r
 - **Potential latency**: Reading large datasets repeatedly from S3 may introduce small delays. This approach works best if you only need to load data once or infrequently.
 
 #### Example: Reading data from S3 into memory
-Our data is stored on an S3 bucket called 'name-titanic-s3' (e.g., doejohn-titanic-s3). We can use the following code to read data directly from S3 into memory in the Jupyter notebook environment, without actually downloading a copy of train.csv as a local file.
+Our data is stored on an S3 bucket called 'teamname-name-dataname' (e.g., sinkorswim-doejohn-titanic). We can use the following code to read data directly from S3 into memory in the Jupyter notebook environment, without actually downloading a copy of train.csv as a local file.
 
 ```python
 import pandas as pd
 # Define the S3 bucket and object key
-bucket_name = 'doejohn-titanic-s3'  # replace with your S3 bucket name
+bucket_name = 'sinkorswim-doejohn-titanic'  # replace with your S3 bucket name
 
 # Read the train data from S3
 key = 'titanic_train.csv'  # replace with your object key
@@ -107,12 +97,6 @@ print(test_data.shape)
 train_data.head()
 ```
 
-    sagemaker.config INFO - Not applying SDK defaults from location: /etc/xdg/sagemaker/config.yaml
-    sagemaker.config INFO - Not applying SDK defaults from location: /home/ec2-user/.config/sagemaker/config.yaml
-    (712, 12)
-    (179, 12)
-
-
 ### B) Download copy into notebook environment
 In some cases, downloading a local copy of the dataset may be useful, such as when performing repeated reads in an interactive notebook session.
 
@@ -131,8 +115,6 @@ In some cases, downloading a local copy of the dataset may be useful, such as wh
 ```python
 !pwd
 ```
-
-    /home/ec2-user/SageMaker/
 
 
 ```python
@@ -188,13 +170,8 @@ print(f"Total size of bucket '{bucket_name}': {total_size_mb:.2f} MB")
 #print(f"Total size of bucket '{bucket_name}': {total_size_gb:.2f} GB")
 ```
 
-    Total size of bucket 'doejohn-titanic-s3': 0.06 MB
-
-
-### Using helper functions from lesson repo
-We have added code to calculate bucket size to a helper function called `get_s3_bucket_size(bucket_name)` for your convenience. There are also some other helper functions in that repo to assist you with common AWS/SageMaker workflows. We'll show you how to clone this code into your notebook environment.
-
-**Note**: Make sure you have already forked the lesson repo as described on the [setup page](https://uw-madison-datascience.github.io/ML_with_Amazon_SageMaker/#workshop-repository-setup). Replace "username" below with your GitHub username.
+### Using helper functions from GitHub
+We have added code to calculate bucket size to a helper function called `get_s3_bucket_size(bucket_name)` for your convenience. There are also some other helper functions in the AWS_helpers repo to assist you with common AWS/SageMaker workflows. We'll show you how to clone this code into your notebook environment.
 
 #### Directory setup
 Let's make sure we're starting in the root directory of this instance, so that we all have our AWS_helpers.py file located in the same path (/test_AWS/scripts/AWS_helpers.py)
@@ -203,11 +180,9 @@ Let's make sure we're starting in the root directory of this instance, so that w
 %cd /home/ec2-user/SageMaker/
 ```
 
-    /home/ec2-user/SageMaker
-
-To clone the repo to our Jupyter notebook, use the following code, adjusting username to your GitHub username.
+To clone the repo to our Jupyter notebook, use the following code.
 ```python
-!git clone https://github.com/username/AWS_helpers.git # downloads AWS_helpers folder/repo (refresh file explorer to see)
+!git clone https://github.com/UW-Madison-DataScience/AWS_helpers.git # downloads AWS_helpers folder/repo (refresh file explorer to see)
 ```
 
 Our AWS_helpers.py file can be found in `AWS_helpers/helpers.py`. With this file downloaded, you can call this function via...
@@ -217,7 +192,6 @@ import AWS_helpers.helpers as helpers
 helpers.get_s3_bucket_size(bucket_name)
 ```
 
-    {'size_mb': 0.060057640075683594, 'size_gb': 5.865003913640976e-05}
 
 ### Check storage costs of bucket
 To estimate the storage cost of your Amazon S3 bucket directly from a Jupyter notebook in SageMaker, you can use the following approach. This method calculates the total size of the bucket and estimates the monthly storage cost based on AWS S3 pricing.
@@ -249,8 +223,6 @@ print(f"Estimated monthly storage cost: ${cost:.5f}")
 print(f"Estimated annual storage cost: ${cost*12:.5f}")
 
 ```
-
-    Estimated monthly storage cost: $0.0000
 
 
 For your convenience, we have also added this code to a helper function.
@@ -285,8 +257,6 @@ print("Files uploaded successfully.")
 
 ```
 
-    Files uploaded successfully.
-
 After uploading, we can view the objects/files available on our bucket using...
 
 ```python
@@ -308,9 +278,6 @@ Alternatively, we can substitute this for a helper function call as well.
 file_list = helpers.list_S3_objects(bucket_name)
 file_list
 ```
-
-   ['results/results.txt', 'titanic_test.csv', 'titanic_train.csv']
-
 
 :::::::::::::::::::::::::::::::::::::: keypoints 
 

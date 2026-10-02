@@ -21,8 +21,11 @@ exercises: 10
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Initial setup
-To keep things organized, you may wish to open a fresh jupyter notebook (pytorch environment). Name your notebook something along the lines of, "Training-part2.ipynb". Once your notebook is open, we can setup our SageMaker controller as usual:
+## Initial setup: open prefilled .ipynb notebook
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/Training-models-in-SageMaker-notebooks-part2.ipynb`. Select the **pytorch environment**.
+
+## Setup notebook as controller
+Once your notebook is open, we can setup our SageMaker controller as usual:
 
 ```python
 import boto3
@@ -34,37 +37,44 @@ from sagemaker import get_execution_role
 role = sagemaker.get_execution_role()
 print(f'role = {role}')
 
-# Create a SageMaker session to manage interactions with Amazon SageMaker, such as training jobs, model deployments, and data input/output.
-session = sagemaker.Session()
-
 # Initialize an S3 client to interact with Amazon S3, allowing operations like uploading, downloading, and managing objects and buckets.
 s3 = boto3.client('s3')
 
 # Define the S3 bucket that we will load from
-bucket_name = 'myawesometeam-titanic'  # replace with your S3 bucket name
+bucket_name = 'sinkorswim-doejohn-titanic'  # replace with your S3 bucket name
 
 # Define train/test filenames
 train_filename = 'titanic_train.csv'
 test_filename = 'titanic_test.csv'
 ```
 
-We should also record our local instance information to report this information during testing.
+Create a SageMaker session to manage interactions with Amazon SageMaker, such as training jobs, model deployments, and data input/output.
+```python
+region = "us-east-2" # United States (Ohio). Make sure this matches what you see near top right of AWS Console menu
+boto_session = boto3.Session(region_name=region) # Create a Boto3 session that ensures all AWS service calls (including SageMaker) use the specified region
+session = sagemaker.Session(boto_session=boto_session)
+```
+
+We should also record our local instance information to report this information during testing. First, let's make sure we're starting in the same location to access helper functions
+
+```python
+%cd /home/ec2-user/SageMaker/
+```
 
 ```python
 import AWS_helpers.helpers as helpers
-notebook_instance_name = 'MyAwesomeTeam-ChrisEndemann-Titanic-Train-Tune-Xgboost-NN'
-local_instance_info = helpers.get_notebook_instance_info(notebook_instance_name)
+notebook_instance_name = 'sinkorswim-DoeJohn-TrainClassifier'
+
+# Make sure this matches what you see near top right of AWS Console menu
+region = "us-east-2" # United States (Ohio)
+
+local_instance_info = helpers.get_notebook_instance_info(notebook_instance_name, region)
 local_instance = local_instance_info['InstanceType']
 local_instance
 ````
 
-    'ml.t3.medium'
-
-  
-
 ## Training a neural network with SageMaker
 Let's see how to do a similar experiment, but this time using PyTorch neural networks. We will again demonstrate how to test our custom model train script (train_nn.py) before deploying to SageMaker, and discuss some strategies (e.g., using a GPU) for improving train time when needed.
-
 
 ### Preparing the data (compressed npz files)
 When deploying a PyTorch model on SageMaker, it's helpful to prepare the input data in a format that's directly accessible and compatible with PyTorch's data handling methods. The next code cell will prep our npz files from the existing csv versions. 
@@ -125,8 +135,7 @@ np.savez('val_data.npz', X_val=X_val, y_val=y_val)
 
 ```
 
-Next, we will upload our compressed files to our S3 bucket. Storage is farily cheap on AWS (around $0.023 per GB per month), but be mindful of uploading too much data. It may be convenient to store a preprocessed version of the data, just don't store too many versions that aren't being actively used.
-
+Next, we will upload our compressed files to our S3 bucket. Storage is farily cheap on AWS (around $0.023 per GB per month), but be mindful of uploading too much data. It may be convenient to store a preprocessed version of the data at times, but try not to store too many versions that aren't being actively used.
 
 ```python
 import boto3
@@ -144,9 +153,6 @@ s3.upload_file(val_file, bucket_name, f"{val_file}")
 print("Files successfully uploaded to S3.")
 
 ```
-
-    Files successfully uploaded to S3.
-
 
 ## Testing on notebook instance
 You should always test code thoroughly before scaling up and using more resources. Here, we will test our script using a small number of epochs — just to verify our setup is correct.
@@ -169,7 +175,7 @@ print(f"Local training time: {t.time() - start_time:.2f} seconds, instance_type 
 ## Deploying PyTorch neural network via SageMaker
 Now that we have tested things locally, we can try to train with a larger number of epochs and a better instance selected. We can do this easily by invoking the PyTorch estimator. Our notebook is currently configured to use ml.m5.large. We can upgrade this to `ml.m5.xlarge` with the below code (using our notebook as a controller). 
 
-**Should we use a GPU?**: Since this dataset is farily small, we don't necessarily need a GPU for training. Considering costs, the m5.xlarge is `$0.17/hour`, while the cheapest GPU instance is `$0.75/hour`. However, for larger datasets (> 1 GB) and models, we may want to consider a GPU if training time becomes cumbersome (see [Instances for ML](https://docs.google.com/spreadsheets/d/1uPT4ZAYl_onIl7zIjv5oEAdwy4Hdn6eiA9wVfOBbHmY/edit?usp=sharing). If that doesn't work, we can try distributed computing (setting instance > 1). More on this in the next section.
+**Should we use a GPU?**: Since this dataset is farily small, we don't necessarily need a GPU for training. Considering costs, the m5.xlarge is `$0.17/hour`, while the cheapest GPU instance is `$0.75/hour`. However, for larger datasets (> 1 GB) and models, we may want to consider a GPU if training time becomes cumbersome (see [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html). If that doesn't work, we can try distributed computing (setting instance > 1). More on this in the next section.
 
 
 ```python
@@ -180,8 +186,13 @@ instance_count = 1
 instance_type="ml.m5.large"
 output_path = f's3://{bucket_name}/output_nn/' # this folder will auto-generate if it doesn't exist already
 
+# Define max runtime in seconds to ensure you don't use more compute time than expected. Use a generous threshold (2x expected time but < 2 days) so that work isn't interrupted without any gains.
+max_run = 2*60*60 # 2 hours
+
 # Define the PyTorch estimator and pass hyperparameters as arguments
 pytorch_estimator = PyTorch(
+    base_job_name=notebook_instance_name,
+    max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="AWS_helpers/train_nn.py",
     role=role,
     instance_type=instance_type, # with this small dataset, we don't recessarily need a GPU for fast training. 
@@ -210,13 +221,7 @@ end = t.time()
 print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_type: {instance_type}, instance_count: {instance_count}")
 
 ```
-    
-    2024-11-03 21:27:03 Uploading - Uploading generated training model
-    2024-11-03 21:27:03 Completed - Training job completed
-    Training seconds: 135
-    Billable seconds: 135
-    Runtime for training on SageMaker: 197.62 seconds, instance_type: ml.m5.large, instance_count: 1
-
+   
 
 ## Deploying PyTorch neural network via SageMaker with a GPU instance
 
@@ -253,6 +258,8 @@ output_path = f's3://{bucket_name}/output_nn/'
 
 # Define the PyTorch estimator and pass hyperparameters as arguments
 pytorch_estimator_gpu = PyTorch(
+    base_job_name=notebook_instance_name,
+    max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="AWS_helpers/train_nn.py",
     role=role,
     instance_type=instance_type,
@@ -280,13 +287,6 @@ end = t.time()
 print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_type: {instance_type}, instance_count: {instance_count}")
 
 ```
-    
-    2024-11-03 21:33:56 Uploading - Uploading generated training model
-    2024-11-03 21:33:56 Completed - Training job completed
-    Training seconds: 350
-    Billable seconds: 350
-    Runtime for training on SageMaker: 409.68 seconds, instance_type: ml.g4dn.xlarge, instance_count: 1
-
 
 ::::::::::::::::::::::::::: callout
 #### GPUs can be slow for small datasets/models
@@ -317,6 +317,8 @@ output_path = f's3://{bucket_name}/output_nn/'
 
 # Define the PyTorch estimator and pass hyperparameters as arguments
 pytorch_estimator = PyTorch(
+    base_job_name=notebook_instance_name,
+    max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="AWS_helpers/train_nn.py",
     role=role,
     instance_type=instance_type, # with this small dataset, we don't recessarily need a GPU for fast training. 
@@ -345,32 +347,26 @@ end = t.time()
 print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_type: {instance_type}, instance_count: {instance_count}")
 
 ```
-    
-    2024-11-03 21:36:35 Uploading - Uploading generated training model
-    2024-11-03 21:36:47 Completed - Training job completed
-    Training seconds: 228
-    Billable seconds: 228
-    Runtime for training on SageMaker: 198.36 seconds, instance_type: ml.m5.xlarge, instance_count: 2
-
 
 ### Distributed training for neural nets: how epochs are managed
 Amazon SageMaker provides two main strategies for distributed training: **data parallelism** and **model parallelism**. Understanding which strategy will be used depends on the model size and the configuration of your SageMaker training job, as well as the default settings of the specific SageMaker Estimator you are using.
 
 #### 1. **Data parallelism (most common for mini-batch SGD)**
-   - **How it works**: In data parallelism, each instance in the cluster (e.g., multiple `ml.m5.xlarge` instances) maintains a **complete copy of the model**. The **training dataset is split across instances**, and each instance processes a different subset of data simultaneously. This enables multiple instances to complete forward and backward passes on different data batches independently.
-   - **Epoch distribution**: Even though each instance processes all the specified epochs, they only work on a portion of the dataset for each epoch. After each batch, instances synchronize their gradient updates across all instances using a method such as *all-reduce*. This ensures that while each instance is working with a unique data batch, the model weights remain consistent across instances.
-   - **Key insight**: Because all instances process the specified number of epochs and synchronize weight updates between batches, each instance's training contributes to a cohesive, shared model. The **effective epoch count across instances appears to be shared** because data parallelism allows each instance to handle a fraction of the data per epoch, not the epochs themselves. Data parallelism is well-suited for models that can fit into a single instance's memory and benefit from increased data throughput.
+- **How it works**: In data parallelism, each instance in the cluster (e.g., multiple `ml.m5.xlarge` instances) maintains a **complete copy of the model**. The **training dataset is split across instances**, and each instance processes a different subset of data simultaneously. This enables multiple instances to complete forward and backward passes on different data batches independently.
+- **Epoch distribution**: Even though each instance processes all the specified epochs, they only work on a portion of the dataset for each epoch. After each batch, instances synchronize their gradient updates across all instances using a method such as *all-reduce*. This ensures that while each instance is working with a unique data batch, the model weights remain consistent across instances.
+- **Key insight**: Because all instances process the specified number of epochs and synchronize weight updates between batches, each instance's training contributes to a cohesive, shared model. The **effective epoch count across instances appears to be shared** because data parallelism allows each instance to handle a fraction of the data per epoch, not the epochs themselves. Data parallelism is well-suited for models that can fit into a single instance's memory and benefit from increased data throughput.
 
 #### 2. **Model parallelism (best for large models)**
-   - **How it works**: Model parallelism divides the model itself across multiple instances, not the data. This approach is best suited for very large models that cannot fit into a single GPU or instance's memory (e.g., large language models).
-   - **Epoch distribution**: The model is partitioned so that each instance is responsible for specific layers or components. Data flows sequentially through these partitions, where each instance processes a part of each batch and passes it to the next instance.
-   - **Key insight**: This approach is more complex due to the dependency between model components, so **synchronization occurs across the model layers rather than across data batches**. Model parallelism generally suits scenarios with exceptionally large model architectures that exceed memory limits of typical instances.
+- **How it works**: Model parallelism divides the model itself across multiple instances, not the data. This approach is best suited for very large models that cannot fit into a single GPU or instance's memory (e.g., large language models).
+- **Epoch distribution**: The model is partitioned so that each instance is responsible for specific layers or components. Data flows sequentially through these partitions, where each instance processes a part of each batch and passes it to the next instance.
+- **Key insight**: This approach is more complex due to the dependency between model components, so **synchronization occurs across the model layers rather than across data batches**. Model parallelism generally suits scenarios with exceptionally large model architectures that exceed memory limits of typical instances.
 
 ### Determining which distributed training strategy is used
 SageMaker will select the distributed strategy based on:
-   - **Framework and Estimator configuration**: Most deep learning frameworks in SageMaker default to data parallelism, especially when using PyTorch or TensorFlow with standard configurations.
-   - **Model and data size**: If you specify a model that exceeds a single instance's memory capacity, SageMaker may switch to model parallelism if configured for it.
-   - **Instance count**: When you specify `instance_count > 1` in your Estimator with a deep learning model, SageMaker will use data parallelism by default unless explicitly configured for model parallelism.
+
+- **Framework and Estimator configuration**: Most deep learning frameworks in SageMaker default to data parallelism, especially when using PyTorch or TensorFlow with standard configurations.
+- **Model and data size**: If you specify a model that exceeds a single instance's memory capacity, SageMaker may switch to model parallelism if configured for it.
+- **Instance count**: When you specify `instance_count > 1` in your Estimator with a deep learning model, SageMaker will use data parallelism by default unless explicitly configured for model parallelism.
 
 You observed that each instance ran all epochs with `instance_count=2` and 10,000 epochs, which aligns with data parallelism. Here, each instance processed the full set of epochs independently, but each batch of data was different, and the gradient updates were synchronized across instances.
 

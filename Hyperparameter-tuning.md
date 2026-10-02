@@ -20,10 +20,13 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+## Initial setup: open prefilled .ipynb notebook
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/Hyperparameter-tuning.ipynb`. Select the **pytorch environment**.
 
+## Hyperparameter tuning in SageMaker
 To conduct efficient hyperparameter tuning with neural networks (or any model) in SageMaker, we’ll leverage SageMaker’s **hyperparameter tuning jobs** while carefully managing parameter ranges and model count. Here’s an overview of the process, with a focus on both efficiency and cost-effectiveness.
 
-### Key steps for hyperparameter tuning
+### Key steps 
 The overall process involves these five below steps.
 
 1. Setup estimator
@@ -38,6 +41,7 @@ The overall process involves these five below steps.
 We'll walk through each step in detail by tuning a neural network. Specifcially, we will test out different values for our `epochs` and `learning_rate` parameters. We are sticking to just two hyperparameters for demonstration purposes, but you may wish to explore additional parameters in your own work. 
  
 This setup provides:
+
 - **Explicit control** over `epochs` using `CategoricalParameter`, allowing targeted testing of specific values.
 - **Efficient sampling** for `learning_rate` using `ContinuousParameter`, covering a defined range for a balanced approach.
 - **Cost control** by setting moderate `max_jobs` and `max_parallel_jobs`.
@@ -52,8 +56,6 @@ Just to make we are all on the same directory starting point, let's cd to our in
 %cd /home/ec2-user/SageMaker/
 ```
 
-    /home/ec2-user/SageMaker
-
 
 #### 1. Setup estimator
 To kick off our hyperparameter tuning for a neural network model, we’ll start by defining the **SageMaker Estimator**. The estimator setup here is very similar to our previous episode, where we used it to configure and train a model directly. However, this time, rather than directly running a training job with the estimator, we’ll be using it as the foundation for **hyperparameter tuning**.
@@ -62,9 +64,39 @@ In SageMaker, the estimator serves as a blueprint for each tuning job, specifyin
 
 Here’s the setup for our PyTorch estimator, which includes specifying the entry script for training (`train_nn.py`) and defining hyperparameters that will remain fixed across tuning jobs. The hyperparameters we’re setting up to tune include `epochs` and `learning_rate`, with a few specific values or ranges defined:
 
+We'll use our notebook instance name again to label the training jobs launched in this episode
+```python
+import boto3
+
+notebook_instance_name = 'sinkorswim-DoeJohn-TrainClassifier' # adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.
+
+# the following code just verifies you have the right name for your notebook instance
+region = "us-east-2" # United States (Ohio) —  make sure this matches what you see near top right of AWS Console menu
+sagemaker_client = boto3.client('sagemaker', region_name=region) # Initialize SageMaker client
+response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name) # Describe the notebook instance
+
+# Display the status and instance type
+print(f"Notebook Instance '{notebook_instance_name}' status: {response['NotebookInstanceStatus']}")
+local_instance = response['InstanceType']
+print(f"Instance Type: {local_instance}")
+```
+
+**Cost tracking**: Just like in the previous episode, we explicitly tag each training job at launch time. This ensures that compute usage is traceable to a project, a purpose, and a human-readable name, even after the job has completed.
+```python
+name = "John Doe" # replace with your name
+project = "sinkorswim" # replace with your team name
+purpose = "train_XGBoost"
+
+job_tags = [
+    {"Key": "Name", "Value": name},
+    {"Key": "Project", "Value": project},
+    {"Key": "Purpose", "Value": purpose},
+]
+
+```
 
 
-
+Next, we'll configure the baseline estimator that we plan to do hyperparameter search on.
 ```python
 import sagemaker
 from sagemaker.tuner import HyperparameterTuner, IntegerParameter, ContinuousParameter, CategoricalParameter
@@ -72,17 +104,29 @@ from sagemaker.pytorch import PyTorch
 from sagemaker.inputs import TrainingInput
 from sagemaker import get_execution_role
 
-# Initialize SageMaker session and role
-session = sagemaker.Session()
+# Initialize role, bucket, and SageMaker session variables
 role = get_execution_role()
-bucket_name = 'myawesometeam-titanic'  # replace with your S3 bucket name
+bucket_name = 'sinkorswim-doejohn-titanic'  # replace with your S3 bucket name
+region = "us-east-2" # United States (Ohio). Make sure this matches what you see near top right of AWS Console menu
+boto_session = boto3.Session(region_name=region) # Create a Boto3 session that ensures all AWS service calls (including SageMaker) use the specified region
+session = sagemaker.Session(boto_session=boto_session)
+
+# Define instance type/count we'll use for training
+instance_type="ml.m5.large"
+instance_count=1 # always start with 1. Rarely is parallelized training justified with data < 50 GB. More on this later.
+
+# Define max runtime in seconds to ensure you don't use more compute time than expected. Use a generous threshold (2x expected time but < 2 days) so that work isn't interrupted without any gains.
+max_run = 2*60*60 # 2 hours
 
 # Define the PyTorch estimator with entry script and environment details
 pytorch_estimator = PyTorch(
+    base_job_name=notebook_instance_name, # adjust to your notebook name,
+    max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="AWS_helpers/train_nn.py",  # Your script for training
     role=role,
-    instance_count=1,
-    instance_type="ml.m5.large",
+    tags=job_tags,
+    instance_count=instance_count,
+    instance_type=instance_type,
     framework_version="1.9",
     py_version="py38",
     metric_definitions=[{"Name": "validation:accuracy", "Regex": "validation:accuracy = ([0-9\\.]+)"}],
@@ -94,8 +138,6 @@ pytorch_estimator = PyTorch(
     },
     sagemaker_session=session,
 )
-
-
 ```
 
 #### 2. Define hyperparameter ranges
@@ -153,10 +195,23 @@ In step 3, we set up the `HyperparameterTuner`, which controls the tuning proces
 **Always start with `max_jobs = 1` and `max_parallel_jobs=1`.**
 Before running the full search, let's test our setup by setting max_jobs = 1. This will test just one possible hyperparameter configuration. This critical step helps ensure our code is functional before attempting to scale up. 
 
+**Adjust cost tracking "purpose" tag to include mention of tuning.**
+
+```python
+purpose = "tune_NeurnalNet"
+
+tune_job_tags = [
+    {"Key": "Name", "Value": name},
+    {"Key": "Project", "Value": project},
+    {"Key": "Purpose", "Value": purpose},
+]
+
+```
 
 ```python
 # Tuner configuration
 tuner = HyperparameterTuner(
+    base_tuning_job_name=notebook_instance_name,
     estimator=pytorch_estimator,
     metric_definitions=[{"Name": "validation:accuracy", "Regex": "validation:accuracy = ([0-9\\.]+)"}],
     objective_metric_name="validation:accuracy",  # Ensure this matches the metric name exactly
@@ -164,7 +219,8 @@ tuner = HyperparameterTuner(
     hyperparameter_ranges=hyperparameter_ranges,
     strategy="Bayesian",  # Default setting (recommend sticking with this!); can adjust to "Random" for uniform sampling across the range
     max_jobs=1,                # Always start with 1 instance for debugging purposes. Adjust based on exploration needs (keep below 30 to be kind to environment). 
-    max_parallel_jobs=1         # Always start with 1 instance for debugging purposes. Adjust based on available resources and budget. Recommended to keep this value < 4 since SageMaker tests values dynamically.
+    max_parallel_jobs=1,         # Always start with 1 instance for debugging purposes. Adjust based on available resources and budget. Recommended to keep this value < 4 since SageMaker tests values dynamically.
+    tags=tune_job_tags,
 )
 
 ```
@@ -175,8 +231,8 @@ To prepare `train_nn.py` for hyperparameter tuning, we added code to log validat
 **Note**: It's best to use an if statement to only print out metrics periodically (e.g., every 100 epochs), so that you print time does not each up too much of your training time. It may be a little counter-intuitive that printing can slow things down so dramatically, but it truly does become a significant factor if you're doing it every epoch. On the flipside of this, you don't want to print metrics so infrequently that you lose resolution in the monitored validation accuracy. Choose a number between 100-1000 epochs or divide your total epoch count by ~25 to yield a reasonable range. 
 
 ```python
-if (epoch + 1) % 100 == 0 or epoch == epochs - 1:
-    print(f"validation:accuracy = {val_accuracy:.4f}", flush=True)  # Log for SageMaker metric tracking. Needed for hyperparameter tuning later.
+# if (epoch + 1) % 100 == 0 or epoch == epochs - 1:
+#     print(f"validation:accuracy = {val_accuracy:.4f}", flush=True)  # Log for SageMaker metric tracking. Needed for hyperparameter tuning later.
 ```
 
 Paired with this, our `metric_definitions` above uses a regular expression `"validation:accuracy = ([0-9\\.]+)"` to extract the val_accuracy value from each log line. This regex specifically looks for validation:accuracy =, followed by a floating-point number, which corresponds to the format of our log statement in train_nn.py.
@@ -196,14 +252,6 @@ tuner.fit({"train": train_input, "val": val_input})
 print("Hyperparameter tuning job launched.")
 
 ```
-
-    No finished training job found associated with this estimator. Please make sure this estimator is only used for building workflow config
-    No finished training job found associated with this estimator. Please make sure this estimator is only used for building workflow config
-
-
-    .......................................!
-    Hyperparameter tuning job launched.
-
 
 #### 6. Monitor tuning job from SageMaker console
 After running the above cell, we can check on the progress by visiting the SageMaker Console and finding the "Training" tab located on the left panel. Click "Hyperparmater tuning jobs" to view running jobs.
@@ -225,13 +273,15 @@ max_parallel_jobs = 2
 
 # Define the Tuner configuration
 tuner = HyperparameterTuner(
+    base_tuning_job_name=notebook_instance_name,
     estimator=pytorch_estimator,
     metric_definitions=[{"Name": "validation:accuracy", "Regex": "validation:accuracy = ([0-9\\.]+)"}],
     objective_metric_name="validation:accuracy",  # Ensure this matches the metric name exactly
     objective_type="Maximize",                   # Specify if maximizing or minimizing the metric
     hyperparameter_ranges=hyperparameter_ranges,
     max_jobs=max_jobs,
-    max_parallel_jobs=max_parallel_jobs
+    max_parallel_jobs=max_parallel_jobs,
+    tags=tune_job_tags,
 )
 
 # Define the input paths
@@ -251,14 +301,6 @@ runtime = t.time() - start_time
 print(f"Tuning runtime: {runtime:.2f} seconds, Instance Type: {instance_type}, Max Jobs: {max_jobs}, Max Parallel Jobs: {max_parallel_jobs}")
 
 ```
-
-    No finished training job found associated with this estimator. Please make sure this estimator is only used for building workflow config
-    No finished training job found associated with this estimator. Please make sure this estimator is only used for building workflow config
-
-
-    .......................................!
-    Tuning runtime: 205.53 seconds, Instance Type: ml.m5.large, Max Jobs: 2, Max Parallel Jobs: 2
-
 
 ### Monitoring tuning
 After running the above cell, we can check on the progress by visiting the SageMaker Console and finding the "Training" tab located on the left panel. Click "Hyperparmater tuning jobs" to view running jobs.
@@ -330,16 +372,10 @@ print(f"Best model artifact S3 URI: {best_model_s3_uri}")
 
 ```
 
-    Best training job name: pytorch-training-241107-0025-001-72851d7f
-    Best hyperparameters: {'_tuning_objective_metric': 'validation:accuracy', 'epochs': '"100"', 'learning_rate': '0.005250489250786233', 'sagemaker_container_log_level': '20', 'sagemaker_estimator_class_name': '"PyTorch"', 'sagemaker_estimator_module': '"sagemaker.pytorch.estimator"', 'sagemaker_job_name': '"pytorch-training-2024-11-07-00-25-35-999"', 'sagemaker_program': '"train_nn.py"', 'sagemaker_region': '"us-east-1"', 'sagemaker_submit_directory': '"s3://sagemaker-us-east-1-183295408236/pytorch-training-2024-11-07-00-25-35-999/source/sourcedir.tar.gz"', 'train': '"/opt/ml/input/data/train/train_data.npz"', 'val': '"/opt/ml/input/data/val/val_data.npz"'}
-    Best model artifact S3 URI: s3://sagemaker-us-east-1-183295408236/pytorch-training-241107-0025-001-72851d7f/output/model.tar.gz
-
-
 #### Retrieve and load best model
 
 
 ```python
-import boto3
 import tarfile
 
 # Initialize S3 client
@@ -355,8 +391,6 @@ with tarfile.open(local_model_path, 'r:gz') as tar:
     tar.extractall()
 print("Best model downloaded and extracted.")
 ```
-
-    Best model downloaded and extracted.
 
 
 #### Prepare test set as test_data.npz
@@ -406,9 +440,6 @@ with torch.no_grad():
 
 ```
 
-    Test Accuracy: 98.0894
-
-
 ### Conclusions
 In just under 5 minutes, we produced a model that is almost 100% accurate on the test set. However, this performance does come at a cost (albeit manageable if you've stuck with our advise thus far). This next section will help you assess the total compute time that was used by your tuning job.
 
@@ -423,12 +454,16 @@ Round-Up Policy: SageMaker rounds up the billing time to the nearest second for 
 
 
 ```python
-import boto3
 import math
 
-# Initialize SageMaker client
-sagemaker_client = boto3.client("sagemaker")
+# Set region
+region = "us-east-2"
 
+# Initialize SageMaker client
+sagemaker_client = boto3.client("sagemaker", region_name=region)
+```
+
+```python
 # Retrieve tuning job details
 tuning_job_name = tuner.latest_tuning_job.name  # Replace with your tuning job name if needed
 tuning_job_desc = sagemaker_client.describe_hyper_parameter_tuning_job(HyperParameterTuningJobName=tuning_job_name)
@@ -468,13 +503,6 @@ print(f"Estimated total billing time across all jobs: {total_billing_time / 3600
 
 ```
 
-    Instance Type: ml.m5.large
-    Max Jobs: 2
-    Max Parallel Jobs: 2
-    Total training time across all jobs: 0.07 hours
-    Estimated total billing time across all jobs: 0.07 hours
-
-
 For convenience, we have added this as a function in helpers.py
 
 
@@ -482,28 +510,5 @@ For convenience, we have added this as a function in helpers.py
 import AWS_helpers.helpers as helpers
 import importlib
 importlib.reload(helpers)
-helpers.calculate_tuning_job_time(tuner)
-
-```
-
-    Instance Type: ml.m5.large
-    Max Jobs: 2
-    Max Parallel Jobs: 2
-    Total training time across all jobs: 0.07 hours
-    Estimated total billing time across all jobs: 0.07 hours
-
-
-
-```python
-!jupyter nbconvert --to markdown Hyperparameter-tuning.ipynb
-
-```
-
-    [NbConvertApp] Converting notebook Hyperparameter-tuning.ipynb to markdown
-    [NbConvertApp] Writing 31418 bytes to Hyperparameter-tuning.md
-
-
-
-```python
-
+helpers.calculate_tuning_job_time(tuner, region)
 ```

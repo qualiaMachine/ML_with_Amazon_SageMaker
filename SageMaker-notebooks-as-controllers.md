@@ -34,8 +34,8 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
 #### 2. Create a new notebook instance
 - In the SageMaker left-side menu, click on **Notebooks**, then click **Create notebook instance**.
-- **Notebook name**: To easily track this resource in our shared account, please use the following naming convention: "YourName-ExploreSageMaker". For example, "DoeJohn-ExploreSageMaker". Can include hyphens, but not spaces. 
-- **Instance type**: SageMaker notebooks run on AWS EC2 instances. The instance type determines the compute resources allocated to the notebook. Since our notebook will act as a **low-resource "controller"**, we'll select a small instance such as `ml.t3.medium`.  
+- **Notebook name**: To easily track this resource in our shared account, please use the following naming convention: "TeamName-LastnameFirstname-NotebookPurpose". For example, "sinkorswin-DoeJohn-TrainClassifier". Can include hyphens, but not spaces. 
+- **Instance type**: SageMaker notebooks run on AWS EC2 instances. The instance type determines the compute resources allocated to the notebook. Since our notebook will act as a **low-resource "controller"**, we'll select a small instance such as `ml.t3.medium` (4 GB RAM, $0.04/hour)  
   - This keeps costs low while allowing us to launch separate training/tuning jobs on more powerful instances when needed.  
   - For guidance on common instances for ML procedures, refer to our supplemental [Instances for ML webpage](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html).  
 - **Platform identifier**: This is an internal AWS setting related to the environment version and underlying platform. You can leave this as the default.
@@ -51,16 +51,19 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
 - Click **Create notebook instance**. It may take a few minutes for the instance to start. Once its status is **InService**, you can open the notebook instance and start coding.
 
-### Managing training and tuning with the controller notebook
+### Load pre-filled Jupyter notebooks
+Once your newly created *instance* shows as `InService`, open the instance in Jupyter Lab. From there, we can create as many Jupyter notebooks as we would like within the instance environment. 
 
-In the next couple expisodes, we'll use the **SageMaker Python SDK** within the notebook to launch compute-heavy tasks on more powerful instances as needed. Examples of tasks to launch include:
+We will then select the standard python3 environment (conda_python3) to start our first .ipynb notebook (Jupyter notebook). We can use the standard conda_python3 environment since we aren't doing any training/tuning just yet.
 
-- **Training a model**: Use the SDK to submit a training job, specifying a higher-powered instance (e.g., `ml.p2.xlarge` or `ml.m5.4xlarge`) based on your model's resource requirements.
-- **Hyperparameter tuning**: Configure and launch tuning jobs, allowing SageMaker to automatically manage multiple powerful instances for optimal tuning.
+##### Load pre-filled Jupyter notebooks
+Within the Jupyter notebook, run the following command to clone the lesson repo into our Jupyter environment:
 
-This setup allows you to control costs by keeping the notebook instance minimal and only incurring costs for larger instances when they are actively training or tuning models. Detailed guidance on training, tuning, and batch processing will follow in later episodes.
+```sh
+!git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
+```
 
-For more details, refer to the [SageMaker Python SDK documentation](https://sagemaker.readthedocs.io/) for example code on launching and managing remote training jobs.
+Then, navigate to `/ML_with_AWS_SageMaker/notebooks/Accessing-S3-via-SageMaker-notebooks.ipynb` to begin the first notebook.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 

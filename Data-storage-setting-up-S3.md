@@ -24,7 +24,7 @@ Machine learning and AI projects rely on data, making efficient storage and mana
 
 > #### Consult your institution's IT before handling sensitive data in AWS
 > When using AWS for research, **ensure that no restricted or sensitive data is uploaded to S3 or any other AWS service *unless explicitly approved by your institution’s IT or cloud security team***.
-> For projects involving sensitive or regulated data (e.g., HIPAA, FERPA, or proprietary research data), consult your institution's cloud security or compliance team to explore approved solutions. This may include encryption, restricted-access storage, or dedicated secure environments. If unsure about data > classification, review your institution's data security policies before uploading.
+> For projects involving sensitive or regulated data (e.g., HIPAA, FERPA, or proprietary research data), consult your institution's cloud security or compliance team to explore approved solutions. This may include encryption, restricted-access storage, or dedicated secure environments. If unsure about data classification, review your institution's data security policies before uploading.
 
 ## Options for storage: EC2 Instance or S3
 When working with SageMaker and other AWS services, you have options for data storage, primarily **EC2 instances** or **S3**.
@@ -83,16 +83,18 @@ In order to upload our titanic dataset to an S3 bucket on AWS, we'll follow the 
 - Select **S3 - Scalable Storage in the Cloud**
 
 ##### 3. Create a new bucket
-- Click **Create Bucket** and enter a unique name, and note that bucket name must not contain uppercase characters. To easily find this bucket later in our shared AWS account, please use the following naming convention: `yourname-titanic-s3` (e.g., doejohn-titanic-s3).
+- Click **Create Bucket** and enter a unique name, and note that bucket name must not contain uppercase characters. To easily find this bucket later in our shared AWS account, please use the following naming convention: `teamname-yourname-dataname` (e.g., sinkorswim-doejohn-titanic).
 - **Access Control (ACLs)**: Disable ACLs (recommended).  
 	- **What are ACLs?** Access Control Lists (ACLs) define fine-grained permissions at the object level, allowing you to grant specific users or AWS accounts access to individual files in your bucket.  
 	- **Why disable them?** AWS now recommends managing access through bucket policies and IAM roles, which offer better security and are easier to manage at scale. Unless you have a specific need for ACLs, disabling them is the best practice.
 - **Public Access**: Turn on "Block all public access" (recommended). This setting prevents unauthorized access and accidental data exposure. If you need external access, use IAM policies or signed URLs instead.
-- **Versioning**: Disable unless you need multiple versions of objects. Enable only if needed, as versioning increases storage costs. Useful when tracking changes to datasets over time but unnecessary for static datasets.  
+- **Versioning**: Disable unless you need multiple versions of objects (unnecessary for ML Marathon). Enable only if needed, as versioning increases storage costs. Useful when tracking changes to datasets over time but unnecessary for static datasets.  
 - **Tags**: Adding tags to your S3 buckets is a great way to track project-specific costs and usage over time, especially as data and resources scale up. To easily track costs associated with your bucket in our shared AWS account, add the following fields:
-	- **Purpose**: titanic-bucket
-	- **Owner**: yourname
-	![Example of Tags for an S3 Bucket](https://raw.githubusercontent.com/UW-Madison-DataScience/ml-with-aws-sagemaker/main/images/bucket_tags2.png){alt="Screenshot showing required tags for an S3 bucket"}
+	- **Project**: teamname (if participating in ML Marathon)
+	- **Name**: yourname
+  	- **Purpose**: Bucket-titanic
+
+![Example of Tags for an S3 Bucket](https://raw.githubusercontent.com/UW-Madison-DataScience/ml-with-aws-sagemaker/main/images/bucket_tags2.png){alt="Screenshot showing required tags for an S3 bucket"}
 
 - Click **Create Bucket** at the bottom once everything above has been configured
 
@@ -102,7 +104,7 @@ Once the bucket is created, you'll be brought to a page that shows all of your c
 
 1. Click on the name of your bucket to bring up additional options and settings.
 2. Click the Permissions tab
-3. Scroll down to Bucket policy and click Edit. Paste the following policy, **editing the bucket name "doejohn-titanic-s3"** to reflect your bucket's name
+3. Scroll down to Bucket policy and click Edit. Paste the following policy, **editing the bucket name "sinkorswim-doejohn-titanic"** to reflect your bucket's name
 
 ```json
 {
@@ -111,7 +113,10 @@ Once the bucket is created, you'll be brought to a page that shows all of your c
 		{
 			"Effect": "Allow",
 			"Principal": {
-				"AWS": "arn:aws:iam::183295408236:role/ml-sagemaker-use"
+			    "AWS": [
+			        "arn:aws:iam::183295408236:role/ml-sagemaker-use",
+			        "arn:aws:iam::183295408236:role/ml-sagemaker-bedrock-use"
+		        ]
 			},
 			"Action": [
 				"s3:GetObject",
@@ -120,8 +125,8 @@ Once the bucket is created, you'll be brought to a page that shows all of your c
 				"s3:ListMultipartUploadParts"
 			],
 			"Resource": [
-				"arn:aws:s3:::doejohn-titanic-s3",
-				"arn:aws:s3:::doejohn-titanic-s3/*"
+				"arn:aws:s3:::sinkorswim-chrisendemann-titanic",
+				"arn:aws:s3:::sinkorswim-chrisendemann-titanic/*"
 			]
 		}
 	]
@@ -146,9 +151,11 @@ This setup ensures that your SageMaker operations will have the access needed wi
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ##### 5. Upload files to the bucket
-- If you haven't downloaded these files yet (part of workshop setup), right-click and save as .csv:
-	- [titanic_train.csv](https://raw.githubusercontent.com/UW-Madison-DataScience/ml-with-aws-sagemaker/main/data/titanic_train.csv)
-	- [titanic_test.csv](https://raw.githubusercontent.com/UW-Madison-DataScience/ml-with-aws-sagemaker/main/data/titanic_test.csv)
+- If you haven't downloaded these files yet (part of workshop setup), download the data for this workshop: [data.zip](https://raw.githubusercontent.com/UW-Madison-DataScience/ml-with-aws-sagemaker/main/data/data.zip)
+	- Extract the zip folder contents (Right-click -> Extract all on Windows; Double-click on mac)
+	- Save the two data files (train and test) to a location where they can easily be accessed. E.g., ... 
+		- `~/Downloads/data/titanic_train.csv`
+		- `~/Downloads/data/titanic_test.csv`
 - Navigate to the Objects tab of your bucket, then **Upload**.
 - **Add Files** (`titanic_train.csv`, `titanic_test.csv`) and click **Upload** to complete.
 
@@ -192,7 +199,7 @@ S3 bucket storage incurs costs based on data storage, data transfer, and request
 - `GET` requests cost: $0.0004 per 1,000 requests (each model training will incur one `GET` request)
 - Check the [AWS S3 Pricing](https://aws.amazon.com/s3/pricing/) page for more details.
  
-**2. Repeat the above calculation using the following dataset sizes: 10 GB, 100 GB, 1 TB**
+**2. Repeat the above calculation using the following dataset sizes: 10 GB, 100 GB, 1 TB (1024 GB)**
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 

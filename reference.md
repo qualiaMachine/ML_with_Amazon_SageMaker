@@ -8,11 +8,13 @@ We encourage you to briefly study this glossary before the workshop and refer ba
 
 ### Cloud Compute Essentials  
 
+* **Serverless**: A way of running code without setting up or managing servers yourself. The cloud provider automatically handles the servers, scaling, and maintenance in the background, and you only pay when your code runs. This model is common in cloud platforms like AWS and is useful for short tasks, event-driven workflows, or connecting parts of a pipeline without keeping a server on all the time (for example, using AWS Lambda to run code when a new file is uploaded).
 * **Virtual Machine (VM)**: A software-based computer that runs in a cloud or on-premises environment. In AWS, EC2 instances act as virtual machines with configurable CPU, memory, and storage resources.  
 * **Instance**: A virtual machine that runs in the cloud. AWS provides different types of instances for various computing needs, including general-purpose, memory-optimized, and GPU-powered instances for machine learning.  
 * **Container**: A lightweight virtualized environment that packages applications and their dependencies together. Containers allow for consistent execution across different computing environments and can be deployed on AWS services like ECS, EKS, and SageMaker.  
 * **Docker**: A popular platform for developing, shipping, and running containerized applications. Docker containers encapsulate an application and its dependencies, making them portable across different cloud and local environments.  
-* **Elasticity**: The ability to automatically scale computing resources up or down based on demand. Cloud platforms like AWS provide elasticity to help manage costs and performance.  
+* **Elasticity**: The ability to automatically scale computing resources up or down based on demand. Cloud platforms like AWS provide elasticity to help manage costs and performance. 
+
 
 ### AWS General  
 
@@ -34,9 +36,8 @@ We encourage you to briefly study this glossary before the workshop and refer ba
 
 * **S3 (Simple Storage Service)**: A scalable storage service where you can store datasets, models, and other files. S3 is commonly used to store data that will be processed by SageMaker.  
 * **S3 Bucket**: A container in S3 where data is stored. Think of it like a folder, but with more scalability and security options. Data is accessed via unique S3 URIs (e.g., `s3://your-bucket-name/your-file.csv`).  
-* **S3 URI**: A unique identifier for an object in an S3 bucket, used for referencing data in AWS services like SageMaker.  
+*  **S3 URI or Object URI**: The Uniform Resource Identifier (URI) is a unique address that specifies the location of the file within S3 (e.g., `s3://doejohn-titanic-s3/titanic_train.csv`). This URI is essential for referencing data in AWS services like SageMaker, where it will be used to load data for processing and model training.
 * **Elastic Block Store (EBS)**: Persistent storage volumes attached to EC2 instances. Unlike S3, which is an object store, EBS provides block-level storage and is commonly used for databases or applications requiring high-speed storage.  
- **Object URI**: The Uniform Resource Identifier (URI) is a unique address that specifies the location of the file within S3 (e.g., `s3://doejohn-titanic-s3/titanic_train.csv`). This URI is essential for referencing data in AWS services like SageMaker, where it will be used to load data for processing and model training.
   
 ### SageMaker and Machine Learning Workflows  
 
@@ -44,4 +45,4 @@ We encourage you to briefly study this glossary before the workshop and refer ba
 * **SageMaker Notebook Instance** or **Notebook Instance** for short: A Jupyter notebook environment hosted on AWS. It provides a pre-configured setup for writing and running Python code, accessing data, and training models.  
 * **Controller**: In this workshop, we use the term "controller" to describe how a SageMaker Notebook Instance is used to launch and manage training jobs, inference endpoints, and other AWS services. Rather than performing all computations within the notebook itself, the notebook acts as a high-level interface to configure and execute cloud-based ML workflows.  
 * **SageMaker Training Job**: A managed process in SageMaker where a model is trained on a specified dataset using EC2 instances. Training jobs can be configured to use GPUs or multiple instances for scalability. 
-* **Hyperparameter Tuning Job (HPO)**: A SageMaker feature that automatically tests different hyperparameter values to find the best-performing model configuration.  
+* **Hyperparameter Tuning Job**: A SageMaker feature that automatically tests different hyperparameter values to find the best-performing model configuration.  
