@@ -40,13 +40,16 @@
   <div class="container-fluid top-nav-container">
     <div class="col-md-8">
       <div class="large-logo">
-        <img id="incubator-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo.svg"><span class="badge text-bg-danger">
-          <abbr title="This lesson is in the pre-alpha phase, which means that it is in early development, but has not yet been taught.">
+        <a href="index.html">
+        <img id="incubator-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo.svg"></a>
+
+        <span class="badge text-bg-warning">
+          <abbr title="This lesson is in the alpha phase, which means that it has been taught once and lesson authors are iterating on feedback.">
             <a href="https://docs.carpentries.org/resources/curriculum/lesson-life-cycle.html" class="external-link alert-link">
-              <i aria-hidden="true" class="icon" data-feather="alert-octagon" style="border-radius: 5px"></i>
-              Pre-Alpha
+              <i aria-hidden="true" class="icon" data-feather="alert-triangle" style="border-radius: 5px"></i>
+              Alpha
             </a>
-            <span class="visually-hidden">This lesson is in the pre-alpha phase, which means that it is in early development, but has not yet been taught.</span>
+            <span class="visually-hidden">This lesson is in the alpha phase, which means that it has been taught once and lesson authors are iterating on feedback.</span>
           </abbr>
         </span>
 
@@ -96,8 +99,9 @@
       <span class="menu-title">Menu</span>
     </button>
     <div class="nav-logo">
-      <img class="small-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo-sm.svg">
-</div>
+      <a href="index.html">
+      <img class="small-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo-sm.svg"></a>
+    </div>
     <div class="lesson-title-md">
       Intro to AWS SageMaker for Predictive ML/AI
     </div>
@@ -143,7 +147,7 @@
       </fieldset>
     </form>
     -->
-    <a id="search-button" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
+    <a id="search-button-nav" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
   </div>
 <!--/div.container-fluid -->
 </nav><div class="container">
@@ -155,6 +159,9 @@
           <i class="search-icon" data-feather="x" role="img"></i>
         </button>
         <div class="sidebar-inner">
+          <div class="row mobile-row" id="theme-row-mobile">
+            <a id="search-button-sidebar" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
+          </div>
           <div class="row mobile-row" id="theme-row-mobile">
             <menu class="col theme-selector" id="theme-selector-sidebar">
 <li class="nav-item dropdown theme-button-list" id="theme-button-list-sidebar">
@@ -203,6 +210,7 @@
 <!--/div.accordion-item-->
                 </div>
 <!--/div.accordion-flush-->
+
               </div>
 <!--div.sidenav-view-selector -->
             </div>
@@ -333,7 +341,55 @@
 <div class="accordion accordion-flush" id="accordionFlush10">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading10">
-        <a href="Resource-management-cleanup.html">9. Resource Management and Monitoring</a>
+        <a href="00_Overview-RAG-on-AWS.html">9. Overview of RAG Workflows on AWS</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush11">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading11">
+        <a href="01_RAG_WattBot_GPU-instance.html">10. RAG with a Notebook GPU</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush12">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading12">
+        <a href="02_RAG_WattBot_Processing_Jobs.html">11. RAG with Processing Jobs</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush13">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading13">
+        <a href="03_RAG_WattBot_Bedrock.html">12. RAG with Bedrock</a>
+    </div>
+<!--/div.accordion-header-->
+
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush14">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading14">
+        <a href="Resource-management-cleanup.html">13. Resource Management and Monitoring</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -347,6 +403,34 @@
             </div>
 
             <hr class="half-width">
+<div class="accordion accordion-flush" id="accordion-links-toggle">
+                <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-heading-links-toggle">
+                  <button class="accordion-button collapsed" id="links" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse-links-toggle" aria-expanded="false" aria-controls="flush-collapse-links-toggle">
+                    LINKS
+                  </button>
+                </h2>
+                <div id="flush-collapse-links-toggle" class="accordion-collapse show collapse" data-bs-parent="#accordion-links-toggle">
+                    <div class="accordion-body">
+                        <ul>
+<li>
+                            <a href="key-points.html">Key Points</a>
+                            </li>
+                            <li>
+                            <a href="reference.html#glossary">Glossary</a>
+                            </li>
+                            <li>
+                            <a href="profiles.html">Learner Profiles</a>
+                            </li>
+                        </ul>
+</div>
+                </div>
+                </div>
+<!--/div.accordion-item-->
+            </div>
+<!--/div.accordion-flush-->
+
+            <hr class="half-width">
 <div class="accordion accordion-flush lesson-resources" id="accordion-resources-toggle">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="flush-heading-resources-toggle">
@@ -357,16 +441,7 @@
                 <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
                     <ul>
-<li>
-                        <a href="key-points.html">Key Points</a>
-                      </li>
-                      <li>
-                        <a href="reference.html#glossary">Glossary</a>
-                      </li>
-                      <li>
-                        <a href="profiles.html">Learner Profiles</a>
-                      </li>
-                      <li><a href="reference.html">Glossary</a></li>
+<li><a href="reference.html">Glossary</a></li>
 <li><a href="instances-for-ML.html">Instances for ML</a></li>
                     </ul>
 </div>
@@ -398,11 +473,149 @@
         <h1>Instructor Notes</h1>
         
 
-<p>This is a placeholder file. Please add content here.</p>
+<p>Hello all! In this document, we will show you how to run an AWS Nuke
+script within the ML-Marathon Sagemaker server. As you progress through
+the Sagemaker workshop, towards the end of the workshop you’ll be tasked
+to remove and empty your notebooks &amp; buckets. However, depending on
+the size of your data, it can take a long time to remove them
+altogether.</p>
+<p>This is where the AWS Nuke script comes in handy, instead of removing
+your notebooks and buckets one-by-one, the script automates this process
+and removes it for you!</p>
+<p>Here are the following steps on how to launch and run the AWS-Nuke
+Script:</p>
+<div class="section level3">
+<h3 id="open-cloudshell-in-the-correct-aws-account">1. Open CloudShell in the correct AWS account<a class="anchor" aria-label="anchor" href="#open-cloudshell-in-the-correct-aws-account"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>Sign in to the AWS Console for the account you intend to clean.</li>
+<li>In the top-right Region, select the Region where you want CloudShell
+storage to live. In this case, we will choose US-East-2 (OHIO) since
+that’s where we store our servers.</li>
+<li>Open CloudShell from the console toolbar.</li>
+<li>Verify exactly which account/role you are using:</li>
+</ol>
+<p><strong>aws sts get-caller-identity</strong></p>
+</div>
+<div class="section level3">
+<h3 id="create-a-config-file">2. Create a config file<a class="anchor" aria-label="anchor" href="#create-a-config-file"></a>
+</h3>
+<p><strong>In order to run the script, you’ll need to make a config
+file. This file MUST be in .yml or .yaml format or else your script will
+FAIL.</strong></p>
+<ol style="list-style-type: decimal">
+<li>Select Windows + E to open file-explorer.</li>
+<li>Click on the documents tab on the left. Then click on the “New”
+button in the top left corner.</li>
+<li>Select “Text Document,” please use notepad for this as it will be
+easy to edit.</li>
+<li>Once you’ve opened notepad. This is the format our config file will
+follow:</li>
+</ol>
+<p>regions: - global - us-east-2 # do not change</p>
+<p>blocklist: - “551379999285” # production, do not modify</p>
+<p>accounts: “183295408236”: # aws-nuke-account resource-types:
+includes: #Specifies which types of resources you want to clean out -
+S3Bucket - SageMakerNotebookInstance</p>
+<p><strong>MAKE SURE TO USE SPACE INDENTING AND NOT TAB INDENTING AS IT
+IS SENSITIVE TO USE IN CLOUDSHELL AND MAY CAUSE THE SCRIPT TO
+FAIL</strong></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Once you’ve gotten your config file set up, click on <strong>“FILE”
+&gt; “SAVE AS”</strong>
+</li>
+<li>Label your doc as “nuke-config.yml” under “File Name:” &amp; Ensure
+“All files (*)” is selected under “Save as type:”</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="upload-your-config-file-to-cloudshell">3. Upload your config file to CloudShell<a class="anchor" aria-label="anchor" href="#upload-your-config-file-to-cloudshell"></a>
+</h3>
+<p>In CloudShell, choose <strong>“Actions” &gt; “Upload file”</strong>,
+then upload “nuke-config.yml”</p>
+<p>To confirm it’s inside your Shell:</p>
+<p><strong>pwd ls -l nuke-config.yml cat nuke-config.yml</strong></p>
+</div>
+<div class="section level3">
+<h3 id="download-and-install-the-linux-version">4. Download and install the linux version<a class="anchor" aria-label="anchor" href="#download-and-install-the-linux-version"></a>
+</h3>
+<p>AWS CloudShell uses Linux as their base distribution. So you will
+need to download the linux version of AWS Nuke from Github. You should
+download only from the official ekristen/aws-nuke releases-not use any
+local verision.</p>
+<p>Link: <a href="https://github.com/ekristen/aws-nuke/releases" class="external-link uri">https://github.com/ekristen/aws-nuke/releases</a></p>
+<p>Run the following script:</p>
+<p>mkdir -p “<span class="math inline">\(HOME/bin"
+cd "\)</span>HOME”</p>
+<p>curl -fL<br>
+-o aws-nuke-v3.67.0-linux-amd64.tar.gz<br><a href="https://github.com/ekristen/aws-nuke/releases/download/v3.67.0/aws-nuke-v3.67.0-linux-amd64.tar.gz" class="external-link uri">https://github.com/ekristen/aws-nuke/releases/download/v3.67.0/aws-nuke-v3.67.0-linux-amd64.tar.gz</a></p>
+<p>tar -xzf aws-nuke-v3.67.0-linux-amd64.tar.gz mv aws-nuke “<span class="math inline">\(HOME/bin/aws-nuke"
+chmod 700 "\)</span>HOME/bin/aws-nuke”</p>
+<p>export PATH=“<span class="math inline">\(HOME/bin:\)</span>PATH”
+aws-nuke –version</p>
+<p>To make aws-nuke stay on your PATH in later CloudShell sessions:</p>
+<p><strong>echo ‘export PATH=“<span class="math inline">\(HOME/bin:\)</span>PATH”’ &gt;&gt; ~/.bashrc source
+~/.bashrc</strong></p>
+<p>Reminder: CloudShell is based on Amazon Linux, and software saved in
+$HOME persists; software installed elsewhere may disappear after the
+session ends.</p>
+</div>
+<div class="section level3">
+<h3 id="do-a-dry-run-first">5. DO a dry run first<a class="anchor" aria-label="anchor" href="#do-a-dry-run-first"></a>
+</h3>
+<p>It is important that you first run a dry-run so that you can verify
+which files you want to remove before executing the actual script.</p>
+<p>Here is the script to do so:</p>
+<p><strong>aws-nuke run –config “$HOME/nuke-config.yml”</strong></p>
+<p>This should list resources it would remove, without deleting them.
+Review the output carefully—especially S3 buckets, IAM-related
+resources, and the displayed account identity.</p>
+</div>
+<div class="section level3">
+<h3 id="only-after-review-actual-deletion">6. Only after review: actual deletion<a class="anchor" aria-label="anchor" href="#only-after-review-actual-deletion"></a>
+</h3>
+<p>Only if the dry-run output is correct and this is truly the intended
+non-production account:</p>
+<p><strong>aws-nuke run –config “$HOME/nuke-config.yml”
+–no-dry-run</strong></p>
+<p>Do not add –no-prompt / –force on your first real run; leave the
+confirmation prompt enabled as an additional safeguard.</p>
+<p>Oftentimes when running <strong>aws-nuke run –config
+“$HOME/nuke-config.yml”</strong>, you will run into an error
+stating:</p>
+<p>WARN[0000] ‘targets’ is deprecated. Please use ‘includes’ instead.
+aws-nuke - v3.67.0 - 9cc98ccaed6303dac29001642879320ab584d41a FATA[0000]
+specified account doesn’t have an alias. For safety reasons you need to
+specify an account alias. Your production account should contain the
+term ‘prod’</p>
+<p>Do not panic, this isn’t related to CloudShell or credentials.
+Rather, it connected to AWS successfully but stopped abruptly since the
+account you are trying to target has <strong>no AWS account
+alias.</strong> By default, aws-nuke requires an alias so you must
+visually confirm a recognizable account name before proceeding. It also
+blocks aliases containing prod by default</p>
+<p>Recommended: create a non-production account alias First, verify the
+exact account:</p>
+<p><strong>aws sts get-caller-identity</strong></p>
+<p>Then add an alias in the AWS Console:</p>
+<ol style="list-style-type: decimal">
+<li>Go to IAM</li>
+<li>Open Dashboard</li>
+<li>Under AWS Account, choose Create Alias</li>
+<li>Set a clear, unique non-production alias—e.g. mycompany-sandbox or
+training-cleanup</li>
+<li>Do not use a name containing prod, production, or live.</li>
+</ol>
+<p>Then run the dry-run again: <strong>aws-nuke run –config
+“$HOME/nuke-config.yml”</strong></p>
+<p>Congratulations, you have reached the end of this tutorial! By now,
+all scripts should work and the specified notebooks/buckets you wanted
+to clean should now be all empty!</p>
 <!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
+</div>
 
 
       <section id="aggregate-instructor-notes"></section>
@@ -432,7 +645,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.21.0" class="external-link">sandpaper (0.21.0)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/1.1.2" class="external-link">varnish (1.1.2)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/" class="external-link">sandpaper (0.21.1)</a>, <a href="https://github.com/carpentries/pegboard/tree/" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/" class="external-link">varnish (1.1.3)</a></p>
 		</div>
 		</footer>
 </div> <!-- / div.container -->
@@ -455,8 +668,8 @@ any links that you are not going to use.
   "url": "https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor-notes.html",
   "identifier": "https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/instructor-notes.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-09-29",
-  "datePublished": "2026-09-29"
+  "dateModified": "2026-10-02",
+  "datePublished": "2026-10-02"
 }
 
   </script><script>

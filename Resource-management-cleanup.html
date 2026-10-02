@@ -24,13 +24,16 @@
   <div class="container-fluid top-nav-container">
     <div class="col-md-8">
       <div class="large-logo">
-        <img id="incubator-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo.svg"><span class="badge text-bg-danger">
-          <abbr title="This lesson is in the pre-alpha phase, which means that it is in early development, but has not yet been taught.">
+        <a href="index.html">
+        <img id="incubator-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo.svg"></a>
+
+        <span class="badge text-bg-warning">
+          <abbr title="This lesson is in the alpha phase, which means that it has been taught once and lesson authors are iterating on feedback.">
             <a href="https://docs.carpentries.org/resources/curriculum/lesson-life-cycle.html" class="external-link alert-link">
-              <i aria-hidden="true" class="icon" data-feather="alert-octagon" style="border-radius: 5px"></i>
-              Pre-Alpha
+              <i aria-hidden="true" class="icon" data-feather="alert-triangle" style="border-radius: 5px"></i>
+              Alpha
             </a>
-            <span class="visually-hidden">This lesson is in the pre-alpha phase, which means that it is in early development, but has not yet been taught.</span>
+            <span class="visually-hidden">This lesson is in the alpha phase, which means that it has been taught once and lesson authors are iterating on feedback.</span>
           </abbr>
         </span>
 
@@ -74,7 +77,9 @@
       <span class="menu-title">Menu</span>
     </button>
     <div class="nav-logo">
-      <img class="small-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo-sm.svg"></div>
+      <a href="index.html">
+      <img class="small-logo" alt="Learn how to run predictive AI/ML procedures (train, tune, etc.) using AWS SageMaker. These examples focus on narrow &amp;quot;predictive ML/AI&amp;quot; cases, where models are trained to perform a single function (contrasing with &amp;quot;foundation&amp;quot; model use via AWS Bedrock). These materials are directed towards participants of the 2024 Machine Learning Marathon, and some instructions may pertain only to that group. A more general purpose version of this workshop will be made available in future months." src="assets/images/incubator-logo-sm.svg"></a>
+    </div>
     <div class="lesson-title-md">
       Intro to AWS SageMaker for Predictive ML/AI
     </div>
@@ -115,10 +120,10 @@
       </fieldset>
     </form>
     -->
-    <a id="search-button" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
+    <a id="search-button-nav" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
   </div><!--/div.container-fluid -->
 </nav><aside class="col-md-12 lesson-progress"><div class="progress incubator">
-    <div class="progress-bar incubator" role="progressbar" style="width: 89%" aria-valuenow="89" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">89%</div>
+    <div class="progress-bar incubator" role="progressbar" style="width: 93%" aria-valuenow="93" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">93%</div>
   </div>
 </aside><div class="container">
       <div class="row">
@@ -129,6 +134,9 @@
           <i class="search-icon" data-feather="x" role="img"></i>
         </button>
         <div class="sidebar-inner">
+          <div class="row mobile-row" id="theme-row-mobile">
+            <a id="search-button-sidebar" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
+          </div>
           <div class="row mobile-row" id="theme-row-mobile">
             <menu class="col theme-selector" id="theme-selector-sidebar"><li class="nav-item dropdown theme-button-list" id="theme-button-list-sidebar">
                 <button class="btn btn-link nav-link px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">
@@ -171,6 +179,7 @@
                     </div>
                   </div><!--/div.accordion-item-->
                 </div><!--/div.accordion-flush-->
+
               </div><!--div.sidenav-view-selector -->
             </div><!--/div.col -->
 
@@ -268,13 +277,49 @@
   </div><!--/div.accordion-item-->
 </div><!--/div.accordion-flush-->
 
+<div class="accordion accordion-flush" id="accordionFlush10">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading10">
+        <a href="00_Overview-RAG-on-AWS.html">9. Overview of RAG Workflows on AWS</a>
+    </div><!--/div.accordion-header-->
+
+  </div><!--/div.accordion-item-->
+</div><!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush11">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading11">
+        <a href="01_RAG_WattBot_GPU-instance.html">10. RAG with a Notebook GPU</a>
+    </div><!--/div.accordion-header-->
+
+  </div><!--/div.accordion-item-->
+</div><!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush12">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading12">
+        <a href="02_RAG_WattBot_Processing_Jobs.html">11. RAG with Processing Jobs</a>
+    </div><!--/div.accordion-header-->
+
+  </div><!--/div.accordion-item-->
+</div><!--/div.accordion-flush-->
+
+<div class="accordion accordion-flush" id="accordionFlush13">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading13">
+        <a href="03_RAG_WattBot_Bedrock.html">12. RAG with Bedrock</a>
+    </div><!--/div.accordion-header-->
+
+  </div><!--/div.accordion-item-->
+</div><!--/div.accordion-flush-->
+
 <div class="accordion accordion-flush" id="accordionFlushcurrent">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-headingcurrent">
       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapsecurrent" aria-expanded="true" aria-controls="flush-collapsecurrent">
         <span class="visually-hidden">Current Chapter</span>
         <span class="current-chapter">
-        9. Resource Management and Monitoring
+        13. Resource Management and Monitoring
         </span>
       </button>
     </div><!--/div.accordion-header-->
@@ -296,6 +341,29 @@
               </div>
             </div>
 
+            <hr class="half-width"><div class="accordion accordion-flush" id="accordion-links-toggle">
+                <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-heading-links-toggle">
+                  <button class="accordion-button collapsed" id="links" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse-links-toggle" aria-expanded="false" aria-controls="flush-collapse-links-toggle">
+                    LINKS
+                  </button>
+                </h2>
+                <div id="flush-collapse-links-toggle" class="accordion-collapse show collapse" data-bs-parent="#accordion-links-toggle">
+                    <div class="accordion-body">
+                        <ul><li>
+                            <a href="key-points.html">Key Points</a>
+                            </li>
+                            <li>
+                            <a href="reference.html#glossary">Glossary</a>
+                            </li>
+                            <li>
+                            <a href="profiles.html">Learner Profiles</a>
+                            </li>
+                        </ul></div>
+                </div>
+                </div><!--/div.accordion-item-->
+            </div><!--/div.accordion-flush-->
+
             <hr class="half-width"><div class="accordion accordion-flush lesson-resources" id="accordion-resources-toggle">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="flush-heading-resources-toggle">
@@ -305,16 +373,7 @@
                 </h2>
                 <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
-                    <ul><li>
-                        <a href="key-points.html">Key Points</a>
-                      </li>
-                      <li>
-                        <a href="reference.html#glossary">Glossary</a>
-                      </li>
-                      <li>
-                        <a href="profiles.html">Learner Profiles</a>
-                      </li>
-                      <li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li>
+                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li>
                     </ul></div>
                 </div>
               </div>
@@ -334,14 +393,14 @@
         <!-- START: inst/pkgdown/templates/content-instructor.html -->
   <div class="col-xl-8 col-lg-12 primary-content">
     <nav class="lesson-content mx-md-4" aria-label="Previous and Next Chapter Top"><!-- content for small screens --><div class="d-block d-sm-block d-md-none">
-        <a class="chapter-link" href="Hyperparameter-tuning.html" rel="prev"><i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>Previous</a>
+        <a class="chapter-link" href="03_RAG_WattBot_Bedrock.html" rel="prev"><i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>Previous</a>
         <a class="chapter-link float-end" href="index.html" rel="next">Next<i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i></a>
       </div>
       <!-- content for large screens -->
       <div class="d-none d-sm-none d-md-block">
-        <a class="chapter-link" href="Hyperparameter-tuning.html" rel="prev">
+        <a class="chapter-link" href="03_RAG_WattBot_Bedrock.html" rel="prev">
           <i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>
-          Previous: Hyperparameter Tuning in SageMaker:...
+          Previous: RAG with Bedrock...
         </a>
         <a class="chapter-link float-end" href="index.html" rel="next">
           Home
@@ -350,7 +409,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Resource Management and Monitoring</h1>
-        <p>Last updated on 2025-03-10 |
+        <p>Last updated on 2026-10-02 |
 
         <a href="https://github.com/UW-Madison-DataScience/ml-with-aws-sagemaker/edit/main/episodes/Resource-management-cleanup.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -453,9 +512,23 @@ to view detailed expenses by service, such as SageMaker and S3.</li>
 </ul></li>
 <li>
 <strong>Use tags for cost tracking:</strong>
-<ul><li>Refer to the tags you set up earlier in the workshop for your
-notebooks and S3 buckets. These tags help you identify and monitor costs
-associated with specific resources.</li>
+<ul><li>Refer to the tags you set up earlier in the workshop. Remember that
+tags never propagate between resources: your notebook instance, each S3
+bucket, each training/tuning/Processing job, and each Bedrock
+application inference profile carries its own tags, and anything you
+launched without tags is untraceable after the fact.</li>
+<li>Tags only appear as filters in Cost Explorer after the tag
+<em>keys</em> (<code>Name</code>, <code>Project</code>,
+<code>Purpose</code>) have been activated as cost allocation tags in the
+Billing console by an account administrator. On a shared workshop
+account this is done once by the organizers; on your own account, do it
+once under <strong>Billing and Cost Management → Cost allocation
+tags</strong>. Activation applies only to usage recorded after that
+point, and new tags can take up to 24 hours to show up.</li>
+<li>Bedrock application inference profiles cost nothing to keep, but you
+can delete the ones you created from the Bedrock console or with
+<code>bedrock.delete_inference_profile(...)</code> once a project is
+finished.</li>
 </ul></li>
 </ol></section><section><h2 class="section-heading" id="best-practices-for-resource-management">Best practices for resource management<a class="anchor" aria-label="anchor" href="#best-practices-for-resource-management"></a></h2>
 <hr class="half-width"><p>Efficient resource management can save significant costs and improve
@@ -507,14 +580,14 @@ any links that you are not going to use.
  -->
 </section></div> <!-- / div.lesson-content -->
     </main><!-- / main#main-content.main-content --><nav class="bottom-pagination mx-md-4" aria-label="Previous and Next Chapter Bottom"><div class="d-block d-sm-block d-md-none">
-        <a class="chapter-link" href="Hyperparameter-tuning.html"><i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>Previous</a>
+        <a class="chapter-link" href="03_RAG_WattBot_Bedrock.html"><i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>Previous</a>
         <a class="chapter-link float-end" href="index.html">Next<i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i></a>
       </div>
       <!-- content for large screens -->
       <div class="d-none d-sm-none d-md-block">
-        <a class="chapter-link" href="Hyperparameter-tuning.html" rel="prev">
+        <a class="chapter-link" href="03_RAG_WattBot_Bedrock.html" rel="prev">
           <i aria-hidden="true" class="small-arrow" data-feather="arrow-left"></i>
-          Previous: Hyperparameter Tuning in SageMaker:...
+          Previous: RAG with Bedrock...
         </a>
         <a class="chapter-link float-end" href="index.html" rel="next">
           Home
@@ -543,7 +616,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/0.21.0" class="external-link">sandpaper (0.21.0)</a>, <a href="https://github.com/carpentries/pegboard/tree/0.7.9" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/1.1.2" class="external-link">varnish (1.1.2)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/" class="external-link">sandpaper (0.21.1)</a>, <a href="https://github.com/carpentries/pegboard/tree/" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/" class="external-link">varnish (1.1.3)</a></p>
 		</div>
 		</footer></div> <!-- / div.container -->
 	<div id="to-top">
@@ -565,8 +638,8 @@ any links that you are not going to use.
   "url": "https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/Resource-management-cleanup.html",
   "identifier": "https://UW-Madison-DataScience.github.io/ml-with-aws-sagemaker/Resource-management-cleanup.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2025-03-10",
-  "datePublished": "2026-09-29"
+  "dateModified": "2026-10-02",
+  "datePublished": "2026-10-02"
 }
 
   </script><script>
