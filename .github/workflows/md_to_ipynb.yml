@@ -11,22 +11,32 @@ on:
 jobs:
   convert:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install nbformat pandoc
+        run: pip install nbformat
 
       - name: Convert Markdown files to Jupyter Notebooks
         run: python scripts/md_to_ipynb.py
 
+      # On a pull_request event the checkout is a detached merge commit, so
+      # there is no branch to push to. Only report what would change there;
+      # commit and push the regenerated notebooks on pushes to main.
+      - name: Report notebooks that are out of date (pull requests)
+        if: github.event_name == 'pull_request'
+        run: git status --short -- notebooks
+
       - name: Commit and push changes
+        if: github.event_name == 'push'
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
