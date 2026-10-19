@@ -13,7 +13,7 @@ assets, each well under GitHub's 2 GiB per-asset limit:
 
 Usage (from a folder containing the Kaggle download, i.e. train.csv and images/):
 
-    python build_badger_scribe_release.py --src ~/Downloads/badger-scribe --version 9
+    python build_badger_scribe_release.py --src ~/Downloads/badger-scribe --version 1
 
 Then follow the printed `gh release create` command (needs the GitHub CLI
 logged in with write access to the repo; pass --repo to publish elsewhere). Unzipping all three assets
@@ -34,7 +34,7 @@ LABEL_FILES = [
     "train.csv", "test.csv", "metadata.csv", "metric.py",
     "sample_submission.csv", "transcription_conventions.md",
 ]
-DEFAULT_REPO = "qualiaMachine/ML_with_Amazon_SageMaker"
+DEFAULT_REPO = "carpentries-incubator/ML_with_AWS_SageMaker"
 
 
 def add_images(zf, src, page_ids, label):
@@ -52,7 +52,7 @@ def add_images(zf, src, page_ids, label):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True, help="folder with the Kaggle download (train.csv, images/, ...)")
-    ap.add_argument("--version", required=True, type=int, help="Kaggle dataset version number, e.g. 9")
+    ap.add_argument("--version", required=True, type=int, help="lesson data release number: 1 for the first release, then 2, 3, ...")
     ap.add_argument("--out", default="release", help="output folder for the zips")
     ap.add_argument("--repo", default=DEFAULT_REPO, help="GitHub repo that hosts the release (owner/name)")
     args = ap.parse_args()
