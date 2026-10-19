@@ -12,11 +12,11 @@ ML Marathon and Research Bazaar, usable by anyone with an AWS account.
 
 | Part | Episodes | Hands-on problem |
 |---|---|---|
-| SageMaker foundations | Overview, S3 setup, notebooks as controllers, accessing S3, code repos (the GitHub PAT episode is optional self-study) | Titanic survival classifier |
+| SageMaker foundations | Overview, S3 setup, notebooks as controllers, accessing S3, code repos | Titanic survival classifier |
 | Training and tuning | Training jobs (XGBoost, PyTorch), hyperparameter tuning | Titanic, CPU vs GPU, parallel jobs |
-| Retrieval-augmented generation | Overview, Bedrock, Processing jobs (plus an optional self-study GPU-notebook episode) | [WattBot](https://www.kaggle.com/competitions/WattBot2025) energy-literature Q&A |
+| Retrieval-augmented generation | Overview, Bedrock, Processing jobs | [WattBot](https://www.kaggle.com/competitions/WattBot2025) energy-literature Q&A |
 | Fine-tuning | LoRA fine-tune of CHURRO-3B as a training job | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
-| Wrap-up | Resource management and cleanup (plus an optional episode on the CLI equivalents: look, stop, copy, launch) | |
+| Wrap-up | Resource management and cleanup, CLI equivalents | |
 
 Every episode uses the same cost practices: cost-allocation tags on every
 resource, `max_run` caps on every job, an estimate before each launch compared
