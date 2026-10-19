@@ -59,7 +59,7 @@ If the mini jobs are still queueing at 0:45 (capacity), move Step 3 forward: the
 - `ml.g5.xlarge for training job usage`: at least the number of students launching at once. Request **100**.
 - `ml.g5.xlarge for processing job usage`: only needed for the homework, where each student launches two jobs at once. Request **200**.
 - `Maximum number of instances across all training jobs`: check it is not lower than the above.
-- If you want `ml.g6e.xlarge` for Exercise 2, request 10–20 of those too.
+- If you want `ml.g6e.xlarge` for Exercise 2, request 100 of those too.
 
 New accounts often have these at 0 to 4. Quota increases for GPU instances can take days and sometimes a back-and-forth with support, so file them **three to four weeks** before class.
 

@@ -18,10 +18,10 @@ Console: **Service Quotas → AWS services → Amazon SageMaker**, in the region
 | `ml.g4dn.xlarge for training job usage` | 100 | PyTorch part 2 GPU comparison |
 | `ml.g5.xlarge for training job usage` | 100 | fine-tuning episode (one job per student at once) |
 | `ml.g6e.xlarge for training job usage` | 100 | optional: fine-tuning Exercise 2 |
-| `Maximum number of instances across all training jobs` | 400 | must exceed the largest concurrent total above |
+| `Number of instances across all training jobs` | 250 (already applied) | account-level ceiling; 250 covers 100 students |
 | `ml.g5.xlarge for processing job usage` | 200 | Processing Jobs episode and fine-tuning homework (two jobs per student, possibly at once) |
 | `ml.g6e.xlarge for processing job usage` | 200 | only if the Processing Jobs episode is moved to the 27B model |
-| `Maximum number of instances across all processing jobs` | 200 | |
+| `Number of instances across all processing jobs` | 250 (already applied) | account-level ceiling |
 
 Also check `ml.g5.xlarge for training warm pool usage` is left at its default of 0; the episodes do not use warm pools and a nonzero quota lets a student leave an idle GPU billing.
 
