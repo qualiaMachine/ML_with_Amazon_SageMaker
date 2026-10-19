@@ -49,3 +49,7 @@ docs/
 # translation temp files
 po/*~
 
+
+# Badger Scribe release build outputs (scripts/build_badger_scribe_release.py)
+release/
+release_notes_v*.md
