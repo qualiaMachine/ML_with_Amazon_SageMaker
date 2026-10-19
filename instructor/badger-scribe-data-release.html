@@ -451,8 +451,9 @@ large downloads and <code>gdown</code> breaks regularly. A release is
 permanent, versioned, free, and sits next to the lesson.</p>
 <section><h2 class="section-heading" id="publishing-a-new-data-version">Publishing a new data version<a class="anchor" aria-label="anchor" href="#publishing-a-new-data-version"></a></h2>
 <hr class="half-width"><p>Do this whenever the competition data changes (new pages pass review,
-labels are corrected). <code>&lt;N&gt;</code> is the Kaggle dataset
-version number so the lesson and the competition stay in step.</p>
+labels are corrected). <code>&lt;N&gt;</code> is the lesson’s own
+release number (1, 2, 3, …); the release notes record which Kaggle
+dataset version it was taken from.</p>
 <ol style="list-style-type: decimal"><li><p>Download the current data from the competition’s data tab into a
 folder, e.g. <code>~/Downloads/badger-scribe</code> (it should contain
 <code>train.csv</code> and <code>images/</code>).</p></li>
@@ -461,36 +462,34 @@ folder, e.g. <code>~/Downloads/badger-scribe</code> (it should contain
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="ex">python</span> scripts/build_badger_scribe_release.py <span class="at">--src</span> ~/Downloads/badger-scribe <span class="at">--version</span> 9</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="ex">python</span> scripts/build_badger_scribe_release.py <span class="at">--src</span> ~/Downloads/badger-scribe <span class="at">--version</span> 1</span></code></pre>
 </div>
 <p>The script checks that every page id in the CSVs has an image, writes
 the three zips to <code>release/</code>, prints their sizes, and prints
 the publish command.</p>
 </li>
-<li><p>Write <code>release_notes_v9.md</code> (template below) and run
+<li><p>Write <code>release_notes_v1.md</code> (template below) and run
 the printed <code>gh release create ...</code> command, logged in to the
 GitHub CLI with write access to the repository that hosts the release
-(currently <code>qualiaMachine/ML_with_Amazon_SageMaker</code>; pass
-<code>--repo</code> to the build script to change it). Uploading ~2 GB
-takes a few minutes.</p></li>
-<li><p>Update the version number (<code>V=9</code>) in the episode’s
+(<code>carpentries-incubator/ML_with_AWS_SageMaker</code>; pass
+<code>--repo</code> to the build script to publish elsewhere, e.g. on a
+fork while developing). Uploading ~2 GB takes a few minutes.</p></li>
+<li><p>Update the version number (<code>V=1</code>) in the episode’s
 self-paced callout and in the staging step below. Earlier releases stay
 available, so a learner mid-way through an old version is not
 broken.</p></li>
-</ol><p>The release currently lives on the
-<code>qualiaMachine/ML_with_Amazon_SageMaker</code> fork. When the
-lesson is synced to
-<code>carpentries-incubator/ML_with_AWS_SageMaker</code>, either
-re-publish the same assets there
-(<code>--repo carpentries-incubator/ML_with_AWS_SageMaker</code>) and
-change the URL in the episode, the setup page and this page, or leave
-the release on the fork; the download URL works from anywhere.</p>
+</ol><p>The lesson’s URLs point at the release on
+<code>carpentries-incubator/ML_with_AWS_SageMaker</code>. A copy of the
+same release also exists on the
+<code>qualiaMachine/ML_with_Amazon_SageMaker</code> fork, where it was
+first published; the zips are byte-identical, so either URL serves the
+same data.</p>
 <div class="section level3">
 <h3 id="release-notes-template">Release notes template<a class="anchor" aria-label="anchor" href="#release-notes-template"></a></h3>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">MARKDOWN<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode markdown" tabindex="0"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a>Badger Scribe competition data, version 9 (2026-09-17 on Kaggle).</span>
+<pre class="sourceCode markdown" tabindex="0"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="an">Lesson data release v1:</span><span class="co"> the German-letter (Kade) pages of the Badger Scribe competition data, taken from Kaggle dataset version 9 (2026-09-17). 295 train pages, 141 test pages, all human-transcribed.</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>Three assets; unzip all three into one directory to recreate the layout</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a>(<span class="in">`train.csv`</span>, <span class="in">`test.csv`</span>, <span class="in">`metadata.csv`</span>, <span class="in">`metric.py`</span>, <span class="in">`images/&lt;page_id&gt;.jpg`</span>).</span>
@@ -518,8 +517,8 @@ downloaded from GitHub during class. From any machine with the AWS CLI
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="va">V</span><span class="op">=</span>9</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="va">R</span><span class="op">=</span>https://github.com/qualiaMachine/ML_with_Amazon_SageMaker/releases/download/badger-scribe-data-v<span class="va">$V</span></span>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="va">V</span><span class="op">=</span>1</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="va">R</span><span class="op">=</span>https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases/download/badger-scribe-data-v<span class="va">$V</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="fu">mkdir</span> <span class="at">-p</span> badger-scribe <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> badger-scribe</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a><span class="cf">for</span> a <span class="kw">in</span> labels images-train images-test<span class="kw">;</span> <span class="cf">do</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1" aria-label="code-block-3-5"></a>  <span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> <span class="va">$a</span>.zip <span class="va">$R</span>/badger-scribe-v<span class="va">$V</span>-<span class="va">$a</span>.zip <span class="kw">&amp;&amp;</span> <span class="fu">unzip</span> <span class="at">-q</span> <span class="at">-o</span> <span class="va">$a</span>.zip <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="va">$a</span>.zip</span>
