@@ -29,7 +29,7 @@ notebook instances.
 |---|---|
 | `episodes/*.md` | The lesson text. **Edit these**; everything else below derives from them. |
 | `notebooks/*.ipynb` | Jupyter notebooks generated from the episodes by `scripts/md_to_ipynb.py`. Regenerated automatically on every push to `main`; do not edit by hand. |
-| `scripts/` | Training, processing and helper scripts that the episodes clone into SageMaker (`train_nn.py`, `wattbot_rag_batch.py`, `finetune_churro_lora.py`, ...), plus the notebook generator and the data-release builder. |
+| `scripts/` | Everything the episodes import or launch: `helpers.py` (bucket size, instance info, tuning-job cost), the training scripts (`train_xgboost.py`, `train_nn.py`), the RAG and fine-tuning scripts, plus the notebook generator and the data-release builder. Learners clone this repository once onto their notebook instance; there is no separate helper repository. |
 | `learners/` | Setup instructions, glossary, instance-selection guide. |
 | `instructors/` | Instructor notes: account preparation and quotas, per-episode cost estimates, data staging, end-of-workshop cleanup with aws-nuke. |
 | `data/data.zip` | The Titanic CSVs used in the first half of the lesson. |
