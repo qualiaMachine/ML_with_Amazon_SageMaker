@@ -72,12 +72,12 @@ This is the recommended approach for most workflows. By keeping data in S3 and r
 - **Potential latency**: Reading large datasets repeatedly from S3 may introduce small delays. This approach works best if you only need to load data once or infrequently.
 
 #### Example: Reading data from S3 into memory
-Our data is stored in the S3 bucket you created in the previous episode, named 'teamname-yourname' (e.g., sinkorswim-doejohn). We can use the following code to read data directly from S3 into memory in the Jupyter notebook environment, without actually downloading a copy of train.csv as a local file.
+Our data is stored in the S3 bucket you created in the previous episode, named 'challenge-lastnamefirstname' (e.g., badgerscribe-doejohn). We can use the following code to read data directly from S3 into memory in the Jupyter notebook environment, without actually downloading a copy of train.csv as a local file.
 
 ```python
 import pandas as pd
 # Define the S3 bucket and object key
-bucket_name = 'sinkorswim-doejohn'  # replace with your S3 bucket name
+bucket_name = 'badgerscribe-doejohn'  # replace with your S3 bucket name
 
 # Read the train data from S3
 key = 'titanic_train.csv'  # replace with your object key
@@ -306,7 +306,7 @@ print(size_before, size_after)
 
 The bucket grows by the size of the file (a few hundred bytes here), and at $0.023 per GB-month that is a rounding error: well under a thousandth of a cent per month. The point of the exercise is the habit, not the number. The same two lines, run before and after a training job, tell you what the job wrote and whether something is accumulating that you should clean up.
 
-2. The training episode writes under `xgboost/` (`s3://sinkorswim-doejohn/xgboost/`), the same way this episode wrote under `docs/`; the PyTorch episode uses `pytorch/`, the RAG episodes `wattbot/`, and the fine-tuning episode `badger-scribe/`. One bucket with prefixes keeps a single bucket policy, a single set of tags, and a single thing to delete at the end of the workshop; one bucket per episode would mean repeating the policy and tag setup five times and a longer cleanup list.
+2. The training episode writes under `xgboost/` (`s3://badgerscribe-doejohn/xgboost/`), the same way this episode wrote under `docs/`; the PyTorch episode uses `pytorch/`, the RAG episodes `wattbot/`, and the fine-tuning episode `badger-scribe/`. One bucket with prefixes keeps a single bucket policy, a single set of tags, and a single thing to delete at the end of the workshop; one bucket per episode would mean repeating the policy and tag setup five times and a longer cleanup list.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
