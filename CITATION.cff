@@ -1,11 +1,10 @@
 cff-version: 1.2.0
-title: Intro to AWS SageMaker for Predictive ML/AI
+title: Machine Learning with Amazon SageMaker
 message: >-
   Please cite this lesson using the information in this file
   when you refer to it in publications, and/or if you
   re-use, adapt, or expand on the content in your own
   training material.
-type: dataset
 authors:
   - given-names: Christopher
     family-names: Endemann
@@ -17,34 +16,34 @@ repository-code: >-
 url: >-
   https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/index.html
 abstract: >-
-  This workshop introduces foundational workflows in AWS
-  SageMaker, focusing on data setup, repository management,
-  model training, and hyperparameter tuning within AWS's
-  managed environment. Participants will learn to use
-  SageMaker notebooks to orchestrate data pipelines, launch
-  training and tuning jobs, and assess model performance.
-  The session will also cover strategies for scaling ML
-  workflows efficiently, including guidance on selecting
-  between CPU and GPU instances and leveraging parallelized
-  workflows across multiple instances. To support
-  cost-effective experimentation, the workshop provides best
-  practices for tracking and managing AWS expenses. While
-  AWS usage incurs costs, it can be an affordable solution
-  for research-oriented ML workflows. For example, training
-  approximately 100 small to medium-sized models (e.g.,
-  logistic regression, random forests, or lightweight deep
-  learning models with a few million parameters) on datasets
-  under 10GB can often be achieved for under $20. This
-  workshop is designed for researchers and practitioners
-  looking to implement scalable, cost-conscious ML workflows
-  using cloud-based infrastructure.
+  A Carpentries-style lesson on running machine learning
+  workflows on AWS without losing control of the bill. It
+  covers SageMaker notebooks as lightweight controllers,
+  S3 data setup, training and hyperparameter-tuning jobs
+  (XGBoost and PyTorch, CPU vs. GPU, parallel instances),
+  retrieval-augmented generation on Amazon Bedrock, on a
+  rented GPU notebook, and as Processing jobs (the WattBot
+  energy-literature challenge), and fine-tuning an
+  open-weight vision-language model with LoRA as a training
+  job (the Badger Scribe handwriting-transcription
+  challenge, German Kurrent letters from the UW-Madison
+  Max Kade Institute). Cost control runs through every
+  episode: cost-allocation tags on every resource, runtime
+  caps on every job, written cost estimates compared to the
+  bill, and explicit cleanup. Designed for researchers and
+  practitioners who want scalable, cost-conscious ML
+  workflows on cloud infrastructure.
 keywords:
   - AWS
   - Cloud Computing
   - Machine Learning
   - Artificial Intelligence
   - SageMaker
+  - Bedrock
+  - Retrieval-Augmented Generation
+  - Fine-tuning
   - GPU
+  - Cost Management
   - Open-Source
   - Carpentries Incubator
   - Python
