@@ -23,8 +23,13 @@ There are two ways to get access to AWS for this lesson. Please wait for a pre-w
 #### Option 1) Shared Account
 If you are attending this lesson as part of the Machine Learning Marathon or Research Bazaar, the instructors will provide a shared AWS account for all attendees. You do not need to set up your own AWS account. What to expect:
 
-* Before the workshop, you will receive an email invitation from the instructor with access details for the shared AWS account.
-* During the lesson, you will log in using the credentials provided in the email.
+* Before the workshop, the instructor adds you to the shared account. You sign in with your UW–Madison NetID through this link, which opens the AWS console directly in the workshop account and role:  
+  **[Open the workshop AWS console](https://uw-madison-dlt3.awsapps.com/start/#/console?account_id=183295408236&role_name=ml-bedrock-183295408236sagemaker)**  
+  Bookmark it; it is the link you will use every session.
+* **Verify your access before the workshop** (two minutes, and it is much easier to fix beforehand than on the day):
+  1. Open the link above and sign in with your NetID. If you see a "no access" or "not assigned" message, email the instructor with your NetID; you have not been added yet.
+  2. Check the top-right of the console: the account should read **ml-marathon-2024 (183295408236)** and the region **United States (Ohio)**. If the region shows anything else, change it to Ohio (`us-east-2`); everything in the workshop lives there.
+  3. Type **SageMaker** in the search bar and open **Amazon SageMaker AI**. If the page loads without an error banner, you are set.
 * This setup ensures that all participants have the same environment and eliminates concerns about unexpected costs for attendees.
 * These shared AWS credits should not be wasted, as we repurpose them for additional training events each year.
   * Attendees are expected to **stick to the lesson materials** to ensure expensive pipelines (e.g., training/tuning LLMs) do not lead to high costs and wasted credits.
