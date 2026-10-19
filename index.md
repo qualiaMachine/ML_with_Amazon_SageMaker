@@ -18,7 +18,6 @@ Every episode applies the same controls: cost-allocation tags on every resource,
 
 - **Deploying models as endpoints**: serving a trained or fine-tuned model behind an always-on API.
 - **Agents and tool use**: LLM applications that call tools or chain multiple model calls (e.g., Bedrock Agents).
-- **Full-parameter fine-tuning and multi-GPU training**: the lesson fine-tunes with LoRA on one GPU and explains what larger runs cost, but does not run one.
 - **Evaluation beyond a single metric**: LLM-as-judge, human evaluation, and benchmark suites.
 - **MLOps**: pipelines, experiment tracking, model registries, and scheduled retraining.
 
