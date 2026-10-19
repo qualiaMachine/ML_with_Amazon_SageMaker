@@ -6,7 +6,7 @@ Planning notes for running the *Fine-tuning a Vision-Language Model with Trainin
 
 ## The in-class design
 
-The full 619-page fine-tune takes about 65 minutes, which does not fit a 3-hour class. In class, every student runs one ~25-minute job instead: it scores 15 held-out survey pages with the base model, trains on 120 survey pages for 2 epochs, scores the same 15 pages again, and saves the adapter. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the Kaggle submission are homework.
+The full 619-page fine-tune takes about 65 minutes, which does not fit a 3-hour class. In class, every student runs one ~25-minute job instead: it scores 15 held-out German-letter (`kade_letters`) pages with the base model, trains on 120 German-letter pages for 2 epochs, scores the same 15 pages again, and saves the adapter. The German letters were chosen because every label is human-transcribed (the survey and account-book labels are mostly machine drafts) and because they are most of the hidden test set. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the optional Kaggle submission are homework.
 
 Students compare their mini adapter against a full run **you** ran before class (see "Before class" below). That is what makes the "powerful when done right" point without anyone waiting an hour.
 
@@ -17,7 +17,7 @@ Launches use `wait=True` and an explicit `job_name=f"badger-{username}-mini-v1"`
 | Item | Instance | Billable time | Cost |
 |---|---|---|---|
 | Controller notebook (CPU) | `ml.t3.medium` ($0.05/h) | 3 h | $0.15 |
-| In-class mini fine-tune (120 survey pages × 2 epochs, 15 pages scored before and after) | `ml.g5.xlarge` ($1.41/h) | ~25 min | $0.60 |
+| In-class mini fine-tune (120 German-letter pages × 2 epochs, 15 pages scored before and after) | `ml.g5.xlarge` ($1.41/h) | ~25 min | $0.60 |
 | Exercise 1: same job at 2 megapixels | `ml.g5.xlarge` | ~35 min | $0.80 |
 | **In class** | | **~1 GPU-hour** | **~$1.55** |
 | Homework: full fine-tune (526 pages × 2 epochs, 60 pages scored before and after) | `ml.g5.xlarge` | ~65 min | $1.53 |
@@ -75,7 +75,7 @@ New accounts often have these at 0 to 4. Quota increases for GPU instances can t
 
 ### 1. Stage the data in a shared read-only bucket
 
-Students do not create a bucket or upload anything for this episode. Download the dataset once from the [competition data page](https://www.kaggle.com/competitions/badger-scribe/data) (1.95 GB, 837 JPEGs) and upload it so the bucket has this layout:
+Students do not create a bucket or upload anything for this episode, and nobody needs a Kaggle account. The data lives as a release on the lesson repository (see the *Badger Scribe data: publishing a release* page for how to publish a new version and the exact staging commands). Stage it once per term so the bucket has this layout:
 
 - `badger-scribe/train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`
 - `badger-scribe/images/<page_id>.jpg`
@@ -116,7 +116,7 @@ Run the episode's homework estimator (all categories, 2 epochs, `eval_pages` 60)
 - `badger-scribe/instructor/full-run/eval_before.csv`
 - `badger-scribe/instructor/full-run/eval_after.csv`
 
-The holdout split is seeded, so your 60 evaluation pages include the students' 15 survey pages as long as everyone keeps `seed` and `holdout_frac` at their defaults. While you are at it, note the job's `BillableTimeInSeconds` and `seconds_per_page` and replace the time estimates in the episode's Step 0 tables with measured ones. The episode tells students to compare their bill to the estimate; the estimate should be a real number.
+The holdout split is seeded, so your 60 evaluation pages include the students' 15 German-letter pages as long as everyone keeps `seed` and `holdout_frac` at their defaults. While you are at it, note the job's `BillableTimeInSeconds` and `seconds_per_page` and replace the time estimates in the episode's Step 0 tables with measured ones. The episode tells students to compare their bill to the estimate; the estimate should be a real number.
 
 ### 3. The rest
 

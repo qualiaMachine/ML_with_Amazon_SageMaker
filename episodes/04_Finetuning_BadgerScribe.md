@@ -19,7 +19,7 @@ exercises: 45
 - Launch a LoRA fine-tune of a 3B vision-language model (CHURRO-3B) as a `HuggingFace` training job on a single 24 GB GPU, with tags, a unique job name and a `max_run` cap.
 - Read a job's billable time and compare it to the estimate.
 - Compare the base model and the fine-tuned model on held-out pages using the competition's own character error rate (CER).
-- Know how to scale the same job up to the full dataset and to a Kaggle submission (homework).
+- Know how to scale the same job up to the full dataset and, optionally, to a Kaggle submission (homework).
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -31,7 +31,7 @@ Everything so far in the RAG episodes left the model's weights alone. Fine-tunin
 - It is iterative. Nobody gets the learning rate, the image resolution or the data split right the first time, so the first run is never the last.
 - The cost of a run depends on things that are easy to get wrong by 10x: model size, epochs, image resolution, instance type, and whether the instance is still running after you stopped paying attention.
 
-That combination is why fine-tuning is where research teams see the surprise bills. It is also, done carefully, the single biggest lever you have: the Badger Scribe organizers report that LoRA on ~100 pages of survey notebooks takes a small open model from 0.23 to 0.06 CER in about a GPU-hour. This episode is about getting that kind of gain for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead.
+That combination is why fine-tuning is where research teams see the surprise bills. It is also, done carefully, the single biggest lever you have: the Badger Scribe organizers report that LoRA on ~100 pages takes a small open model from 0.23 to 0.06 CER on survey notebooks in about a GPU-hour. This episode is about getting that kind of gain for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead.
 
 ### The task: Badger Scribe
 
@@ -46,7 +46,7 @@ The released train set is small:
 | `dominy_accounts` (account books, letters) | 36 | 2 human, 34 machine draft |
 | **total** | **619** | ~709 characters per page on average |
 
-Small is the point. 619 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material.
+Small is the point. 619 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material. In class we train on the German letters: every one of their labels was produced by a person, and they are most of the hidden test set, so a gain there is a gain that counts.
 
 We will fine-tune [CHURRO-3B](https://github.com/stanford-oval/Churro), a 3-billion-parameter open-weight vision-language model from Stanford that was itself fine-tuned from Qwen2.5-VL-3B on roughly 100,000 pages of historical documents in 46 language clusters. It already reads old handwriting better than its base model does; we are teaching it *these* hands and *these* transcription conventions.
 
@@ -70,7 +70,7 @@ The cost of a run is GPU-hours × the hourly rate, and GPU-hours scale with **mo
 
 | Run | Hardware | GPU-hours | Cost |
 |---|---|---|---|
-| **This episode:** 3B, LoRA, 120 pages × 2 epochs | 1 × A10G (`ml.g5.xlarge`, $1.41/h), ~25 min | 0.4 | **~$0.60** |
+| **This episode:** 3B, LoRA, 120 Kurrent pages × 2 epochs | 1 × A10G (`ml.g5.xlarge`, $1.41/h), ~25 min | 0.4 | **~$0.60** |
 | Homework: 3B, LoRA, all 619 pages × 2 epochs | 1 × A10G, ~65 min | 1.1 | ~$1.50 |
 | 7B full fine-tune, ~50k documents, a few epochs | 8 × A100 (`ml.p4d.24xlarge`, $25.25/h), ~10 h | 80 | ~$250 |
 | 70B LoRA, one day | 8 × A100, 24 h | 192 | ~$600 |
@@ -100,7 +100,7 @@ Multi-GPU instances are the right tool when the model, its optimizer state and a
 
 ### The run
 
-A training job bills from the moment its instance is ready until the job ends, including the minutes spent pulling the container and downloading data and model weights. In class we train on 120 survey-notebook pages for 2 epochs and score 15 held-out pages before and after, all inside one job:
+A training job bills from the moment its instance is ready until the job ends, including the minutes spent pulling the container and downloading data and model weights. In class we train on 120 German-letter pages for 2 epochs and score 15 held-out pages before and after, all inside one job:
 
 | Phase | Time | Cost |
 |---|---|---|
@@ -139,13 +139,34 @@ Compare the classic mistake: doing all of this interactively on a `ml.g5.xlarge`
 
 This episode runs from a **CPU** notebook instance (`ml.t3.medium` or `ml.m5.xlarge`). The notebook is only a controller: it stages data, launches jobs, and reads results. The GPU lives in the job.
 
-There is no data upload in this episode. Your instructor has staged the competition data (from the Kaggle data tab) in a shared read-only bucket:
+There is no data upload in this episode. The competition data is published as a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) (three zip files: labels, train images, test images), and your instructor has staged it in a shared read-only bucket:
 
 - `s3://<shared-bucket>/badger-scribe/train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`
 - `s3://<shared-bucket>/badger-scribe/images/<page_id>.jpg`: train and test pages together, about 2 GB
 - `s3://<shared-bucket>/badger-scribe/instructor/full-run/`: the output of a full fine-tune your instructor ran before class, for comparison in Step 3
 
-The training job reads the images straight from that bucket; the only files your notebook downloads are the small CSVs. Outputs go to the bucket you created in the Bedrock episode. (Working on your own? Download the dataset from the [competition data page](https://www.kaggle.com/competitions/badger-scribe/data) into a bucket of yours with the same layout.)
+The training job reads the images straight from that bucket; the only files your notebook downloads are the small CSVs. Outputs go to the bucket you created in the Bedrock episode.
+
+::::::::::::::::::::::::::::::::::::: callout
+
+### Working on your own account?
+
+Download the three assets of the data release and sync them into a bucket of yours under the same `badger-scribe/` prefix, then set `shared_bucket` below to that bucket. From a terminal with the AWS CLI (the notebook instance's terminal works):
+
+```bash
+%%bash
+V=9   # data release version; check the releases page for the latest
+R=https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases/download/badger-scribe-data-v$V
+mkdir -p badger-scribe && cd badger-scribe
+for a in labels images-train images-test; do
+  curl -L -o $a.zip $R/badger-scribe-v$V-$a.zip && unzip -q -o $a.zip && rm $a.zip
+done
+cd .. && aws s3 sync badger-scribe/ s3://<your-bucket>/badger-scribe/
+```
+
+No Kaggle account is needed for any of this. The Step 3 comparison against an instructor full run will not apply; run the homework's full fine-tune yourself instead.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 ```python
 import os
@@ -187,10 +208,10 @@ print("train pages:", len(train_df), " test pages:", len(test_df))
 print(train_df.groupby(["category", "label_source"]).size())
 ```
 
-Look at one page and its transcription. Note what "verbatim" means here: the writer's spelling, the abbreviations, the `#` for a character the transcriber could not read.
+Look at one page and its transcription. Note what "verbatim" means here: the writer's spelling and punctuation, umlauts and `ß` kept as written, Kurrent letterforms mapped to their Latin equivalents, and `#` for a character the transcriber could not read.
 
 ```python
-row = train_df[train_df.category == "survey_notes"].iloc[3]
+row = train_df[train_df.category == "kade_letters"].iloc[3]
 print(row.page_id, "|", row.category, "|", row.label_source)
 print(row.text[:600])
 ```
@@ -225,7 +246,7 @@ print(os.listdir("code"))
 ```
 
 - `badger_common.py`: the prompt, image loading, and a copy of the competition's CER. Shared by the other two so the model is trained on exactly the prompt it is later asked.
-- `finetune_churro_lora.py`: the training job entry point. Holds out 15% of pages per category, scores a sample of holdout pages with the base model, trains a LoRA adapter, scores the same pages again, and saves everything.
+- `finetune_churro_lora.py`: the training job entry point. Holds out 15% of pages per category, filters to the categories you ask for, scores a sample of holdout pages with the base model, trains a LoRA adapter, scores the same pages again, and saves everything.
 - `churro_transcribe_batch.py`: used in the homework. Transcribes any list of pages with the base model or with the adapter merged in, and writes `predictions.csv` in the submission format.
 
 Open `code/finetune_churro_lora.py` and read it before launching it. The pieces worth understanding:
@@ -268,7 +289,7 @@ def make_job_tags(purpose: str):
 
 ## Step 1: Launch the fine-tune
 
-One job does everything: scores 15 held-out survey pages with the base model, trains on 120 survey pages for 2 epochs, scores the same 15 pages again, and saves the adapter. The hyperparameters below are what the Step 0 estimate was built from.
+One job does everything: scores 15 held-out German-letter pages with the base model, trains on 120 German-letter pages for 2 epochs, scores the same 15 pages again, and saves the adapter. The hyperparameters below are what the Step 0 estimate was built from.
 
 ```python
 from sagemaker.huggingface import HuggingFace
@@ -292,7 +313,7 @@ estimator = HuggingFace(
     sagemaker_session=session,
     hyperparameters={
         "model_id": "stanford-oval/churro-3B",
-        "categories": "survey_notes",     # one category in class; the homework uses all three
+        "categories": "kade_letters",     # one category in class; the homework uses all three
         "max_train_pages": 120,
         "epochs": 2,
         "lr": 2e-4,
@@ -403,7 +424,7 @@ print(comparison.sort_values("gain", ascending=False).round(3).to_string(index=F
 print(f"\nmean CER  base: {comparison.cer_base.mean():.3f}   tuned: {comparison.cer_tuned.mean():.3f}")
 ```
 
-Look at the page that improved most. The fine-tuned model should have picked up the conventions (`&` for the surveyors' "and" mark, `½` for raised fractions, no leader dashes) as well as the handwriting.
+Look at the page that improved most. The fine-tuned model should have picked up the conventions (umlauts and `ß` as written, no modernised spelling, Kurrent `s` and `e` forms read correctly) as well as this particular writer's hand.
 
 ```python
 best = comparison.sort_values("gain", ascending=False).iloc[0].page_id
@@ -445,7 +466,7 @@ print("CER before :", full_summary["holdout_eval_before"]["per_category"])
 print("CER after  :", full_summary["holdout_eval_after"]["per_category"])
 ```
 
-Put the three models side by side on the survey pages they have in common:
+Put the three models side by side on the German-letter pages they have in common:
 
 ```python
 full_after = pd.read_csv(os.path.join(full_dir, "eval_after.csv"), keep_default_na=False)
@@ -462,7 +483,7 @@ Three numbers: the base model, 10 minutes of training on 120 pages, and 50 minut
 
 ### Why the holdout number flatters you
 
-The script holds out 15% of *pages*, so the same surveyor's hand appears in both the training and holdout halves. The competition's hidden test set is split by *document*: whole letters and notebooks the model has never seen. Expect the leaderboard CER to be worse than the holdout CER, especially on `dominy_accounts`, where 36 pages come from 20 different writers. A document-level holdout is the fix; it is left as an exercise because with only four German letter bundles in train, it means giving up a quarter of the German data.
+The script holds out 15% of *pages*, so the same writer's hand appears in both the training and holdout halves. The competition's hidden test set is split by *document*: whole letter bundles and notebooks the model has never seen. Expect the leaderboard CER to be worse than the holdout CER, especially on `dominy_accounts`, where 36 pages come from 20 different writers. (The Kade letters are all one correspondent, which softens this for the class run, but not for the other categories.) A document-level holdout is the fix; it is left as an exercise because with only four German letter bundles in train, it means giving up a quarter of the German data.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -528,7 +549,7 @@ Checkpointing. If the instance is reclaimed, the job restarts and, as written, s
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Homework: the full run and a Kaggle submission
+## Homework: the full run and (optionally) a Kaggle submission
 
 Everything below is the same pattern at a larger scale: about $1.50 for the fine-tune and $1.20 for inference, roughly two hours of wall-clock time that you do not need to sit through. Launch, go do something else, come back.
 
@@ -676,7 +697,7 @@ for label, df in preds.items():
 
 ### Submit
 
-The `tuned` prediction file already contains every test page. Keep only those rows, in the order `test.csv` lists them, and upload the CSV on the competition's **Submit Prediction** page (two submissions per day).
+The `tuned` prediction file already contains every test page. Keep only those rows, in the order `test.csv` lists them. If you want a leaderboard score, this file is what you upload on the competition's **Submit Prediction** page (two submissions per day; this is the only step that needs a Kaggle account, and it is optional).
 
 ```python
 submission = test_df[["page_id"]].merge(preds["tuned"], on="page_id", how="left").fillna({"text": ""})
