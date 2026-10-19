@@ -135,6 +135,21 @@ Compare the classic mistake: doing all of this interactively on a `ml.g5.xlarge`
 
 ## Setup
 
+::::::::::::::::::::::::::::::::::::: instructor
+
+### Before class (instructor checklist)
+
+Students never download the data themselves; four things have to be in place before the session. Each is written out in the instructor pages.
+
+1. **Stage the data in a shared read-only bucket** from the lesson's data release (`badger-scribe-data-v1`): about ten minutes from CloudShell, commands in *Badger Scribe data: publishing a release*. Attach the read-only bucket policy from *Fine-tuning episode: cost, capacity and setup* so the student execution role can `GetObject` and `ListBucket`. The bucket must survive the end-of-workshop cleanup, or be recreated from the release next term.
+2. **Run the full fine-tune once** (the estimator in the Homework section, all 251 training pages, `eval_pages` 40) and copy `train_summary.json`, `eval_before.csv` and `eval_after.csv` from its `model.tar.gz` to `badger-scribe/instructor/full-run/` in the shared bucket. Step 3 compares against these. Replace the time estimates in Step 0 with the job's real `BillableTimeInSeconds`.
+3. **Quotas**: `ml.g5.xlarge for training job usage` at least the class size (request 60). Default is often 0 to 4 and increases take days; file three to four weeks ahead. Full list in *Account preparation checklist*.
+4. **Tell students the bucket name** at the start; it is the `shared_bucket` value in the first code cell.
+
+Fallback instance if g5 capacity is short: `ml.g6.xlarge` (L4, 24 GB, $1.13/h).
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 This episode runs from a **CPU** notebook instance (`ml.t3.medium` or `ml.m5.xlarge`). The notebook is only a controller: it stages data, launches jobs, and reads results. The GPU lives in the job.
 
 There is no data upload in this episode. The competition data is published as a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) (three zip files: labels, train images, test images), and your instructor has staged it in a shared read-only bucket:
