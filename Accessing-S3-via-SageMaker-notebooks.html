@@ -548,8 +548,8 @@ if you only need to load data once or infrequently.</li>
 <p>Our data is stored in the S3 bucket you created in the previous
 episode, named ‘challenge-lastnamefirstname’ (e.g., sinkorswim-doejohn).
 We can use the following code to read data directly from S3 into memory
-in the Jupyter notebook environment, without actually downloading a copy
-of train.csv as a local file.</p>
+in the Jupyter notebook environment, without downloading a copy of
+train.csv as a local file.</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -853,7 +853,7 @@ prefixes instead of a new bucket per episode?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>One way to do it:</li>
 </ol><div class="codewrapper sourceCode" id="cb14">
@@ -869,11 +869,10 @@ prefixes instead of a new bucket per episode?</li>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1" aria-label="code-block-14-8"></a><span class="bu">print</span>(size_before, size_after)</span></code></pre>
 </div>
 <p>The bucket grows by the size of the file (a few hundred bytes here),
-and at $0.023 per GB-month that is a rounding error: well under a
-thousandth of a cent per month. The point of the exercise is the habit,
-not the number. The same two lines, run before and after a training job,
-tell you what the job wrote and whether something is accumulating that
-you should clean up.</p>
+and at $0.023 per GB-month that is well under a thousandth of a cent per
+month. The same two lines, run before and after a training job, tell you
+what the job wrote and whether something is accumulating that you should
+clean up.</p>
 <ol start="2" style="list-style-type: decimal"><li>The training episode writes under <code>xgboost/</code>
 (<code>s3://sinkorswim-doejohn/xgboost/</code>), the same way this
 episode wrote under <code>docs/</code>; the PyTorch episode uses

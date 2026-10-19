@@ -477,8 +477,7 @@ AWS.</li>
 <li>Explain why pay‑per‑token Bedrock inference is the safe default for
 most research RAG work.</li>
 <li>Identify the specific situations where self‑managed GPU compute
-(Processing Jobs, notebook GPUs, or endpoints) is actually worth
-it.</li>
+(Processing Jobs, notebook GPUs, or endpoints) is worth it.</li>
 <li>Understand the core cost and control trade‑offs that drive which
 approach to use.</li>
 </ul></div>
@@ -534,11 +533,11 @@ billed</strong>:</p>
 <td>Curated catalog (incl. proprietary models)</td>
 <td>Any open‑weight model you can load</td>
 </tr></tbody></table><p>A GPU instance is a rental that keeps the meter running until
-<em>you</em> turn it off. Forgetting to do so is the single most common
-way research teams burn through cloud budgets. Bedrock has no equivalent
+<em>you</em> turn it off. Forgetting to do so is the most common way
+research teams overspend on cloud compute. Bedrock has no equivalent
 failure mode: if you stop calling it, you stop paying.</p>
 <div class="section level3">
-<h3 id="what-forgetting-actually-costs">What forgetting actually costs<a class="anchor" aria-label="anchor" href="#what-forgetting-actually-costs"></a></h3>
+<h3 id="what-forgetting-costs">What forgetting costs<a class="anchor" aria-label="anchor" href="#what-forgetting-costs"></a></h3>
 <p>To make this concrete, here is what a GPU notebook instance costs if
 it is left running after you close your laptop (us-east-1 on‑demand
 prices from the AWS price list, October 2026; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
@@ -654,7 +653,7 @@ skipping it leaves the usage anonymous on the bill.</li>
 </div>
 </section><section><h2 class="section-heading" id="approaches-to-running-rag-on-aws">Approaches to Running RAG on AWS<a class="anchor" aria-label="anchor" href="#approaches-to-running-rag-on-aws"></a></h2>
 <hr class="half-width"><p>With that framing, here are the main patterns, ordered from “reach
-for this first” to “only when you really need it.”</p>
+for this first” to “only when nothing else fits.”</p>
 <div class="section level3">
 <h3 id="amazon-bedrock-managed-embedding-and-generation-apis-default">1. Amazon Bedrock — managed embedding and generation APIs
 (default)<a class="anchor" aria-label="anchor" href="#amazon-bedrock-managed-embedding-and-generation-apis-default"></a></h3>

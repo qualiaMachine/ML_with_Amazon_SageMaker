@@ -526,8 +526,8 @@
 <ul>
 <li>Introduce SageMaker and the controller-plus-jobs pattern the whole
 lesson is built on.</li>
-<li>Preview the three parts of the lesson and the cost-control thread
-that runs through them.</li>
+<li>Preview the three parts of the lesson and the cost practices used in
+all of them.</li>
 </ul>
 </div>
 </div>
@@ -622,24 +622,20 @@ under $20, making it accessible for many research projects.</p></li>
 <div class="section level3">
 <h3 id="what-this-lesson-covers">What this lesson covers<a class="anchor" aria-label="anchor" href="#what-this-lesson-covers"></a>
 </h3>
-<p>The lesson has three parts, and one thread runs through all of them.
-In <strong>part one</strong> you build the foundations: an S3 bucket for
-your data, a small notebook instance that acts as a <em>controller</em>,
-and then SageMaker training jobs (XGBoost and PyTorch) and
-hyperparameter tuning on the Titanic dataset, with guidance on CPU
-vs. GPU instances and when parallel instances pay off. In <strong>part
-two</strong> you build retrieval-augmented generation (RAG) three ways
-for the WattBot energy-literature question-answering challenge: on
-Amazon Bedrock (pay per token, nothing left running), as SageMaker
-Processing jobs serving an open-weight model, and, as optional
-self-study, interactively on a GPU notebook instance. In <strong>part
-three</strong> you fine-tune a 3B open-weight vision-language model with
-LoRA as a training job, on the Badger Scribe handwriting-transcription
-challenge, and score it before and after. The thread is cost control,
-taught as practice rather than as a warning: tags on every resource, a
-runtime cap on every job, a cost estimate written down before each
-launch and compared to the bill afterwards, and explicit cleanup at the
-end.</p>
+<p>The lesson has three parts. <strong>Part one</strong> covers the
+foundations: an S3 bucket for your data, a small notebook instance that
+acts as a <em>controller</em>, then SageMaker training jobs (XGBoost and
+PyTorch) and hyperparameter tuning, with guidance on CPU vs. GPU
+instances and when parallel instances help. <strong>Part two</strong>
+builds a retrieval-augmented generation (RAG) pipeline over a corpus of
+research papers two ways: on Amazon Bedrock (pay per token, nothing left
+running) and as SageMaker Processing jobs serving an open-weight model
+that Bedrock does not offer. <strong>Part three</strong> fine-tunes a 3B
+open-weight vision-language model with LoRA as a training job, for
+handwriting transcription, and scores it before and after. Every episode
+applies the same cost controls: tags on every resource, a runtime cap on
+every job, a cost estimate before each launch compared to the bill
+after, and cleanup at the end.</p>
 <div id="challenge-controller-or-job" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -669,7 +665,7 @@ pages.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>
@@ -678,7 +674,7 @@ the result is a quick look at a DataFrame. Launching a job would cost
 more in startup time than the work itself.</li>
 <li>
 <strong>Job</strong> (a hyperparameter tuning job). Fifty training
-runs is real compute, and a tuning job runs them in parallel on
+runs is a lot of compute, and a tuning job runs them in parallel on
 instances that exist only for as long as the training lasts. The
 controller just submits the job and reads the results back from S3.</li>
 <li>
@@ -1348,7 +1344,7 @@ $0.09<br>
 </ul>
 </li>
 </ol>
-<p>Two things to notice. The reads by SageMaker are essentially free no
+<p>Two things to notice: the reads by SageMaker are essentially free no
 matter how many times a job loads the data, which is why the lesson
 keeps data in S3 and reads it from jobs in the same region. And the
 single download to a laptop costs four times the month of storage:
@@ -1463,9 +1459,8 @@ running and nothing while it is stopped, and the files you keep under
 <div class="section level3">
 <h3 id="why-we-work-from-a-notebook-instance-in-this-lesson">Why we work from a notebook instance in this lesson<a class="anchor" aria-label="anchor" href="#why-we-work-from-a-notebook-instance-in-this-lesson"></a>
 </h3>
-<p>Nothing in the lesson <em>requires</em> it: the SageMaker SDK runs
-anywhere Python does. We use a notebook instance anyway, for reasons
-that matter in a classroom and in a research group alike:</p>
+<p>The SageMaker SDK runs anywhere Python does, so the lesson could be
+run from a laptop. We use a notebook instance for four reasons:</p>
 <ul>
 <li>
 <strong>Identity comes from the instance, not from a file on your
@@ -1473,38 +1468,35 @@ machine.</strong> The IAM role attached to the notebook is what
 authorizes every call it makes. Nobody installs the AWS CLI, configures
 credentials, or has an access key that can end up in a notebook, a shell
 history or a GitHub commit. For a shared account with a hundred people
-in it, that is the single biggest security simplification
-available.</li>
+in it, this removes the most common security problem.</li>
 <li>
 <strong>Everyone has the same environment.</strong> The kernels, the
 SDK version and the paths are identical for every learner, so a cell
 that works for the instructor works for you. Package and path problems
-are the main thing that eats workshop time; this removes most of
-them.</li>
+take up a lot of workshop time; this avoids most of them.</li>
 <li>
 <strong>It is inside AWS.</strong> Reading your S3 bucket from the
 instance is in-region, fast and free of transfer charges; the same reads
 from a laptop would be slower and billed as data leaving AWS.</li>
 <li>
-<strong>It is a resource like any other.</strong> It has to be
-sized, tagged, started and, above all, stopped. Creating it is your
-first practice at the discipline that the whole lesson is about.</li>
+<strong>It is a billed resource like any other.</strong> It has to
+be sized, tagged, started and stopped. Creating it is the first practice
+at what every later episode does with jobs.</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="the-controller-pattern">The controller pattern<a class="anchor" aria-label="anchor" href="#the-controller-pattern"></a>
 </h3>
-<p>The instance you create here will be small
-(<code>ml.t3.medium</code>: 2 vCPUs, 4 GB of memory, $0.05 per hour) and
-that is deliberate. The notebook never does the heavy computation. Its
-job is to be a <strong>controller</strong>: it holds your code and your
+<p>The instance you create here is small (<code>ml.t3.medium</code>: 2
+vCPUs, 4 GB of memory, $0.05 per hour) because it does not do the heavy
+computation. It is a <strong>controller</strong>: it holds your code and
 notes, and it uses the SageMaker SDK to launch separate, more powerful
 instances for training, hyperparameter tuning and batch processing.
 Those instances start, run your script, write their results to S3, and
 shut themselves down. You pay for a GPU for the minutes a job needs it,
-not for the hours you spend thinking in between, and a mistake in a
-notebook cell cannot leave an expensive machine running: the expensive
-machine is a job, and jobs end.</p>
+not for the hours between runs, and a mistake in a notebook cell cannot
+leave an expensive machine running, because the expensive machine is a
+job with a runtime cap.</p>
 <p>Every later episode uses the same instance. In this one we create it,
 open it, and learn to stop it.</p>
 <p>We’ll follow these steps to create our first “SageMaker notebook
@@ -1720,7 +1712,7 @@ and say which of them need the three tags.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
@@ -1952,8 +1944,8 @@ if you only need to load data once or infrequently.</li>
 <p>Our data is stored in the S3 bucket you created in the previous
 episode, named ‘challenge-lastnamefirstname’ (e.g., sinkorswim-doejohn).
 We can use the following code to read data directly from S3 into memory
-in the Jupyter notebook environment, without actually downloading a copy
-of train.csv as a local file.</p>
+in the Jupyter notebook environment, without downloading a copy of
+train.csv as a local file.</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -2277,7 +2269,7 @@ prefixes instead of a new bucket per episode?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2295,11 +2287,10 @@ prefixes instead of a new bucket per episode?</li>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1" aria-label="code-block-14-8"></a><span class="bu">print</span>(size_before, size_after)</span></code></pre>
 </div>
 <p>The bucket grows by the size of the file (a few hundred bytes here),
-and at $0.023 per GB-month that is a rounding error: well under a
-thousandth of a cent per month. The point of the exercise is the habit,
-not the number. The same two lines, run before and after a training job,
-tell you what the job wrote and whether something is accumulating that
-you should clean up.</p>
+and at $0.023 per GB-month that is well under a thousandth of a cent per
+month. The same two lines, run before and after a training job, tell you
+what the job wrote and whether something is accumulating that you should
+clean up.</p>
 <ol start="2" style="list-style-type: decimal">
 <li>The training episode writes under <code>xgboost/</code>
 (<code>s3://sinkorswim-doejohn/xgboost/</code>), the same way this
@@ -2401,11 +2392,10 @@ nothing else in the lesson does.</p>
 <hr class="half-width">
 <p>So far every notebook you have run came from the lesson repository,
 which you cloned read-only in the Accessing S3 episode. You cannot push
-to that repository, and you would not want to: the lesson is not your
-project. The realistic situation is the one this episode sets up:
-<strong>your own work lives in your own repository</strong>. We will
-create an empty repository on GitHub, make a matching folder on the
-notebook instance, copy a notebook into it, and push.</p>
+to that repository. This episode sets up the usual situation instead:
+<strong>your own work in your own repository</strong>. We will create an
+empty repository on GitHub, make a matching folder on the notebook
+instance, copy a notebook into it, and push.</p>
 <ol style="list-style-type: decimal">
 <li>On GitHub, click <strong>New repository</strong> (the
 <strong>+</strong> in the top-right corner). Name it
@@ -2502,7 +2492,7 @@ session and is not written into the notebook file.</p>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a>token <span class="op">=</span> getpass.getpass(<span class="st">"GitHub Personal Access Token (PAT): "</span>)</span></code></pre>
 </div>
 <p><strong>Note</strong>: when you re-run the whole notebook later, this
-cell prompts again. That is the point: nothing is saved.</p>
+cell prompts again, because nothing is saved.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-2-configure-git-settings">Step 2: Configure Git settings<a class="anchor" aria-label="anchor" href="#step-2-configure-git-settings"></a>
 </h2>
@@ -2788,7 +2778,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -2862,7 +2852,7 @@ SageMaker-managed training?</li>
 <li>How do Estimator classes in SageMaker streamline the training
 process for various frameworks?</li>
 <li>How do you estimate what a training job will cost before launching
-it, and check what it actually cost afterwards?</li>
+it, and check what it cost afterwards?</li>
 </ul>
 </div>
 </div>
@@ -3041,7 +3031,7 @@ group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3159,7 +3149,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3749,7 +3739,7 @@ temporary location on the training instance
 <div class="section level4">
 <h4 id="what-did-that-cost">What did that cost?<a class="anchor" aria-label="anchor" href="#what-did-that-cost"></a>
 </h4>
-<p>Now ask SageMaker what it actually charged for.
+<p>Now ask SageMaker what it charged for.
 <code>describe_training_job</code> returns two durations:
 <code>TrainingTimeInSeconds</code> (your script running) and
 <code>BillableTimeInSeconds</code> (the wall-clock time the instance was
@@ -4124,13 +4114,13 @@ Check the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker
 for ML page</a> for guidance.</li>
 <li>
 <strong>Option 2: Use multiple instances (distributed
-training).</strong> This only helps when your script and data are
-actually set up to split the work, and it is only worth the effort in
-two situations: the dataset no longer fits in the memory of the largest
-single instance you can justify (tens of GB or more), or a
-single-instance run takes longer than about 10 hours. That is the one
-rule of thumb we use throughout this lesson, and it is why every
-estimator so far has <code>instance_count=1</code>.</li>
+training).</strong> This only helps when your script and data are set up
+to split the work, and it is only worth the effort in two situations:
+the dataset no longer fits in the memory of the largest single instance
+you can justify (tens of GB or more), or a single-instance run takes
+longer than about 10 hours. That is the one rule of thumb we use
+throughout this lesson, and it is why every estimator so far has
+<code>instance_count=1</code>.</li>
 </ul>
 <p>In the next episode we train a PyTorch network, try Option 1 (a GPU
 instance), and then run a two-instance job to see for ourselves what
@@ -4202,8 +4192,8 @@ any links that you are not going to use.
 <ul>
 <li>When should you consider using a GPU instance for training neural
 networks in SageMaker, and what are the benefits and limitations?</li>
-<li>What does <code>instance_count=2</code> actually do to a training
-job, and what does real distributed training require?</li>
+<li>What does <code>instance_count=2</code> do to a training job, and
+what does distributed training require?</li>
 </ul>
 </div>
 </div>
@@ -4660,9 +4650,9 @@ factors:</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Small dataset/model size</strong>: When datasets and
 models are small, the overhead of transferring data between the CPU and
-GPU, as well as managing the GPU, can actually slow things down. For
-very small models and datasets, CPUs are often faster since there’s
-minimal data to process.</p></li>
+GPU, as well as managing the GPU, can slow things down. For very small
+models and datasets, CPUs are often faster since there’s minimal data to
+process.</p></li>
 <li><p><strong>GPU initialization overhead</strong>: Every time a
 training job starts on a GPU, there’s a small overhead for initializing
 CUDA libraries. For short jobs, this setup time can make the GPU appear
@@ -4757,16 +4747,16 @@ jobs, your job, View logs): there are two log streams,
 1000 epochs. The wall-clock time is about the same as the
 single-instance run (slightly longer, if anything, because two instances
 have to be provisioned), and the billable minutes are double.</p>
-<div id="what-real-distributed-training-needs" class="callout">
+<div id="what-distributed-training-needs" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
 </div>
 <span class="callout-header">Callout</span>
-<div id="what-real-distributed-training-needs" class="callout-inner">
-<h3 class="callout-title">What real distributed training needs</h3>
+<div id="what-distributed-training-needs" class="callout-inner">
+<h3 class="callout-title">What distributed training needs</h3>
 <div class="callout-content">
-<p>To actually split the work across instances you need two things the
-demo above did not have:</p>
+<p>To split the work across instances you need two things the demo above
+did not have:</p>
 <ul>
 <li>
 <strong>Data parallelism</strong> (the common case; each instance
@@ -5726,7 +5716,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -5772,7 +5762,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -5915,8 +5905,7 @@ AWS.</li>
 <li>Explain why pay‑per‑token Bedrock inference is the safe default for
 most research RAG work.</li>
 <li>Identify the specific situations where self‑managed GPU compute
-(Processing Jobs, notebook GPUs, or endpoints) is actually worth
-it.</li>
+(Processing Jobs, notebook GPUs, or endpoints) is worth it.</li>
 <li>Understand the core cost and control trade‑offs that drive which
 approach to use.</li>
 </ul>
@@ -6002,11 +5991,11 @@ billed</strong>:</p>
 </tbody>
 </table>
 <p>A GPU instance is a rental that keeps the meter running until
-<em>you</em> turn it off. Forgetting to do so is the single most common
-way research teams burn through cloud budgets. Bedrock has no equivalent
+<em>you</em> turn it off. Forgetting to do so is the most common way
+research teams overspend on cloud compute. Bedrock has no equivalent
 failure mode: if you stop calling it, you stop paying.</p>
 <div class="section level3">
-<h3 id="what-forgetting-actually-costs">What forgetting actually costs<a class="anchor" aria-label="anchor" href="#what-forgetting-actually-costs"></a>
+<h3 id="what-forgetting-costs">What forgetting costs<a class="anchor" aria-label="anchor" href="#what-forgetting-costs"></a>
 </h3>
 <p>To make this concrete, here is what a GPU notebook instance costs if
 it is left running after you close your laptop (us-east-1 on‑demand
@@ -6170,7 +6159,7 @@ skipping it leaves the usage anonymous on the bill.</li>
 </h2>
 <hr class="half-width">
 <p>With that framing, here are the main patterns, ordered from “reach
-for this first” to “only when you really need it.”</p>
+for this first” to “only when nothing else fits.”</p>
 <div class="section level3">
 <h3 id="amazon-bedrock-managed-embedding-and-generation-apis-default">1. Amazon Bedrock — managed embedding and generation APIs
 (default)<a class="anchor" aria-label="anchor" href="#amazon-bedrock-managed-embedding-and-generation-apis-default"></a>
@@ -6724,7 +6713,7 @@ below and everything else works unchanged.</p>
 <span id="cb1-15"><a href="#cb1-15" tabindex="-1" aria-label="code-block-1-15"></a>session <span class="op">=</span> sagemaker.Session()</span>
 <span id="cb1-16"><a href="#cb1-16" tabindex="-1" aria-label="code-block-1-16"></a>region <span class="op">=</span> session.boto_region_name</span>
 <span id="cb1-17"><a href="#cb1-17" tabindex="-1" aria-label="code-block-1-17"></a></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1" aria-label="code-block-1-18"></a><span class="co"># Base model IDs. These are the models we actually want to call, but we will NOT pass</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1" aria-label="code-block-1-18"></a><span class="co"># Base model IDs. These are the models we want to call, but we will NOT pass</span></span>
 <span id="cb1-19"><a href="#cb1-19" tabindex="-1" aria-label="code-block-1-19"></a><span class="co"># them to the runtime directly -- see "Cost tracking" below for why.</span></span>
 <span id="cb1-20"><a href="#cb1-20" tabindex="-1" aria-label="code-block-1-20"></a><span class="co"># Any chat model in the Bedrock catalog works here (e.g. a Claude or Llama model ID)</span></span>
 <span id="cb1-21"><a href="#cb1-21" tabindex="-1" aria-label="code-block-1-21"></a><span class="co"># because we call it through the provider-neutral `converse` API.</span></span>
@@ -7282,7 +7271,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -7589,7 +7578,7 @@ whole WattBot pipeline on Bedrock”, and with one hour of the
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -8404,7 +8393,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -8461,7 +8450,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -8472,7 +8461,7 @@ prefix is empty because the script never reached the point of writing
 seconds: 600 / 3600 × $2.61 ≈ $0.44 for nothing. A cap has to leave room
 for the setup that precedes the work, which is why ours is four times
 the 30-minute estimate rather than ten percent over it.</p>
-<p>Under the real caps, the worst case for a job that hangs (a stuck
+<p>Under the caps we set, the worst case for a job that hangs (a stuck
 download, a model that never finishes loading) is 2 h × $1.41 =
 <strong>$2.82</strong> for the embedding job and 2 h × $2.61 =
 <strong>$5.22</strong> for the RAG job. A <code>ml.g6e.xlarge</code>
@@ -8539,7 +8528,7 @@ thousands, and how do I estimate where my run falls <em>before</em> I
 launch it?</li>
 <li>How do I run a GPU fine-tune as a SageMaker training job so the
 meter stops the moment it finishes?</li>
-<li>How do I measure whether the fine-tune actually helped?</li>
+<li>How do I measure whether the fine-tune helped?</li>
 </ul>
 </div>
 </div>
@@ -8582,10 +8571,10 @@ last.</li>
 10x: model size, epochs, image resolution, instance type, and whether
 the instance is still running after you stopped paying attention.</li>
 </ul>
-<p>That combination is why fine-tuning is where research teams see the
-surprise bills. It is also, done carefully, the single biggest lever you
-have: the Badger Scribe organizers report that LoRA on ~100 pages takes
-a small open model from 0.23 to 0.06 CER on survey notebooks in about a
+<p>That combination is why fine-tuning is where research teams see
+surprise bills. Done carefully, it is also where the largest gains are:
+the Badger Scribe organizers report that LoRA on ~100 pages takes a
+small open model from 0.23 to 0.06 CER on survey notebooks in about a
 GPU-hour. This episode is about getting that kind of gain for a few
 dollars, and about knowing in advance when a run is going to cost a few
 thousand instead.</p>
@@ -8673,10 +8662,9 @@ like this. We use LoRA.</p>
 </section><section><h2 class="section-heading" id="step-0-estimate-the-cost-before-you-launch-anything">Step 0: Estimate the cost before you launch anything<a class="anchor" aria-label="anchor" href="#step-0-estimate-the-cost-before-you-launch-anything"></a>
 </h2>
 <hr class="half-width">
-<p>This is the habit that matters. Before launching a fine-tune, write
-down a number for what it should cost. If the real bill is 3x your
-number, something is wrong and you want to know on the first run, not
-the fiftieth.</p>
+<p>Before launching a fine-tune, write down what it should cost. If the
+bill is 3x your number, something is wrong, and you want to know on the
+first run, not the fiftieth.</p>
 <div class="section level3">
 <h3 id="what-fine-tuning-costs-from-one-dollar-to-ten-thousand">What fine-tuning costs, from one dollar to ten thousand<a class="anchor" aria-label="anchor" href="#what-fine-tuning-costs-from-one-dollar-to-ten-thousand"></a>
 </h3>
@@ -8747,15 +8735,14 @@ below)</td>
 </tr>
 </tbody>
 </table>
-<p>Two rows deserve a second look. The CHURRO row is the model you are
-about to fine-tune: Stanford spent on the order of 800 H100-hours making
-it, and you get the benefit for sixty cents because you are
-<em>adapting</em> it, not retraining it. Starting from a model that
-already knows most of the task is the single largest cost saving
-available, and it is a choice you make before any GPU is involved. The
-sweep row is the other honest one. Nobody’s first run is their last, so
-a “$140 fine-tune” is usually a $700 to $1,400 project, and that is the
-number that surprises research groups. (The 7B row is worked out in the
+<p>Two rows to note. The CHURRO row is the model you are about to
+fine-tune: Stanford spent on the order of 800 H100-hours making it, and
+you get the benefit for sixty cents because you are <em>adapting</em>
+it, not retraining it. Starting from a model that already knows most of
+the task is the largest cost saving available, and it is decided before
+any GPU is involved. The sweep row: a first run is rarely the last, so a
+“$140 fine-tune” is usually a $700 to $1,400 project. That is the number
+that surprises research groups. (The 7B row is worked out in the
 challenge below; the 70B rows are rule-of-thumb magnitudes; the CHURRO
 figures come from a published review of the paper.)</p>
 <p>The habits in this episode are cheap practice at sixty cents a run.
@@ -8841,12 +8828,12 @@ two moments 8</td>
 </tr>
 </tbody>
 </table>
-<p>The jump from the inference rows to the training rows is the point.
-Training cannot run on quantized weights the way inference can: gradient
-updates are tiny numbers that vanish in 8-bit or 4-bit precision, so
-every trainable parameter keeps a full-precision master copy plus two
-Adam moments, 16 bytes against 2. That is why a 7B model you can
-<em>run</em> on a 24 GB GPU needs 112 GB plus activations to <em>fully
+<p>Note the jump from the inference rows to the training rows. Training
+cannot run on quantized weights the way inference can: gradient updates
+are tiny numbers that vanish in 8-bit or 4-bit precision, so every
+trainable parameter keeps a full-precision master copy plus two Adam
+moments, 16 bytes against 2. That is why a 7B model you can <em>run</em>
+on a 24 GB GPU needs 112 GB plus activations to <em>fully
 fine-tune</em>, which means several GPUs with the model sharded across
 them. LoRA sidesteps it by freezing the model and training a few million
 adapter parameters, which is why this episode fits on one 24 GB
@@ -9434,9 +9421,9 @@ job</h3>
 <div class="callout-content">
 <p>The square “interrupt kernel” button stops the <em>notebook</em> from
 watching the job. The GPU instance keeps running and keeps billing until
-the script finishes or <code>max_run</code> expires. To actually stop a
-job, use the console (<strong>SageMaker AI → Training → Training jobs →
-select → Stop</strong>) or:</p>
+the script finishes or <code>max_run</code> expires. To stop a job, use
+the console (<strong>SageMaker AI → Training → Training jobs → select →
+Stop</strong>) or:</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9468,7 +9455,7 @@ overnight.</p>
 split, before the 120-page slice.</li>
 <li>
 <code>trainable params: ...</code>: what fraction of the 3B
-parameters LoRA actually trains.</li>
+parameters LoRA trains.</li>
 <li>
 <code>[eval before] 15 holdout pages in ...s (... s/page) -&gt; macro CER ...</code>:
 the base model’s score, and the per-page time that the homework
@@ -9728,7 +9715,7 @@ more efficiently.</p>
 on <code>ml.g6e.xlarge</code>. Then do the same for the homework run (21
 min of training, 13 min of evaluation, 10 min of startup on the g5).
 Which phase does <em>not</em> get faster, and when does the faster
-instance actually save money?</p>
+instance save money?</p>
 </div>
 </div>
 </div>
@@ -9752,11 +9739,11 @@ The g6e only wins once training dominates startup: at four epochs, or at
 2 megapixels, or on a thousand pages, the g5 bill grows linearly while
 the g6e bill grows at a third of the slope, and then the faster card is
 cheaper per run.</p>
-<p>The lesson is that the hourly rate is the wrong thing to compare; the
-cost per run is what matters, and the fixed overhead is a larger share
-of it on faster hardware. The catch is quotas: the account needs a
-service quota for <code>ml.g6e.xlarge</code> training jobs, and those
-often default to zero.</p>
+<p>The hourly rate is the wrong thing to compare; the cost per run is
+what matters, and the fixed overhead is a larger share of it on faster
+hardware. The catch is quotas: the account needs a service quota for
+<code>ml.g6e.xlarge</code> training jobs, and those often default to
+zero.</p>
 </div>
 </div>
 </div>
@@ -10193,11 +10180,10 @@ October 2026). That is:</p>
 </tr>
 </tbody>
 </table>
-<p>Compare the Bedrock episode, where the whole WattBot evaluation cost
-well under a dollar. One forgotten weekend on this instance costs a
-thousand times more than the thing it was rented to do. And it is not
-hypothetical: a forgotten GPU notebook is the single most common way
-research groups burn through cloud credits.</p>
+<p>The same evaluation on Bedrock cost well under a dollar. One
+forgotten weekend on this instance costs a thousand times more than the
+work it was rented for. A forgotten GPU notebook is the most common way
+research groups overspend cloud credits.</p>
 <p>Two further charges people do not expect:</p>
 <ul>
 <li>
@@ -10223,10 +10209,10 @@ Then look at the status column until it says <code>Stopped</code>.</li>
 <strong>Set a reminder</strong> on your phone or calendar before you
 start the instance, for two hours from now.</li>
 <li>
-<strong>Prefer jobs for any real work</strong>: a Processing job
-(the Processing Jobs episode) or a training job ends on its own, and
-<code>max_runtime_in_seconds</code> (<code>max_run</code> on a training
-job) guarantees it.</li>
+<strong>Prefer jobs for anything beyond exploration</strong>: a
+Processing job (the Processing Jobs episode) or a training job ends on
+its own, and <code>max_runtime_in_seconds</code> (<code>max_run</code>
+on a training job) guarantees it.</li>
 </ol>
 </div>
 </div>
@@ -10236,8 +10222,8 @@ point for understanding the alternatives, because it is:</p>
 <ul>
 <li>Easy to understand on the AWS side (pick a GPU instance, pick a
 model, go)</li>
-<li>Ideal for learning what retrieval and generation actually do, step
-by step</li>
+<li>Ideal for learning what retrieval and generation do, step by
+step</li>
 <li>The fastest loop for experimenting with prompts and models that
 Bedrock does not carry</li>
 </ul>
@@ -11074,8 +11060,8 @@ strategies, and richer document preprocessing without changing the
 overall pipeline structure.</p>
 <p>The Processing Jobs episode does the same work, with the same
 <code>wattbot_rag.py</code>, as short-lived SageMaker jobs, so the GPU
-only bills while it is actually embedding or generating. Stop this
-instance now, and delete it if you are done with the episode.</p>
+only bills while it is embedding or generating. Stop this instance now,
+and delete it if you are done with the episode.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -11148,7 +11134,7 @@ any links that you are not going to use.
 lesson’s notebooks did, and what should I not do with it?</li>
 <li>How do I see, and stop, everything that is costing money from a
 terminal?</li>
-<li>What was the SageMaker SDK actually sending when I called
+<li>What request does the SageMaker SDK send when I call
 <code>estimator.fit()</code>?</li>
 </ul>
 </div>
@@ -11177,12 +11163,11 @@ the account refuses them.</li>
 <h3 id="optional-self-study-episode">Optional, self-study episode<a class="anchor" aria-label="anchor" href="#optional-self-study-episode"></a>
 </h3>
 <p>Everything in this lesson went through the SageMaker Python SDK in a
-notebook. The same account can be driven from a terminal with the AWS
-CLI, and sooner or later you will want to: to check on a job from your
-phone’s SSH client, to stop something from a machine where you have no
-notebook open, to copy results out of S3 in bulk, or to script a launch.
-This episode shows the CLI equivalents of what you already did, in that
-order of usefulness: <strong>look, stop, copy, then launch</strong>.</p>
+notebook. The same account can be used from a terminal with the AWS CLI:
+to check on a job from another machine, to stop something when no
+notebook is open, to copy results out of S3 in bulk, or to script a
+launch. This episode shows the CLI equivalents of what you already did,
+in four groups: <strong>look, stop, copy, launch</strong>.</p>
 <div id="read-this-before-the-first-command" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -11192,19 +11177,19 @@ order of usefulness: <strong>look, stop, copy, then launch</strong>.</p>
 <h3 class="callout-title">Read this before the first command</h3>
 <div class="callout-content">
 <p>The CLI, the SDK and the console are the same API. Nothing here is
-more powerful than a notebook cell; the difference is that a terminal
-shows you <em>nothing</em> unless you ask. A notebook instance left
-running sits in a console tab you will see tomorrow; an endpoint created
-from a terminal on a Friday is invisible until the bill arrives. One
-past participant of this workshop spent a large share of a year’s
-credits that way. So three rules, in force for the shared account and
-worth keeping on your own:</p>
+more powerful than a notebook cell. The difference is that a terminal
+shows nothing unless you ask: a notebook instance left running is
+visible in the console the next day, while an endpoint created from a
+terminal on a Friday is not noticed until the bill arrives. A past
+participant of this workshop spent a large share of a year’s credits
+that way. Three rules apply on the shared account and are worth keeping
+on your own:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Authenticate with <code>aws sso login</code> only.</strong>
 Never <code>aws configure</code> with an access key ID and secret. Those
-are long-lived, they end up in shell histories and committed files, and
-they are the usual way a research group’s keys reach the internet.</li>
+are long-lived, and they end up in shell histories and committed
+files.</li>
 <li>
 <strong>Launch only jobs</strong> (training, processing, tuning),
 with the same three tags and the same <code>MaxRuntimeInSeconds</code>
@@ -11212,11 +11197,10 @@ the notebooks always set. Jobs end on their own. <strong>Endpoints, EC2
 instances and GPU notebook instances do not</strong>, and the lesson
 never creates them from the CLI, or at all.</li>
 <li>
-<strong>If the account refuses a command, that is the system
-working.</strong> The workshop permission set denies endpoint and EC2
-creation, instance types outside the lesson’s list, and any job launched
-without the tags. An <code>AccessDeniedException</code> on one of those
-is not a permissions bug to work around; it is the guard rail.</li>
+<strong>An <code>AccessDeniedException</code> on the commands below
+is intended.</strong> The workshop permission set denies endpoint and
+EC2 creation, instance types outside the lesson’s list, and any job
+launched without the tags. Do not look for a workaround.</li>
 </ol>
 </div>
 </div>
@@ -11296,8 +11280,8 @@ bill:</p>
 </section><section><h2 class="section-heading" id="stop-the-commands-worth-memorising">3. Stop: the commands worth memorising<a class="anchor" aria-label="anchor" href="#stop-the-commands-worth-memorising"></a>
 </h2>
 <hr class="half-width">
-<p>These are the reason to have the CLI installed at all. Each one makes
-money stop.</p>
+<p>These are the most useful CLI commands to know. Each one stops a
+charge.</p>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -11337,9 +11321,9 @@ region and let a job read it, which is the lesson’s pattern.</p>
 </h2>
 <hr class="half-width">
 <p>Every <code>estimator.fit()</code> in the training episodes assembled
-a JSON request and sent it to <code>CreateTrainingJob</code>. Seeing
-that request once makes the SDK’s arguments stop looking like magic.
-Fill in the five placeholders from your notebook: the image URI (run
+a JSON request and sent it to <code>CreateTrainingJob</code>. Here is
+that request. Fill in the five placeholders from your notebook: the
+image URI (run
 <code>print(xgboost_estimator.training_image_uri())</code> in the
 training episode’s notebook), your role ARN (<code>print(role)</code>),
 your bucket, your tag values, and a job name, which must be unique in
@@ -11378,14 +11362,14 @@ the account.</p>
 <span id="cb9-29"><a href="#cb9-29" tabindex="-1" aria-label="code-block-9-29"></a><span class="op">JSON</span></span>
 <span id="cb9-30"><a href="#cb9-30" tabindex="-1" aria-label="code-block-9-30"></a><span class="ex">aws</span> sagemaker create-training-job <span class="at">--cli-input-json</span> file://train-xgboost.json</span></code></pre>
 </div>
-<p>Three things to notice.
+<p>Three fields to notice.
 <code>StoppingCondition.MaxRuntimeInSeconds</code> is the
 <code>max_run</code> you set on every estimator; the SDK would have sent
 48 hours if you had not. <code>Tags</code> is the <code>tags=</code>
 argument, and without it the request is refused on the workshop account.
-And <code>ResourceConfig</code> is where the money is: the instance type
-you would think twice about in a notebook deserves the same second
-thought in a JSON file, where nothing prints a price.</p>
+<code>ResourceConfig</code> sets the instance type and count, which
+determine the cost; nothing in a JSON file prints a price, so check it
+as carefully as you would in a notebook.</p>
 <p>The CLI returns the moment the request is accepted; nothing waits. To
 follow the job the way <code>wait=True</code> did:</p>
 <div class="codewrapper sourceCode" id="cb10">
@@ -11409,8 +11393,8 @@ billable on <code>ml.m5.large</code>, about a cent.</p>
 <code>aws sagemaker create-endpoint</code> /
 <code>create-endpoint-config</code>: an endpoint is a server that runs
 until you delete it, with no runtime cap. The lesson serves models with
-processing jobs and Bedrock precisely so that nothing of this kind
-exists in the account.</li>
+processing jobs and Bedrock so that nothing of this kind exists in the
+account.</li>
 <li>
 <code>aws sagemaker create-notebook-instance</code> with a GPU type:
 a GPU notebook is $60 a day while you are asleep. The optional
@@ -11424,8 +11408,8 @@ in.</li>
 <p>On the workshop account all three are denied by the permission set,
 as is any instance type outside the lesson’s list and any job without
 the three tags; the instructor page <em>Account preparation
-checklist</em> has the policy. On your own account, the same denies are
-a fifteen-minute setup and the best money you will not spend.</p>
+checklist</em> has the policy. On your own account, the same denies take
+about fifteen minutes to set up.</p>
 </div>
 </div>
 </div>
@@ -11440,7 +11424,7 @@ a fifteen-minute setup and the best money you will not spend.</p>
 <p>You are leaving for the weekend and have a terminal, not a browser.
 Write the commands you would run, in order, to make sure the account is
 costing nothing until Monday, and the one command to run if each check
-finds something. Then run them for real against your own resources.</p>
+finds something. Then run them against your own resources.</p>
 </div>
 </div>
 </div>
@@ -11764,7 +11748,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>

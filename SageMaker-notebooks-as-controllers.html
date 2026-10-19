@@ -475,45 +475,41 @@ running and nothing while it is stopped, and the files you keep under
 <code>/home/ec2-user/SageMaker/</code> survive a stop.</p>
 <div class="section level3">
 <h3 id="why-we-work-from-a-notebook-instance-in-this-lesson">Why we work from a notebook instance in this lesson<a class="anchor" aria-label="anchor" href="#why-we-work-from-a-notebook-instance-in-this-lesson"></a></h3>
-<p>Nothing in the lesson <em>requires</em> it: the SageMaker SDK runs
-anywhere Python does. We use a notebook instance anyway, for reasons
-that matter in a classroom and in a research group alike:</p>
+<p>The SageMaker SDK runs anywhere Python does, so the lesson could be
+run from a laptop. We use a notebook instance for four reasons:</p>
 <ul><li>
 <strong>Identity comes from the instance, not from a file on your
 machine.</strong> The IAM role attached to the notebook is what
 authorizes every call it makes. Nobody installs the AWS CLI, configures
 credentials, or has an access key that can end up in a notebook, a shell
 history or a GitHub commit. For a shared account with a hundred people
-in it, that is the single biggest security simplification
-available.</li>
+in it, this removes the most common security problem.</li>
 <li>
 <strong>Everyone has the same environment.</strong> The kernels, the
 SDK version and the paths are identical for every learner, so a cell
 that works for the instructor works for you. Package and path problems
-are the main thing that eats workshop time; this removes most of
-them.</li>
+take up a lot of workshop time; this avoids most of them.</li>
 <li>
 <strong>It is inside AWS.</strong> Reading your S3 bucket from the
 instance is in-region, fast and free of transfer charges; the same reads
 from a laptop would be slower and billed as data leaving AWS.</li>
 <li>
-<strong>It is a resource like any other.</strong> It has to be
-sized, tagged, started and, above all, stopped. Creating it is your
-first practice at the discipline that the whole lesson is about.</li>
+<strong>It is a billed resource like any other.</strong> It has to
+be sized, tagged, started and stopped. Creating it is the first practice
+at what every later episode does with jobs.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="the-controller-pattern">The controller pattern<a class="anchor" aria-label="anchor" href="#the-controller-pattern"></a></h3>
-<p>The instance you create here will be small
-(<code>ml.t3.medium</code>: 2 vCPUs, 4 GB of memory, $0.05 per hour) and
-that is deliberate. The notebook never does the heavy computation. Its
-job is to be a <strong>controller</strong>: it holds your code and your
+<p>The instance you create here is small (<code>ml.t3.medium</code>: 2
+vCPUs, 4 GB of memory, $0.05 per hour) because it does not do the heavy
+computation. It is a <strong>controller</strong>: it holds your code and
 notes, and it uses the SageMaker SDK to launch separate, more powerful
 instances for training, hyperparameter tuning and batch processing.
 Those instances start, run your script, write their results to S3, and
 shut themselves down. You pay for a GPU for the minutes a job needs it,
-not for the hours you spend thinking in between, and a mistake in a
-notebook cell cannot leave an expensive machine running: the expensive
-machine is a job, and jobs end.</p>
+not for the hours between runs, and a mistake in a notebook cell cannot
+leave an expensive machine running, because the expensive machine is a
+job with a runtime cap.</p>
 <p>Every later episode uses the same instance. In this one we create it,
 open it, and learn to stop it.</p>
 <p>We’ll follow these steps to create our first “SageMaker notebook
@@ -696,7 +692,7 @@ and say which of them need the three tags.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
