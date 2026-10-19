@@ -244,7 +244,7 @@
 <div class="accordion accordion-flush" id="accordionFlush6">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading6">
-        <a href="Interacting-with-code-repo.html">5. Using a GitHub Personal Access Token (PAT) to Push/Pull from a SageMaker Notebook</a>
+        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing to GitHub from a SageMaker Notebook with a Personal Access Token</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -499,10 +499,11 @@ of calls that a managed inference API is built to serve.</p>
 </section><section><h2 class="section-heading" id="start-here-bedrock-is-the-default">Start Here: Bedrock Is the Default<a class="anchor" aria-label="anchor" href="#start-here-bedrock-is-the-default"></a></h2>
 <hr class="half-width"><p><strong>For standard RAG inference, use Amazon Bedrock.</strong>
 Bedrock exposes embedding and generation models (Amazon Titan, Anthropic
-Claude, Meta Llama, and others) as pay‑per‑token APIs. Your retrieval
-code — chunking, indexing, similarity search, reranking, evaluation —
-stays entirely under your control and can run on a cheap CPU notebook or
-your laptop. Only the two model calls above are sent to Bedrock.</p>
+Claude, DeepSeek, Meta Llama, and others) as pay‑per‑token APIs. Your
+retrieval code — chunking, indexing, similarity search, reranking,
+evaluation — stays entirely under your control and can run on a cheap
+CPU notebook or your laptop. Only the two model calls above are sent to
+Bedrock.</p>
 <p>The reason this is the default comes down to <strong>how you are
 billed</strong>:</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th></th>
@@ -530,8 +531,8 @@ failure mode: if you stop calling it, you stop paying.</p>
 <div class="section level3">
 <h3 id="what-forgetting-actually-costs">What forgetting actually costs<a class="anchor" aria-label="anchor" href="#what-forgetting-actually-costs"></a></h3>
 <p>To make this concrete, here is what a GPU notebook instance costs if
-it is left running after you close your laptop (on‑demand prices at time
-of writing; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
+it is left running after you close your laptop (us-east-1 on‑demand
+prices from the AWS price list, October 2026; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
 page</a>):</p>
 <table style="width:100%;" class="table"><colgroup><col width="16%"><col width="16%"><col width="16%"><col width="16%"><col width="16%"><col width="16%"></colgroup><thead><tr><th>Instance</th>
 <th>GPU</th>
@@ -539,53 +540,65 @@ page</a>):</p>
 <th>Forgotten overnight (12 h)</th>
 <th>Forgotten over a weekend (64 h)</th>
 <th>Forgotten for a month (730 h)</th>
-</tr></thead><tbody><tr><td>ml.g5.xlarge</td>
-<td>1 × A10G</td>
-<td>$1.21</td>
-<td>~$15</td>
-<td>~$77</td>
-<td>~$880</td>
+</tr></thead><tbody><tr><td>ml.g4dn.xlarge</td>
+<td>1 × T4 (16 GB)</td>
+<td>$0.74</td>
+<td>~$9</td>
+<td>~$47</td>
+<td>~$540</td>
+</tr><tr><td>ml.g5.xlarge</td>
+<td>1 × A10G (24 GB)</td>
+<td>$1.41</td>
+<td>~$17</td>
+<td>~$90</td>
+<td>~$1,030</td>
 </tr><tr><td>ml.g5.2xlarge</td>
-<td>1 × A10G</td>
-<td>$1.69</td>
-<td>~$20</td>
-<td>~$108</td>
-<td>~$1,230</td>
+<td>1 × A10G (24 GB)</td>
+<td>$1.52</td>
+<td>~$18</td>
+<td>~$97</td>
+<td>~$1,110</td>
 </tr><tr><td>ml.g6e.xlarge</td>
 <td>1 × L40S (48 GB)</td>
 <td>$2.61</td>
 <td>~$31</td>
 <td>~$167</td>
-<td>~$1,906</td>
-</tr><tr><td>ml.p3.8xlarge</td>
-<td>4 × V100</td>
-<td>$15.20</td>
-<td>~$182</td>
-<td>~$973</td>
-<td>~$11,100</td>
+<td>~$1,905</td>
+</tr><tr><td>ml.p4d.24xlarge</td>
+<td>8 × A100 (40 GB)</td>
+<td>$25.25</td>
+<td>~$303</td>
+<td>~$1,616</td>
+<td>~$18,430</td>
 </tr></tbody></table><p>Compare that to running the <strong>entire WattBot pipeline</strong>
-from this lesson on Bedrock. Using Claude 3 Haiku ($0.25 per million
-input tokens, $1.25 per million output tokens) and Titan Text Embeddings
-V2 ($0.02 per million tokens):</p>
+from this lesson on Bedrock, with DeepSeek V3 as the generator and Titan
+Text Embeddings V2 ($0.02 per million tokens) for embeddings. For
+DeepSeek V3’s per-token prices, check the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>;
+at launch it was in the same price class as the cheapest frontier
+models, a fraction of a dollar per million input tokens and a few
+dollars per million output tokens, and at any price in that class the
+arithmetic comes out the same way:</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Step</th>
 <th>Rough volume</th>
 <th>Cost</th>
 </tr></thead><tbody><tr><td>Embed ~3,000 chunks (~1M tokens)</td>
 <td>1M input tokens</td>
 <td>~$0.02</td>
-</tr><tr><td>Answer 100 questions (~3K‑token prompt + ~300‑token answer
-each)</td>
+</tr><tr><td>Answer 100 questions (~3K‑token prompt + ~300‑token answer each)
+with DeepSeek V3</td>
 <td>300K in / 30K out</td>
-<td>~$0.11</td>
-</tr><tr><td>Explanation pass over 100 answers</td>
+<td>cents</td>
+</tr><tr><td>Explanation pass over 100 answers with DeepSeek V3</td>
 <td>300K in / 30K out</td>
-<td>~$0.11</td>
+<td>cents</td>
 </tr><tr><td><strong>Total</strong></td>
 <td></td>
 <td><strong>well under $1</strong></td>
 </tr></tbody></table><p>A single forgotten weekend on the <em>cheapest</em> GPU instance
-costs more than a hundred full runs of the pipeline on Bedrock. That
-asymmetry is why Bedrock is the default, not just an alternative.</p>
+costs more than fifty full runs of the pipeline on Bedrock; a forgotten
+weekend on the <code>ml.g6e.xlarge</code> the later episodes use costs
+more than a hundred. That asymmetry is why Bedrock is the default, not
+just an alternative.</p>
 <div id="bedrock-trade-offs-to-know-about" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -689,8 +702,8 @@ approach:</p>
 <li>Set up an <a href="https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html" class="external-link">AWS
 Budget</a> alert and consider a <a href="https://docs.aws.amazon.com/sagemaker/latest/dg/notebook-lifecycle-config.html" class="external-link">lifecycle
 configuration</a> that auto‑stops idle notebooks.</li>
-<li>For larger models the hourly rate (e.g., $15/hour for a p3.8xlarge)
-becomes a limiting factor very quickly.</li>
+<li>For larger models the hourly rate (e.g., $25/hour for a
+p4d.24xlarge) becomes a limiting factor very quickly.</li>
 </ul><p><strong>Use it for:</strong> walking through RAG internals step by
 step, debugging a model locally before packaging it as a job, or short
 experiments where you will be at the keyboard the whole time.</p>
@@ -824,9 +837,13 @@ chunking the corpus, from a cheap CPU notebook with nothing left running
 afterward. The Processing Jobs episode reruns the same pipeline on a
 self-hosted open-weight model that Bedrock does not carry, as jobs that
 end on their own, so you can see what Bedrock abstracts away and what it
-costs to do yourself. An optional self-study episode at the end of the
-lesson runs the same self-hosted pipeline interactively on a GPU
-notebook instance, for prototyping alone at a keyboard.</p>
+costs to do yourself. The fine-tuning episode follows. An optional
+self-study episode after it runs the same self-hosted pipeline
+interactively on a GPU notebook instance, for prototyping alone at a
+keyboard; it is not taught in class. All three RAG episodes share one
+module of pipeline code (<code>scripts/wattbot_rag.py</code> in the
+lesson repository), so what changes between them is only the two model
+calls and where the compute runs.</p>
 <p>When you build your own RAG system afterward, start from the Bedrock
 episode.</p>
 </div>
@@ -859,8 +876,8 @@ well under a dollar.</li>
 calls through a tagged application inference profile, or the spend is
 untraceable.</li>
 <li>The hands‑on episodes start with Bedrock, then show the same
-pipeline on Processing Jobs; the notebook-GPU version is optional
-self-study.</li>
+pipeline on Processing Jobs; the notebook-GPU version, after the
+fine-tuning episode, is optional self-study.</li>
 </ul></div>
 </div>
 </div>

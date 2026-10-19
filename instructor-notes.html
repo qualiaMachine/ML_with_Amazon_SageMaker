@@ -293,7 +293,7 @@
 <div class="accordion accordion-flush" id="accordionFlush6">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading6">
-        <a href="Interacting-with-code-repo.html">5. Using a GitHub Personal Access Token (PAT) to Push/Pull from a SageMaker Notebook</a>
+        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing to GitHub from a SageMaker Notebook with a Personal Access Token</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -526,12 +526,20 @@ follow:</li>
 </ol>
 <p>regions: - global - us-east-2 # do not change</p>
 <p>blocklist: - “551379999285” # production, do not modify</p>
-<p>accounts: “183295408236”: # aws-nuke-account resource-types:
-includes: #Specifies which types of resources you want to clean out -
-S3Bucket - SageMakerNotebookInstance</p>
+<p>accounts: “183295408236”: # the shared workshop account
+resource-types: includes: # only these types are deleted; the key must
+be “includes” (v3) - S3Bucket - SageMakerNotebookInstance filters:
+S3Bucket: - property: Name value: “ml-marathon-shared” # the
+instructor-staged data bucket survives</p>
 <p><strong>MAKE SURE TO USE SPACE INDENTING AND NOT TAB INDENTING AS IT
 IS SENSITIVE TO USE IN CLOUDSHELL AND MAY CAUSE THE SCRIPT TO
-FAIL</strong></p>
+FAIL.</strong> The committed copy at
+<code>instructors/nuke-config.yml</code> is the reference. Two things it
+deliberately does <em>not</em> delete: the shared data bucket (the
+<code>filters</code> block) and Bedrock application inference profiles,
+which learners remove themselves in the cleanup episode. Everything else
+the lesson creates (training, processing and tuning jobs) has already
+ended and holds no billable resource.</p>
 <ol start="5" style="list-style-type: decimal">
 <li>Once you’ve gotten your config file set up, click on <strong>“FILE”
 &gt; “SAVE AS”</strong>
