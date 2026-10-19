@@ -20,9 +20,8 @@ Run as written, the full workshop costs a few dollars per learner. Every episode
 
 ### What This Workshop Does Not Cover
 
+- **General ML/AI concepts**: the focus is on moving existing ML and AI work to the cloud, not on teaching training, fine-tuning or RAG themselves.
 - **Deploying models as endpoints**: serving a trained or fine-tuned model behind an always-on API.
 - **Agents and tool use**: LLM applications that call tools or chain multiple model calls (e.g., Bedrock Agents).
-- **Evaluation beyond a single metric**: LLM-as-judge, human evaluation, and benchmark suites.
-- **MLOps**: pipelines, experiment tracking, model registries, and scheduled retraining.
 
 If there's a specific ML or AI workflow or AWS service you'd like to see included in this curriculum, please let us know! We're happy to develop additional content to meet the needs of researchers, students, and ML/AI practitioners. Please [post an issue on the lesson GitHub](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/issues) or contact [endemann@wisc.edu](mailto:endemann@wisc.edu) with suggestions or requests.
