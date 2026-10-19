@@ -14,7 +14,8 @@ ignore_list = [
     "SageMaker-overview.md",
     "Data-storage-setting-up-S3.md",
     "SageMaker-notebooks-as-controllers.md",
-    "Resource-management-cleanup.md"
+    "Resource-management-cleanup.md",
+    "CLI-equivalents.md"
 ]
 
 # Ensure notebooks directory exists

@@ -16,7 +16,7 @@ ML Marathon and Research Bazaar, usable by anyone with an AWS account.
 | Training and tuning | Training jobs (XGBoost, PyTorch), hyperparameter tuning | Titanic, CPU vs GPU, parallel jobs |
 | Retrieval-augmented generation | Overview, Bedrock, Processing jobs (plus an optional self-study GPU-notebook episode) | [WattBot](https://www.kaggle.com/competitions/WattBot2025) energy-literature Q&A |
 | Fine-tuning | LoRA fine-tune of CHURRO-3B as a training job | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
-| Wrap-up | Resource management and cleanup | |
+| Wrap-up | Resource management and cleanup (plus an optional episode on the CLI equivalents: look, stop, copy, launch) | |
 
 Cost control runs through every episode: cost-allocation tags on every
 resource, `max_run` caps on every job, estimates written down before a launch
