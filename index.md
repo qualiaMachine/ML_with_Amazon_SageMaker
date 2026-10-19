@@ -16,7 +16,7 @@ Researchers and students who use ML or AI in their work and want to run it on AW
 
 ### Cost controls
 
-Every episode applies the same controls: cost-allocation tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end. The final episode covers monitoring and cleanup. Run as written, the full workshop costs a few dollars per learner.
+Run as written, the full workshop costs a few dollars per learner. Every episode applies the same controls: cost-allocation tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end. The final episode covers monitoring and cleanup.
 
 ### What This Workshop Does Not Cover
 
