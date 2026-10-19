@@ -12,7 +12,7 @@ This workshop introduces machine learning workflows on AWS using **Amazon SageMa
 
 ### Who this workshop is for
 
-Researchers and students who already train models and want to run that work on AWS. The lesson assumes a basic machine learning background: you have trained a model before, and you know what training, hyperparameter tuning, fine-tuning, embeddings and retrieval-augmented generation are. It does not teach these concepts; instructors may briefly review some of them depending on the audience, but the default schedule does not include that time. Python and Jupyter are used throughout; no prior AWS experience is needed.
+Researchers and students who use ML or AI in their work and want to run it on AWS. The lesson assumes a basic machine learning background: you know what training, hyperparameter tuning, fine-tuning, embeddings and retrieval-augmented generation are. It does not teach these concepts; instructors may briefly review some of them depending on the audience, but the default schedule does not include that time. Python and Jupyter are used throughout; no prior AWS experience is needed.
 
 ### Cost controls
 
