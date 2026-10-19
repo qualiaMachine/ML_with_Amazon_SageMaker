@@ -54,7 +54,7 @@ For this workshop, you will need the Titanic dataset, which can be used to train
 
 In the first episode, you will create an S3 bucket and upload this data to use with SageMaker.
 
-The later episodes use two more datasets, and you do **not** need to download them now: the WattBot documents (RAG episodes) come from a zip in the lesson repository, and the Badger Scribe handwriting data (fine-tuning episode) is published as a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) that the instructors stage in a shared bucket. No Kaggle account is required for any part of the workshop.
+The later episodes use two more datasets, and you do **not** need to download them: the WattBot papers (RAG episodes) and the Badger Scribe handwriting data (fine-tuning episode, published as a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases)) are staged by the instructors in a shared, read-only bucket. You create one bucket of your own in the S3 episode and use it for the whole workshop. No Kaggle account is required for any part of the workshop.
 
 ### 4. Get Access To Workshop Code (Fork GitHub Repo)
 

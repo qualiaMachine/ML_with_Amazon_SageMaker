@@ -40,8 +40,7 @@ Console: **Service Quotas → Amazon Bedrock**, and **Bedrock → Model access**
 
 ## Data and files
 
-- Shared read-only bucket with the Badger Scribe data and your full fine-tune outputs: see the fine-tuning cost page.
-- WattBot data: students upload `data.zip` contents to their own bucket in the Bedrock episode; nothing to stage.
+- One shared read-only bucket holds the WattBot inputs (metadata, questions, PDF corpus) and the Badger Scribe data plus your full fine-tune outputs. Staging commands and the bucket policy: *Shared data bucket: staging before each term*. Learners create one bucket each in the S3 episode and write all outputs there.
 
 ## Capacity fallbacks to have on a slide
 

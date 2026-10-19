@@ -73,40 +73,9 @@ New accounts often have these at 0 to 4. Quota increases for GPU instances can t
 
 ## Before class
 
-### 1. Stage the data in a shared read-only bucket
+### 1. Stage the data in the shared read-only bucket
 
-Students do not create a bucket or upload anything for this episode, and nobody needs a Kaggle account. The data lives as a release on the lesson repository (see the *Badger Scribe data: publishing a release* page for how to publish a new version and the exact staging commands). Stage it once per term so the bucket has this layout:
-
-- `badger-scribe/train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`
-- `badger-scribe/images/<page_id>.jpg`
-
-Then attach a bucket policy that lets the students' execution role read it. This mirrors the policy from the S3 episode, read-only (edit the bucket name and the account/role ARNs to match yours):
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": [
-                    "arn:aws:iam::183295408236:role/ml-sagemaker-use"
-                ]
-            },
-            "Action": [
-                "s3:GetObject",
-                "s3:ListBucket"
-            ],
-            "Resource": [
-                "arn:aws:s3:::ml-marathon-shared",
-                "arn:aws:s3:::ml-marathon-shared/*"
-            ]
-        }
-    ]
-}
-```
-
-`s3:ListBucket` is required: the training job's `train` channel lists the prefix before downloading it. S3-to-SageMaker transfer within a region is free, and 50 jobs each copying 2 GB is not a concern.
+Students do not create a bucket or upload anything for this episode, and nobody needs a Kaggle account. The data lives as a release on the lesson repository and is staged once per term under `badger-scribe/` in the shared bucket, next to the WattBot data. The bucket policy, layout and exact commands are on the *Shared data bucket: staging before each term* page.
 
 ### 2. Run the full fine-tune yourself and stage its output
 
