@@ -14,7 +14,7 @@ This workshop introduces machine learning workflows on AWS using **Amazon SageMa
 
 Every episode applies the same controls: cost-allocation tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end. The final episode covers monitoring and cleanup. Run as written, the full workshop costs a few dollars per learner.
 
-### What This Workshop Does Not Cover (Yet)
+### What This Workshop Does Not Cover
 
 - **Deploying models as endpoints**: serving a trained or fine-tuned model behind an always-on API.
 - **Agents and tool use**: LLM applications that call tools or chain multiple model calls (e.g., Bedrock Agents).
