@@ -4,9 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
-import torch
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 
 # ---------------------- similarity + retrieval ----------------------
@@ -136,27 +134,25 @@ def explanation_system_prompt() -> str:
 # ---------------------- Qwen loading + wrapper ----------------------
 
 
-def load_qwen_pipeline(model_id: str = "Qwen/Qwen2.5-7B-Instruct"):
+def load_qwen_pipeline(model_id: str = "Qwen/Qwen3.8-27B-FP8", max_model_len: int = 8192):
     """
-    Load Qwen once and return a text-generation pipeline.
+    Load the generator once with vLLM and return the engine.
 
-    This should be called a single time per processing job and then reused
-    for all calls to `call_qwen_chat`.
+    Qwen3.8-27B in FP8 is ~27 GB of weights and fits one 48 GB GPU
+    (ml.g6e.xlarge). vLLM is used rather than transformers because it has
+    the kernels for FP8 and for this model's hybrid attention, and it
+    batches well. Called a single time per processing job and reused for
+    every call to `call_qwen_chat`.
     """
-    print(f"Loading model: {model_id}", flush=True)
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id,
-        dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-        device_map="auto",
-    )
+    from vllm import LLM
 
-    generator = pipeline(
-        "text-generation",
-        model=model,
-        tokenizer=tokenizer,
+    print(f"Loading model with vLLM: {model_id}", flush=True)
+    return LLM(
+        model=model_id,
+        max_model_len=max_model_len,                  # longest prompt + answer we need
+        gpu_memory_utilization=0.85,                  # leave room for the embedding model
+        limit_mm_per_prompt={"image": 0, "video": 0},  # text only
     )
-    return generator
 
 
 def call_qwen_chat(
@@ -182,20 +178,15 @@ def call_qwen_chat(
         },
     ]
 
-    prompt_text = ""
-    for msg in messages:
-        role = msg["role"]
-        content = msg["content"]
-        prompt_text += f"{role.upper()}: {content}\n\n"
-    prompt_text += "ASSISTANT:"
+    from vllm import SamplingParams
 
-    outputs = generator(
-        prompt_text,
-        max_new_tokens=max_new_tokens,
-        do_sample=False,
+    outputs = generator.chat(
+        messages,
+        sampling_params=SamplingParams(temperature=0.0, max_tokens=max_new_tokens),
+        chat_template_kwargs={"enable_thinking": False},  # answer directly, no reasoning trace
+        use_tqdm=False,
     )
-
-    return outputs[0]["generated_text"][len(prompt_text) :].strip()
+    return outputs[0].outputs[0].text.strip()
 
 
 # ---------------------- RAG phases ----------------------
@@ -425,15 +416,19 @@ def main():
     parser.add_argument(
         "--qwen_model_id",
         type=str,
-        default="Qwen/Qwen2.5-7B-Instruct",
-        help="Which Qwen chat model to use for generation.",
+        default="Qwen/Qwen3.8-27B-FP8",
+        help="Open-weight chat model for generation (served with vLLM).",
     )
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Match the folder layout you used in ProcessingInput destinations
-    chunks_path = os.path.join(args.input_dir, "chunks", "wattbot_chunks.jsonl")
+    chunks_dir = os.path.join(args.input_dir, "chunks")
+    jsonl_files = sorted(f for f in os.listdir(chunks_dir) if f.endswith(".jsonl"))
+    if not jsonl_files:
+        raise FileNotFoundError(f"no .jsonl chunk file found in {chunks_dir}")
+    chunks_path = os.path.join(chunks_dir, jsonl_files[0])
     emb_path = os.path.join(args.input_dir, "embeddings", "embeddings.npy")
     train_qa_path = os.path.join(args.input_dir, "train", "train_QA.csv")
     metadata_path = os.path.join(args.input_dir, "metadata", "metadata.csv")
