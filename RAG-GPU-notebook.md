@@ -54,7 +54,7 @@ A GPU notebook instance is a rental with the meter running. It bills by the hour
 | A week | ~$438 |
 | A month | **~$1,906** |
 
-Compare the Bedrock episode, where the whole WattBot evaluation cost about fifteen cents. One forgotten weekend on this instance costs a thousand times more than the thing it was rented to do. And it is not hypothetical: a forgotten GPU notebook is the single most common way research groups burn through cloud credits.
+Compare the Bedrock episode, where the whole WattBot evaluation cost well under a dollar. One forgotten weekend on this instance costs a thousand times more than the thing it was rented to do. And it is not hypothetical: a forgotten GPU notebook is the single most common way research groups burn through cloud credits.
 
 Two further charges people do not expect:
 
@@ -65,7 +65,7 @@ The habits that keep this safe:
 
 1. **Stop the instance when you stand up**, every time, from the console (**Notebook instances → select → Stop**). Then look at the status column until it says `Stopped`.
 2. **Set a reminder** on your phone or calendar before you start the instance, for two hours from now.
-3. **Prefer jobs for any real work**: a Processing job (the previous episode) or a training job ends on its own, and `max_run` guarantees it.
+3. **Prefer jobs for any real work**: a Processing job (the Processing Jobs episode) or a training job ends on its own, and `max_runtime_in_seconds` (`max_run` on a training job) guarantees it.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -94,7 +94,7 @@ In this episode we will:
    - Construct WattBot-style answers that we can compare against `train_QA.csv`.
 4. **Add an explanation pass.**
    - Use an LLM to look at the retrieved evidence, the answer, and citations.
-   - Generate a short explanation and label the **evidence type**: `[Quote]`, `[Table]`, `[Figure]`, or `[Mixed]`.
+   - Generate a short explanation and label the **evidence type**: `[text]`, `[table]`, `[figure]` or a combination such as `[text+table]`.
 
 
 ## Notebook + dataset setup
@@ -119,12 +119,30 @@ We reuse the same two buckets as the Bedrock episode: the shared bucket for `met
 
 
 ```python
-# also verify you've selected teh conda_pytorch_p310 kernel
+# also verify you have selected a PyTorch (conda_pytorch_*) kernel
 import torch
 print("torch cuda available:", torch.cuda.is_available())
 print("num gpus:", torch.cuda.device_count())
-
 ```
+
+### Install vLLM first
+
+We install the inference server before loading anything else, because the install may replace PyTorch and then needs a kernel restart; doing it now means nothing is lost by restarting.
+
+::::::::::::::::::::::::::::::::::::: callout
+
+### Installing vLLM takes a few minutes, and the meter is running
+
+`pip install vllm` downloads several gigabytes (it brings its own CUDA kernels and may replace the kernel's PyTorch build) and takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer. The 27 GB of model weights take another 4–6 minutes to download the first time. At $2.61 an hour that is about 60 cents of waiting, which is fine; what is not fine is doing it twice because the instance was deleted and recreated. Keep the Hugging Face cache on the 100 GB volume (the `HF_HOME` line in the serving cell below does that) so the weights survive a stop/start.
+
+If the install changes PyTorch, restart the kernel (**Kernel → Restart**) before continuing.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+```python
+%pip install -q "vllm>=0.17"
+```
+
 
 ## Import data from bucket into notebook
 
@@ -133,8 +151,6 @@ print("num gpus:", torch.cuda.device_count())
 import os
 import json
 import time
-import math
-from typing import List, Dict, Any
 
 import boto3
 import pandas as pd
@@ -172,7 +188,27 @@ bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks li
 local_data_dir = "./data"
 
 print("Local data dir:", local_data_dir)
+```
 
+### Get the shared WattBot helpers
+
+The retrieval, prompts, answer parsing, per-question orchestration and the scorer are the same code the Bedrock and Processing Jobs episodes used: `scripts/wattbot_rag.py` in the lesson repository. Clone it and copy the module next to this notebook. What this episode adds is the two model callables, `embed_query` and `generate`, running on the notebook's own GPU.
+
+```python
+!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
+!cp ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
+```
+
+```python
+from wattbot_rag import (
+    ANSWER_SYSTEM_PROMPT,
+    build_docid_to_url,
+    compute_wattbot_score,
+    embed_query_with,
+    explanation_system_prompt,
+    retrieve_top_k,
+    run_single_qa,
+)
 ```
 
 
@@ -191,28 +227,12 @@ download_s3_object(shared_bucket, train_qa_key, train_qa_path)
 
 ```
 
-## Step 1 – Imports, paths, and safe CSV loading
+## Step 1 – Model libraries and safe CSV loading
 
 
 ```python
-import os
-import time
-import json
-import math
-import zipfile
-from typing import List, Dict, Any, Tuple
-
-import requests
-import numpy as np
-import pandas as pd
-
 import torch
-from torch import nn
-
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from sentence_transformers import SentenceTransformer
-
-
 ```
 
 
@@ -299,11 +319,6 @@ Later, we’ll implement a small retrieval helper that does cosine-similarity se
 
 
 ```python
-
-import numpy as np
-import time
-from sentence_transformers import SentenceTransformer
-
 # We'll use a stronger embedding model now that we have a GPU.
 # This model has ~335M parameters and benefits from GPU acceleration,
 # but is still reasonable to run on a single 24 GB GPU.
@@ -354,7 +369,7 @@ chunk_embeddings.shape
 
 ### 4. Build a simple retrieval step (cosine similarity)
 
-We are **not** using a heavy vector database in this first episode.
+We are **not** using a heavy vector database in this episode.
 
 Instead, we:
 
@@ -401,63 +416,18 @@ debug. In later episodes (or your own projects), you can **swap out the retrieva
 without changing the overall RAG architecture: the model still sees “top–k retrieved chunks” as context.
 
 
-```python
-
-from typing import List, Dict, Any
-
-def cosine_similarity_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """Compute cosine similarity between rows of a and rows of b."""
-    a_norm = a / (np.linalg.norm(a, axis=1, keepdims=True) + 1e-12)
-    b_norm = b / (np.linalg.norm(b, axis=1, keepdims=True) + 1e-12)
-    return np.dot(a_norm, b_norm.T)
-
-def retrieve_top_k(
-    query_embedding: np.ndarray,
-    chunk_embeddings: np.ndarray,
-    chunked_docs: List[Dict[str, Any]],
-    k: int = 5,
-) -> List[Dict[str, Any]]:
-    """Return top-k most similar chunks for a query embedding."""
-    if chunk_embeddings.shape[0] == 0:
-        return []
-
-    # query_embedding is 1D (D,)
-    sims = cosine_similarity_matrix(query_embedding.reshape(1, -1), chunk_embeddings)[0]
-    top_idx = np.argsort(-sims)[:k]
-
-    results: List[Dict[str, Any]] = []
-    for idx in top_idx:
-        doc = chunked_docs[idx]
-        results.append(
-            {
-                "score": float(sims[idx]),
-                "text": doc["text"],
-                "doc_id": doc["doc_id"],
-                "page_num": doc["page_num"],
-                "title": doc["title"],
-                "url": doc["url"],
-            }
-        )
-    return results
-
-```
-
+`retrieve_top_k` from `wattbot_rag.py` is that search: normalize the query and the matrix, one matrix multiply for the cosine similarities, `argsort` for the top *k*. Open the file to see it; it is a dozen lines. `embed_query_with` wraps the sentence-transformer as the `embed_query(question)` callable the rest of the pipeline expects.
 
 ```python
+embed_query = embed_query_with(embedder)
 
 # Quick sanity check for `retrieve_top_k` on the first training question
 first_row = train_df.iloc[0]
 test_question = first_row["question"]
 print("Sample question:", test_question)
 
-test_q_emb = embedder.encode(
-    [test_question],
-    convert_to_numpy=True,
-    normalize_embeddings=True,
-)[0]
-
 test_retrieved = retrieve_top_k(
-    query_embedding=test_q_emb,
+    query_embedding=embed_query(test_question),
     chunk_embeddings=chunk_embeddings,
     chunked_docs=chunked_docs,
     k=3,
@@ -468,8 +438,7 @@ for r in test_retrieved:
     snippet = r["text"].replace("\n", " ")
     if len(snippet) > 160:
         snippet = snippet[:160] + "..."
-    print(f"- score={r['score']:.3f} | doc_id={r['doc_id']} | page={r['page_num']} | snippet={snippet}")
-
+    print(f"- score={r['score']:.3f} | doc_id={r['doc_id']} | page={r['page_label']} | snippet={snippet}")
 ```
 
 
@@ -479,26 +448,12 @@ For this episode we use **Qwen3.8-27B**, an open-weight model that Bedrock does 
 
 **Why FP8 weights and not bf16?** Inference is not training. No gradients, no optimizer state, nothing is updated, so the only memory that matters is the weights themselves plus the KV cache for the prompt being processed. A 27B model in bf16 is about 54 GB of weights and does not fit a 48 GB GPU; the same weights in 8-bit floating point are about 27 GB, which fits with room for the embedding model and generation. FP8 is near-lossless for a model this size, and it is faster, because decoding is limited by how fast the GPU can read weights from memory. For inference on rented GPUs, reduced-precision weights are the norm (FP8 where the GPU supports it, 4-bit integer where it does not or where memory is tighter); bf16 is what you use when you have memory to spare and a model small enough not to need it.
 
-**Why vLLM and not `transformers.pipeline`?** vLLM is an inference server: it has the kernels for FP8 and for this model's hybrid attention, batches requests, and manages the KV cache so long prompts do not run out of memory. It is what you would deploy behind an API, and its offline `LLM` class is a two-line replacement for the pipeline we used before.
+**Why vLLM and not `transformers.pipeline`?** vLLM is an inference server: it has the kernels for FP8 and for this model's hybrid attention, batches requests, and manages the KV cache so long prompts do not run out of memory. It is what you would deploy behind an API, and its offline `LLM` class is a two-line replacement for a `transformers.pipeline`.
 
 We will:
 
 1. Call the model once to propose an answer and supporting evidence.
 2. Call it a **second time** with a smaller prompt to generate a short explanation (<= 100 characters).
-
-::::::::::::::::::::::::::::::::::::: callout
-
-### Installing vLLM takes a few minutes, and the meter is running
-
-`pip install vllm` downloads several gigabytes (it brings its own CUDA kernels and may replace the kernel's PyTorch build) and takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer. The 27 GB of model weights take another 4–6 minutes to download the first time. At $2.61 an hour that is about 60 cents of waiting, which is fine; what is not fine is doing it twice because the instance was deleted and recreated. Keep the Hugging Face cache on the 100 GB volume (the `HF_HOME` line below does that) so the weights survive a stop/start.
-
-If the install changes PyTorch, restart the kernel (**Kernel → Restart**) before continuing.
-
-::::::::::::::::::::::::::::::::::::::::::::::::
-
-```python
-%pip install -q "vllm>=0.17"
-```
 
 ```python
 import os
@@ -561,520 +516,56 @@ print(f"Generator ({qwen_model_id}) test response: {test_response}")
 ```
 
 
-### 6. Build prompts for answers and explanations
+### 6. The prompts
 
-We keep the prompts **very explicit**:
+`call_qwen_chat` has the signature the shared pipeline expects, `generate(system_prompt, user_prompt, max_new_tokens) -> str`, and `embed_query` has the other one. `run_single_qa` in `wattbot_rag.py` makes two calls per question with them:
 
-- The first call asks Qwen to return JSON with:
-  - `answer` (short text),
-  - `answer_value` (normalized scalar or category),
-  - `ref_id` (comma‑separated doc ids, e.g. `"jegham2025"`),
-  - `supporting_material` (short quote or paraphrase).
-
-- The second call asks Qwen to generate a **single sentence explanation** (<= 100 characters).
-  We will prepend an evidence type tag (e.g. `[text]` or `[text+table]`) in code rather than
-  asking the model to output it.
-
-
+- The first asks for a JSON object with `answer`, `answer_value` (normalized scalar, range or category), `answer_unit`, `ref_id` (list of document ids), `is_blank` and `supporting_materials`. The retrieved chunks go in the user turn, labelled `[doc_id, page N]` so the model can cite them, along with the expected `answer_unit` from `train_QA.csv` as a hint, so the number comes back in the unit the ground truth uses.
+- The second, made only when the first produced an answer, asks for a short explanation. With `with_evidence_type=True` it also asks the model to name the **main type of evidence** (`text`, `table`, `figure`, or a combination) in the strict format `evidence_type: explanation`, and the code turns that into `[evidence_type] explanation` for the CSV, so the tag is parsed rather than trusted.
 
 ```python
-
-def format_context_for_prompt(retrieved_chunks):
-    """Format retrieved chunks so the LLM can see where text came from."""
-    blocks = []
-    for r in retrieved_chunks:
-        header = f"[DOC {r['doc_id']} | page {r['page_num']} | score {r['score']:.3f}]"
-        blocks.append(header + "\n" + r["text"])
-    return "\n\n".join(blocks)
-
-explanation_system_prompt = (
-    "You are helping annotate how an answer is supported by a research paper. "
-    "You will see a question, an answer, and the supporting text used. "
-    "Your job is to (1) choose the MAIN type of evidence and "
-    "(2) give a VERY short explanation (<= 100 characters). "
-    "Valid evidence types are: text, figure, table, text+figure, table+figure, etc. "
-    "Respond in the strict format: evidence_type: explanation"
-)
-
-def build_explanation_prompt(question, answer, supporting_materials, ref_id_list):
-    ref_str = ", ".join(ref_id_list) if ref_id_list else "unknown"
-    return f"""Question: {question}
-
-Answer: {answer}
-
-Supporting materials:
-{supporting_materials}
-
-Cited document ids: {ref_str}
-
-Remember:
-- evidence_type in [text, figure, table, text+figure, table+figure, etc.]
-- explanation <= 100 characters
-- Format: evidence_type: explanation
-"""
-
+print(ANSWER_SYSTEM_PROMPT)
+print("-" * 80)
+print(explanation_system_prompt(with_evidence_type=True))
 ```
-
 
 ### 7. Run over the full WattBot training set
 
-Now we:
+For every row of `train_QA.csv`, `run_single_qa`:
 
-1. Iterate over **all** questions in `train_QA.csv`.
-2. Retrieve the top-\(k\) chunks for each question.
-3. Ask Qwen for an answer proposal (JSON).
-4. Derive:
-   - `answer` and `answer_value` from the JSON,
-   - `answer_unit` **copied directly from the ground truth** (never guessed),
-   - `ref_id` from the JSON,
-   - `ref_url` by mapping `ref_id` to `metadata.csv`,
-   - `supporting_material` from the JSON,
-   - `evidence_type` from the supporting text,
-   - `explanation` via a second Qwen call, prefixed with `[evidence_type]`.
-5. Save `wattbot_solutions.csv` in the project folder.
-
-
+1. Embeds the question and retrieves the top-*k* chunks.
+2. Asks Qwen for the answer JSON and parses it (a malformed reply counts as unanswerable).
+3. Decides answerability with a **hybrid rule**: the question is `is_blank` if the model said so **or** the top retrieval cosine score is below `retrieval_threshold`. Weak retrieval means the model is about to answer from memory instead of the papers, which is what RAG exists to prevent. A lower threshold marks fewer questions unanswerable, a higher one more; change it, rerun, and rescore to see the trade-off.
+4. Copies `answer_unit` from the row (never guessed), maps each `ref_id` to its URL via `metadata.csv`, and makes the explanation call.
+5. Returns one submission-format row; we collect them into `train_solutions_qwen.csv`.
 
 ```python
-import re
-from decimal import Decimal
+docid_to_url = build_docid_to_url(metadata_df)
 
-def normalize_answer_value(raw_answer_value, answer_text, answer_unit, is_blank):
-    """
-    Normalize answer_value into the conventions used by train_QA:
-      - 'is_blank' for unanswerable questions
-      - plain numeric strings without units, commas, or scientific notation
-      - booleans as 1/0
-      - categorical strings (e.g., 'ML.ENERGY Benchmark') unchanged
-      - ranges like '[0.02,0.1]' preserved as-is
-    """
-    s = str(raw_answer_value).strip()
-    if is_blank:
-        return "is_blank"
-    if not s or s.lower() == "is_blank":
-        return "is_blank"
-
-    # Preserve ranges like [0.02,0.1]
-    if s.startswith("[") and s.endswith("]"):
-        return s
-
-    lower = s.lower()
-
-    # Booleans -> 1/0
-    if lower in {"true", "false"}:
-        return "1" if lower == "true" else "0"
-
-    # Pure categorical (no digits) -> leave as-is
-    if not any(ch.isdigit() for ch in s):
-        return s
-
-    # Try to extract the first numeric token from either the raw string or the answer text
-    txt_candidates = [s, str(answer_text)]
-    match = None
-    for txt in txt_candidates:
-        if not txt:
-            continue
-        match = re.search(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", str(txt).replace(",", ""))
-        if match:
-            break
-
-    if not match:
-        # Fallback: strip obvious formatting characters
-        cleaned = s.replace(",", "").replace("%", "").strip()
-        return cleaned or "is_blank"
-
-    num_str = match.group(0)
-
-    # Format without scientific notation, trim trailing zeros
-    try:
-        d = Decimal(num_str)
-        normalized = format(d.normalize(), "f")
-    except Exception:
-        try:
-            f = float(num_str)
-            normalized = ("%.15f" % f).rstrip("0").rstrip(".")
-        except Exception:
-            normalized = num_str
-
-    return normalized
-
-```
-
-### Running the full RAG pipeline for one question
-
-At this point we have all the building blocks we need:
-
-- an **embedder** to turn questions into vectors  
-- a **retriever** (`retrieve_top_k`) to grab the most relevant text chunks  
-- a **chat helper** (`call_qwen_chat`) to talk to Qwen and get JSON back  
-- a small post-processing helper (`normalize_answer_value`) to clean numbers
-
-In the next few cells we tie these pieces together. We keep the code split into
-small helper functions so learners can follow each step:
-
-1. Retrieve context for a question.  
-2. Ask the LLM for an answer, references, and a quote.  
-3. Clean and normalize the structured fields (answer_value, ref_id, is_blank).  
-4. Ask a second LLM call for a short explanation and evidence type.
-
-
-### 🔍 Retrieving Relevant Context
-This function embeds the question and fetches the top‐K most relevant text chunks. It’s the first step of the RAG pipeline and determines what evidence the LLM can see.
-
-
-
-```python
-# Build a lookup from document id -> URL using metadata
-docid_to_url = {
-    str(row["id"]).strip(): row["url"]
-    for _, row in metadata_df.iterrows()
-    if isinstance(row.get("url", None), str)
-}
-
-def retrieve_context_for_question(question, embedder, chunk_embeddings, chunked_docs, top_k: int = 8):
-    """Embed the question and retrieve the top-k most similar chunks."""
-    q_emb = embedder.encode(
-        [question],
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-    )[0]
-    retrieved = retrieve_top_k(q_emb, chunk_embeddings, chunked_docs, k=top_k)
-    context = format_context_for_prompt(retrieved)
-    return retrieved, context
-
-
-```
-
-### First LLM Step: Producing an Answer
-Here we prompt the model to:
-- Decide if the question is answerable
-- Extract a numeric/categorical answer
-- Identify supporting evidence
-- Select relevant document IDs
-
-
-
-```python
-def answer_phase_for_question(qid, question, answer_unit, context):
-    """
-    First LLM call: ask Qwen for an answer, answer_value, is_blank, ref_ids,
-    and a short supporting quote. Then normalize these fields.
-    """
-    # System prompt: what role Qwen should play
-    system_prompt_answer = (
-        "You answer questions about AI energy, carbon, and water from academic papers.\n"
-        "You are given:\n"
-        "- a question\n"
-        "- retrieved text chunks from the relevant paper(s)\n\n"
-        "You must:\n"
-        "1. Decide if the question can be answered from the provided context.\n"
-        "2. If answerable, extract a concise numeric or short-text answer_value.\n"
-        "3. Use the provided answer_unit EXACTLY as given (do NOT invent units).\n"
-        "4. Select one or more document ids as ref_id from the supplied chunks.\n"
-        "5. Copy a short supporting quote (<= 300 chars) into supporting_materials.\n"
-        "6. If the context is insufficient, mark is_blank = true and set all\n"
-        "   other fields to 'is_blank' except answer_unit (keep it as provided).\n"
-        "Return a JSON object with fields:\n"
-        "  answer (string)\n"
-        "  answer_value (string)\n"
-        "  is_blank (true or false)\n"
-        "  ref_id (list of doc_id strings)\n"
-        "  supporting_materials (string)\n"
-    )
-
-    context_block = context if context.strip() else "[NO CONTEXT FOUND]"
-
-    # User prompt: question + unit hint + retrieved context
-    user_prompt_answer = f"""Question: {question}
-Expected answer unit: {answer_unit}
-
-Retrieved context:
-{context_block}
-
-Return JSON ONLY with keys:
-  answer (string)
-  answer_value (string)
-  is_blank (true or false)
-  ref_id (list of doc_id strings)
-  supporting_materials (string)
-"""
-
-    raw_answer = call_qwen_chat(system_prompt_answer, user_prompt_answer, max_new_tokens=384)
-
-    # Try to parse JSON from the model output
-    parsed = {
-        "answer": "",
-        "answer_value": "is_blank",
-        "is_blank": True,
-        "ref_id": [],
-        "supporting_materials": "is_blank",
-    }
-    try:
-        first_brace = raw_answer.find("{")
-        last_brace = raw_answer.rfind("}")
-        if first_brace != -1 and last_brace != -1:
-            json_str = raw_answer[first_brace : last_brace + 1]
-        else:
-            json_str = raw_answer
-        candidate = json.loads(json_str)
-        if isinstance(candidate, dict):
-            parsed.update(candidate)
-    except Exception as e:
-        print(f"JSON parse error for question {qid}: {e}")
-        # fall back to defaults in `parsed`
-
-    # Normalize parsed fields
-    is_blank = bool(parsed.get("is_blank", False))
-    ref_ids = parsed.get("ref_id") or []
-    if isinstance(ref_ids, str):
-        ref_ids = [ref_ids]
-    ref_ids = [str(r).strip() for r in ref_ids if str(r).strip()]
-
-    answer = str(parsed.get("answer", "")).strip()
-    answer_value = str(parsed.get("answer_value", "")).strip() or "is_blank"
-    answer_value = normalize_answer_value(
-        raw_answer_value=answer_value,
-        answer_text=answer,
-        answer_unit=answer_unit,
-        is_blank=is_blank,
-    )
-    supporting_materials = str(parsed.get("supporting_materials", "")).strip()
-
-    # If context is empty or model says blank, force is_blank behaviour
-    if not context.strip() or is_blank:
-        is_blank = True
-        answer = ""
-        answer_value = "is_blank"
-        ref_ids = []
-        supporting_materials = "is_blank"
-
-    # String formatting for ref_id / ref_url to match training style
-    if not ref_ids:
-        ref_id_str = "is_blank"
-        ref_url_str = "is_blank"
-    else:
-        ref_id_str = str(ref_ids)
-
-        # Resolve ref_url via metadata
-        ref_url = "is_blank"
-        for rid in ref_ids:
-            if rid in docid_to_url:
-                ref_url = docid_to_url[rid]
-                break
-        if not ref_url:
-            ref_url = "is_blank"
-        ref_url_str = str([ref_url])
-
-    return answer, answer_value, is_blank, ref_ids, supporting_materials, ref_id_str, ref_url_str
-
-
-
-```
-
-### Second LLM Step: Explanation and Evidence Type
-Now that we have an answer, we produce a short explanation and classify the evidence type. This step matches WattBot’s expected metadata.
-
-
-
-```python
-def explanation_phase_for_question(question, answer, supporting_materials, ref_ids, is_blank):
-    """
-    Second LLM call: ask Qwen to label an evidence_type and provide a short
-    explanation tying the answer back to the supporting materials.
-    """
-    if is_blank:
-        # For unanswerable questions we just propagate a sentinel.
-        evidence_type = "other"
-        explanation = "is_blank"
-        return evidence_type, explanation
-
-    expl_user_prompt = build_explanation_prompt(
-        question=question,
-        answer=answer,
-        supporting_materials=supporting_materials,
-        ref_id_list=ref_ids,
-    )
-    raw_expl = call_qwen_chat(
-        explanation_system_prompt,
-        expl_user_prompt,
-        max_new_tokens=64,
-    )
-
-    # Take the first non-empty line (we expect something like "text: short reason")
-    first_line = ""
-    for line in raw_expl.splitlines():
-        if line.strip():
-            first_line = line.strip()
-            break
-
-    if ":" in first_line:
-        etype, expl = first_line.split(":", 1)
-        evidence_type = etype.strip().lower() or "other"
-        explanation = expl.strip()
-    else:
-        evidence_type = "other"
-        explanation = first_line.strip() or "short justification"
-
-    # Keep explanations short for the CSV
-    if len(explanation) > 100:
-        explanation = explanation[:100]
-
-    return evidence_type, explanation
-
-```
-
-###  Orchestration: `run_single_qa`
-This high‐level function ties together retrieval, answering, normalization, and explanation into one full pass over a single question.
-
-
-
-### Handling unanswerable questions
-
-Some WattBot questions truly **cannot** be answered from the retrieved papers.  
-We use a simple hybrid rule to detect these cases:
-
-- We look at the **top retrieval score** (cosine similarity).  
-- We also use the LLM's own `is_blank` flag from the first JSON response.  
-
-If **either** of these says the evidence is too weak, we mark the question as unanswerable
-and set all relevant fields (`answer_value`, `ref_id`, `supporting_materials`) to `is_blank`.
-
-The `THRESHOLD` inside `run_single_qa` controls how strict this behaviour is:
-
-- lower values → fewer questions marked unanswerable  
-- higher values → more questions marked unanswerable  
-
-You can change `THRESHOLD` and then re-run the notebook and `Score.py` to see
-how this trade-off affects your final WattBot score.
-
-
-
-```python
-
-def run_single_qa(
-    row,
-    embedder,
-    chunk_embeddings,
-    chunked_docs,
-    top_k: int = 8,
-):
-    """Run retrieval + Qwen for a single training QA row.
-
-    This is the high-level orchestration function that calls three helpers:
-
-    1. retrieve_context_for_question  -> get relevant text chunks
-    2. answer_phase_for_question      -> generate answer from context, returning citations and supporting materials
-    3. explanation_phase_for_question -> evidence type + short explanation
-    """
-
-    # Confidence threshold for retrieval.
-    # If the top similarity score is below this value, we treat the question
-    # as unanswerable, even if the LLM tried to produce an answer.
-    THRESHOLD = 0.25
-
-    qid = row["id"]
-    question = row["question"]
-    answer_unit = row.get("answer_unit", "")
-
-    # 1. Retrieval step
-    retrieved, context = retrieve_context_for_question(
-        question=question,
-        embedder=embedder,
-        chunk_embeddings=chunk_embeddings,
-        chunked_docs=chunked_docs,
-        top_k=top_k,
-    )
-
-    top_score = retrieved[0]["score"] if retrieved else 0.0
-
-    # 2. Answer + refs + supporting materials (LLM's view)
-    (
-        answer,
-        answer_value,
-        is_blank_llm,
-        ref_ids,
-        supporting_materials,
-        ref_id_str,
-        ref_url_str,
-    ) = answer_phase_for_question(
-        qid=qid,
-        question=question,
-        answer_unit=answer_unit,
-        context=context,
-    )
-
-    # Hybrid is_blank decision:
-    # - if retrieval is weak (top_score < THRESHOLD)
-    # - OR the LLM marks is_blank = true
-    # then we treat the question as unanswerable.
-    is_blank = bool(is_blank_llm) or (top_score < THRESHOLD)
-
-    if is_blank:
-        answer = ""
-        answer_value = "is_blank"
-        ref_ids = []
-        ref_id_str = "is_blank"
-        ref_url_str = "is_blank"
-        supporting_materials = "is_blank"
-
-    # Always copy answer_unit from train_QA.csv (do NOT let the LLM invent it)
-    answer_unit = row.get("answer_unit", "")
-
-    # 3. Explanation + evidence_type
-    evidence_type, explanation = explanation_phase_for_question(
-        question=question,
-        answer=answer,
-        supporting_materials=supporting_materials,
-        ref_ids=ref_ids,
-        is_blank=is_blank,
-    )
-
-    return {
-        "id": qid,
-        "question": question,
-        "answer": answer,
-        "answer_value": answer_value,
-        "answer_unit": answer_unit,
-        "is_blank": "true" if is_blank else "false",
-        "ref_id": ref_id_str,
-        "ref_url": ref_url_str,
-        "supporting_materials": supporting_materials,
-        "evidence_type": evidence_type,
-        "explanation": explanation,
-    }
-
-```
-
-
-```python
-# -------------------------------------------------------------------
-# Run over max_N training questions (this can take a while!)
-# -------------------------------------------------------------------
 all_results = []
-error_log = []
-max_N = np.inf
+max_N = np.inf   # set to e.g. 5 for a smoke test
 
 for idx, row in train_df.iterrows():
     if idx >= max_N:
         break
-    question = row["question"]
-    print(f"########################################################################################################\nQUESTION: {question}")
+    print("#" * 96)
+    print(f"QUESTION: {row['question']}")
 
     res = run_single_qa(
         row=row,
-        embedder=embedder,
+        embed_query=embed_query,
+        generate=call_qwen_chat,
         chunk_embeddings=chunk_embeddings,
         chunked_docs=chunked_docs,
+        docid_to_url=docid_to_url,
         top_k=8,
+        retrieval_threshold=0.25,
+        with_evidence_type=True,
+        verbose=True,
     )
-    answer = res["answer"]
-    ref_ids = res["ref_id"]
-
-    explanation = res["explanation"]
-    print(f"ANSWER: {answer}")
-    print(f"ref_ids: {ref_ids}")
-    print(f"EXPLANATION: {explanation}")
-    
+    print(f"ANSWER: {res['answer']}")
+    print(f"ref_ids: {res['ref_id']}")
+    print(f"EXPLANATION: {res['explanation']}")
     all_results.append(res)
 
 solutions_df = pd.DataFrame(all_results)
@@ -1082,10 +573,7 @@ solutions_path = os.path.join(local_data_dir, "train_solutions_qwen.csv")
 solutions_df.to_csv(solutions_path, index=False)
 
 print(f"Saved solutions for {len(solutions_df)} questions to: {solutions_path}")
-print(f"Number of questions with errors (filled as blank): {len(error_log)}")
-
 solutions_df.head(20)
-
 ```
 
 ### Compare answers to ground truth
@@ -1100,230 +588,25 @@ WattBot evaluates each prediction using a weighted score that combines three com
 
 
 
-```python
-import pandas as pd
-import numpy as np
-
-def _to_bool_flag(x):
-    """Convert typical truthy/falsey strings to bool."""
-    if isinstance(x, str):
-        s = x.strip().lower()
-        if s in {"1", "True", "true", "yes"}:
-            return True
-        if s in {"0", "False", "false", "no"}:
-            return False
-    return bool(x)
-
-def _parse_float_or_none(x):
-    try:
-        return float(str(x).strip())
-    except Exception:
-        return None
-
-def _answer_value_correct(gt_val, pred_val, rel_tol=1e-3):
-    """
-    gt_val, pred_val: values from answer_value columns.
-    rel_tol = 0.001 => 0.1% relative tolerance.
-    """
-    gt_str = str(gt_val).strip()
-    pred_str = str(pred_val).strip()
-    
-    # If either is 'is_blank', treat as categorical
-    if gt_str.lower() == "is_blank" or pred_str.lower() == "is_blank":
-        return gt_str.lower() == pred_str.lower()
-    
-    gt_num = _parse_float_or_none(gt_val)
-    pred_num = _parse_float_or_none(pred_val)
-    
-    # If both numeric, use relative tolerance
-    if gt_num is not None and pred_num is not None:
-        if gt_num == 0:
-            return abs(pred_num - gt_num) <= rel_tol  # small absolute tolerance around 0
-        rel_err = abs(pred_num - gt_num) / max(abs(gt_num), 1e-12)
-        return rel_err <= rel_tol
-    
-    # Otherwise, fall back to normalized string match
-    return gt_str.lower() == pred_str.lower()
-
-def _ref_id_jaccard(gt_ref, pred_ref):
-    """
-    Jaccard overlap between sets of ref_ids.
-    Strings may contain semicolon-separated IDs, or 'is_blank'.
-    Case-insensitive.
-    """
-    def to_set(s):
-        if s is None:
-            return set()
-        s = str(s).strip()
-        if not s or s.lower() == "is_blank":
-            return set()
-        parts = [p.strip().lower() for p in s.split(";") if p.strip()]
-        return set(parts)
-    
-    gt_set = to_set(gt_ref)
-    pred_set = to_set(pred_ref)
-    
-    if not gt_set and not pred_set:
-        return 1.0
-    union = gt_set | pred_set
-    if not union:
-        return 0.0
-    inter = gt_set & pred_set
-    return len(inter) / len(union)
-
-def compute_wattbot_score(
-    train_qa_path="train_QA.csv",
-    preds_path="train_solutions_qwen.csv",
-    id_col="id",
-    gt_answer_col="answer_value",
-    gt_ref_col="ref_id",
-    gt_is_na_col="is_NA",   # can also pass "is_blank" or None
-    pred_answer_col="answer_value",
-    pred_ref_col="ref_id",
-    pred_is_na_col=None,    # can pass "is_blank", or leave None to auto
-    n_examples=10,          # how many incorrect examples to print
-):
-    """
-    Compare your solutions to train_QA.csv using a WattBot-style score.
-
-    NA logic:
-    - If an explicit NA column is found/used (e.g. is_NA), we use it via _to_bool_flag.
-    - If you pass gt_is_na_col="is_blank" or pred_is_na_col="is_blank",
-      we *derive* NA from answer_value == "is_blank" instead of expecting a real column.
-    - If no NA column is available at all, we derive from answer_value == "is_blank".
-
-    Also prints up to `n_examples` rows where the model is not perfect
-    (answer_score < 1, ref_id_score < 1, or is_NA_score < 1).
-    """
-    gt = pd.read_csv(train_qa_path)
-    preds = pd.read_csv(preds_path)
-    
-    # Inner join on id to be strict
-    merged = gt.merge(preds, on=id_col, suffixes=("_gt", "_pred"))
-    if merged.empty:
-        raise ValueError("No overlapping ids between ground truth and predictions.")
-
-    # ----- ground truth NA flags -----
-    if gt_is_na_col is not None and gt_is_na_col in merged.columns:
-        # Use explicit column (e.g. "is_NA")
-        gt_is_na_series = merged[gt_is_na_col].map(_to_bool_flag)
-    elif gt_is_na_col is not None and gt_is_na_col.lower() == "is_blank":
-        # Special meaning: derive NA from answer_value_gt == "is_blank"
-        gt_is_na_series = merged[f"{gt_answer_col}_gt"].astype(str).str.lower().eq("is_blank")
-        merged["gt_is_blank_flag"] = gt_is_na_series
-    else:
-        # Fallback: if we have is_NA or is_blank col, use it; else derive
-        if "is_NA" in merged.columns:
-            gt_is_na_series = merged["is_NA"].map(_to_bool_flag)
-        elif "is_blank" in merged.columns:
-            gt_is_na_series = merged["is_blank"].map(_to_bool_flag)
-        else:
-            gt_is_na_series = merged[f"{gt_answer_col}_gt"].astype(str).str.lower().eq("is_blank")
-            merged["gt_is_blank_flag"] = gt_is_na_series
-
-    # ----- prediction NA flags -----
-    if pred_is_na_col is not None and pred_is_na_col in merged.columns:
-        pred_is_na_series = merged[pred_is_na_col].map(_to_bool_flag)
-    elif pred_is_na_col is not None and pred_is_na_col.lower() == "is_blank":
-        # Same convention: derive from answer_value_pred
-        pred_is_na_series = merged[f"{pred_answer_col}_pred"].astype(str).str.lower().eq("is_blank")
-        merged["pred_is_blank_flag"] = pred_is_na_series
-    else:
-        # Auto-detect or derive if no NA column in preds
-        if "is_NA" in merged.columns:
-            pred_is_na_series = merged["is_NA"].map(_to_bool_flag)
-        elif "is_blank" in merged.columns:
-            pred_is_na_series = merged["is_blank"].map(_to_bool_flag)
-        else:
-            pred_is_na_series = merged[f"{pred_answer_col}_pred"].astype(str).str.lower().eq("is_blank")
-            merged["pred_is_blank_flag"] = pred_is_na_series
-
-    ans_scores = []
-    ref_scores = []
-    na_scores = []
-    
-    for idx, row in merged.iterrows():
-        gt_ans = row[f"{gt_answer_col}_gt"]
-        pred_ans = row[f"{pred_answer_col}_pred"]
-        gt_ref = row[f"{gt_ref_col}_gt"]
-        pred_ref = row[f"{pred_ref_col}_pred"]
-        
-        gt_is_na = bool(gt_is_na_series.iloc[idx])
-        pred_is_na = bool(pred_is_na_series.iloc[idx])
-        
-        # 1. answer_value component
-        ans_correct = _answer_value_correct(gt_ans, pred_ans)
-        ans_scores.append(1.0 * ans_correct)
-        
-        # 2. ref_id Jaccard
-        ref_j = _ref_id_jaccard(gt_ref, pred_ref)
-        ref_scores.append(ref_j)
-        
-        # 3. is_NA component (simple: must match ground truth flag)
-        na_scores.append(1.0 if gt_is_na == pred_is_na else 0.0)
-    
-    merged["answer_score"] = ans_scores
-    merged["ref_id_score"] = ref_scores
-    merged["is_NA_score"] = na_scores
-    
-    merged["wattbot_score"] = (
-        0.75 * merged["answer_score"]
-        + 0.15 * merged["ref_id_score"]
-        + 0.10 * merged["is_NA_score"]
-    )
-    
-    print(f"Rows compared: {len(merged)}")
-    print(f"Mean answer_value score: {merged['answer_score'].mean():.4f}")
-    print(f"Mean ref_id score:       {merged['ref_id_score'].mean():.4f}")
-    print(f"Mean is_NA score:        {merged['is_NA_score'].mean():.4f}")
-    print(f"Overall WattBot score:   {merged['wattbot_score'].mean():.4f}")
-    
-    # ----- Show some incorrect examples -----
-    incorrect = merged[
-        (merged["answer_score"] < 1.0)
-        | (merged["ref_id_score"] < 1.0)
-        | (merged["is_NA_score"] < 1.0)
-    ]
-    
-    if not incorrect.empty and n_examples > 0:
-        print("\nExamples of incorrect / partially correct responses "
-              f"(up to {n_examples} rows):\n")
-        # Grab up to n_examples "worst" rows by wattbot_score
-        for _, row in incorrect.sort_values("wattbot_score").head(n_examples).iterrows():
-            q = row["question_gt"] if "question_gt" in row.index else None
-            print("-" * 80)
-            print(f"id: {row[id_col]}")
-            if q is not None:
-                print(f"Question: {q}")
-            print(f"GT answer_value:   {row[f'{gt_answer_col}_gt']}")
-            print(f"Pred answer_value: {row[f'{pred_answer_col}_pred']}")
-            print(f"GT ref_id:         {row[f'{gt_ref_col}_gt']}")
-            print(f"Pred ref_id:       {row[f'{pred_ref_col}_pred']}")
-            print(f"answer_score: {row['answer_score']:.3f}, "
-                  f"ref_id_score: {row['ref_id_score']:.3f}, "
-                  f"is_NA_score: {row['is_NA_score']:.3f}, "
-                  f"wattbot_score: {row['wattbot_score']:.3f}")
-        print("-" * 80)
-    
-    return merged
-
-```
-
+`compute_wattbot_score` from `wattbot_rag.py` implements that metric, joins predictions to `train_QA.csv` on `id`, and prints the worst-scoring rows. `train_QA.csv` has no separate "unanswerable" column, so `gt_is_na_col="is_blank"` derives that flag from `answer_value == "is_blank"` on both sides. The scorer accepts `ref_id` either as `;`-joined ids (what the pipeline writes) or as the Python-list strings in `train_QA.csv`.
 
 ```python
 results_df = compute_wattbot_score(
-    train_qa_path="./data/train_QA.csv",
-    preds_path="./data/train_solutions_qwen.csv",
-    gt_is_na_col="is_blank",   # or "is_blank" / None depending on how you mark NAs
+    train_qa_path=train_qa_path,
+    preds_path=solutions_path,
+    gt_is_na_col="is_blank",
+    pred_is_na_col="is_blank",
     n_examples=10,
 )
 ```
+
+Change `retrieval_threshold` or `top_k` in the loop above, rerun it, and rescore: with the model loaded, a full pass over the training set takes a few minutes, which is what a GPU notebook is for. Then stop the instance.
 
 ## Recap and next steps
 
 In this episode, we:
 
-- Pulled the WattBot corpus chunks that the Bedrock episode cached on S3 into our notebook environment.
+- Pulled the WattBot corpus chunks that the Bedrock episode cached on S3 into our notebook environment, and reused the pipeline code (`wattbot_rag.py`) from the Bedrock and Processing Jobs episodes unchanged.
 - Created vector embeddings for each chunk and used similarity search to retrieve relevant context for a given question.
 - Used an LLM to generate answers from retrieved context and wrote results out to a CSV for later scoring and analysis.
 - Handled unanswerable questions with an `is_blank` flag so the system can explicitly say “I don’t know” when the evidence isn’t there.
@@ -1349,7 +632,7 @@ This is just a first pass at a RAG pipeline: it works, but there’s a lot of he
 
 As you iterate, the goal is to treat this notebook as a baseline RAG “workbench”: you can swap in better models, smarter retrieval strategies, and richer document preprocessing without changing the overall pipeline structure.
 
-The Processing Jobs episode does the same work as short-lived SageMaker jobs, so the GPU only bills while it is actually embedding or generating. Stop this instance now, and delete it if you are done with the episode.
+The Processing Jobs episode does the same work, with the same `wattbot_rag.py`, as short-lived SageMaker jobs, so the GPU only bills while it is actually embedding or generating. Stop this instance now, and delete it if you are done with the episode.
 
 
 
@@ -1368,20 +651,4 @@ The Processing Jobs episode does the same work as short-lived SageMaker jobs, so
   using `is_blank` for unanswerable questions and for missing fields.
 - **Scalability path**: The same logic can later be swapped to FAISS/Chroma
   and larger models, while preserving the interface used here.
-::::::::::::::::::::::::::::::::::::::::::::::::    
-
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
+::::::::::::::::::::::::::::::::::::::::::::::::

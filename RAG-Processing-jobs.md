@@ -23,8 +23,6 @@ exercises: 20
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-# RAG with Processing Jobs
-
 ## When Bedrock does not have your model
 
 The Bedrock episode is the default for RAG: per-token billing, nothing left running, two API calls. Bedrock's catalog is curated, though. It carries Amazon's models, Anthropic, Meta, Mistral, DeepSeek, and a few others, and within a family only some sizes, usually a generation behind: for Qwen, the serverless lineup is still the Qwen3 series. Hugging Face hosts well over a million open-weight checkpoints. The one you want (the newest release, a specific size, a fine-tune for scientific text, a model a paper just published) is usually not on Bedrock, and often never will be.
@@ -51,7 +49,7 @@ The generator is **Qwen3.8-27B**, a 27-billion-parameter open-weight model (Apac
 | RAG over the training questions with Qwen3.8-27B | `ml.g6e.xlarge` (L40S, 48 GB) | $2.61 | ~30 min: 5 startup, ~5 installing vLLM, ~5 downloading 27 GB of weights, the rest generating | ~$1.30 |
 | Controller notebook | `ml.t3.medium` | $0.05 | 2 h | $0.10 |
 
-About $1.60 for the episode, and the GPUs are off the moment each script ends. Both jobs carry `max_runtime_in_seconds`, so a hung job costs at most the cap. Compare the same pipeline on a GPU notebook instance (the optional episode after this one): the hardware is the same, but the meter runs until someone stops it, and a forgotten `ml.g6e.xlarge` is $63 a day.
+About $1.60 for the episode, and the GPUs are off the moment each script ends. Both jobs carry `max_runtime_in_seconds`, so a hung job costs at most the cap. Compare the same pipeline on a GPU notebook instance (the optional GPU-notebook episode at the end of the lesson): the hardware is the same, but the meter runs until someone stops it, and a forgotten `ml.g6e.xlarge` is $63 a day.
 
 The trade-off is latency. A job takes minutes to start, so this pattern is for batch questions, not a chatbot. For interactive use, Bedrock answers in seconds; for interactive use of a model Bedrock does not have, an inference endpoint does, at an hourly rate you have to remember to turn off.
 
@@ -66,23 +64,31 @@ In this episode we will:
 
 ## Setup
 
-We'll first need to clone in some .py files that contain helper functions for embedding and RAG processing jobs. Since we're using containerized Processing jobs, we can't just import local Python functions from the notebook. Instead, we create standalone scripts that the jobs can run.
+### The scripts
+
+Jobs run in containers, so the code they execute has to be shipped with the job: a Processing job cannot import functions defined in this notebook. The lesson repository has the three files we need as standalone scripts. Clone it:
 
 ```python
-!git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
+!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 ```
 
-Create a /code directory and copy over the relevant scripts from ML_with_AWS_SageMaker/scripts into /code:
+- `scripts/embedding_inference.py`: generic embedding script (JSONL with a `text` field in, `embeddings.npy` out).
+- `scripts/wattbot_rag_batch.py`: the WattBot RAG loop as a batch job: loads the inputs, serves Qwen with vLLM, writes `wattbot_solutions.csv`.
+- `scripts/wattbot_rag.py`: the shared pipeline logic (retrieval, prompts, answer parsing, `run_single_qa`, the scorer) that the Bedrock episode imported too. The batch script imports it, so it ships with the job; the notebook imports it for scoring.
+
+Each job gets its own source directory, because the two jobs need different Python packages and SageMaker installs whatever `requirements.txt` it finds next to the script. `code_embed/` holds the embedding job, `code_rag/` the RAG job, and a copy of `wattbot_rag.py` sits next to the notebook for the scoring step at the end.
 
 ```python
-
-- `embedding_inference.py` – generic embedding script
-- `wattbot_rag_batch.py` – WattBot-specific RAG logic for batch processing job
+!mkdir -p code_embed code_rag
+!cp ML_with_AWS_SageMaker/scripts/embedding_inference.py code_embed/
+!cp ML_with_AWS_SageMaker/scripts/wattbot_rag_batch.py ML_with_AWS_SageMaker/scripts/wattbot_rag.py code_rag/
+!cp ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
+!ls code_embed code_rag
 ```
 
-Next, setup your AWS SDK, SageMaker session, and S3 bucket information.
-```python
+Next, set up the AWS SDK, SageMaker session, and bucket names.
 
+```python
 import os
 import json
 
@@ -100,33 +106,29 @@ role = get_execution_role()
 
 shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only inputs, from your instructor
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks in, outputs out)
-# bucket_region = "us-east-1"
 s3_client = boto3.client("s3", region_name=region)
 
 local_data_dir = "./data"
 os.makedirs(local_data_dir, exist_ok=True)
-corpus_dir = local_data_dir + "/pdfs/"
-os.makedirs(corpus_dir, exist_ok=True)
 
 print("Region:", region)
 print("Role:", role)
 print("Bucket:", bucket_name)
-
 ```
 
 
-## Step 1 – Load WattBot metadata and training questions
+## Step 1 – Check the inputs
 
-We reuse the same `metadata.csv`, `train_QA.csv` and `corpus.zip` from the earlier RAG episodes, read from the shared bucket. If they are not already on the notebook file system, we download them.
-
-
+The jobs read three files from S3: `train_QA.csv` and `metadata.csv` from the shared bucket, and `chunks.jsonl` from your bucket, where the Bedrock episode cached it. The PDFs themselves are not needed again: chunking was done once, and the jobs work from the chunks. We download the three files to the notebook only to confirm they exist and to look at them; the jobs fetch their own copies from S3.
 
 ```python
+train_qa_key = "wattbot/train_QA.csv"
+metadata_key = "wattbot/metadata.csv"
+chunks_s3_key = "wattbot/chunks.jsonl"
 
-```
-
-
-```python
+train_qa_s3 = f"s3://{shared_bucket}/{train_qa_key}"
+metadata_s3 = f"s3://{shared_bucket}/{metadata_key}"
+chunks_s3_uri = f"s3://{bucket_name}/{chunks_s3_key}"
 
 def smart_read_csv(path: str) -> pd.DataFrame:
     try:
@@ -134,59 +136,32 @@ def smart_read_csv(path: str) -> pd.DataFrame:
     except UnicodeDecodeError:
         return pd.read_csv(path, encoding="latin-1")
 
-metadata_path = os.path.join(local_data_dir, "metadata.csv")
 train_qa_path = os.path.join(local_data_dir, "train_QA.csv")
-corpus_path = os.path.join(corpus_dir, "corpus.zip")
-
-if not os.path.exists(metadata_path):
-    s3_client.download_file(shared_bucket, "wattbot/metadata.csv", metadata_path)
-if not os.path.exists(train_qa_path):
-    s3_client.download_file(shared_bucket, "wattbot/train_QA.csv", train_qa_path)
-if not os.path.exists(corpus_path):
-    s3_client.download_file(shared_bucket, "wattbot/corpus.zip", corpus_path)
-
-metadata_df = smart_read_csv(metadata_path)
-train_df = smart_read_csv(train_qa_path)
-
-print("Metadata rows:", len(metadata_df))
-print("Train QAs:", len(train_df))
-train_df.head(3)
-
-```
-
-
-```python
-import zipfile
-with zipfile.ZipFile(corpus_path, 'r') as zip_ref:
-    zip_ref.extractall(corpus_dir)
-
-```
-
-
-```python
-corpus_dir
-```
-
-
-## Step 2 – Verify chunks exist on S3 (from the Bedrock episode)
-
-For our processing job, we'll reuse the same chunks generated in the Bedrock episode. The code below just verifies you have this file available in S3 (for calling from the processing job).
-
-```python
-# load chunks from YOUR bucket (written by the Bedrock episode)
-chunks_s3_key = 'wattbot/chunks.jsonl'
-chunks_s3_uri = f"s3://{bucket_name}/{chunks_s3_key}"
+metadata_path = os.path.join(local_data_dir, "metadata.csv")
 local_chunks_path = os.path.join(local_data_dir, "chunks.jsonl")
+
+if not os.path.exists(train_qa_path):
+    s3_client.download_file(shared_bucket, train_qa_key, train_qa_path)
+if not os.path.exists(metadata_path):
+    s3_client.download_file(shared_bucket, metadata_key, metadata_path)
 if not os.path.exists(local_chunks_path):
-    s3_client.download_file(bucket_name, chunks_s3_key, local_chunks_path)
+    s3_client.download_file(bucket_name, chunks_s3_key, local_chunks_path)   # written by the Bedrock episode
+
+train_df = smart_read_csv(train_qa_path)
+metadata_df = smart_read_csv(metadata_path)
 with open(local_chunks_path, "r", encoding="utf-8") as f:
     chunked_docs = [json.loads(line) for line in f]
-print(f"Loaded {len(chunked_docs)} chunks from {local_chunks_path}")
 
+print("Train QAs:", len(train_df))
+print("Metadata rows:", len(metadata_df))
+print("Chunks:", len(chunked_docs), "from", chunks_s3_uri)
+train_df.head(3)
 ```
 
+If the last download fails with `NoSuchKey`, go back to the Bedrock episode and run its chunking step; this episode starts from its output.
 
-## Step 3 – Processing Job 1: embed all chunks on a GPU
+
+## Step 2 – Processing Job 1: embed all chunks on a GPU
 
 Now we launch a short-lived Hugging Face **Processing job** that:
 
@@ -197,25 +172,28 @@ Now we launch a short-lived Hugging Face **Processing job** that:
 
 We use the same `embedding_inference.py` script across projects; here it expects a JSONL file with a `text` field.
 
+### Requirements
 
-### But first...
-we have to create a requirements.txt file that will add additional libraries to the HuggingFaceProcessor we use below, which builds the environment we'll run our embedding_inference.py script in. For the processing job to recognize this dependence, we'll add it to the source_dir (code/) referenced when we call embedding_processor.run() below.
-
+The Hugging Face container has `transformers` and PyTorch but not `sentence-transformers`. A `requirements.txt` in the job's `source_dir` is installed before the script runs. The RAG job's requirements are different (vLLM, plus `sentence-transformers` for the query embedder), which is why it has its own directory.
 
 ```python
-requirements = [
-    "sentence-transformers",   # embedding job
-    "vllm>=0.17",              # RAG job: serves Qwen3.8-27B (FP8); needs 0.17+ for this model
-]
+with open("code_embed/requirements.txt", "w") as f:
+    f.write("sentence-transformers\n")
 
-req_path = "code/requirements.txt"
-with open(req_path, "w") as f:
-    f.write("\n".join(requirements))
+with open("code_rag/requirements.txt", "w") as f:
+    f.write("\n".join(["vllm>=0.17", "sentence-transformers"]) + "\n")   # 0.17+ is needed for Qwen3.8
 
-print(f"Created requirements.txt at {req_path}")
-
+print("code_embed:", os.listdir("code_embed"))
+print("code_rag:  ", os.listdir("code_rag"))
 ```
 
+::::::::::::::::::::::::::::::::::::: callout
+
+### The RAG job's pip install is part of its bill
+
+vLLM ships its own CUDA kernels and pins its own PyTorch, so `pip install vllm` in the RAG job pulls several gigabytes and replaces the container's `torch` and `transformers` with the versions it wants. That is normal (the container is thrown away when the job ends) but it takes about 5 of the job's ~30 minutes, on a GPU instance that is billing the whole time: roughly 20 cents per run. For a job you launch often, bake the install into a custom container image instead; for a job you launch twice in a workshop, paying for the install is cheaper than building the image.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 ### Cost tracking: tag every job
 
@@ -235,10 +213,10 @@ def make_job_tags(purpose: str):
     ]
 ```
 
-```python
+### Launch the embedding job
 
+```python
 embedding_model_id = "thenlper/gte-large"
-script_path = "embedding_inference.py"
 
 emb_output_prefix = "wattbot/embeddings"
 emb_output_path = f"s3://{bucket_name}/{emb_output_prefix}/"
@@ -253,12 +231,12 @@ embedding_processor = HuggingFaceProcessor(
     pytorch_version="2.8",
     py_version="py312",
     sagemaker_session=session,
-    max_runtime_in_seconds=2 * 60 * 60,
+    max_runtime_in_seconds=2 * 60 * 60,   # backstop: the estimate is 8 minutes
 )
 
 embedding_processor.run(
-    code=script_path,
-    source_dir="code/",
+    code="embedding_inference.py",
+    source_dir="code_embed/",
     inputs=[
         ProcessingInput(
             source=chunks_s3_uri,
@@ -282,76 +260,59 @@ embedding_processor.run(
 )
 
 print("Embedding job complete.")
-
 ```
 
-### Check on running job in AWS Console
+### Check on the running job in the AWS Console
+
 To view the job running from the AWS Console, you can visit SageMaker AI, and then find the "Data Preparation" dropdown menu on the left side panel. Click that to find "Processing jobs". If you're in us-east-1, the following link should bring you there: [https://us-east-1.console.aws.amazon.com/sagemaker/home?region=us-east-1#/processing-jobs](https://us-east-1.console.aws.amazon.com/sagemaker/home?region=us-east-1#/processing-jobs)
 
-It may take ~5 minutes in total for the job to complete. This is the downside of launching jobs, but the good news is that we only need to launch one embedding job for our RAG pipeline. This strategy also ensures we're only paying for GPUs when we need them during the processing job.
+It takes ~5-8 minutes in total for the job to complete, most of it provisioning the instance and installing the requirements. This is the downside of launching jobs, but the good news is that we only need to launch one embedding job for our RAG pipeline. This strategy also ensures we're only paying for the GPU while the job runs.
 
 
 ### Sanity-check the embeddings locally
 
 We can download `embeddings.npy` back into the notebook and inspect its shape to confirm the job ran successfully.
 
-
-
 ```python
-
 local_embeddings_path = os.path.join(local_data_dir, "embeddings.npy")
 embeddings_key = f"{emb_output_prefix}/embeddings.npy"
 
 s3_client.download_file(bucket_name, embeddings_key, local_embeddings_path)
 chunk_embeddings = np.load(local_embeddings_path)
 
-print("Embeddings shape:", chunk_embeddings.shape)
-
+print("Embeddings shape:", chunk_embeddings.shape, "for", len(chunked_docs), "chunks")
 ```
 
 
-## Step 5 – Processing Job 2: full WattBot RAG over all questions
+## Step 3 – Processing Job 2: full WattBot RAG over all questions
 
 For the second job, we pass four inputs:
 
-- `chunks.jsonl` – serialized chunks
-- `embeddings.npy` – precomputed chunk embeddings
-- `train_QA.csv` – training questions (to compare with ground truth)
-- `metadata.csv` – to resolve `ref_id` → URL
+- `chunks.jsonl` – serialized chunks (your bucket)
+- `embeddings.npy` – precomputed chunk embeddings (your bucket, written by Job 1)
+- `train_QA.csv` – training questions (shared bucket)
+- `metadata.csv` – to resolve `ref_id` → URL (shared bucket)
 
-The script `wattbot_rag_batch.py` reuses the RAG helpers from the notebook GPU episode:
+The script `wattbot_rag_batch.py` is short, because the pipeline lives in `scripts/wattbot_rag.py`, the same module the Bedrock episode imported:
 
-- cosine similarity + `retrieve_top_k`
-- `retrieve_context_for_question`
-- `answer_phase_for_question` (Qwen answer, answer_value, ref_ids, is_blank)
-- `explanation_phase_for_question`
-- `run_single_qa` (hybrid unanswerable logic: retrieval threshold + LLM is_blank)
+- `retrieve_top_k`: cosine similarity over the embedding matrix
+- `run_single_qa`: retrieval, the answer call, the hybrid unanswerable rule (retrieval threshold OR the model's own `is_blank`), the explanation call
+- `compute_wattbot_score`: the metric we use at the end
 
-The job writes out `wattbot_solutions.csv` in the WattBot submission format.
-
-
+What the batch script adds is the two model callables: `embed_query` wraps the same `gte-large` sentence-transformer the embedding job used (the question has to be embedded with the same model as the chunks), and `generate` wraps a vLLM engine serving Qwen3.8-27B with thinking mode off. The job writes `wattbot_solutions.csv` in the WattBot submission format.
 
 ```python
-
-# Inputs: the CSVs from the shared bucket, the embeddings from yours
-train_qa_key = "wattbot/train_QA.csv"
-metadata_key = "wattbot/metadata.csv"
-
-train_qa_s3 = f"s3://{shared_bucket}/{train_qa_key}"
-metadata_s3 = f"s3://{shared_bucket}/{metadata_key}"
 emb_output_s3 = f"s3://{bucket_name}/{emb_output_prefix}/embeddings.npy"
 
-print("train_QA:", train_qa_s3)
-print("metadata:", metadata_s3)
+print("chunks:    ", chunks_s3_uri)
 print("embeddings:", emb_output_s3)
-
+print("train_QA:  ", train_qa_s3)
+print("metadata:  ", metadata_s3)
 ```
 
+Two settings on this processor matter more than on the embedding job. `volume_size_in_gb=60` attaches a 60 GB volume to the instance, mounted under `/opt/ml/processing`; the container's own root disk is small, so the 27 GB of model weights (and vLLM's install) must not land there. `env={"HF_HOME": ...}` points Hugging Face's download cache at that volume, which is where the weights go.
 
 ```python
-
-rag_script = "wattbot_rag_batch.py"
-
 rag_output_prefix = "wattbot/solutions"
 rag_output_path = f"s3://{bucket_name}/{rag_output_prefix}/"
 
@@ -363,7 +324,8 @@ rag_processor = HuggingFaceProcessor(
     tags=make_job_tags("RAG-batch"),   # separate job, separate tags
     instance_type="ml.g6e.xlarge",     # 1 x L40S, 48 GB: holds the FP8 27B model plus KV cache
     instance_count=1,
-    volume_size_in_gb=60,              # vLLM install + 27 GB of weights
+    volume_size_in_gb=60,              # 27 GB of weights + vLLM install; mounted at /opt/ml/processing
+    env={"HF_HOME": "/opt/ml/processing/hf_cache"},   # put the weight download on that volume
     transformers_version="4.56",
     pytorch_version="2.8",
     py_version="py312",
@@ -372,8 +334,8 @@ rag_processor = HuggingFaceProcessor(
 )
 
 rag_processor.run(
-    code=rag_script,
-    source_dir="code/",
+    code="wattbot_rag_batch.py",
+    source_dir="code_rag/",            # wattbot_rag_batch.py + wattbot_rag.py + requirements.txt
     inputs=[
         ProcessingInput(
             source=chunks_s3_uri,
@@ -405,252 +367,88 @@ rag_processor.run(
         "--embedding_model_id", embedding_model_id,
         "--qwen_model_id", generation_model_id,
         "--top_k", "8",
+        "--retrieval_threshold", "0.25",
     ],
 )
 
-
 print("RAG batch job complete.")
-
 ```
 
-
-## Step 6 – Download predictions and evaluate
-
-Finally, we download `wattbot_solutions.csv` from S3, inspect a few rows, and (optionally) compute the WattBot score against `train_QA.csv` using the `Score.py` logic.
+While it runs, open the job's CloudWatch log from the console page above. You will see, in order: pip installing vLLM, the weight download (27 GB in shards), vLLM loading the model and reporting how much GPU memory it reserved, then one line per question. The whole job is the 30 minutes in the cost callout; the generation is the last third of it.
 
 
+## Step 4 – Download predictions and evaluate
+
+Finally, we download `wattbot_solutions.csv` from S3, inspect a few rows, and compute the WattBot score against `train_QA.csv` with the same `compute_wattbot_score` the Bedrock episode used.
 
 ```python
-
 solutions_key = f"{rag_output_prefix}/wattbot_solutions.csv"
 local_solutions_path = os.path.join(local_data_dir, "wattbot_solutions.csv")
 
 s3_client.download_file(bucket_name, solutions_key, local_solutions_path)
 solutions_df = pd.read_csv(local_solutions_path)
 solutions_df.head()
-
 ```
 
-
 ```python
-import pandas as pd
-import numpy as np
+from wattbot_rag import compute_wattbot_score
 
-def _to_bool_flag(x):
-    """Convert typical truthy/falsey strings to bool."""
-    if isinstance(x, str):
-        s = x.strip().lower()
-        if s in {"1", "True", "true", "yes"}:
-            return True
-        if s in {"0", "False", "false", "no"}:
-            return False
-    return bool(x)
-
-def _parse_float_or_none(x):
-    try:
-        return float(str(x).strip())
-    except Exception:
-        return None
-
-def _answer_value_correct(gt_val, pred_val, rel_tol=1e-3):
-    """
-    gt_val, pred_val: values from answer_value columns.
-    rel_tol = 0.001 => 0.1% relative tolerance.
-    """
-    gt_str = str(gt_val).strip()
-    pred_str = str(pred_val).strip()
-    
-    # If either is 'is_blank', treat as categorical
-    if gt_str.lower() == "is_blank" or pred_str.lower() == "is_blank":
-        return gt_str.lower() == pred_str.lower()
-    
-    gt_num = _parse_float_or_none(gt_val)
-    pred_num = _parse_float_or_none(pred_val)
-    
-    # If both numeric, use relative tolerance
-    if gt_num is not None and pred_num is not None:
-        if gt_num == 0:
-            return abs(pred_num - gt_num) <= rel_tol  # small absolute tolerance around 0
-        rel_err = abs(pred_num - gt_num) / max(abs(gt_num), 1e-12)
-        return rel_err <= rel_tol
-    
-    # Otherwise, fall back to normalized string match
-    return gt_str.lower() == pred_str.lower()
-
-def _ref_id_jaccard(gt_ref, pred_ref):
-    """
-    Jaccard overlap between sets of ref_ids.
-    Strings may contain semicolon-separated IDs, or 'is_blank'.
-    Case-insensitive.
-    """
-    def to_set(s):
-        if s is None:
-            return set()
-        s = str(s).strip()
-        if not s or s.lower() == "is_blank":
-            return set()
-        parts = [p.strip().lower() for p in s.split(";") if p.strip()]
-        return set(parts)
-    
-    gt_set = to_set(gt_ref)
-    pred_set = to_set(pred_ref)
-    
-    if not gt_set and not pred_set:
-        return 1.0
-    union = gt_set | pred_set
-    if not union:
-        return 0.0
-    inter = gt_set & pred_set
-    return len(inter) / len(union)
-
-def compute_wattbot_score(
-    train_qa_path="train_QA.csv",
-    preds_path="train_solutions_qwen.csv",
-    id_col="id",
-    gt_answer_col="answer_value",
-    gt_ref_col="ref_id",
-    gt_is_na_col="is_NA",   # can also pass "is_blank" or None
-    pred_answer_col="answer_value",
-    pred_ref_col="ref_id",
-    pred_is_na_col=None,    # can pass "is_blank", or leave None to auto
-    n_examples=10,          # how many incorrect examples to print
-):
-    """
-    Compare your solutions to train_QA.csv using a WattBot-style score.
-
-    NA logic:
-    - If an explicit NA column is found/used (e.g. is_NA), we use it via _to_bool_flag.
-    - If you pass gt_is_na_col="is_blank" or pred_is_na_col="is_blank",
-      we *derive* NA from answer_value == "is_blank" instead of expecting a real column.
-    - If no NA column is available at all, we derive from answer_value == "is_blank".
-
-    Also prints up to `n_examples` rows where the model is not perfect
-    (answer_score < 1, ref_id_score < 1, or is_NA_score < 1).
-    """
-    gt = pd.read_csv(train_qa_path)
-    preds = pd.read_csv(preds_path)
-    
-    # Inner join on id to be strict
-    merged = gt.merge(preds, on=id_col, suffixes=("_gt", "_pred"))
-    if merged.empty:
-        raise ValueError("No overlapping ids between ground truth and predictions.")
-
-    # ----- ground truth NA flags -----
-    if gt_is_na_col is not None and gt_is_na_col in merged.columns:
-        # Use explicit column (e.g. "is_NA")
-        gt_is_na_series = merged[gt_is_na_col].map(_to_bool_flag)
-    elif gt_is_na_col is not None and gt_is_na_col.lower() == "is_blank":
-        # Special meaning: derive NA from answer_value_gt == "is_blank"
-        gt_is_na_series = merged[f"{gt_answer_col}_gt"].astype(str).str.lower().eq("is_blank")
-        merged["gt_is_blank_flag"] = gt_is_na_series
-    else:
-        # Fallback: if we have is_NA or is_blank col, use it; else derive
-        if "is_NA" in merged.columns:
-            gt_is_na_series = merged["is_NA"].map(_to_bool_flag)
-        elif "is_blank" in merged.columns:
-            gt_is_na_series = merged["is_blank"].map(_to_bool_flag)
-        else:
-            gt_is_na_series = merged[f"{gt_answer_col}_gt"].astype(str).str.lower().eq("is_blank")
-            merged["gt_is_blank_flag"] = gt_is_na_series
-
-    # ----- prediction NA flags -----
-    if pred_is_na_col is not None and pred_is_na_col in merged.columns:
-        pred_is_na_series = merged[pred_is_na_col].map(_to_bool_flag)
-    elif pred_is_na_col is not None and pred_is_na_col.lower() == "is_blank":
-        # Same convention: derive from answer_value_pred
-        pred_is_na_series = merged[f"{pred_answer_col}_pred"].astype(str).str.lower().eq("is_blank")
-        merged["pred_is_blank_flag"] = pred_is_na_series
-    else:
-        # Auto-detect or derive if no NA column in preds
-        if "is_NA" in merged.columns:
-            pred_is_na_series = merged["is_NA"].map(_to_bool_flag)
-        elif "is_blank" in merged.columns:
-            pred_is_na_series = merged["is_blank"].map(_to_bool_flag)
-        else:
-            pred_is_na_series = merged[f"{pred_answer_col}_pred"].astype(str).str.lower().eq("is_blank")
-            merged["pred_is_blank_flag"] = pred_is_na_series
-
-    ans_scores = []
-    ref_scores = []
-    na_scores = []
-    
-    for idx, row in merged.iterrows():
-        gt_ans = row[f"{gt_answer_col}_gt"]
-        pred_ans = row[f"{pred_answer_col}_pred"]
-        gt_ref = row[f"{gt_ref_col}_gt"]
-        pred_ref = row[f"{pred_ref_col}_pred"]
-        
-        gt_is_na = bool(gt_is_na_series.iloc[idx])
-        pred_is_na = bool(pred_is_na_series.iloc[idx])
-        
-        # 1. answer_value component
-        ans_correct = _answer_value_correct(gt_ans, pred_ans)
-        ans_scores.append(1.0 * ans_correct)
-        
-        # 2. ref_id Jaccard
-        ref_j = _ref_id_jaccard(gt_ref, pred_ref)
-        ref_scores.append(ref_j)
-        
-        # 3. is_NA component (simple: must match ground truth flag)
-        na_scores.append(1.0 if gt_is_na == pred_is_na else 0.0)
-    
-    merged["answer_score"] = ans_scores
-    merged["ref_id_score"] = ref_scores
-    merged["is_NA_score"] = na_scores
-    
-    merged["wattbot_score"] = (
-        0.75 * merged["answer_score"]
-        + 0.15 * merged["ref_id_score"]
-        + 0.10 * merged["is_NA_score"]
-    )
-    
-    print(f"Rows compared: {len(merged)}")
-    print(f"Mean answer_value score: {merged['answer_score'].mean():.4f}")
-    print(f"Mean ref_id score:       {merged['ref_id_score'].mean():.4f}")
-    print(f"Mean is_NA score:        {merged['is_NA_score'].mean():.4f}")
-    print(f"Overall WattBot score:   {merged['wattbot_score'].mean():.4f}")
-    
-    # ----- Show some incorrect examples -----
-    incorrect = merged[
-        (merged["answer_score"] < 1.0)
-        | (merged["ref_id_score"] < 1.0)
-        | (merged["is_NA_score"] < 1.0)
-    ]
-    
-    if not incorrect.empty and n_examples > 0:
-        print("\nExamples of incorrect / partially correct responses "
-              f"(up to {n_examples} rows):\n")
-        # Grab up to n_examples "worst" rows by wattbot_score
-        for _, row in incorrect.sort_values("wattbot_score").head(n_examples).iterrows():
-            q = row["question_gt"] if "question_gt" in row.index else None
-            print("-" * 80)
-            print(f"id: {row[id_col]}")
-            if q is not None:
-                print(f"Question: {q}")
-            print(f"GT answer_value:   {row[f'{gt_answer_col}_gt']}")
-            print(f"Pred answer_value: {row[f'{pred_answer_col}_pred']}")
-            print(f"GT ref_id:         {row[f'{gt_ref_col}_gt']}")
-            print(f"Pred ref_id:       {row[f'{pred_ref_col}_pred']}")
-            print(f"answer_score: {row['answer_score']:.3f}, "
-                  f"ref_id_score: {row['ref_id_score']:.3f}, "
-                  f"is_NA_score: {row['is_NA_score']:.3f}, "
-                  f"wattbot_score: {row['wattbot_score']:.3f}")
-        print("-" * 80)
-    
-    return merged
-
-```
-
-
-```python
 results_df = compute_wattbot_score(
-    train_qa_path="./data/train_QA.csv",
-    preds_path="./data/wattbot_solutions.csv",
+    train_qa_path=train_qa_path,
+    preds_path=local_solutions_path,
     gt_is_na_col="is_blank",
     pred_is_na_col="is_blank",
+    n_examples=10,
 )
-
 ```
+
+Compare the overall score with the Bedrock run. The retrieval logic, prompts and scoring are identical, so any difference is the two models: `gte-large` versus Titan for retrieval, Qwen3.8-27B versus DeepSeek V3 for generation.
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+### What did the two jobs cost?
+
+Ask SageMaker what it recorded for each job: `session.sagemaker_client.describe_processing_job(ProcessingJobName=...)` returns `CreationTime`, `ProcessingStartTime` and `ProcessingEndTime`. The job names are `embedding_processor.latest_job.job_name` and `rag_processor.latest_job.job_name`. For each job, compute the minutes between creation and start (provisioning, before the instance is billed) and between start and end (the billed window), and price the billed window at $1.41/h for the `ml.g5.xlarge` and $2.61/h for the `ml.g6e.xlarge`. Then, from the RAG job's CloudWatch log timestamps, estimate how much of its billed window was setup (pip install and weight download) and how much was generation. How does the total compare with the cost callout, and with the Bedrock run?
+
+:::::::::::::::::::::::: solution
+
+```python
+def job_cost(job_name: str, price_per_hour: float):
+    d = session.sagemaker_client.describe_processing_job(ProcessingJobName=job_name)
+    provisioning = (d["ProcessingStartTime"] - d["CreationTime"]).total_seconds() / 60
+    billed = (d["ProcessingEndTime"] - d["ProcessingStartTime"]).total_seconds() / 60
+    cost = billed / 60 * price_per_hour
+    print(f"{job_name}: {d['ProcessingJobStatus']}")
+    print(f"  provisioning (not billed): {provisioning:.1f} min")
+    print(f"  billed window:             {billed:.1f} min at ${price_per_hour}/h = ${cost:.2f}")
+    return cost
+
+total = job_cost(embedding_processor.latest_job.job_name, 1.41)
+total += job_cost(rag_processor.latest_job.job_name, 2.61)
+print(f"GPU total for the episode: ${total:.2f}")
+```
+
+Typical numbers: the embedding job bills 5-6 minutes (about $0.13), the RAG job 22-28 minutes (about $1.00-$1.20), so roughly $1.20-$1.40 of GPU time against the callout's $1.50. In the RAG job's log, the first 10-12 minutes of the billed window are pip and the download; the model loads for another minute or two; the remaining ~10 minutes are the questions, about 15 seconds each for two generation calls. So well over half of what you paid for was setup, which is the argument for a custom container (skip the pip) and for keeping an `HF_HOME` cache on S3 (skip the download) once a job is run routinely. The Bedrock run of the same questions cost cents, and the self-hosted route is only justified here because the model is not in the catalog.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+### The runtime cap
+
+Both processors set `max_runtime_in_seconds=2 * 60 * 60`. Predict what would happen if the RAG job were launched with `max_runtime_in_seconds=600` instead: what does the job status become, what is in the output prefix, and what did it cost? Then compute the most a hung job can bill under each job's actual cap, and compare it with the cost of an `ml.g6e.xlarge` notebook instance left running over a weekend (64 hours).
+
+:::::::::::::::::::::::: solution
+
+With a 600-second cap the RAG job is killed by SageMaker ten minutes after `ProcessingStartTime`, while it is still installing vLLM or downloading the weights. The status becomes `Stopped` (the failure reason reads `MaxRuntimeExceeded`), the output prefix is empty because the script never reached the point of writing `wattbot_solutions.csv`, and the bill is the full 600 seconds: 600 / 3600 × $2.61 ≈ $0.44 for nothing. A cap has to leave room for the setup that precedes the work, which is why ours is four times the 30-minute estimate rather than ten percent over it.
+
+Under the real caps, the worst case for a job that hangs (a stuck download, a model that never finishes loading) is 2 h × $1.41 = **$2.82** for the embedding job and 2 h × $2.61 = **$5.22** for the RAG job. A `ml.g6e.xlarge` notebook instance forgotten over a weekend is 64 h × $2.61 = **$167**, and nothing caps it. That is the difference between a job and an instance: the job's worst case is a number you chose before you launched it.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
@@ -658,6 +456,7 @@ results_df = compute_wattbot_score(
 - Of the ways to rent a GPU, a Processing job is the one that cannot be forgotten: it bills while the script runs and ends on its own, with `max_runtime_in_seconds` as the backstop. Use it for batch work; use Bedrock or an endpoint when you need answers in seconds.
 - Inference runs on reduced-precision weights: Qwen3.8-27B in FP8 is ~27 GB and fits one 48 GB GPU; bf16 would need two.
 - A job's inputs and outputs are S3 prefixes mounted into the container; the notebook only stages files and reads results, so it stays a cheap CPU instance.
+- The pipeline logic (`wattbot_rag.py`) ships with the job unchanged from the Bedrock episode; only the two model callables differ.
 - Tags do not propagate from the notebook: every job gets its own `tags=`.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

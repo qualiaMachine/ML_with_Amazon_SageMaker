@@ -18,67 +18,67 @@ exercises: 20
 - Convert PDFs into page-level records and overlapping text chunks, and cache them as `chunks.jsonl` on S3 for reuse in later episodes.
 - Create tagged application inference profiles so that every Bedrock call is attributed to your project.
 - Embed chunks with Amazon Titan Text Embeddings and retrieve relevant context with cosine similarity.
-- Generate WattBot-format answers and explanations with a Bedrock-hosted model and score them against `train_QA.csv`.
+- Generate WattBot-format answers and explanations with a Bedrock-hosted model (DeepSeek V3) and score them against `train_QA.csv`.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 This is the first hands-on RAG episode, and it starts where the overview told you to start: **Amazon Bedrock**. We build a complete RAG pipeline for the [WattBot 2025](https://www.kaggle.com/competitions/WattBot2025/overview) challenge from a small, CPU-only SageMaker notebook. Nothing in this episode needs a GPU: the core model work — **both text embeddings and answer generation** — runs on Bedrock-hosted models that bill per token and leave nothing running between calls. We'll use:
 
-- an **Amazon Titan Text Embeddings V2** model to turn WattBot chunks into vectors, and  
-- an **Anthropic Claude** model hosted on Bedrock to generate answers and explanations.
+- **Amazon Titan Text Embeddings V2** to turn WattBot chunks into vectors, and
+- **DeepSeek V3**, hosted on Bedrock, to generate answers and explanations.
 
 We also do the corpus preparation here: unpack the WattBot PDF corpus, split it into pages and overlapping
-chunks, and cache the chunks on S3. The two episodes that follow reuse those chunks and run the same
+chunks, and cache the chunks on S3. The Processing Jobs episode (and the optional GPU-notebook episode) reuse those chunks and run the same
 retrieval, evaluation, and scoring logic on self-hosted models, so you can compare cost, latency, and
 complexity directly.
 
 ## Why Bedrock for WattBot?
 
-When you self-host models (as the notebook GPU and Processing Job episodes do later), you are responsible for picking a model,
-managing versions, and making sure your instance has enough VRAM. That’s fine for experiments,
+When you self-host models (as the Processing Jobs episode does next), you are responsible for picking a model,
+managing versions, and making sure your instance has enough VRAM. That's fine for experiments,
 but it can get painful once multiple teams or challenges want to reuse the same pipeline.
 
 Running your **embedding + generation** steps on Amazon Bedrock gives you a few nice properties:
 
-- **Managed, up‑to‑date models.** You can use high‑quality models from Anthropic, Amazon, and
+- **Managed, up-to-date models.** You can use high-quality models from Amazon, Anthropic, DeepSeek, Meta and
   others without worrying about container images or CUDA versions.
 - **Pay for what you use (in tokens).** Instead of paying for a GPU instance that might sit
   idle, you pay per token (input + output) when you call the model. For some workloads this
   is cheaper; for large offline batches with smaller models, a dedicated GPU can still win.
-- **Easier sharing and governance.** It’s easier to standardize on a small set of Bedrock
+- **Easier sharing and governance.** It's easier to standardize on a small set of Bedrock
   models across courses, hackathons, or labs than to manage many separate GPU instances.
 
 In this notebook, both the **embedding** and **answer/explanation** steps run on
 Bedrock-hosted models. The embeddings are saved as `embeddings_bedrock.npy` so you can compare them
-against the self-hosted runs in the next two episodes.
+against the self-hosted run in the Processing Jobs episode.
 
 
 ### Models used in this episode
 
-We’ll work with **Amazon Bedrock–hosted foundation models** for both embedding and generation:
+We'll work with **Amazon Bedrock-hosted foundation models** for both embedding and generation:
 
 - **Amazon Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`)
 
-  - General‑purpose text‑embedding model for semantic search, retrieval, clustering, and classification.
-  - Supports configurable embedding dimensions (for example 256–8,192) and has presets tuned for retrieval or binary indexing.
-  - AWS does not publish the exact number of parameters for Titan models; you can treat it as a modern transformer specialized for embeddings rather than free‑form text generation. 
+  - General-purpose text-embedding model for semantic search, retrieval, clustering, and classification.
+  - Supports configurable embedding dimensions (256, 512 or 1,024; we use the default 1,024) and returns normalized vectors, so cosine similarity is a dot product.
+  - AWS does not publish the exact number of parameters for Titan models; you can treat it as a modern transformer specialized for embeddings rather than free-form text generation.
 
-- **Anthropic Claude 3 Haiku** (`anthropic.claude-3-haiku-20240307-v1:0` via Bedrock)
+- **DeepSeek V3** (`deepseek.v3-v1:0` via Bedrock)
 
-  - A fast, mid‑sized Claude model that balances cost and quality for workloads like RAG, chat, and lightweight analysis.
-  - Particularly useful when you want many calls (e.g., one per question) and care about low latency and lower per‑token pricing compared to flagship models such as Claude Opus or Claude 3.5 Sonnet. 
-  - Anthropic does not publish exact parameter counts for Claude models; Haiku sits in the “smallest / fastest” tier within the Claude 3 family.
+  - An open-weight mixture-of-experts model (671B parameters in total, about 37B active per token) that Amazon serves on-demand, so you get a frontier-class generator at per-token prices with no GPU to manage.
+  - A good fit for RAG: it follows a JSON output contract reliably, has a long context window, and is priced in the same class as the cheapest frontier models (check the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) for the current per-token rates).
+  - The same code works for any chat model in the catalog, because we call it through the provider-neutral `converse` API: switch `base_generation_model_id` to a Claude, Llama, or Mistral model ID and nothing else changes.
 
 - **(Optional) Multimodal models for tables and figures**
 
-  - Bedrock also exposes **multimodal models** that can reason over images, charts, and document layouts (for example, Claude 3.5 Sonnet with vision, or Amazon Titan Multimodal Embeddings). These are a good fit if much of your evidence lives in **figures, tables, or scanned PDFs**.
+  - Bedrock also exposes **multimodal models** that can reason over images, charts, and document layouts (for example, Claude models with vision, or Amazon Titan Multimodal Embeddings). These are a good fit if much of your evidence lives in **figures, tables, or scanned PDFs**.
   - To use them from Bedrock you send **both text and image content** in a single request:
-      - Pre‑process PDFs by rendering pages (or cropping individual tables/figures) to images using a tool like `pdf2image` or a headless browser.
-      - Base64‑encode those images and include them as image parts alongside text in the model request.
+      - Pre-process PDFs by rendering pages (or cropping individual tables/figures) to images using a tool like `pdf2image` or a headless browser.
+      - Base64-encode those images and include them as image parts alongside text in the model request.
       - For multimodal embeddings, you call a Titan multimodal embedding model with an `inputImage` (and optionally `inputText`) payload to obtain a single vector that mixes visual and textual information.
-  - This notebook stays with **text‑only** embeddings + generation to keep the workflow simple, but the same RAG pattern extends naturally to multimodal models once you add an image‑extraction step to your preprocessing pipeline.
+  - This notebook stays with **text-only** embeddings + generation to keep the workflow simple, but the same RAG pattern extends naturally to multimodal models once you add an image-extraction step to your preprocessing pipeline.
 
-For a full catalog of available models (including other Claude variants, Amazon models, and partner models), open the **Model catalog** in the Amazon Bedrock console. Each entry provides a model card with capabilities, typical use cases, and pricing details so learners can explore alternatives for their own RAG systems. 
+For a full catalog of available models (including Claude variants, Amazon models, and partner models), open the **Model catalog** in the Amazon Bedrock console. Each entry provides a model card with capabilities, typical use cases, and pricing details so learners can explore alternatives for their own RAG systems.
 
 
 ## Notebook + dataset setup
@@ -93,9 +93,17 @@ See [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageM
 This episode reads from two buckets and you create neither of them here:
 
 - **The shared bucket** (your instructor gives you its name) holds the WattBot inputs under `wattbot/`: `metadata.csv` (the index of papers), `train_QA.csv` (labelled questions and answers), and `corpus.zip` (the PDFs). It is read-only and there is one copy for the whole class.
-- **Your bucket** from the S3 episode (`teamname-yourname`) is where this episode writes what it derives, under a `wattbot/` prefix: the chunked text (`chunks.jsonl`), and in later episodes embeddings and predictions. Its tags cover its storage cost; your notebook instance carries the tags you gave it when you created it, and in this episode those two resources plus the per-token Bedrock calls (tagged through an inference profile, see "Cost tracking" below) are the only things being billed.
+- **Your bucket** from the S3 episode (`teamname-yourname`) is where this episode writes what it derives, under a `wattbot/` prefix: the chunked text (`wattbot/chunks.jsonl`), the embeddings (`wattbot/embeddings/`) and the predictions (`wattbot/solutions/`). Its tags cover its storage cost; your notebook instance carries the tags you gave it when you created it, and in this episode those two resources plus the per-token Bedrock calls (tagged through an inference profile, see "Cost tracking" below) are the only things being billed.
 
-If you are working through the lesson on your own, stage the shared files yourself: `metadata.csv` and `train_QA.csv` are in `data/data.zip` in the lesson repository, `corpus.zip` is built by `scripts/build_wattbot_corpus.py`, and `instructors/shared-data-bucket.md` has the commands.
+::::::::::::::::::::::::::::::::::::: callout
+
+### Working through the lesson on your own?
+
+If there is no instructor-staged bucket, stage the three input files in your own bucket under the same keys and point both variables at it: `metadata.csv` and `train_QA.csv` are in `data/data.zip` in the lesson repository, `corpus.zip` is built once by `scripts/build_wattbot_corpus.py`, and `instructors/shared-data-bucket.md` has the upload commands. Then set `shared_bucket = bucket_name` in the first cell below and everything else works unchanged.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+### Step 1 – Configure the notebook
 
 ```python
 import os
@@ -104,11 +112,10 @@ from typing import Dict, Any, List
 from pathlib import Path
 
 import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
 import pandas as pd
 import numpy as np
-
-# from sentence_transformers import SentenceTransformer
-from botocore.exceptions import ClientError
 
 # ---- AWS configuration ----
 import sagemaker
@@ -117,8 +124,9 @@ session = sagemaker.Session()
 region = session.boto_region_name
 
 # Base model IDs. These are the models we actually want to call, but we will NOT pass
-# them to invoke_model directly -- see "Cost tracking" below for why.
-# Swap for Sonnet/Opus if you have access and want higher quality.
+# them to the runtime directly -- see "Cost tracking" below for why.
+# Any chat model in the Bedrock catalog works here (e.g. a Claude or Llama model ID)
+# because we call it through the provider-neutral `converse` API.
 base_generation_model_id = "deepseek.v3-v1:0"
 base_embedding_model_id = "amazon.titan-embed-text-v2:0"
 
@@ -130,28 +138,53 @@ bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S
 metadata_key = "wattbot/metadata.csv"
 train_key = "wattbot/train_QA.csv"
 corpus_key = "wattbot/corpus.zip"
-chunks_key = "wattbot/chunks.jsonl"    # written to YOUR bucket at the end of chunking
+chunks_key = "wattbot/chunks.jsonl"                         # written to YOUR bucket at the end of chunking
+embeddings_key = "wattbot/embeddings/embeddings_bedrock.npy"  # YOUR bucket
+solutions_key = "wattbot/solutions/wattbot_solutions_bedrock.csv"  # YOUR bucket
 
 # Local working directory in the notebook instance
 local_data_dir = "./data"
 os.makedirs(local_data_dir, exist_ok=True)
 
-# AWS clients
+# AWS clients. On-demand Bedrock throughput is rate-limited per model, so a long loop of
+# calls will occasionally be throttled; the adaptive retry mode backs off and retries
+# instead of raising, which is what we want for a few thousand embedding calls.
 s3 = boto3.client("s3", region_name=region)
-bedrock_runtime = boto3.client("bedrock-runtime", region_name=region)  # invoke models
+bedrock_runtime = boto3.client(
+    "bedrock-runtime",
+    region_name=region,
+    config=Config(retries={"max_attempts": 10, "mode": "adaptive"}),
+)                                                                      # invoke models
 bedrock = boto3.client("bedrock", region_name=region)                  # manage profiles, list models
-
 ```
 
-## Step 4 – Load the metadata and training questions
+### Step 2 – Get the shared WattBot helpers
+
+The retrieval, prompting, answer parsing and scoring logic of the WattBot pipeline is the same whether the models run on Bedrock, in a Processing job or on a notebook GPU. It lives once in the lesson repository, in `scripts/wattbot_rag.py`, and every RAG episode imports it; the only code that differs per episode is the two model calls. Clone the repository and copy the module next to this notebook (the Processing Jobs episode ships the same file inside its jobs).
+
+```python
+!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
+!cp ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
+```
+
+```python
+from wattbot_rag import (
+    ANSWER_SYSTEM_PROMPT,
+    build_docid_to_url,
+    compute_wattbot_score,
+    retrieve_top_k,
+    run_single_qa,
+)
+```
+
+Open `wattbot_rag.py` in the Jupyter file browser as you go: each helper is short, and the docstring at the top says which episode uses what.
+
+## Step 3 – Load the metadata and training questions
 
 Pull the two CSV files from the shared bucket into the notebook and inspect them.
 
-
 ```python
-import requests
 import zipfile
-from typing import Tuple
 
 
 def download_from_s3(key: str, local_name: str, bucket: str = shared_bucket) -> str:
@@ -195,7 +228,7 @@ print("Number of metadata rows:", len(metadata_df))
 train_df.head(15)
 ```
 
-## Step 5 – Get the PDF corpus
+## Step 4 – Get the PDF corpus
 
 The corpus is the set of PDFs listed in `metadata.csv`, one per paper, named `<id>.pdf`. Downloading them from the publishers' sites is slow and unreliable when fifty notebooks do it at once, so the instructors did it once with `scripts/build_wattbot_corpus.py` and staged the result as `corpus.zip` in the shared bucket. We download that one file and unpack it.
 
@@ -215,11 +248,11 @@ print(f"{len(pdf_files)} PDFs in {PDF_DIR}; metadata lists {len(metadata_df)} pa
 
 ### Where the corpus came from
 
-`metadata.csv` has a `url` column pointing at each paper. `scripts/build_wattbot_corpus.py` in the lesson repository walks that column, downloads every PDF, and zips them; it reports any URL that failed so the instructor can decide what to do about it. If you are working on your own, run it once and upload the zip to your bucket under `wattbot/corpus.zip`. That is the whole difference between "the data" and "a copy of the data": the corpus is built once and read many times.
+`metadata.csv` has a `url` column pointing at each paper. `scripts/build_wattbot_corpus.py` in the lesson repository walks that column, downloads every PDF, and zips them; it reports any URL that failed so the instructor can decide what to do about it. If you are working on your own, run it once and upload the zip to your bucket under `wattbot/corpus.zip` (with `shared_bucket = bucket_name`, as in the callout above). That is the whole difference between "the data" and "a copy of the data": the corpus is built once and read many times.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Step 6 – Turn PDFs into page-level “documents”
+## Step 5 – Turn PDFs into page-level "documents"
 
 Next, we convert each PDF into a list of **page-level records**. Each record stores:
 
@@ -234,22 +267,19 @@ Later, we will **chunk these pages** into smaller overlapping segments for embed
 
 ### Why we page-chunk first
 
-We split the PDF into **pages before chunking** because pages give us a stable, easy-to-interpret unit.  
+We split the PDF into **pages before chunking** because pages give us a stable, easy-to-interpret unit.
 This helps with:
 
-- **Keeping metadata** (doc ID, URL, page labels) tied to the text.  
-- **Debugging retrieval** — it’s much easier to understand what the model saw if we know which page(s) were used.  
-- **Cleaning text** before making smaller overlapping chunks.  
+- **Keeping metadata** (doc ID, URL, page labels) tied to the text.
+- **Debugging retrieval** — it's much easier to understand what the model saw if we know which page(s) were used.
+- **Cleaning text** before making smaller overlapping chunks.
 - **Flexibility later** — once pages are structured, we can try different chunk sizes or strategies without re-extracting the PDF.
 
 In short: **pages first → then chunks** keeps the workflow cleaner and easier to reason about.
 
-
-
 ```python
-!pip install pypdf
+%pip install -q pypdf
 ```
-
 
 ```python
 from pypdf import PdfReader
@@ -310,7 +340,7 @@ print(f"Loaded {len(page_docs)} page-level records from {len(metadata_df)} PDFs.
 page_docs[0] if page_docs else None
 ```
 
-## Step 7 – Simple, explicit text chunking
+## Step 6 – Simple, explicit text chunking
 
 RAG systems typically break documents into **chunks** so that:
 
@@ -322,9 +352,7 @@ For this workshop we will implement a **simple sliding-window chunker** that ope
 - `chunk_size_chars`: maximum characters per chunk (e.g., 1,000–1,500).
 - `chunk_overlap_chars`: overlap between consecutive chunks (e.g., 200).
 
-In our own work, you may wish to plug in more sophisticated *semantic chunking*  methods(e.g., splitting on headings, section titles, or sentence boundaries). For now, we'll keep the implementation explicit and easy to debug.
-
-
+In your own work, you may wish to plug in more sophisticated *semantic chunking* methods (e.g., splitting on headings, section titles, or sentence boundaries). For now, we'll keep the implementation explicit and easy to debug.
 
 ```python
 def split_text_into_chunks(
@@ -389,16 +417,12 @@ def make_chunked_docs(
                 }
             )
     return chunked
-
-
-
 ```
 
+Chunking is cheap CPU work, but there is no reason to repeat it on every run. We save the chunks locally as `data/chunks.jsonl` (one JSON record per line) and reload the file if it already exists.
 
 ```python
-import os, json
-
-chunks_jsonl_path = os.path.join(local_data_dir, chunks_key)
+chunks_jsonl_path = os.path.join(local_data_dir, "chunks.jsonl")
 
 def save_chunked_docs_jsonl(path, chunks):
     with open(path, "w", encoding="utf-8") as f:
@@ -428,11 +452,10 @@ else:
 print("Raw pages:", len(page_docs))
 print("Chunked docs:", len(chunked_docs))
 chunked_docs[0] if chunked_docs else None
-
 ```
 
 ```python
-# Upload to YOUR bucket so the next two episodes (and future runs) can reuse the
+# Upload to YOUR bucket so the Processing Jobs episode (and future runs) can reuse the
 # chunks without repeating the unpacking and chunking steps.
 print(f"Uploading chunked docs to s3://{bucket_name}/{chunks_key} ...")
 s3.upload_file(chunks_jsonl_path, bucket_name, chunks_key)
@@ -440,16 +463,16 @@ print("Upload complete.")
 ```
 
 
-## Cost tracking: Bedrock calls carry no tags unless you route them through a profile
+## Step 7 – Cost tracking: Bedrock calls carry no tags unless you route them through a profile
 
-In the SageMaker episodes that follow, we tag every job at launch because tags never propagate from the notebook. Bedrock is stricter still: **an on-demand `invoke_model` or `converse` call has no tags parameter at all.** If you call `anthropic.claude-3-haiku-...` or `amazon.titan-embed-text-v2:0` by its model ID, the usage lands in the account's Bedrock bill as anonymous per-token charges. The notebook's tags, the bucket's tags, and the tags you set on anything else are irrelevant to it. On a shared account that means nobody can tell which team spent what.
+In the SageMaker episodes, we tag every job at launch because tags never propagate from the notebook. Bedrock is stricter still: **an on-demand `invoke_model` or `converse` call has no tags parameter at all.** If you call `deepseek.v3-v1:0` or `amazon.titan-embed-text-v2:0` by its model ID, the usage lands in the account's Bedrock bill as anonymous per-token charges. The notebook's tags, the bucket's tags, and the tags you set on anything else are irrelevant to it. On a shared account that means nobody can tell which team spent what.
 
 The mechanism Bedrock provides for this is an **application inference profile**: a small, free resource that points at a base model and carries cost allocation tags. You create the profile once, then pass the **profile ARN** instead of the model ID as `modelId` in every call. Usage billed through the profile carries the profile's tags into Cost Explorer. Two details to get right:
 
-- You need **one profile per base model** (the profile is model‑specific), so we create one for the generation model and one for the embedding model.
+- You need **one profile per base model** (the profile is model-specific), so we create one for the generation model and one for the embedding model.
 - Bedrock's tag format uses lowercase `key` / `value`, unlike SageMaker's `Key` / `Value`. The tag *names* (`Name`, `Project`, `Purpose`) stay the same so the Cost Explorer filters line up across services.
 
-The helper below reuses a profile if one with the same name already exists, so re‑running the notebook does not create duplicates.
+The helper below reuses a profile if one with the same name already exists, so re-running the notebook does not create duplicates.
 
 ```python
 import re
@@ -473,7 +496,7 @@ def _source_arn(model_id: str) -> str:
     """ARN that the profile should point at.
 
     Plain model IDs (e.g. 'amazon.titan-embed-text-v2:0') map to a foundation-model ARN.
-    Cross-region IDs (e.g. 'us.anthropic.claude-3-5-sonnet-...') are system-defined
+    Cross-region IDs (e.g. 'us.deepseek.v3-v1:0') are system-defined
     inference profiles, so we copy from that profile's ARN instead.
     """
     if model_id.split(".")[0] in {"us", "eu", "apac", "global", "jp", "au"}:
@@ -501,8 +524,8 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
     print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
     return resp["inferenceProfileArn"]
 
-# From here on, these ARNs are what we pass as modelId. The base IDs are only used
-# inside request bodies that require a model name.
+# From here on, these ARNs are what we pass as modelId. The base IDs are never sent to
+# the runtime again.
 bedrock_model_id = get_or_create_inference_profile(base_generation_model_id, "wattbot-gen")
 embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_model_id, "wattbot-embed")
 ```
@@ -513,81 +536,62 @@ embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_mode
 
 - The notebook's execution role needs `bedrock:CreateInferenceProfile`, `bedrock:GetInferenceProfile`, `bedrock:ListInferenceProfiles`, `bedrock:GetFoundationModel`, and `bedrock:TagResource` in addition to `bedrock:InvokeModel`. The `InvokeModel` permission must cover **both** the profile ARN and the underlying model ARN, or calls through the profile are denied. If `create_inference_profile` raises `AccessDeniedException`, ask the account administrator for these permissions rather than falling back to the raw model ID.
 - You can confirm the routing in the Bedrock console under **Inference and Assessment → Cross-region inference → Application inference profiles**, or with `bedrock.list_inference_profiles(typeEquals="APPLICATION")`.
-- Tags only become filters in Cost Explorer once the tag keys have been **activated as cost allocation tags** in the Billing console (an account‑admin, once‑per‑key action; on a shared workshop account the organizers do this). Until then the tags exist on the resource but do not show up on reports.
+- Tags only become filters in Cost Explorer once the tag keys have been **activated as cost allocation tags** in the Billing console (an account-admin, once-per-key action; on a shared workshop account the organizers do this). Until then the tags exist on the resource but do not show up on reports.
 - The profile itself has no hourly or storage charge. You only pay per token, exactly as before.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::
 
+::::::::::::::::::::::::::::::::::::: challenge
+
+### Who is paying for these tokens?
+
+List the application inference profiles in the account and find your two. For each, print its name, the model it points at, and its tags (`bedrock.list_tags_for_resource` takes the profile ARN). Then answer: if a teammate skipped this step and called `deepseek.v3-v1:0` by its raw model ID for the rest of the episode, what would Cost Explorer show when the organizers filter the month's Bedrock spend by `Project`?
+
+:::::::::::::::::::::::: solution
 
 ```python
-# Everything the RAG loop needs is now in memory.
+profiles = bedrock.list_inference_profiles(typeEquals="APPLICATION")["inferenceProfileSummaries"]
+print(f"{len(profiles)} application inference profiles in this account/region")
+for p in profiles:
+    if p["inferenceProfileArn"] in {bedrock_model_id, embedding_model_id_bedrock}:
+        tags = bedrock.list_tags_for_resource(resourceARN=p["inferenceProfileArn"])["tags"]
+        print(p["inferenceProfileName"], "->", [m["modelArn"].split("/")[-1] for m in p["models"]])
+        print("   tags:", {t["key"]: t["value"] for t in tags})
+```
+
+Filtering by `Project` shows **only** the usage that went through a tagged profile. The teammate's calls are still on the bill, under the Bedrock service line for `deepseek.v3-v1:0`, but with no `Project`, `Name` or `Purpose` value: in the grouped view they fall into the "No tag key: Project" bucket, together with every other untagged call in the account. There is no way to attribute them after the fact; tags are applied when the usage is metered, not later. That is why the base model ID is never passed to the runtime in this episode.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+## Step 8 – Embed the chunks with Titan
+
+Everything the RAG loop needs is now in memory: the chunks, the questions, and a way to resolve a document id to its URL for the `ref_url` column.
+
+```python
 print(f"Chunks: {len(chunked_docs)}")
 print(f"Train QAs: {len(train_df)}")
 print(f"Metadata rows: {len(metadata_df)}")
-```
 
-
-```python
-def retrieve_context_for_question_bedrock(
-    question: str,
-    chunk_embeddings: np.ndarray,
-    chunked_docs,
-    top_k: int = 8,
-):
-    """
-    Retrieve top-k chunks for a question using Bedrock embeddings.
-
-    We call the Bedrock embedding model (via `bedrock_embed_text`) to
-    embed the question, then compute cosine similarity against the
-    pre-computed `chunk_embeddings` array.
-    """
-    # Embed the question with the same Bedrock model used for chunks
-    q_emb = bedrock_embed_text(question)
-
-    # Use the same cosine similarity + top-k helper as before
-    retrieved = retrieve_top_k(q_emb, chunk_embeddings, chunked_docs, k=top_k)
-    return retrieved, q_emb
-
-```
-
-
-```python
-from sentence_transformers import SentenceTransformer
-
-```
-
-
-```python
-# Build a mapping from doc_id -> URL so we can surface links in our outputs
-docid_to_url = {}
-for _, row in metadata_df.iterrows():
-    doc_id = str(row.get("id", "")).strip()
-    url = row.get("url", "")
-    if doc_id and isinstance(url, str) and url.strip():
-        docid_to_url[doc_id] = url.strip()
-
+docid_to_url = build_docid_to_url(metadata_df)
 print(f"docid_to_url has {len(docid_to_url)} entries.")
 ```
 
+Titan Text Embeddings V2 takes one string per `invoke_model` call and returns a 1,024-dimensional normalized vector. `embedding_model_id_bedrock` is the ARN of our tagged profile for it, so every call is attributed to our `Project`/`Name`/`Purpose` tags. The embedding loop takes a few minutes for ~3,000 chunks (one HTTPS round trip each); it saves its progress every 500 chunks so an interrupted run resumes where it stopped, and uploads the finished matrix to your bucket.
 
 ```python
-# ----------------------------------------------------------------------------------
-# Bedrock embeddings for WattBot chunks
-# ----------------------------------------------------------------------------------
-# embedding_model_id_bedrock was set above to the ARN of our tagged application
-# inference profile for amazon.titan-embed-text-v2:0, so every embedding call is
-# attributed to our Project/Name/Purpose tags.
-
-data_dir = Path("data")
-data_dir.mkdir(exist_ok=True)
+data_dir = Path(local_data_dir)
 emb_save_path = data_dir / "embeddings_bedrock.npy"
+emb_partial_path = data_dir / "embeddings_bedrock.partial.npy"
 
-def bedrock_embed_text(text: str, model_id: str = embedding_model_id_bedrock):
-    """Call a Bedrock embedding model for a single input string."""
-    body = json.dumps({"inputText": text})
+def bedrock_embed_text(text: str, model_id: str = embedding_model_id_bedrock) -> List[float]:
+    """Call the Titan embedding model (through our tagged profile) for one string."""
     response = bedrock_runtime.invoke_model(
         modelId=model_id,
-        body=body,
+        contentType="application/json",
+        accept="application/json",
+        body=json.dumps({"inputText": text}),
     )
     response_body = json.loads(response["body"].read())
     embedding = response_body.get("embedding")
@@ -596,488 +600,136 @@ def bedrock_embed_text(text: str, model_id: str = embedding_model_id_bedrock):
     return embedding
 
 
-# -------------------------------------------------------------------------
-# If an embedding file already exists, skip recomputing and load it instead
-# -------------------------------------------------------------------------
+def embed_query(question: str) -> np.ndarray:
+    """The retrieval-time half of the pipeline: the same model, one question at a time."""
+    return np.asarray(bedrock_embed_text(question), dtype="float32")
+
+
+def _s3_object_exists(bucket: str, key: str) -> bool:
+    try:
+        s3.head_object(Bucket=bucket, Key=key)
+        return True
+    except ClientError:
+        return False
+
+
 if emb_save_path.exists():
     print(f"Found existing embeddings at {emb_save_path}. Skipping re-computation.")
     chunk_embeddings = np.load(emb_save_path)
+elif _s3_object_exists(bucket_name, embeddings_key):
+    s3.download_file(bucket_name, embeddings_key, str(emb_save_path))
+    print(f"Downloaded cached embeddings from s3://{bucket_name}/{embeddings_key}")
+    chunk_embeddings = np.load(emb_save_path)
 else:
-    print("No existing embeddings found. Computing via Bedrock...")
+    # Resume from a partial save if a previous run was interrupted
+    all_embeddings = list(np.load(emb_partial_path)) if emb_partial_path.exists() else []
+    start = len(all_embeddings)
+    print(f"Computing embeddings via Bedrock from chunk {start} of {len(chunked_docs)}...")
 
-    all_embeddings = []
-    for idx, ch in enumerate(chunked_docs):
-        if (idx + 1) % 250 == 0:
-            print(f"Embedding chunk {idx+1} / {len(chunked_docs)}")
-        text = ch.get("text", "")
-        emb = bedrock_embed_text(text)
-        all_embeddings.append(emb)
+    for idx in range(start, len(chunked_docs)):
+        all_embeddings.append(bedrock_embed_text(chunked_docs[idx]["text"]))
+        if (idx + 1) % 500 == 0 or idx + 1 == len(chunked_docs):
+            np.save(emb_partial_path, np.array(all_embeddings, dtype="float32"))
+            print(f"Embedded {idx + 1} / {len(chunked_docs)} chunks (progress saved)")
 
     chunk_embeddings = np.array(all_embeddings, dtype="float32")
-
-    # Save embeddings for reuse
     np.save(emb_save_path, chunk_embeddings)
-    print(f"Saved embeddings to {emb_save_path}")
+    emb_partial_path.unlink(missing_ok=True)
+    s3.upload_file(str(emb_save_path), bucket_name, embeddings_key)
+    print(f"Saved embeddings to {emb_save_path} and s3://{bucket_name}/{embeddings_key}")
 
-```
-
-
-```python
-# Save embeddings so we can reuse them later without re-calling Bedrock
-np.save(emb_save_path, chunk_embeddings)
-print("Saved Bedrock chunk embeddings to", emb_save_path)
+assert chunk_embeddings.shape[0] == len(chunked_docs), "embeddings and chunks are out of step; delete the cached files and rerun"
 print("Embeddings shape:", chunk_embeddings.shape)
 ```
 
+## Step 9 – Retrieve: cosine similarity over the embedding matrix
+
+Retrieval is pure NumPy: embed the question with the same model, take the cosine similarity against every chunk, and keep the top *k*. `retrieve_top_k` from `wattbot_rag.py` does exactly that (open the file to see it: it is a normalize-and-matrix-multiply). No vector database is needed for a few thousand chunks; the optional GPU-notebook episode discusses when one becomes worth it.
 
 ```python
-# ---------------------- similarity + retrieval ----------------------
+first_row = train_df.iloc[0]
+print("Sample question:", first_row["question"])
 
-# ---------------------- similarity + retrieval ----------------------
-
-def cosine_similarity_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """Cosine similarity between two sets of vectors.
-
-    This helper is intentionally defensive: it will accept Python lists,
-    list-of-lists, or NumPy arrays and cast everything to float32 arrays
-    before computing similarities.
-    """
-    a = np.asarray(a, dtype="float32")
-    b = np.asarray(b, dtype="float32")
-
-    # Ensure 2D
-    if a.ndim == 1:
-        a = a.reshape(1, -1)
-    if b.ndim == 1:
-        b = b.reshape(1, -1)
-
-    a_norm = a / np.linalg.norm(a, axis=1, keepdims=True)
-    b_norm = b / np.linalg.norm(b, axis=1, keepdims=True)
-    return np.matmul(a_norm, b_norm.T)
-
-
-
-def retrieve_top_k(
-    query_embedding: np.ndarray,
-    chunk_embeddings: np.ndarray,
-    chunked_docs: List[Dict[str, Any]],
-    k: int = 8,
-) -> List[Dict[str, Any]]:
-    """Return the top–k chunks for a single query embedding.
-
-    Accepts query/collection embeddings as either NumPy arrays or lists.
-    """
-    # Defensive casting in case we accidentally pass in lists
-    query = np.asarray(query_embedding, dtype="float32").reshape(1, -1)
-    chunks = np.asarray(chunk_embeddings, dtype="float32")
-
-    sims = cosine_similarity_matrix(query, chunks)[0]
-
-    top_idx = np.argsort(-sims)[:k]
-
-    results = []
-    for idx in top_idx:
-        ch = chunked_docs[idx]
-        results.append(
-            {
-                "score": float(sims[idx]),
-                "text": ch["text"],
-                "doc_id": ch.get("doc_id", ""),
-                "title": ch.get("title", ""),
-                "url": ch.get("url", ""),
-                "page_num": ch.get("page_num", None),
-                "page_label": ch.get("page_label", None),
-            }
-        )
-    return results
-
-
-
-def format_context_for_prompt(retrieved_chunks: List[Dict[str, Any]]) -> str:
-    """Turn retrieved chunk dicts into a compact context string for the LLM."""
-    lines = []
-    for i, ch in enumerate(retrieved_chunks, start=1):
-        label = ch.get("doc_id", f"chunk_{i}")
-        page = ch.get("page_label", ch.get("page_num", ""))
-        header = f"[{label}, page {page}]".strip()
-        txt = ch["text"].replace("\n", " ")
-        lines.append(f"{header}: {txt}")
-    return "\n".join(lines)
-
-
-def retrieve_context_for_question(
-    question: str,
-    chunk_embeddings: np.ndarray,
-    chunked_docs,
-    top_k: int = 8,
-):
-    """Use Bedrock embeddings to retrieve the top-k chunks for a question."""
-    # Embed question with Bedrock and make sure we end up with a 1D float32 vector
-    q_vec = bedrock_embed_text(question)
-    q_emb = np.asarray(q_vec, dtype="float32")
-
-    retrieved = retrieve_top_k(q_emb, chunk_embeddings, chunked_docs, k=top_k)
-    return retrieved, q_emb
-
-
+test_retrieved = retrieve_top_k(embed_query(first_row["question"]), chunk_embeddings, chunked_docs, k=3)
+for r in test_retrieved:
+    snippet = r["text"].replace("\n", " ")[:160]
+    print(f"- score={r['score']:.3f} | doc_id={r['doc_id']} | page={r['page_label']} | {snippet}...")
 ```
 
+## Step 10 – Generate: DeepSeek V3 through the `converse` API
+
+Bedrock has two runtime APIs. `invoke_model` takes a provider-specific request body (which is why the Titan call above builds a `{"inputText": ...}` body by hand). `converse` is provider-neutral: a system prompt, a list of messages, and an `inferenceConfig`, in the same shape for DeepSeek, Claude, Llama and the rest. We use `converse` for generation so the model is a one-line swap. The response carries the generated text and a `usage` block with the input and output token counts, which is what Bedrock bills on; we keep every `usage` block so we can price the run at the end.
 
 ```python
-# ---------------------- answer normalization ----------------------
+bedrock_usage = []   # one {"inputTokens": ..., "outputTokens": ...} per call
 
-def normalize_answer_value(raw_value: str) -> str:
-    """Normalize answer_value according to WattBot conventions."""
-    if raw_value is None:
-        return "is_blank"
-
-    s = str(raw_value).strip()
-
-    if not s or s.lower() == "none":
-        return "is_blank"
-
-    if s.startswith("[") and s.endswith("]"):
-        return s
-
-    if s.lower() == "is_blank":
-        return "is_blank"
-
-    # If there is whitespace, keep only the first token
-    if " " in s:
-        first, *_ = s.split()
-        s = first
-
-    # Remove commas
-    s = s.replace(",", "")
-
-    try:
-        val = float(s)
-        if val.is_integer():
-            return str(int(val))
-        return f"{val:.10g}"  # avoid scientific notation
-    except ValueError:
-        return s
-
-```
-
-
-```python
-def call_bedrock_claude(
+def call_bedrock_chat(
     system_prompt: str,
     user_prompt: str,
-    model_id: str = bedrock_model_id,
-    max_tokens: int = 512,
-    temperature: float = 0.3,
+    max_new_tokens: int = 512,
+    model_id: str = bedrock_model_id,   # the tagged profile ARN, never the raw model ID
 ) -> str:
-    """
-    Call a Bedrock chat model (Anthropic 4.x / Claude 3.5 / Llama 3.x, etc.)
-    that uses the OpenAI-style chat completions schema.
-    """
-    # OpenAI-style chat body – this is what your error message is asking for
-    body = {
-        "model": base_generation_model_id,  # the body wants the model *name*; modelId below is our tagged profile ARN
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        "max_tokens": max_tokens,
-        "temperature": temperature,
-    }
-
-    request = json.dumps(body)
+    """Send one system + user turn to a Bedrock chat model and return the generated text."""
     try:
-        response = bedrock_runtime.invoke_model(modelId=model_id, body=request)
+        response = bedrock_runtime.converse(
+            modelId=model_id,
+            system=[{"text": system_prompt}],
+            messages=[{"role": "user", "content": [{"text": user_prompt}]}],
+            inferenceConfig={"maxTokens": max_new_tokens, "temperature": 0},
+        )
     except ClientError as e:
         print(f"ERROR calling Bedrock model {model_id}: {e}")
         raise
 
-    model_response = json.loads(response["body"].read())
+    bedrock_usage.append(response["usage"])
+    # Some models return extra content blocks (e.g. reasoning); keep only the text ones.
+    text_blocks = [block["text"] for block in response["output"]["message"]["content"] if "text" in block]
+    return "\n".join(text_blocks).strip()
 
-    # OpenAI-style response: choices[0].message.content
-    try:
-        text = model_response["choices"][0]["message"]["content"]
-    except Exception:
-        # Fallback / debug
-        print("Unexpected model response:", model_response)
-        raise
 
-    return text.strip()
-
+print(call_bedrock_chat("You are a concise assistant.", "What is 2 + 2? Answer in one short sentence.", max_new_tokens=32))
+print("usage of that call:", bedrock_usage[-1])
 ```
 
+That function has the signature the shared pipeline expects, `generate(system_prompt, user_prompt, max_new_tokens) -> str`, and `embed_query` has the other one, `embed_query(question) -> vector`. Those two callables are the entire difference between this episode and the self-hosted ones.
+
+### What the pipeline asks the model
+
+`run_single_qa` in `wattbot_rag.py` makes two calls per question. The first asks for a JSON object in the WattBot submission format, from the retrieved context only; the second, made only when the first produced an answer, asks for a one-to-three-sentence explanation of how the cited material supports it. The system prompt of the first call is the contract that makes the output machine-readable:
 
 ```python
-# ---------------------- explanation helpers ----------------------
-
-def explanation_system_prompt() -> str:
-    return (
-        "You are an AI assistant that explains how evidence supports answers about "
-        "energy, water, and carbon footprint of AI models.\n\n"
-        "Instructions:\n"
-        "- Write 1–3 sentences.\n"
-        "- Directly explain how the cited supporting materials justify the answer.\n"
-        "- Do NOT include any planning text, meta-reasoning, or tags like <reasoning>.\n"
-        "- Do NOT start with phrases like 'We need to answer'—just give the explanation."
-    )
-
-
-
-def explanation_system_prompt() -> str:
-    return (
-        "You are an AI assistant that explains how evidence supports answers about "
-        "energy, water, and carbon footprint. Focus on clear, factual reasoning, "
-        "and refer directly to the cited documents when appropriate."
-    )
-
-
-def bedrock_explanation_phase_for_question(
-    qid: str,
-    question: str,
-    answer: str,
-    supporting_materials: str,
-    model_id: str = bedrock_model_id,
-) -> str:
-    sys_prompt = explanation_system_prompt()
-    prompt = build_explanation_prompt(question, answer, supporting_materials)
-    raw_explanation = call_bedrock_claude(
-        system_prompt=sys_prompt,
-        user_prompt=prompt,
-        model_id=model_id,
-        max_tokens=256,
-    )
-    return raw_explanation.strip()
-
-
-# ---------------------- answer phase (JSON contract) ----------------------
-
-def bedrock_answer_phase_for_question(
-    qid: str,
-    question: str,
-    retrieved_chunks: List[Dict[str, Any]],
-    model_id: str = bedrock_model_id,
-):
-    """Use Bedrock to answer a single WattBot question given retrieved chunks."""
-    context = format_context_for_prompt(retrieved_chunks)
-
-    system_prompt = (
-        "You are WattBot, a question-answering assistant for energy, water, and carbon footprint.\n"
-        "You must answer questions using ONLY the provided context from scientific papers.\n"
-        "If the context does not contain enough information to answer or infer,\n"
-        "you must mark the question as unanswerable.\n\n"
-        "You must respond with a single JSON object with the following keys:\n"
-        "- answer: natural language answer, including numeric value and units if applicable.\n"
-        "- answer_value: normalized numeric (0 for false, 1 for true), or categorical value with NO units or symbols;\n"
-        "  use 'is_blank' if the question is unanswerable.\n"
-        "- answer_unit: unit string (e.g., kWh, gCO2, %, is_blank).\n"
-        "- ref_id: list of document IDs that support the answer, e.g., ['ID1', 'ID2'].\n"
-        "- is_blank: true if unanswerable, false otherwise.\n"
-        "- supporting_materials: short quote or table/figure pointer from the context.\n"
-    )
-
-    user_prompt = (
-        "Use the context below to answer the question. "
-        "Return ONLY a JSON object, no extra commentary.\n\n"
-        f"Question: {question}\n\n"
-        f"Context:\n{context}\n"
-    )
-
-    raw_answer = call_bedrock_claude(
-        system_prompt=system_prompt,
-        user_prompt=user_prompt,
-        model_id=model_id,
-        max_tokens=512,
-    )
-
-    parsed = {
-        "answer": "",
-        "answer_value": "is_blank",
-        "answer_unit": "is_blank",
-        "ref_id": [],
-        "is_blank": True,
-        "supporting_materials": "is_blank",
-    }
-
-    try:
-        first_brace = raw_answer.find("{")
-        last_brace = raw_answer.rfind("}")
-        if first_brace != -1 and last_brace != -1:
-            json_str = raw_answer[first_brace : last_brace + 1]
-        else:
-            json_str = raw_answer
-
-        candidate = json.loads(json_str)
-
-        parsed["answer"] = candidate.get("answer", "").strip()
-        parsed["answer_value"] = normalize_answer_value(candidate.get("answer_value", "is_blank"))
-        parsed["answer_unit"] = str(candidate.get("answer_unit", "is_blank")).strip() or "is_blank"
-
-        ref_id = candidate.get("ref_id", [])
-        if isinstance(ref_id, str):
-            ref_ids = [ref_id]
-        elif isinstance(ref_id, list):
-            ref_ids = [str(x).strip() for x in ref_id if x]
-        else:
-            ref_ids = []
-        parsed["ref_id"] = ref_ids
-
-        is_blank_flag = candidate.get("is_blank", False)
-        parsed["is_blank"] = bool(is_blank_flag)
-
-        supp = candidate.get("supporting_materials", "is_blank")
-        parsed["supporting_materials"] = str(supp).strip() or "is_blank"
-
-    except Exception as e:
-        print(f"JSON parse error for question {qid}; defaulting to is_blank. Error: {e}")
-
-    return (
-        parsed["answer"],
-        parsed["answer_value"],
-        parsed["is_blank"],
-        parsed["ref_id"],
-        parsed["supporting_materials"],
-    )
-
+print(ANSWER_SYSTEM_PROMPT)
 ```
 
+A question is marked unanswerable (`is_blank` everywhere, as the competition requires) when the model says so **or** when the best retrieval score is below `retrieval_threshold`: weak retrieval means the model is about to answer from its own memory rather than the papers, which is exactly what RAG is meant to prevent.
 
-```python
-def run_single_qa_bedrock(
-    row,
-    chunk_embeddings: np.ndarray,
-    chunked_docs,
-    docid_to_url: dict,
-    top_k: int = 8,
-    retrieval_threshold: float = 0.25,
-    model_id: str = "anthropic.claude-3-haiku-20240307-v1:0",
-):
-    """
-    Full pipeline for a single question using Bedrock for both retrieval-time
-    embeddings and generation.
-    """
-    qid = row["id"]
-    question = row["question"]
+## Step 11 – Run the WattBot evaluation with Bedrock
 
-    # 1. Retrieve supporting chunks using Bedrock embeddings for the query
-    retrieved, q_emb = retrieve_context_for_question_bedrock(
-        question=question,
-        chunk_embeddings=chunk_embeddings,
-        chunked_docs=chunked_docs,
-        top_k=top_k,
-    )
-
-    top_score = retrieved[0]["score"] if retrieved else 0.0
-
-    # 2. Call Bedrock Claude to produce answer JSON
-    (
-        answer,
-        answer_value,
-        is_blank_llm,
-        ref_ids,
-        supporting_materials,
-    ) = bedrock_answer_phase_for_question(
-        qid=qid,
-        question=question,
-        retrieved_chunks=retrieved,
-        model_id=model_id,
-    )
-
-    # --------------------------------------------------------
-    # 3. DECISION: retrieval_threshold OR model blank?
-    # --------------------------------------------------------
-    # NOTE: we only tell the user when it *actually* gets blanked.
-    if is_blank_llm:
-        print(f"[diag][{qid}] → Model returned is_blank (LLM could not answer).")
-    elif top_score < retrieval_threshold:
-        print(
-            f"[diag][{qid}] → Retrieval blocked: top cosine={top_score:.3f} "
-            f"< threshold={retrieval_threshold:.3f}"
-        )
-    is_blank = bool(is_blank_llm) or (top_score < retrieval_threshold)
-
-    if is_blank:
-        answer = "Unable to answer with confidence based on the provided documents."
-        answer_value = "is_blank"
-        answer_unit = "is_blank"
-        ref_ids = []
-        ref_id_str = "is_blank"
-        ref_url_str = "is_blank"
-        supporting_materials = "is_blank"
-        explanation = ""
-    else:
-        answer_value = normalize_answer_value(answer_value)
-        answer_unit = "is_blank"
-
-        if isinstance(ref_ids, list) and ref_ids:
-            ref_id_str = ";".join(ref_ids)
-            urls = []
-            for rid in ref_ids:
-                url = docid_to_url.get(str(rid), "")
-                if url:
-                    urls.append(url)
-            ref_url_str = ";".join(urls) if urls else "is_blank"
-        else:
-            ref_id_str = "is_blank"
-            ref_url_str = "is_blank"
-
-        explanation = bedrock_explanation_phase_for_question(
-            qid=qid,
-            question=question,
-            answer=answer,
-            supporting_materials=supporting_materials,
-            model_id=model_id,
-        )
-
-    return {
-        "id": qid,
-        "question": question,
-        "answer": answer,
-        "answer_value": answer_value,
-        "answer_unit": answer_unit,
-        "ref_id": ref_id_str,
-        "ref_url": ref_url_str,
-        "supporting_materials": supporting_materials,
-        "explanation": explanation,
-    }
-
-```
-
-## Run the WattBot evaluation with Bedrock
-
-Now we can loop over all questions in `train_QA.csv`, run retrieval + Bedrock
-generation, and write a `wattbot_solutions_bedrock.csv` file.
-
-The next two episodes reuse this same loop with self-hosted models; the only difference there is that the answer
-and explanation phases call a local Qwen model instead of a Bedrock-hosted one.
-
-
+Now we loop over all questions in `train_QA.csv`, run retrieval + Bedrock generation, and write `wattbot_solutions_bedrock.csv`, locally and to your bucket. The Processing Jobs episode runs the same `run_single_qa` with self-hosted models; only `embed_query` and `generate` change.
 
 ```python
 results = []
 
-# For quick smoke tests, you can slice train_df (e.g., train_df.head(5))
+# For quick smoke tests, slice train_df (e.g., train_df.head(5))
 for _, row in train_df.iterrows():
-    question = row["question"]
     print("#" * 96)
-    print(f"QUESTION: {question}")
+    print(f"QUESTION: {row['question']}")
 
-    out = run_single_qa_bedrock(
+    out = run_single_qa(
         row=row,
+        embed_query=embed_query,
+        generate=call_bedrock_chat,
         chunk_embeddings=chunk_embeddings,
         chunked_docs=chunked_docs,
         docid_to_url=docid_to_url,
-        top_k=20,
-        retrieval_threshold=0.1,
-        model_id=bedrock_model_id,
+        top_k=8,
+        retrieval_threshold=0.25,
+        verbose=True,
     )
 
-    answer = out["answer"]
-    ref_ids = out["ref_id"]
-    explanation = out["explanation"]
-
-    print(f"ANSWER: {answer}")
-    print(f"ref_ids: {ref_ids}")
-    print(f"EXPLANATION: {explanation}")
-
+    print(f"ANSWER: {out['answer']}")
+    print(f"ref_ids: {out['ref_id']}")
+    print(f"EXPLANATION: {out['explanation']}")
     results.append(out)
 
 results_df = pd.DataFrame(results)
@@ -1085,423 +737,101 @@ results_df = pd.DataFrame(results)
 output_dir = "outputs"
 os.makedirs(output_dir, exist_ok=True)
 output_path = os.path.join(output_dir, "wattbot_solutions_bedrock.csv")
-
 results_df.to_csv(output_path, index=False)
-print(f"Wrote predictions to {output_path}")
+s3.upload_file(output_path, bucket_name, solutions_key)
+print(f"Wrote predictions to {output_path} and s3://{bucket_name}/{solutions_key}")
 
 results_df.head()
-
 ```
 
+## Step 12 – Score against the training answers
+
+WattBot scores each prediction with three components: 0.75 for `answer_value` (numeric within ±0.1% relative tolerance, categorical exact match), 0.15 for the Jaccard overlap between predicted and ground-truth `ref_id` sets, and 0.10 for marking unanswerable questions correctly. `compute_wattbot_score` from `wattbot_rag.py` implements that, joins on `id`, and prints the worst-scoring rows so you can see *why* the pipeline lost points. `train_QA.csv` has no separate "unanswerable" column, so `gt_is_na_col="is_blank"` tells the scorer to derive that flag from `answer_value == "is_blank"` on both sides.
 
 ```python
-import pandas as pd
-import numpy as np
-
-def _to_bool_flag(x):
-    """Convert typical truthy/falsey strings to bool."""
-    if isinstance(x, str):
-        s = x.strip().lower()
-        if s in {"1", "True", "true", "yes"}:
-            return True
-        if s in {"0", "False", "false", "no"}:
-            return False
-    return bool(x)
-
-def _parse_float_or_none(x):
-    try:
-        return float(str(x).strip())
-    except Exception:
-        return None
-
-def _answer_value_correct(gt_val, pred_val, rel_tol=1e-3):
-    """
-    gt_val, pred_val: values from answer_value columns.
-    rel_tol = 0.001 => 0.1% relative tolerance.
-    """
-    gt_str = str(gt_val).strip()
-    pred_str = str(pred_val).strip()
-    
-    # If either is 'is_blank', treat as categorical
-    if gt_str.lower() == "is_blank" or pred_str.lower() == "is_blank":
-        return gt_str.lower() == pred_str.lower()
-    
-    gt_num = _parse_float_or_none(gt_val)
-    pred_num = _parse_float_or_none(pred_val)
-    
-    # If both numeric, use relative tolerance
-    if gt_num is not None and pred_num is not None:
-        if gt_num == 0:
-            return abs(pred_num - gt_num) <= rel_tol  # small absolute tolerance around 0
-        rel_err = abs(pred_num - gt_num) / max(abs(gt_num), 1e-12)
-        return rel_err <= rel_tol
-    
-    # Otherwise, fall back to normalized string match
-    return gt_str.lower() == pred_str.lower()
-
-def _ref_id_jaccard(gt_ref, pred_ref):
-    """
-    Jaccard overlap between sets of ref_ids.
-    Strings may contain semicolon-separated IDs, or 'is_blank'.
-    Case-insensitive.
-    """
-    def to_set(s):
-        if s is None:
-            return set()
-        s = str(s).strip()
-        if not s or s.lower() == "is_blank":
-            return set()
-        parts = [p.strip().lower() for p in s.split(";") if p.strip()]
-        return set(parts)
-    
-    gt_set = to_set(gt_ref)
-    pred_set = to_set(pred_ref)
-    
-    if not gt_set and not pred_set:
-        return 1.0
-    union = gt_set | pred_set
-    if not union:
-        return 0.0
-    inter = gt_set & pred_set
-    return len(inter) / len(union)
-
-def compute_wattbot_score(
-    train_qa_path="train_QA.csv",
-    preds_path="train_solutions_qwen.csv",
-    id_col="id",
-    gt_answer_col="answer_value",
-    gt_ref_col="ref_id",
-    gt_is_na_col="is_NA",   # can also pass "is_blank" or None
-    pred_answer_col="answer_value",
-    pred_ref_col="ref_id",
-    pred_is_na_col=None,    # can pass "is_blank", or leave None to auto
-    n_examples=10,          # how many incorrect examples to print
-):
-    """
-    Compare your solutions to train_QA.csv using a WattBot-style score.
-
-    NA logic:
-    - If an explicit NA column is found/used (e.g. is_NA), we use it via _to_bool_flag.
-    - If you pass gt_is_na_col="is_blank" or pred_is_na_col="is_blank",
-      we *derive* NA from answer_value == "is_blank" instead of expecting a real column.
-    - If no NA column is available at all, we derive from answer_value == "is_blank".
-
-    Also prints up to `n_examples` rows where the model is not perfect
-    (answer_score < 1, ref_id_score < 1, or is_NA_score < 1).
-    """
-    gt = pd.read_csv(train_qa_path)
-    preds = pd.read_csv(preds_path)
-    
-    # Inner join on id to be strict
-    merged = gt.merge(preds, on=id_col, suffixes=("_gt", "_pred"))
-    if merged.empty:
-        raise ValueError("No overlapping ids between ground truth and predictions.")
-
-    # ----- ground truth NA flags -----
-    if gt_is_na_col is not None and gt_is_na_col in merged.columns:
-        # Use explicit column (e.g. "is_NA")
-        gt_is_na_series = merged[gt_is_na_col].map(_to_bool_flag)
-    elif gt_is_na_col is not None and gt_is_na_col.lower() == "is_blank":
-        # Special meaning: derive NA from answer_value_gt == "is_blank"
-        gt_is_na_series = merged[f"{gt_answer_col}_gt"].astype(str).str.lower().eq("is_blank")
-        merged["gt_is_blank_flag"] = gt_is_na_series
-    else:
-        # Fallback: if we have is_NA or is_blank col, use it; else derive
-        if "is_NA" in merged.columns:
-            gt_is_na_series = merged["is_NA"].map(_to_bool_flag)
-        elif "is_blank" in merged.columns:
-            gt_is_na_series = merged["is_blank"].map(_to_bool_flag)
-        else:
-            gt_is_na_series = merged[f"{gt_answer_col}_gt"].astype(str).str.lower().eq("is_blank")
-            merged["gt_is_blank_flag"] = gt_is_na_series
-
-    # ----- prediction NA flags -----
-    if pred_is_na_col is not None and pred_is_na_col in merged.columns:
-        pred_is_na_series = merged[pred_is_na_col].map(_to_bool_flag)
-    elif pred_is_na_col is not None and pred_is_na_col.lower() == "is_blank":
-        # Same convention: derive from answer_value_pred
-        pred_is_na_series = merged[f"{pred_answer_col}_pred"].astype(str).str.lower().eq("is_blank")
-        merged["pred_is_blank_flag"] = pred_is_na_series
-    else:
-        # Auto-detect or derive if no NA column in preds
-        if "is_NA" in merged.columns:
-            pred_is_na_series = merged["is_NA"].map(_to_bool_flag)
-        elif "is_blank" in merged.columns:
-            pred_is_na_series = merged["is_blank"].map(_to_bool_flag)
-        else:
-            pred_is_na_series = merged[f"{pred_answer_col}_pred"].astype(str).str.lower().eq("is_blank")
-            merged["pred_is_blank_flag"] = pred_is_na_series
-
-    ans_scores = []
-    ref_scores = []
-    na_scores = []
-    
-    for idx, row in merged.iterrows():
-        gt_ans = row[f"{gt_answer_col}_gt"]
-        pred_ans = row[f"{pred_answer_col}_pred"]
-        gt_ref = row[f"{gt_ref_col}_gt"]
-        pred_ref = row[f"{pred_ref_col}_pred"]
-        
-        gt_is_na = bool(gt_is_na_series.iloc[idx])
-        pred_is_na = bool(pred_is_na_series.iloc[idx])
-        
-        # 1. answer_value component
-        ans_correct = _answer_value_correct(gt_ans, pred_ans)
-        ans_scores.append(1.0 * ans_correct)
-        
-        # 2. ref_id Jaccard
-        ref_j = _ref_id_jaccard(gt_ref, pred_ref)
-        ref_scores.append(ref_j)
-        
-        # 3. is_NA component (simple: must match ground truth flag)
-        na_scores.append(1.0 if gt_is_na == pred_is_na else 0.0)
-    
-    merged["answer_score"] = ans_scores
-    merged["ref_id_score"] = ref_scores
-    merged["is_NA_score"] = na_scores
-    
-    merged["wattbot_score"] = (
-        0.75 * merged["answer_score"]
-        + 0.15 * merged["ref_id_score"]
-        + 0.10 * merged["is_NA_score"]
-    )
-    
-    print(f"Rows compared: {len(merged)}")
-    print(f"Mean answer_value score: {merged['answer_score'].mean():.4f}")
-    print(f"Mean ref_id score:       {merged['ref_id_score'].mean():.4f}")
-    print(f"Mean is_NA score:        {merged['is_NA_score'].mean():.4f}")
-    print(f"Overall WattBot score:   {merged['wattbot_score'].mean():.4f}")
-    
-    # ----- Show some incorrect examples -----
-    incorrect = merged[
-        (merged["answer_score"] < 1.0)
-        | (merged["ref_id_score"] < 1.0)
-        | (merged["is_NA_score"] < 1.0)
-    ]
-    
-    if not incorrect.empty and n_examples > 0:
-        print("\nExamples of incorrect / partially correct responses "
-              f"(up to {n_examples} rows):\n")
-        # Grab up to n_examples "worst" rows by wattbot_score
-        for _, row in incorrect.sort_values("wattbot_score").head(n_examples).iterrows():
-            q = row["question_gt"] if "question_gt" in row.index else None
-            print("-" * 80)
-            print(f"id: {row[id_col]}")
-            if q is not None:
-                print(f"Question: {q}")
-            print(f"GT answer_value:   {row[f'{gt_answer_col}_gt']}")
-            print(f"Pred answer_value: {row[f'{pred_answer_col}_pred']}")
-            print(f"GT ref_id:         {row[f'{gt_ref_col}_gt']}")
-            print(f"Pred ref_id:       {row[f'{pred_ref_col}_pred']}")
-            print(f"answer_score: {row['answer_score']:.3f}, "
-                  f"ref_id_score: {row['ref_id_score']:.3f}, "
-                  f"is_NA_score: {row['is_NA_score']:.3f}, "
-                  f"wattbot_score: {row['wattbot_score']:.3f}")
-        print("-" * 80)
-    
-    return merged
-
-```
-
-
-```python
-# ------------------------------------------------------------------
-# Normalize reference IDs + answer ranges after results are created
-# ------------------------------------------------------------------
-
-from typing import Any
-import re
-import numpy as np
-
-def normalize_ref_ids(refs: Any) -> str:
-    """
-    Normalize reference IDs to a Python-list-style string.
-
-    Output format examples:
-      Input                       → Output
-      ---------------------------------------------------------
-      "chen2024"                 → "['chen2024']"
-      ['chen2024']               → "['chen2024']"
-      "[chen2024]"               → "['chen2024']"
-      "['chen2024']"             → "['chen2024']"
-
-      "chen2024;smith2023"       → "['chen2024', 'smith2023']"
-      "chen2024, smith2023"      → "['chen2024', 'smith2023']"
-      "[wu2021b;wu2021a]"        → "['wu2021b', 'wu2021a']"
-      ['wu2021b','wu2021a']      → "['wu2021b', 'wu2021a']"
-
-      None                       → "is_blank"
-      "is_blank"                 → "is_blank"
-
-    Rules:
-      - "is_blank" stays exactly "is_blank".
-      - Semicolons are treated as separators (→ commas).
-      - Strips stray brackets, quotes, spaces.
-      - Produces Python-list-style: ['id'] or ['id1', 'id2'].
-    """
-    import numpy as np
-
-    # ----- 1. Handle blanks -----
-    if refs is None or str(refs).strip() == "is_blank":
-        return "is_blank"
-
-    # ----- 2. True iterable input -----
-    if isinstance(refs, (list, tuple, np.ndarray)):
-        cleaned = [str(x).strip().strip("[]'\" ") for x in refs if str(x).strip()]
-        return "[" + ", ".join(f"'{c}'" for c in cleaned) + "]"
-
-    # ----- 3. Treat as string -----
-    s = str(refs).strip()
-
-    # Strip outer brackets if present (e.g., "[chen2024]" or "['chen2024']")
-    if s.startswith("[") and s.endswith("]"):
-        s = s[1:-1].strip()
-
-    # Replace semicolons with commas
-    s = s.replace(";", ",")
-
-    # Split, strip quotes/spaces
-    parts = [p.strip().strip("'\"") for p in s.split(",") if p.strip()]
-
-    if len(parts) == 0:
-        return "is_blank"
-
-    if len(parts) == 1:
-        return f"['{parts[0]}']"
-
-    return "[" + ", ".join(f"'{p}'" for p in parts) + "]"
-
-
-
-def normalize_answer_value(val: Any) -> str:
-    """
-    Normalize answer_value so that:
-      - single numbers stay as-is (300 -> "300")
-      - ranges get bracketed ("300-1000" -> "[300,1000]")
-      - lists/tuples become bracketed ranges
-    """
-    import re
-    import numpy as np
-
-    # list / tuple / array → always a range
-    if isinstance(val, (list, tuple, np.ndarray)):
-        vals = []
-        for v in val:
-            # convert ints cleanly
-            if isinstance(v, (int, float)) and float(v).is_integer():
-                vals.append(str(int(v)))
-            else:
-                vals.append(str(v))
-        return "[" + ",".join(vals) + "]"
-
-    # numeric scalar → leave alone
-    if isinstance(val, (int, float)):
-        if float(val).is_integer():
-            return str(int(val))
-        return str(val)
-
-    # string cases
-    if isinstance(val, str):
-        s = val.strip()
-
-        # already bracketed
-        if s.startswith("[") and s.endswith("]"):
-            return s
-
-        # detect range: 300-1000 or 300 – 1000
-        m = re.match(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*[-–—]\s*([0-9]+(?:\.[0-9]+)?)\s*$", s)
-        if m:
-            a, b = m.groups()
-            # strip trailing .0
-            a = a.rstrip(".0")
-            b = b.rstrip(".0")
-            return f"[{a},{b}]"
-
-        # otherwise single value → leave alone
-        return s
-
-    # fallback: return string without brackets
-    return str(val)
-
-
-```
-
-
-```python
-import pandas as pd
-
-solutions_df = pd.read_csv(output_dir + "/wattbot_solutions_bedrock.csv")
-solutions_df.head()
-
-```
-
-
-```python
-solutions_df["ref_id"] = solutions_df["ref_id"].apply(normalize_ref_ids)
-solutions_df["answer_value"] = solutions_df["answer_value"].apply(normalize_answer_value)
-solutions_df.head()
-```
-
-
-```python
-solutions_df.to_csv(output_dir + "/solutions_normalized.csv", index=False)
-
-```
-
-
-```python
-results_df = compute_wattbot_score(
-    train_qa_path="./data/train_QA.csv",
-    preds_path=output_dir + "/solutions_normalized.csv",
-    gt_is_na_col="is_NA",   # or "is_blank" / None depending on how you mark NAs
+scored_df = compute_wattbot_score(
+    train_qa_path=train_qa_path,
+    preds_path=output_path,
+    gt_is_na_col="is_blank",
+    pred_is_na_col="is_blank",
     n_examples=20,
 )
 ```
 
-## Wrap‑up: Bedrock versus GPU‑based runs
+::::::::::::::::::::::::::::::::::::: challenge
 
-You now have a complete WattBot evaluation running on Bedrock, with per‑token billing and nothing left running. The next two episodes rerun the same evaluation on self‑hosted models, so by the end you will have three versions to compare:
+### What did that run cost?
 
-1. **Bedrock** (this episode) using hosted embedding and generation models with per‑token billing.
-2. **Notebook GPU instance** using a locally loaded open‑source model.
-3. **SageMaker Processing job** running the same model in batch with on-demand compute.
+Every `converse` response carried a `usage` block, and `call_bedrock_chat` kept them all in `bedrock_usage`. Sum the input and output tokens over the evaluation run and price them at the current on-demand rates for DeepSeek V3 on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) (fill the two prices in below). Add the embedding step: ~3,000 chunks of 1,200 characters at Titan Text Embeddings V2's $0.02 per million input tokens. How does the total compare with the overview's estimate for "the whole WattBot pipeline on Bedrock", and with one hour of the `ml.g6e.xlarge` the Processing Jobs episode rents?
+
+:::::::::::::::::::::::: solution
+
+```python
+price_in_per_m = 0.0    # <-- EDIT ME: DeepSeek V3 on-demand, $ per million input tokens
+price_out_per_m = 0.0   # <-- EDIT ME: DeepSeek V3 on-demand, $ per million output tokens
+
+in_tokens = sum(u["inputTokens"] for u in bedrock_usage)
+out_tokens = sum(u["outputTokens"] for u in bedrock_usage)
+gen_cost = in_tokens / 1e6 * price_in_per_m + out_tokens / 1e6 * price_out_per_m
+
+# Titan bills per input token; ~4 characters per token is a fair estimate for English prose
+embed_tokens = sum(len(ch["text"]) for ch in chunked_docs) / 4
+embed_cost = embed_tokens / 1e6 * 0.02
+
+print(f"{len(bedrock_usage)} generation calls: {in_tokens:,} input + {out_tokens:,} output tokens -> ${gen_cost:.3f}")
+print(f"~{embed_tokens:,.0f} embedding tokens -> ${embed_cost:.3f}")
+print(f"Total ~${gen_cost + embed_cost:.2f}; one hour of ml.g6e.xlarge is $2.61")
+```
+
+With ~40 questions, two calls each and ~3,000-token prompts, the run is on the order of 250K input and 20K output tokens: cents, not dollars, at any price in DeepSeek V3's class, plus about two cents of embeddings. That matches the overview's "well under $1" for the whole pipeline, and it is a small fraction of a single GPU-hour. The number to remember is not the exact total but its shape: the bill is proportional to the tokens you sent, and it was zero the moment the loop finished.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+## Wrap-up: Bedrock versus GPU-based runs
+
+You now have a complete WattBot evaluation running on Bedrock, with per-token billing and nothing left running. The Processing Jobs episode reruns the same evaluation on a self-hosted model, and the optional GPU-notebook episode does it once more interactively, so by the end you can compare:
+
+1. **Bedrock** (this episode) using hosted embedding and generation models with per-token billing.
+2. **SageMaker Processing jobs** running an open-weight model in batch, on a GPU that exists only while the job runs.
+3. **A notebook GPU instance** (optional) with the same model loaded interactively.
 
 When deciding between these options in practice:
 
 - Use **Bedrock or other hosted APIs** when:
-  - You want to try the latest frontier models quickly.  
-  - You only need to run a modest number of questions, or you are still prototyping.  
-  - You prefer a simple, token‑based cost model and don’t want to manage GPU capacity.
+  - You want to try the latest frontier models quickly.
+  - You only need to run a modest number of questions, or you are still prototyping.
+  - You prefer a simple, token-based cost model and don't want to manage GPU capacity.
 
-- Use **self‑hosted models on GPU instances** when:
-  - You expect to run large batches repeatedly (e.g., many thousands of questions).  
-  - You want tight control over which architectures/checkpoints you run or fine‑tune.  
-  - You already have institutional access to cost‑effective on‑prem or cloud GPUs.
+- Use **self-hosted models on GPU instances** when:
+  - You need a specific open-weight model that the catalog does not carry.
+  - You expect to run large batches repeatedly (e.g., many thousands of questions).
+  - You want tight control over which architectures/checkpoints you run or fine-tune.
 
-The core **RAG evaluation logic stays identical** across all three episodes, which is the main takeaway:
-once you have a clean retrieval + normalization pipeline (like WattBot’s), swapping out the generator
-is mostly a matter of re‑implementing `answer_phase_for_question` and `explanation_phase_for_question`
-for each compute option you care about.
+The core **RAG evaluation logic stays identical** across all three, which is the main takeaway:
+once you have a clean retrieval + normalization pipeline (like WattBot's, in `wattbot_rag.py`), swapping out the generator
+is a matter of providing a different `embed_query` and `generate`.
 
 
 ## Concluding remarks: Bedrock models are one piece of the RAG puzzle
 
-In this episode we swapped in Bedrock-hosted models for **both** embedding and
+In this episode we used Bedrock-hosted models for **both** embedding and
 generation. Larger, higher-quality models can definitely help a ton — especially on
 messy real-world questions — but it's important to remember that they are still just
 **one component** in your RAG system.
 
 - **Bigger or newer models do not magically fix weak retrieval.** If your chunks
   are poorly aligned with the questions, a very strong LLM will still struggle.
-- **Most of the long‑term accuracy gains in RAG systems come from the plumbing
+- **Most of the long-term accuracy gains in RAG systems come from the plumbing
   around the LLMs**, including:
   - smarter / semantic chunking strategies
   - good metadata and filtering
-  - reranking or multi‑stage retrieval
-  - domain‑specific heuristics and post‑processing
+  - reranking or multi-stage retrieval
+  - domain-specific heuristics and post-processing
 - **Cost and latency live in tension with quality.** Larger models (or higher
   token budgets) often improve answers, but at the cost of more inference time
-  and higher per‑request spend. Bedrock makes it easier to experiment with that
+  and higher per-request spend. Bedrock makes it easier to experiment with that
   tradeoff by switching models without rewriting your pipeline.
 
 As you adapt this notebook to your own projects, treat the LLM choice as **one
@@ -1513,8 +843,9 @@ between already-good models.
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - A complete RAG pipeline on AWS needs no GPU: a CPU notebook plus Bedrock-hosted embedding and generation models is enough.
-- Corpus preparation (PDF download, page extraction, chunking) is cheap CPU work; cache `chunks.jsonl` on S3 so later episodes and runs can reuse it.
+- Corpus preparation (unpacking the staged PDFs, page extraction, chunking) is cheap CPU work; cache `chunks.jsonl` in your bucket so the Processing Jobs episode and later runs can reuse it.
 - Bedrock calls carry no tags; route them through a tagged application inference profile or the spend is anonymous on the bill.
+- `converse` is the provider-neutral way to call a chat model on Bedrock; its `usage` block is what you are billed on. DeepSeek V3 is the generator here, and any catalog model is a one-line swap.
 - Bedrock bills per token and leaves nothing running between calls, which is why it is the default route for RAG inference.
 - The model is one tunable component; most accuracy gains come from chunking, retrieval, and post-processing.
 
