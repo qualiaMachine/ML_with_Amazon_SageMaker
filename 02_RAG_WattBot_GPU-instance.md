@@ -34,7 +34,9 @@ When that happens you host the model yourself on a GPU you rent. This episode do
 
 ::::::::::::::::::::::::::::::::::::: callout
 
-### This is the riskiest way to spend cloud money in the whole lesson
+### The easiest way in this lesson to lose money by accident
+
+Two kinds of cloud-cost disaster show up in research groups. One is a run that is expensive by design, multiplied by the number of attempts it takes to get right: that is fine-tuning, where five-figure bills are routine, and it has its own episode at the end of this lesson. The other is a resource nobody is using that nobody turned off. This episode is the second kind, and it is the one that catches people who were being careful.
 
 A GPU notebook instance is a rental with the meter running. It bills by the hour from the moment it starts until the moment *you* stop it, whether it is generating answers, sitting at an idle prompt, or showing a closed browser tab on a laptop that went home for the weekend. Nothing in this episode turns it off for you. The instance we use, `ml.g6e.xlarge` (one L40S GPU, 48 GB), costs **$2.61 per hour** on-demand in `us-east-1` (AWS price list, October 2026). That is:
 
