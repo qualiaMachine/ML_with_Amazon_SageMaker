@@ -259,7 +259,7 @@ role = get_execution_role()
 s3_client = boto3.client("s3", region_name=region)
 
 shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only bucket with the competition data
-bucket_name = "badgerscribe-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode
+bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode
 username = "doejohn"                   # <-- EDIT ME: lowercase letters/digits only; used in job names
 
 data_prefix = "badger-scribe"
@@ -353,7 +353,7 @@ As in every episode: tags do not propagate from the notebook to the jobs it laun
 
 ```python
 name = "John Doe"        # replace with your name
-project = "badgerscribe"   # replace with your challenge name
+project = "sinkorswim"   # replace with your challenge name
 
 def make_job_tags(purpose: str):
     return [

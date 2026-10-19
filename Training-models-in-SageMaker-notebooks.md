@@ -58,7 +58,7 @@ print(f'role = {role}')
 s3 = boto3.client('s3')
 
 # Define the S3 bucket that we will load from
-bucket_name = 'badgerscribe-doejohn'  # replace with your S3 bucket name
+bucket_name = 'sinkorswim-doejohn'  # replace with your S3 bucket name
 
 # Define train/test filenames
 train_filename = 'titanic_train.csv'
@@ -210,7 +210,7 @@ To compare our local runtime with future experiments, we'll need to know what in
 ```python
 # Replace with your notebook instance name.
 # This does NOT refer to specific ipynb files, but to the SageMaker notebook instance.
-notebook_instance_name = 'badgerscribe-doejohn-trainclassifier'
+notebook_instance_name = 'sinkorswim-doejohn-trainclassifier'
 
 # Describe the notebook instance (sagemaker_client was created from our session above)
 response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
@@ -390,7 +390,7 @@ To avoid this, we explicitly tag each training job at launch time. This ensures 
 
 ```python
 name = "John Doe" # replace with your name
-project = "badgerscribe" # replace with your challenge name
+project = "sinkorswim" # replace with your challenge name
 purpose = "train_XGBoost"
 
 job_tags = [
@@ -647,7 +647,7 @@ To view and monitor your SageMaker training job, follow these steps in the AWS M
    - In the left-hand navigation menu, select **Training jobs**. You'll see a list of recent training jobs, which may include jobs from other users in the account.
 
 3. **Verify your training Job**  
-   - Identify your job by its name. Because we set `base_job_name=notebook_instance_name`, the name starts with your notebook instance name followed by a timestamp, e.g. `badgerscribe-doejohn-trainclassifier-2026-10-16-14-05-33-123` (this is also what `xgboost_estimator.latest_training_job.name` printed above). Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
+   - Identify your job by its name. Because we set `base_job_name=notebook_instance_name`, the name starts with your notebook instance name followed by a timestamp, e.g. `sinkorswim-doejohn-trainclassifier-2026-10-16-14-05-33-123` (this is also what `xgboost_estimator.latest_training_job.name` printed above). Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
 
 4. **Monitor the job status**  
    - Once you've verified the correct job, click on its name to access detailed information:

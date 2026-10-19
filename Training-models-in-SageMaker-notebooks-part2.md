@@ -41,7 +41,7 @@ print(f'role = {role}')
 s3 = boto3.client('s3')
 
 # Define the S3 bucket that we will load from
-bucket_name = 'badgerscribe-doejohn'  # replace with your S3 bucket name
+bucket_name = 'sinkorswim-doejohn'  # replace with your S3 bucket name
 
 # Define train/test filenames
 train_filename = 'titanic_train.csv'
@@ -68,7 +68,7 @@ import helpers
 ```
 
 ```python
-notebook_instance_name = 'badgerscribe-doejohn-trainclassifier' # replace with your notebook instance name
+notebook_instance_name = 'sinkorswim-doejohn-trainclassifier' # replace with your notebook instance name
 
 local_instance_info = helpers.get_notebook_instance_info(notebook_instance_name, region)
 local_instance = local_instance_info['InstanceType']
@@ -170,7 +170,7 @@ As in the XGBoost episode, every training job needs its own tags: a job does not
 
 ```python
 name = "John Doe" # replace with your name
-project = "badgerscribe" # replace with your challenge name
+project = "sinkorswim" # replace with your challenge name
 purpose = "train_PyTorch"
 
 job_tags = [
