@@ -492,10 +492,11 @@ The lesson uses exactly those three everywhere.</li>
 <li>Set a Budgets alert on the account at the planned class total, and a
 Cost Explorer saved report filtered on <code>Project</code>.</li>
 </ul></section><section><h2 class="section-heading" id="data-and-files">Data and files<a class="anchor" aria-label="anchor" href="#data-and-files"></a></h2>
-<hr class="half-width"><ul><li>Shared read-only bucket with the Badger Scribe data and your full
-fine-tune outputs: see the fine-tuning cost page.</li>
-<li>WattBot data: students upload <code>data.zip</code> contents to
-their own bucket in the Bedrock episode; nothing to stage.</li>
+<hr class="half-width"><ul><li>One shared read-only bucket holds the WattBot inputs (metadata,
+questions, PDF corpus) and the Badger Scribe data plus your full
+fine-tune outputs. Staging commands and the bucket policy: <em>Shared
+data bucket: staging before each term</em>. Learners create one bucket
+each in the S3 episode and write all outputs there.</li>
 </ul></section><section><h2 class="section-heading" id="capacity-fallbacks-to-have-on-a-slide">Capacity fallbacks to have on a slide<a class="anchor" aria-label="anchor" href="#capacity-fallbacks-to-have-on-a-slide"></a></h2>
 <hr class="half-width"><ul><li>GPU notebook episode: if <code>ml.g6e.xlarge</code> capacity is
 short, <code>ml.g6e.2xlarge</code> ($2.80/h, same GPU) is the only
