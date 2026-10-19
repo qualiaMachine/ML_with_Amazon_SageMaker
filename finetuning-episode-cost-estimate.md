@@ -28,7 +28,7 @@ Assumptions behind the training lines: CHURRO-3B in bf16 with LoRA rank 16, grad
 
 ## What the class spends
 
-| Scenario | Per student | 50 students |
+| Scenario | Per student | 50 students (double for 100) |
 |---|---|---|
 | In class, one clean pass each (mini job + Exercise 1) | $1.55 | $80 |
 | In class, realistic (one extra relaunch each) | ~$2.20 | ~$110 |
@@ -56,10 +56,10 @@ If the mini jobs are still queueing at 0:45 (capacity), move Step 3 forward: the
 
 **Service quotas.** This is the item most likely to sink the session. In Service Quotas → Amazon SageMaker, per region:
 
-- `ml.g5.xlarge for training job usage`: at least the number of students launching at once. Request **60**.
-- `ml.g5.xlarge for processing job usage`: only needed for the homework. Request **20**; the two jobs per student will not all run at once.
+- `ml.g5.xlarge for training job usage`: at least the number of students launching at once. Request **100**.
+- `ml.g5.xlarge for processing job usage`: only needed for the homework, where each student launches two jobs at once. Request **200**.
 - `Maximum number of instances across all training jobs`: check it is not lower than the above.
-- If you want `ml.g6e.xlarge` for Exercise 2, request 10–20 of those too.
+- If you want `ml.g6e.xlarge` for Exercise 2, request 100 of those too.
 
 New accounts often have these at 0 to 4. Quota increases for GPU instances can take days and sometimes a back-and-forth with support, so file them **three to four weeks** before class.
 
