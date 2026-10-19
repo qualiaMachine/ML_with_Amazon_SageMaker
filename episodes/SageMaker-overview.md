@@ -12,7 +12,7 @@ exercises: 5
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Introduce SageMaker and the controller-plus-jobs pattern the whole lesson is built on.
+- Introduce SageMaker
 - Preview the three parts of the lesson and the cost practices used in all of them.
   
 ::::::::::::::::::::::::::::::::::::::::::::::
@@ -72,7 +72,8 @@ In summary, Amazon SageMaker is a fully managed machine learning platform that s
 
 - SageMaker simplifies ML workflows by eliminating the need for manual job orchestration.
 - Flexible compute options allow users to choose CPU, GPU, or memory-optimized instances based on workload needs.
-- The lesson's pattern: a cheap controller notebook launches jobs that run elsewhere and end on their own, each launched with tags, a runtime cap, a written estimate, and a cleanup step.
+- A cheap controller notebook launches jobs that run on separate instances and end on their own; each job is launched with tags, a runtime cap, a cost estimate, and a cleanup step.
+
 - Parallelized training and hyperparameter tuning accelerate model development.
 - SageMaker supports both built-in ML algorithms and custom scripts via Docker containers.
 - Cost monitoring tools help track and optimize spending on AWS resources.
