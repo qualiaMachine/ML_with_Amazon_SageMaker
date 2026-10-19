@@ -490,7 +490,7 @@ steps is about $6 per student.</p>
 </section><section><h2 class="section-heading" id="what-the-class-spends">What the class spends<a class="anchor" aria-label="anchor" href="#what-the-class-spends"></a></h2>
 <hr class="half-width"><table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Scenario</th>
 <th>Per student</th>
-<th>50 students</th>
+<th>50 students (double for 100)</th>
 </tr></thead><tbody><tr><td>In class, one clean pass each (mini job + Exercise 1)</td>
 <td>$1.55</td>
 <td>$80</td>
@@ -542,15 +542,15 @@ forward: the comparison against your full run needs no student job.</p>
 the session. In Service Quotas → Amazon SageMaker, per region:</p>
 <ul><li>
 <code>ml.g5.xlarge for training job usage</code>: at least the
-number of students launching at once. Request <strong>60</strong>.</li>
+number of students launching at once. Request <strong>100</strong>.</li>
 <li>
 <code>ml.g5.xlarge for processing job usage</code>: only needed for
-the homework. Request <strong>20</strong>; the two jobs per student will
-not all run at once.</li>
+the homework, where each student launches two jobs at once. Request
+<strong>200</strong>.</li>
 <li>
 <code>Maximum number of instances across all training jobs</code>:
 check it is not lower than the above.</li>
-<li>If you want <code>ml.g6e.xlarge</code> for Exercise 2, request 10–20
+<li>If you want <code>ml.g6e.xlarge</code> for Exercise 2, request 100
 of those too.</li>
 </ul><p>New accounts often have these at 0 to 4. Quota increases for GPU
 instances can take days and sometimes a back-and-forth with support, so

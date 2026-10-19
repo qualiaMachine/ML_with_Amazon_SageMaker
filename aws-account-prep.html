@@ -408,11 +408,13 @@
         
 
 <p>Everything that has to be requested or configured on the class AWS
-account before the workshop, sized for <strong>50 students</strong>. GPU
-quota increases often take days and sometimes a support exchange, so
-file them three to four weeks ahead. Instance usage per episode is taken
-from the code in the episodes; if you change an instance type in an
-episode, change the quota here.</p>
+account before the workshop, sized for a class of up to <strong>100
+students</strong> (100 for one-per-student resources, 200 for anything a
+student can have two of at once). GPU quota increases often take days
+and sometimes a support exchange, so file them three to four weeks
+ahead. Instance usage per episode is taken from the code in the
+episodes; if you change an instance type in an episode, change the quota
+here.</p>
 <section><h2 class="section-heading" id="sagemaker-service-quotas">SageMaker service quotas<a class="anchor" aria-label="anchor" href="#sagemaker-service-quotas"></a></h2>
 <hr class="half-width"><p>Console: <strong>Service Quotas → AWS services → Amazon
 SageMaker</strong>, in the region the class uses. Names below are the
@@ -421,45 +423,45 @@ quota names as the console lists them.</p>
 <th>Request</th>
 <th>Used by</th>
 </tr></thead><tbody><tr><td><code>ml.t3.medium for notebook instance usage</code></td>
-<td>60</td>
+<td>100</td>
 <td>controller notebook, every episode</td>
 </tr><tr><td><code>ml.g6e.xlarge for notebook instance usage</code></td>
-<td>60</td>
+<td>100</td>
 <td>GPU RAG episode (Qwen3.8-27B via vLLM). <strong>Default is usually
 0</strong>
 </td>
 </tr><tr><td><code>Total number of notebook instances</code></td>
-<td>120</td>
-<td>two per student</td>
+<td>200</td>
+<td>two per student (controller + GPU)</td>
 </tr><tr><td><code>ml.m5.large for training job usage</code></td>
-<td>120</td>
+<td>200</td>
 <td>XGBoost episode; PyTorch part 2; tuning (2 parallel jobs each)</td>
 </tr><tr><td><code>ml.m5.xlarge for training job usage</code></td>
-<td>120</td>
+<td>200</td>
 <td>PyTorch part 2 runs <code>instance_count=2</code>
 </td>
 </tr><tr><td><code>ml.g4dn.xlarge for training job usage</code></td>
-<td>60</td>
+<td>100</td>
 <td>PyTorch part 2 GPU comparison</td>
 </tr><tr><td><code>ml.g5.xlarge for training job usage</code></td>
-<td>60</td>
+<td>100</td>
 <td>fine-tuning episode (one job per student at once)</td>
 </tr><tr><td><code>ml.g6e.xlarge for training job usage</code></td>
-<td>20</td>
+<td>100</td>
 <td>optional: fine-tuning Exercise 2</td>
-</tr><tr><td><code>Maximum number of instances across all training jobs</code></td>
-<td>250</td>
-<td>must exceed the largest concurrent total above</td>
+</tr><tr><td><code>Number of instances across all training jobs</code></td>
+<td>250 (already applied)</td>
+<td>account-level ceiling; 250 covers 100 students</td>
 </tr><tr><td><code>ml.g5.xlarge for processing job usage</code></td>
-<td>60</td>
-<td>Processing Jobs episode (two jobs per student, sequential);
-fine-tuning homework</td>
+<td>200</td>
+<td>Processing Jobs episode and fine-tuning homework (two jobs per
+student, possibly at once)</td>
 </tr><tr><td><code>ml.g6e.xlarge for processing job usage</code></td>
-<td>60</td>
+<td>200</td>
 <td>only if the Processing Jobs episode is moved to the 27B model</td>
-</tr><tr><td><code>Maximum number of instances across all processing jobs</code></td>
-<td>60</td>
-<td></td>
+</tr><tr><td><code>Number of instances across all processing jobs</code></td>
+<td>250 (already applied)</td>
+<td>account-level ceiling</td>
 </tr></tbody></table><p>Also check <code>ml.g5.xlarge for training warm pool usage</code> is
 left at its default of 0; the episodes do not use warm pools and a
 nonzero quota lets a student leave an idle GPU billing.</p>

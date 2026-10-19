@@ -1148,7 +1148,7 @@ sizes: 10 GB, 100 GB, 1 TB (1024 GB)</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -10768,7 +10768,7 @@ the job’s real <code>BillableTimeInSeconds</code>.</li>
 <li>
 <strong>Quotas</strong>:
 <code>ml.g5.xlarge for training job usage</code> at least the class size
-(request 60). Default is often 0 to 4 and increases take days; file
+(request 100). Default is often 0 to 4 and increases take days; file
 three to four weeks ahead. Full list in <em>Account preparation
 checklist</em>.</li>
 <li>
