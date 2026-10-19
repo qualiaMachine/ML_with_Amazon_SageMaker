@@ -239,7 +239,7 @@ huggingface-cli download stanford-oval/churro-3B --local-dir /tmp/churro-3B
 aws s3 sync /tmp/churro-3B/ s3://<your-bucket>/badger-scribe/model/churro-3B/ && rm -rf /tmp/churro-3B
 ```
 
-No Kaggle account is needed for any of this. The Step 3 comparison against an instructor full run will not apply; run the homework's full fine-tune yourself instead.
+The Step 3 comparison against an instructor full run will not apply; run the homework's full fine-tune yourself instead.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
