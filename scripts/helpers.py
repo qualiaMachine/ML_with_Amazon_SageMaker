@@ -1,13 +1,14 @@
-"""Mirror of helpers.py from the AWS_helpers repository.
+"""Helper functions used throughout the lesson.
 
-The canonical copy of these helpers lives in the external repo that learners
-fork and clone during the lesson (https://github.com/UW-Madison-DataScience/AWS_helpers,
-file ``helpers.py``, imported in the episodes as ``import AWS_helpers.helpers as helpers``).
-This file mirrors that module so the lesson repo is self-contained; keep the two in sync.
+Learners clone the lesson repository once, in the Accessing S3 episode, into
+``/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/`` and import this module with::
+
+    import sys
+    sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
+    import helpers
 """
 import boto3
 from datetime import datetime, timedelta
-import getpass
 import os
 
 def get_s3_bucket_size(bucket_name):
@@ -227,71 +228,31 @@ def get_current_costs(days=1):
     return total_cost
 
 import os
-import getpass
 
-def update_repo(
-    repo_url="github.com/UW-Madison-DataScience/test_AWS.git",
-    name="Chris Endemann", 
-    email="endemann@wisc.edu",
-    commit_message="Updates from Jupyter notebooks"
-):
+def convert_files(direction="notebook_to_python", directory="."):
+    """Convert every notebook in ``directory`` to a .py script, or every .py script
+    to a notebook, with jupytext (``pip install jupytext``).
+
+    direction: "notebook_to_python" (default) or "python_to_notebook".
+    Converts *every* matching file in the directory, so run it inside a folder that
+    holds only the files you mean to convert.
     """
-    Updates a GitHub repository by adding, committing, and pushing changes from the current directory.
-    
-    Parameters:
-    repo_url (str): The GitHub repository URL (HTTPS format without 'https://').
-    name (str): GitHub username for commit configuration.
-    email (str): GitHub email for commit configuration.
-    commit_message (str): The commit message to use. Default is "Updates from Jupyter notebooks".
-    """
-    # Record the starting directory
-    starting_dir = os.getcwd()
-    repo_name = os.path.basename(repo_url).replace('.git', '')  # Extract repository name from URL
-    repo_dir = os.path.join(starting_dir, repo_name)
-
-    # Check if the repository directory exists and change to it if necessary
-    changed_dir = False
-    if os.path.isdir(repo_dir):
-        os.chdir(repo_dir)
-        changed_dir = True
-
-    try:
-        # Prompt for GitHub username and personal access token (PAT)
-        username = input("GitHub Username: ") or "default_username"
-        token = getpass.getpass("GitHub Personal Access Token (PAT): ")
-
-        # Configure Git user details
-        os.system(f'git config --global user.name "{name}"')
-        os.system(f'git config --global user.email "{email}"')
-        
-        # Ensure we are in a git repository
-        if not os.path.exists(".git"):
-            print("Not a Git repository. Please initialize with `git init` and add remote origin before running this.")
-            return
-
-        # Add and commit changes
-        os.system("git add .")
-        os.system(f'git commit -m "{commit_message}"')
-
-        # Pull any remote changes
-        os.system("git config pull.rebase false")
-        os.system("git pull origin main")
-
-        # Push changes to GitHub
-        github_url = f"https://{username}:{token}@{repo_url}"
-        os.system(f"git push {github_url} main")
-        print("Repository updated successfully.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-    finally:
-        # Change back to the original directory if it was changed
-        if changed_dir:
-            os.chdir(starting_dir)
+    import subprocess
+    if direction == "notebook_to_python":
+        src_ext, dst_ext, fmt = ".ipynb", ".py", "py"
+    elif direction == "python_to_notebook":
+        src_ext, dst_ext, fmt = ".py", ".ipynb", "notebook"
+    else:
+        raise ValueError("direction must be 'notebook_to_python' or 'python_to_notebook'")
+    for name in sorted(os.listdir(directory)):
+        if not name.endswith(src_ext):
+            continue
+        src = os.path.join(directory, name)
+        dst = os.path.join(directory, name[: -len(src_ext)] + dst_ext)
+        subprocess.run(["jupytext", "--to", fmt, src, "--output", dst], check=True)
+        print(f"Converted {name} to {os.path.basename(dst)}")
 
 
-# Example usage of the functions in this script
 if __name__ == "__main__":
     # Example: Get the cost of a specific EC2 instance type over the last day
     instance_type = 'g4dn.xlarge'  # Replace with your desired instance type
@@ -317,7 +278,3 @@ if __name__ == "__main__":
     # Example: Get the total AWS cost across all services over the last 7 days
     total_cost = get_current_costs(days=7)
     print(f"Total AWS costs over the last 7 days: ${total_cost:.2f}")
-
-    # Example: Update the GitHub repository with changes
-    repo_url = 'github.com/UW-Madison-DataScience/test_AWS.git'  # Update with your repository URL
-    update_repo(repo_url, commit_message="Automated commit from Jupyter notebook")

@@ -305,7 +305,7 @@ display(Image(filename=page_path, width=500))
 Jobs run in containers, so the code they execute has to be shipped with the job. Clone the lesson repository and copy the scripts into a `code/` directory:
 
 ```python
-!git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
+!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 ```
 
 ```python
