@@ -2712,7 +2712,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -2826,7 +2826,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -10912,6 +10912,50 @@ description and compare.</li>
 </section><section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <hr class="half-width">
+<div id="accordionInstructor1" class="accordion instructor-note accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
+  <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
+</button>
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
+<div class="accordion-body">
+<p>Students never download the data themselves; four things have to be
+in place before the session. Each is written out in the instructor
+pages.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Stage the data in a shared read-only bucket</strong> from
+the lesson’s data release (<code>badger-scribe-data-v1</code>): about
+ten minutes from CloudShell, commands in <em>Badger Scribe data:
+publishing a release</em>. Attach the read-only bucket policy from
+<em>Fine-tuning episode: cost, capacity and setup</em> so the student
+execution role can <code>GetObject</code> and <code>ListBucket</code>.
+The bucket must survive the end-of-workshop cleanup, or be recreated
+from the release next term.</li>
+<li>
+<strong>Run the full fine-tune once</strong> (the estimator in the
+Homework section, all 251 training pages, <code>eval_pages</code> 40)
+and copy <code>train_summary.json</code>, <code>eval_before.csv</code>
+and <code>eval_after.csv</code> from its <code>model.tar.gz</code> to
+<code>badger-scribe/instructor/full-run/</code> in the shared bucket.
+Step 3 compares against these. Replace the time estimates in Step 0 with
+the job’s real <code>BillableTimeInSeconds</code>.</li>
+<li>
+<strong>Quotas</strong>:
+<code>ml.g5.xlarge for training job usage</code> at least the class size
+(request 60). Default is often 0 to 4 and increases take days; file
+three to four weeks ahead. Full list in <em>Account preparation
+checklist</em>.</li>
+<li>
+<strong>Tell students the bucket name</strong> at the start; it is
+the <code>shared_bucket</code> value in the first code cell.</li>
+</ol>
+<p>Fallback instance if g5 capacity is short: <code>ml.g6.xlarge</code>
+(L4, 24 GB, $1.13/h).</p>
+</div>
+</div>
+</div>
+</div>
 <p>This episode runs from a <strong>CPU</strong> notebook instance
 (<code>ml.t3.medium</code> or <code>ml.m5.xlarge</code>). The notebook
 is only a controller: it stages data, launches jobs, and reads results.
@@ -11343,7 +11387,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect startup to be close to 10 minutes and the two evaluations to
@@ -11458,7 +11502,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -11496,7 +11540,7 @@ faster?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Startup (~10 min, $0.44) does not speed up: the container pull and
 the downloads are the same. Training drops from ~10 to ~4 minutes and
@@ -11537,7 +11581,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Checkpointing. If the instance is reclaimed, the job restarts and, as
 written, starts training from scratch. For a 25-minute job that costs 25
