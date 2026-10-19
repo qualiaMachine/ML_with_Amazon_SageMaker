@@ -27,7 +27,7 @@ Also check `ml.g5.xlarge for training warm pool usage` is left at its default of
 
 ## Learner access
 
-Learners sign in through IAM Identity Center with their NetID using the console link in the setup page (account `183295408236`, permission set `ml-bedrock-183295408236sagemaker`). Before the workshop, add every registered NetID to the group that carries that permission set, then ask learners to run the "verify your access" steps in the setup page; a missing assignment is the most common day-one problem and it cannot be fixed from the classroom in a hurry.
+Learners sign in through IAM Identity Center with their university login. Before the workshop, add every registered user to the group that carries the workshop permission set, then email them the Identity Center console link for that account and permission set (the `.../start/#/console?account_id=...&role_name=...` deep link), together with the account name and region to expect. The link is deliberately not printed in the public lesson: it is not a credential, but a public start URL plus role name is the raw material for a convincing phishing page, and the lesson is reused outside UW. Ask learners to run the "verify your access" steps in the setup page; a missing assignment is the most common day-one problem and it cannot be fixed from the classroom in a hurry.
 
 ## Bedrock
 

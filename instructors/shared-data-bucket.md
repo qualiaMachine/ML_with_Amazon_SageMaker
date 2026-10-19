@@ -23,7 +23,7 @@ Learners set `shared_bucket = "<this bucket's name>"` in the first cell of the R
 
 ## 1. Create the bucket and make it readable by the student role
 
-Create the bucket in the class region (same naming rules as the S3 episode; something like `ml-marathon-shared`), with the three cost-allocation tags. Then attach this read-only policy (Permissions → Bucket policy), editing the bucket name and the account/role ARNs:
+Create the bucket in the class region (same naming rules as the S3 episode; something like `ml-marathon-shared`), with the three cost-allocation tags. Then attach this read-only policy (Permissions → Bucket policy), editing the bucket name and replacing `<account-id>` and the role names with your account's:
 
 ```json
 {
@@ -33,8 +33,8 @@ Create the bucket in the class region (same naming rules as the S3 episode; some
             "Effect": "Allow",
             "Principal": {
                 "AWS": [
-                    "arn:aws:iam::183295408236:role/ml-sagemaker-use",
-                    "arn:aws:iam::183295408236:role/ml-sagemaker-bedrock-use"
+                    "arn:aws:iam::<account-id>:role/ml-sagemaker-use",
+                    "arn:aws:iam::<account-id>:role/ml-sagemaker-bedrock-use"
                 ]
             },
             "Action": [
