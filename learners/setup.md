@@ -14,7 +14,7 @@ Before attending this workshop, you'll need to complete a few setup steps to ens
 Details on each step are outlined below.
 
 ### 1. GitHub Account (optional)
-All of the workshop's code lives in the lesson repository itself, which you clone (read-only, no account needed) onto your notebook instance in the *Accessing S3* episode with one command that every later episode repeats. A GitHub account is only needed for the optional self-study episode on pushing your own notebooks to GitHub from SageMaker. If you plan to do that episode and don't have an account, [sign up for GitHub](https://github.com/) (free); the episode walks through the rest.
+Only needed for the optional episode on pushing your notebooks to GitHub. [Sign up](https://github.com/) if you plan to do it.
 
 ### 2. AWS Account 
 There are two ways to get access to AWS for this lesson. Please wait for a pre-workshop email from the instructor to confirm which option to choose.
