@@ -443,8 +443,7 @@
 <div class="card-body">
 <div class="inner bordered">
 <h3 class="card-title">Objectives</h3>
-<ul><li>Introduce SageMaker and the controller-plus-jobs pattern the whole
-lesson is built on.</li>
+<ul><li>Introduce SageMaker</li>
 <li>Preview the three parts of the lesson and the cost practices used in
 all of them.</li>
 </ul></div>
@@ -575,7 +574,7 @@ pages.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>
 <strong>Controller.</strong> It takes a second, needs no GPU, and
@@ -619,21 +618,21 @@ seamlessly.</p>
 <span class="callout-header">Key Points</span>
 <div class="callout-inner">
 <div class="callout-content">
-<ul><li>SageMaker simplifies ML workflows by eliminating the need for manual
-job orchestration.</li>
-<li>Flexible compute options allow users to choose CPU, GPU, or
-memory-optimized instances based on workload needs.</li>
-<li>The lesson’s pattern: a cheap controller notebook launches jobs that
-run elsewhere and end on their own, each launched with tags, a runtime
-cap, a written estimate, and a cleanup step.</li>
-<li>Parallelized training and hyperparameter tuning accelerate model
-development.</li>
-<li>SageMaker supports both built-in ML algorithms and custom scripts
-via Docker containers.</li>
-<li>Cost monitoring tools help track and optimize spending on AWS
-resources.</li>
-<li>SageMaker streamlines scaling from experimentation to deployment,
-making it suitable for both research and production.</li>
+<ul><li><p>SageMaker simplifies ML workflows by eliminating the need for
+manual job orchestration.</p></li>
+<li><p>Flexible compute options allow users to choose CPU, GPU, or
+memory-optimized instances based on workload needs.</p></li>
+<li><p>A cheap controller notebook launches jobs that run on separate
+instances and end on their own; each job is launched with tags, a
+runtime cap, a cost estimate, and a cleanup step.</p></li>
+<li><p>Parallelized training and hyperparameter tuning accelerate model
+development.</p></li>
+<li><p>SageMaker supports both built-in ML algorithms and custom scripts
+via Docker containers.</p></li>
+<li><p>Cost monitoring tools help track and optimize spending on AWS
+resources.</p></li>
+<li><p>SageMaker streamlines scaling from experimentation to deployment,
+making it suitable for both research and production.</p></li>
 </ul></div>
 </div>
 </div>
