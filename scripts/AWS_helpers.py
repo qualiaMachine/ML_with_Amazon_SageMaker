@@ -1,3 +1,10 @@
+"""Mirror of helpers.py from the AWS_helpers repository.
+
+The canonical copy of these helpers lives in the external repo that learners
+fork and clone during the lesson (https://github.com/UW-Madison-DataScience/AWS_helpers,
+file ``helpers.py``, imported in the episodes as ``import AWS_helpers.helpers as helpers``).
+This file mirrors that module so the lesson repo is self-contained; keep the two in sync.
+"""
 import boto3
 from datetime import datetime, timedelta
 import getpass
@@ -127,13 +134,82 @@ def get_sagemaker_notebook_status(notebook_instance_name):
     response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
     return response['NotebookInstanceStatus']
 
-def get_notebook_instance_info(notebook_instance_name):
+def get_notebook_instance_info(notebook_instance_name, region=None):
     """
     Fetches the status and instance type of a specific SageMaker notebook instance.
+
+    Parameters:
+        notebook_instance_name (str): Name of the SageMaker notebook instance (not an .ipynb file).
+        region (str or None): AWS region of the instance. Defaults to the session's region
+            (e.g. ``boto3.Session().region_name``); never hard-code a region in lesson code.
+
+    Returns:
+        dict: {'Status': ..., 'InstanceType': ...}
     """
-    sagemaker_client = boto3.client('sagemaker')
+    if region is None:
+        region = boto3.Session().region_name
+    sagemaker_client = boto3.client('sagemaker', region_name=region)
     response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
     return {'Status': response['NotebookInstanceStatus'], 'InstanceType': response['InstanceType']}
+
+def calculate_tuning_job_time(tuner, region=None):
+    """
+    Sums training and billable time across every training job launched by a SageMaker
+    hyperparameter tuning job. Matches the call in the Hyperparameter-tuning episode:
+    ``helpers.calculate_tuning_job_time(tuner, region)``.
+
+    SageMaker bills per second: each training job's ``BillableTimeInSeconds`` (instance
+    reserved for you, including container pull and data download) multiplied by its
+    instance count. The tuning job itself is not billed.
+
+    Parameters:
+        tuner (sagemaker.tuner.HyperparameterTuner): A tuner whose ``.fit()`` has been called.
+        region (str or None): AWS region. Defaults to the session's region.
+
+    Returns:
+        dict: instance type, max_jobs, max_parallel_jobs, number of completed jobs, and total
+              training / billable seconds (billable already multiplied by instance count).
+    """
+    if region is None:
+        region = boto3.Session().region_name
+    sagemaker_client = boto3.client('sagemaker', region_name=region)
+
+    tuning_job_name = tuner.latest_tuning_job.name
+    tuning_job_desc = sagemaker_client.describe_hyper_parameter_tuning_job(
+        HyperParameterTuningJobName=tuning_job_name)
+    instance_type = tuning_job_desc['TrainingJobDefinition']['ResourceConfig']['InstanceType']
+    limits = tuning_job_desc['HyperParameterTuningJobConfig']['ResourceLimits']
+
+    # Page through all child training jobs of the tuning job
+    paginator = sagemaker_client.get_paginator('list_training_jobs_for_hyper_parameter_tuning_job')
+    job_names = []
+    for page in paginator.paginate(HyperParameterTuningJobName=tuning_job_name, StatusEquals='Completed'):
+        job_names.extend(j['TrainingJobName'] for j in page['TrainingJobSummaries'])
+
+    total_training_seconds = 0
+    total_billable_seconds = 0
+    for job_name in job_names:
+        job_desc = sagemaker_client.describe_training_job(TrainingJobName=job_name)
+        total_training_seconds += job_desc.get('TrainingTimeInSeconds', 0)
+        total_billable_seconds += job_desc.get('BillableTimeInSeconds', 0) * job_desc['ResourceConfig']['InstanceCount']
+
+    print(f"Tuning job: {tuning_job_name}")
+    print(f"Instance Type: {instance_type}")
+    print(f"Max Jobs: {limits['MaxNumberOfTrainingJobs']}")
+    print(f"Max Parallel Jobs: {limits['MaxParallelTrainingJobs']}")
+    print(f"Completed training jobs: {len(job_names)}")
+    print(f"Total training time across all jobs: {total_training_seconds / 60:.1f} minutes")
+    print(f"Total billable time across all jobs: {total_billable_seconds / 60:.1f} minutes (x instance count)")
+
+    return {
+        'TuningJobName': tuning_job_name,
+        'InstanceType': instance_type,
+        'MaxJobs': limits['MaxNumberOfTrainingJobs'],
+        'MaxParallelJobs': limits['MaxParallelTrainingJobs'],
+        'CompletedJobs': len(job_names),
+        'TotalTrainingSeconds': total_training_seconds,
+        'TotalBillableSeconds': total_billable_seconds,
+    }
 
 def get_current_costs(days=1):
     """
@@ -234,7 +310,7 @@ if __name__ == "__main__":
     print(f"SageMaker Notebook '{notebook_instance_name}' Status: {status}")
 
     # Example: Fetch status and instance type of a specific notebook instance
-    notebook_info = get_notebook_instance_info(notebook_instance_name)
+    notebook_info = get_notebook_instance_info(notebook_instance_name, boto3.Session().region_name)
     print(f"Notebook Instance Info for '{notebook_instance_name}':")
     print(f"Status: {notebook_info['Status']}, Instance Type: {notebook_info['InstanceType']}")
 
