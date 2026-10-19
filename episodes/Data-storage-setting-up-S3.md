@@ -104,7 +104,7 @@ Once the bucket is created, you'll be brought to a page that shows all of your c
 
 1. Click on the name of your bucket to bring up additional options and settings.
 2. Click the Permissions tab
-3. Scroll down to Bucket policy and click Edit. Paste the following policy, **editing the bucket name "sinkorswim-doejohn"** to reflect your bucket's name
+3. Scroll down to Bucket policy and click Edit. Paste the following policy, **editing the bucket name "sinkorswim-doejohn"** to reflect your bucket's name and replacing `<account-id>` with the 12-digit AWS account ID shown at the top right of the console (your instructor will also give it to you)
 
 ```json
 {
@@ -114,8 +114,8 @@ Once the bucket is created, you'll be brought to a page that shows all of your c
 			"Effect": "Allow",
 			"Principal": {
 			    "AWS": [
-			        "arn:aws:iam::183295408236:role/ml-sagemaker-use",
-			        "arn:aws:iam::183295408236:role/ml-sagemaker-bedrock-use"
+			        "arn:aws:iam::<account-id>:role/ml-sagemaker-use",
+			        "arn:aws:iam::<account-id>:role/ml-sagemaker-bedrock-use"
 		        ]
 			},
 			"Action": [
