@@ -107,7 +107,7 @@
           <button class="nav-link dropdown-toggle" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             More <i data-feather="chevron-down"></i>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
           </ul></li>
       </ul></div>
     <!--
@@ -386,7 +386,7 @@
                 </h2>
                 <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
-                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li>
+                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li><li><a href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
                     </ul></div>
                 </div>
               </div>
@@ -958,9 +958,8 @@ a time so nothing larger than one zip sits on disk:</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="ex">huggingface-cli</span> download stanford-oval/churro-3B <span class="at">--local-dir</span> /tmp/churro-3B</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a><span class="ex">aws</span> s3 sync /tmp/churro-3B/ s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/badger-scribe/model/churro-3B/ <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/churro-3B</span></code></pre>
 </div>
-<p>No Kaggle account is needed for any of this. The Step 3 comparison
-against an instructor full run will not apply; run the homework’s full
-fine-tune yourself instead.</p>
+<p>The Step 3 comparison against an instructor full run will not apply;
+run the homework’s full fine-tune yourself instead.</p>
 </div>
 </div>
 </div>
