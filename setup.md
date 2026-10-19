@@ -7,7 +7,7 @@ Before attending this workshop, you'll need to complete a few setup steps to ens
 
 1. **GitHub Account** – Create an account and be ready to fork a repository.
 2. **AWS Access** – Use a **shared AWS account** (if attending Machine Learning Marathon or Research Bazaar) or sign up for an AWS Free Tier account.
-3. **Titanic Dataset** – Download the required CSV files in advance.
+3. **Data** – Download one small zip (Titanic CSVs); the two larger datasets are staged for you.
 4. **Workshop Repository** – Fork the provided GitHub repository for use in AWS.
 5. **Visit Glossary** — Find and briefly review the workshop glossary
 6. **(Optional) AWS Skill Builder** — For a broader overview of AWS, visit the [Getting Started with the AWS Cloud Essentials](https://skillbuilder.aws/search?searchText=Getting+Started+with+the+AWS+Cloud+Essentials) course
@@ -47,20 +47,26 @@ Once your AWS account is set up, log in to the **AWS Management Console** to get
 
 ### 3. Download the Data
 
-For this workshop, you will need the Titanic dataset, which can be used to train a classifier predicting survival. 
+The workshop uses three datasets. You download only the first; the other two are already in AWS when you arrive.
 
-1. Please download the following zip file (Right-click -> Save as): [data.zip](https://raw.githubusercontent.com/carpentries-incubator/ML_with_AWS_SageMaker/main/data/data.zip)
+| Dataset | Used in | Size | What you do |
+|---|---|---|---|
+| **Titanic** passenger CSVs (predict survival) | S3, training and tuning episodes | 90 KB | Download now, upload to your own bucket in the S3 episode |
+| **WattBot** energy-literature Q&A (paper index, labelled questions, PDF corpus) | RAG episodes | ~200 MB with PDFs | Nothing. Read from the shared bucket |
+| **Badger Scribe** German Kurrent letters with transcriptions (a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases)) | Fine-tuning episode | ~130 MB | Nothing. Read from the shared bucket |
 
-2. Extract the zip folder contents (Right-click -> Extract all on Windows; Double-click on mac)
+1. Download this zip (Right-click -> Save as): [data.zip](https://raw.githubusercontent.com/carpentries-incubator/ML_with_AWS_SageMaker/main/data/data.zip)
 
-3. Save the two data files (train and test) to a location where they can easily be accessed. E.g., ... 
+2. Extract it (Right-click -> Extract all on Windows; double-click on Mac). It contains a `titanic/` folder and a `wattbot/` folder.
 
-- `~/Downloads/data/titanic_train.csv`
-- `~/Downloads/data/titanic_test.csv`
+3. Keep the two Titanic files somewhere you can find them during the S3 episode, e.g.
 
-In the S3 episode (*Data Storage: Setting up S3*), you will create an S3 bucket and upload this data to use with SageMaker.
+- `~/Downloads/data/titanic/titanic_train.csv`
+- `~/Downloads/data/titanic/titanic_test.csv`
 
-The later episodes use two more datasets, and you do **not** need to download them: the WattBot papers (RAG episodes) and the Badger Scribe handwriting data (fine-tuning episode, published as a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases)) are staged by the instructors in a shared, read-only bucket. You create one bucket of your own in the S3 episode and use it for the whole workshop. No Kaggle account is required for any part of the workshop.
+The `wattbot/` folder holds the two WattBot CSVs (`metadata.csv`, `train_QA.csv`) for anyone staging their own bucket; in the workshop you will not use them from your laptop, because the shared bucket already has them alongside the PDF corpus, which is not in the zip.
+
+In the S3 episode (*Data Storage: Setting up S3*), you will create one S3 bucket of your own, upload the Titanic data to it, and use that bucket for your outputs for the whole workshop. The WattBot and Badger Scribe data live in a shared, read-only bucket that the instructors stage before class; the instructor tells you its name at the start of the RAG and fine-tuning episodes.
 
 ### 4. Get Access To Workshop Code (Fork GitHub Repo)
 
