@@ -135,6 +135,8 @@ Once the bucket is created, you'll be brought to a page that shows all of your c
 
 For workshop attendees, this policy grants the `ml-sagemaker-use` IAM role access to specific S3 bucket actions, ensuring they can use the bucket for reading, writing, deleting, and listing parts during multipart uploads. Attendees should apply this policy to their buckets to enable SageMaker to operate on stored data.
 
+The bucket you create here is for data *you* bring. Some later episodes (for example, the fine-tuning episode) instead read a larger dataset from a shared, read-only bucket that the instructors stage ahead of time, so you never upload it yourself; you only point your jobs at its S3 path.
+
 ::::::::::::::::::::::::::::::::::::: callout 
 
 #### General guidance for setting up permissions outside of this workshop

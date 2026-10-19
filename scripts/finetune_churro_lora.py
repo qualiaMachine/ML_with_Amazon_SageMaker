@@ -13,6 +13,8 @@ What gets written to $SM_MODEL_DIR (SageMaker tars it into model.tar.gz):
     adapter_config.json, adapter_model.safetensors   the LoRA adapter
     processor files                                  so inference needs no base download
     holdout_page_ids.csv                             pages held out of training
+    eval_before.csv, eval_after.csv                  per-page CER on sampled holdout pages,
+                                                     base model vs. fine-tuned (same pages)
     train_summary.json                               what this run did and scored
 
 The base weights are never modified: a LoRA adapter is a few tens of MB that
@@ -38,6 +40,7 @@ from badger_common import (
     load_metadata,
     load_page_image,
     macro_cer,
+    page_cer,
     user_messages,
 )
 
@@ -57,9 +60,11 @@ def parse_args():
     p.add_argument("--min_pixels", type=int, default=DEFAULT_MIN_PIXELS)
     p.add_argument("--use_metadata", type=int, default=1)
     # --- how much of the data ---
+    p.add_argument("--categories", type=str, default="", help="comma-separated subset, e.g. survey_notes; empty = all")
     p.add_argument("--holdout_frac", type=float, default=0.15, help="fraction of pages per category kept for scoring")
     p.add_argument("--max_train_pages", type=int, default=0, help="0 = all; set small (e.g. 20) for a smoke test")
-    p.add_argument("--eval_pages", type=int, default=20, help="holdout pages transcribed after training to report CER (0 = skip)")
+    p.add_argument("--eval_pages", type=int, default=20, help="holdout pages transcribed to report CER (0 = skip)")
+    p.add_argument("--eval_before", type=int, default=1, help="1 = also score the base model on the same pages before training")
     p.add_argument("--max_new_tokens", type=int, default=1024)
     p.add_argument("--seed", type=int, default=42)
     # --- SageMaker paths ---
@@ -146,10 +151,14 @@ def transcribe(model, processor, image, prompt, max_new_tokens):
     return processor.decode(gen, skip_special_tokens=True).strip()
 
 
-def evaluate(model, processor, df, images_dir, doc_ctx, max_pixels, n_pages, max_new_tokens, seed):
+def evaluate(model, processor, df, images_dir, doc_ctx, max_pixels, n_pages, max_new_tokens, seed, label, out_dir):
+    """Transcribe a fixed sample of holdout pages and report CER. Called with
+    the same seed before and after training, so both scores are on the same
+    pages. Writes eval_<label>.csv with one row per page."""
     if n_pages <= 0 or len(df) == 0:
         return None
     sample = df.sample(n=min(n_pages, len(df)), random_state=seed)
+    was_training = model.training
     model.eval()
     processor.tokenizer.padding_side = "left"
     preds = []
@@ -157,11 +166,19 @@ def evaluate(model, processor, df, images_dir, doc_ctx, max_pixels, n_pages, max
     for r in sample.to_dict("records"):
         img = load_page_image(os.path.join(images_dir, f"{r['page_id']}.jpg"), max_pixels)
         preds.append(transcribe(model, processor, img, build_prompt(r["category"], doc_ctx.get(r["doc_id"], "")), max_new_tokens))
+    secs = time.time() - t0
     sample = sample.assign(text_pred=preds).rename(columns={"text": "text_ref"})
     macro, by_cat = macro_cer(sample)
-    print(f"[eval] {len(sample)} holdout pages in {time.time() - t0:.0f}s -> macro CER {macro:.4f}")
+    sample["cer"] = [page_cer(p, r) for p, r in zip(sample["text_pred"], sample["text_ref"])]
+    sample[["page_id", "doc_id", "category", "cer", "text_ref", "text_pred"]].to_csv(
+        os.path.join(out_dir, f"eval_{label}.csv"), index=False)
+    print(f"[eval {label}] {len(sample)} holdout pages in {secs:.0f}s ({secs / len(sample):.1f} s/page) -> macro CER {macro:.4f}")
     print(by_cat.to_string())
-    return {"n_pages": int(len(sample)), "macro_cer": macro, "per_category": by_cat.round(4).to_dict()}
+    processor.tokenizer.padding_side = "right"
+    if was_training:
+        model.train()
+    return {"n_pages": int(len(sample)), "macro_cer": round(macro, 4),
+            "per_category": by_cat.round(4).to_dict(), "seconds_per_page": round(secs / len(sample), 1)}
 
 
 # ---------------------------------------------------------------------------
@@ -181,7 +198,12 @@ def main():
     meta_path = os.path.join(args.train_dir, "metadata.csv")
     doc_ctx = load_metadata(meta_path) if (args.use_metadata and os.path.exists(meta_path)) else {}
 
+    # Split over ALL pages first (so the holdout is the same for every run,
+    # whatever subset is trained on), then filter to the requested categories.
     train_df, hold_df = split_pages(df, args.holdout_frac, args.seed)
+    if args.categories:
+        cats = [c.strip() for c in args.categories.split(",") if c.strip()]
+        train_df, hold_df = train_df[train_df.category.isin(cats)], hold_df[hold_df.category.isin(cats)]
     if args.max_train_pages > 0:
         train_df = train_df.sample(n=min(args.max_train_pages, len(train_df)), random_state=args.seed)
     print(f"pages: {len(df)} total -> {len(train_df)} train / {len(hold_df)} holdout")
@@ -212,6 +234,13 @@ def main():
     model = get_peft_model(model, lora)
     model.enable_input_require_grads()  # needed for gradient checkpointing with frozen embeddings
     model.print_trainable_parameters()
+
+    # --- score the base model on the holdout sample BEFORE training ---
+    # (the adapter is freshly initialised to zero, so this is the base model)
+    eval_before = None
+    if args.eval_before:
+        eval_before = evaluate(model, processor, hold_df, images_dir, doc_ctx, args.max_pixels,
+                               args.eval_pages, args.max_new_tokens, args.seed, "before", args.model_dir)
 
     # --- train ---
     targs = TrainingArguments(
@@ -248,12 +277,13 @@ def main():
     model.save_pretrained(args.model_dir)
     processor.save_pretrained(args.model_dir)
 
-    # --- quick score on holdout pages ---
-    eval_result = evaluate(model, processor, hold_df, images_dir, doc_ctx, args.max_pixels,
-                           args.eval_pages, args.max_new_tokens, args.seed)
+    # --- score the fine-tuned model on the SAME holdout pages ---
+    eval_after = evaluate(model, processor, hold_df, images_dir, doc_ctx, args.max_pixels,
+                          args.eval_pages, args.max_new_tokens, args.seed, "after", args.model_dir)
 
     summary = {
         "model_id": args.model_id,
+        "categories": args.categories or "all",
         "train_pages": int(len(train_df)),
         "holdout_pages": int(len(hold_df)),
         "epochs": args.epochs,
@@ -262,7 +292,8 @@ def main():
         "lora_r": args.lora_r,
         "train_minutes": round(train_secs / 60, 1),
         "final_loss": round(float(result.training_loss), 4),
-        "holdout_eval": eval_result,
+        "holdout_eval_before": eval_before,
+        "holdout_eval_after": eval_after,
     }
     with open(os.path.join(args.model_dir, "train_summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
