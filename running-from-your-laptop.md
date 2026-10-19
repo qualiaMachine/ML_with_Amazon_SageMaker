@@ -2,7 +2,7 @@
 title: 'Running this lesson from your own machine'
 ---
 
-Every episode in this lesson runs on a small SageMaker notebook instance, and the workshop keeps it that way on purpose: the instance's execution role is your identity, so no credential ever has to be installed on a laptop, and everyone gets the same Python environment. After the workshop, though, the natural way to use what you learned is from JupyterLab on your own machine, with the same cells launching the same jobs. This page is the list of what changes. It is short, because the lesson's point is that the *jobs* do the work and the controller is cheap: a laptop is just another controller.
+Every episode in this lesson runs on a SageMaker notebook instance, and the *Notebooks as Controllers* episode explains why: the instance's role is the identity, so no credential is installed on anyone's machine, and everyone has the same environment. If you later want to run the same cells from JupyterLab on your own computer, this page lists what changes. It is short, because the *jobs* do the work and the controller is cheap: a laptop is just another controller.
 
 ## 1. Authenticate with short-lived credentials, never with access keys
 
@@ -41,7 +41,7 @@ jupyter lab
 |---|---|---|
 | Every episode's setup cell | `role = get_execution_role()` | Off a SageMaker instance this raises *"The current AWS identity is not a role"*. Set it explicitly: `role = "arn:aws:iam::<account-id>:role/<execution-role>"`. For the workshop account use the execution role your notebook instance had (copy its ARN from the instance's details page in the console, under **Permissions and encryption**). Your SSO permission set must allow `iam:PassRole` on that role; the workshop's does. |
 | Every episode's setup cell | `region = boto3.Session().region_name` | Unchanged; it now reads the profile's default region. If it prints `None`, set `AWS_DEFAULT_REGION` or re-run `aws configure sso`. |
-| Accessing S3, PyTorch episodes | `%cd /home/ec2-user/SageMaker/`, paths under it | Any folder you like; keep the `AWS_helpers/` clone next to your notebooks so the `sys.path` lines still find `helpers.py`. |
+| Accessing S3, PyTorch episodes | `%cd /home/ec2-user/SageMaker/`, paths under it | Any folder you like; clone the lesson repository there and point the `sys.path.insert` line at its `scripts/` folder. |
 | PyTorch episode | `helpers.get_notebook_instance_info(...)` to label the local run | There is no notebook instance to describe. Replace with `local_instance = "laptop"` (or your CPU model). The local timing is still the point of the cell. |
 | Accessing S3 episode | Reads directly from S3 in the same region, free | Reading to a laptop is a transfer out of AWS at $0.09/GB. The lesson's data is megabytes; for real datasets, keep the data and the compute in the same region and let jobs read it, which is the lesson's pattern anyway. |
 | Optional GPU-notebook episode | Needs a `ml.g6e.xlarge` notebook instance | Does not apply. The Processing-jobs episode is the laptop-friendly version of the same work. |
@@ -51,4 +51,4 @@ Everything else, every estimator, processor, tag block, `max_run` cap and cost r
 
 ## 4. One thing you lose, one thing you gain
 
-You lose the uniform environment: the version of the SageMaker SDK on your laptop is yours to keep current (`pip install -U sagemaker`), and a cell that works for you may fail for a colleague with a two-year-old install. You gain the thing researchers actually want, which is your own editor, your own files, and no instance to remember to stop.
+You lose the uniform environment: the version of the SageMaker SDK on your laptop is yours to keep current (`pip install -U sagemaker`), and a cell that works for you may fail for a colleague with a two-year-old install. You gain your own editor, your own files, and no instance to remember to stop.
