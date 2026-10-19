@@ -16,7 +16,7 @@ ML Marathon and Research Bazaar, usable by anyone with an AWS account.
 | Training and tuning | Training jobs (XGBoost, PyTorch), hyperparameter tuning | Titanic, CPU vs GPU, parallel jobs |
 | Retrieval-augmented generation | Overview, Bedrock, Processing jobs (plus an optional self-study GPU-notebook episode) | [WattBot](https://www.kaggle.com/competitions/WattBot2025) energy-literature Q&A |
 | Fine-tuning | LoRA fine-tune of CHURRO-3B as a training job | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
-| Wrap-up | Resource management and cleanup | |
+| Wrap-up | Resource management and cleanup (plus an optional episode on the CLI equivalents: look, stop, copy, launch) | |
 
 Cost control runs through every episode: cost-allocation tags on every
 resource, `max_run` caps on every job, estimates written down before a launch
@@ -29,7 +29,7 @@ notebook instances.
 |---|---|
 | `episodes/*.md` | The lesson text. **Edit these**; everything else below derives from them. |
 | `notebooks/*.ipynb` | Jupyter notebooks generated from the episodes by `scripts/md_to_ipynb.py`. Regenerated automatically on every push to `main`; do not edit by hand. |
-| `scripts/` | Training, processing and helper scripts that the episodes clone into SageMaker (`train_nn.py`, `wattbot_rag_batch.py`, `finetune_churro_lora.py`, ...), plus the notebook generator and the data-release builder. |
+| `scripts/` | Everything the episodes import or launch: `helpers.py` (bucket size, instance info, tuning-job cost), the training scripts (`train_xgboost.py`, `train_nn.py`), the RAG and fine-tuning scripts, plus the notebook generator and the data-release builder. Learners clone this repository once onto their notebook instance; there is no separate helper repository. |
 | `learners/` | Setup instructions, glossary, instance-selection guide. |
 | `instructors/` | Instructor notes: account preparation and quotas, per-episode cost estimates, data staging, end-of-workshop cleanup with aws-nuke. |
 | `data/data.zip` | The Titanic CSVs used in the first half of the lesson. |
@@ -39,7 +39,7 @@ notebook instances.
 
 - **Titanic** (training episodes): `data/data.zip` in this repository; learners download it before the workshop.
 - **WattBot** (RAG episodes): `metadata.csv` and `train_QA.csv` are in the same `data.zip`; the PDF corpus is built once with `scripts/build_wattbot_corpus.py`. Instructors stage all three in the shared bucket; learners read them from there.
-- **Badger Scribe** (fine-tuning episode): published as a [GitHub Release](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) on this repository (`badger-scribe-data-v1`: 295 train and 141 test pages of the Anna Seifert correspondence, Max Kade Institute, with human transcriptions). Instructors stage it in the shared S3 bucket before class; learners do not need a Kaggle account. See `instructors/badger-scribe-data-release.md` for publishing a new version and `instructors/shared-data-bucket.md` for staging.
+- **Badger Scribe** (fine-tuning episode): published as a [GitHub Release](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) on this repository (`badger-scribe-data-v1`: 295 train and 141 test pages of the Anna Seifert correspondence, Max Kade Institute, with human transcriptions). Instructors stage it in the shared S3 bucket before class. See `instructors/badger-scribe-data-release.md` for publishing a new version and `instructors/shared-data-bucket.md` for staging.
 
 Learners create exactly one bucket of their own, in the S3 episode, and every later episode writes its outputs there under a prefix.
 
