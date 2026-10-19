@@ -56,7 +56,6 @@ Once your AWS account is set up, log in to the **AWS Management Console** to get
 - `~/Downloads/data/titanic/titanic_train.csv`
 - `~/Downloads/data/titanic/titanic_test.csv`
 
-The larger datasets used in the RAG and fine-tuning episodes are staged by the instructors in a shared bucket; you do not need to download them.
 
 ### 4. Review the Workshop Glossary Page  
 When learning cloud tools for the first time, understanding new terminology is half the battle. We encourage learners to *briefly review* the [Glossary page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html#glossary) (also accessible from the top menu of each lesson page) before the workshop.  *You don't need to memorize the terms*—just a quick read-through will help familiarize you with key concepts. Once we start running our own AWS SageMaker experiments, these terms will start to make more sense in context. If you feel lost at any point during the workshop, please ask the instructor for assistance or refer back to the glossary.
