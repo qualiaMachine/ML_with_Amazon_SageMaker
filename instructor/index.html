@@ -441,24 +441,23 @@ episode covers monitoring and cleanup. Run as written, the full workshop
 costs a few dollars per learner.</p>
 </div>
 <div class="section level3">
-<h3 id="what-this-workshop-does-not-cover-yet">What This Workshop Does Not Cover (Yet)<a class="anchor" aria-label="anchor" href="#what-this-workshop-does-not-cover-yet"></a></h3>
-<p>Currently, this workshop does not include:</p>
+<h3 id="what-this-workshop-does-not-cover">What This Workshop Does Not Cover<a class="anchor" aria-label="anchor" href="#what-this-workshop-does-not-cover"></a></h3>
 <ul><li>
-<strong>Inference endpoints</strong>: serving a model behind an
-always-on API for an application with steady traffic. The lesson
-explains when an endpoint is the right tool and what it costs, but does
-not deploy one.</li>
+<strong>Deploying models as endpoints</strong>: serving a trained or
+fine-tuned model behind an always-on API.</li>
 <li>
-<strong>AWS Lambda</strong>: Lambda lets you run small pieces of
-code without setting up or managing a server. You write a function, tell
-AWS when to run it (for example, when a file is uploaded or a request
-comes in), and it automatically runs and scales as needed. This is
-useful for simple tasks like cleaning data as it arrives, kicking off a
-training job, or running a quick analysis without having to keep a
-server running all the time.</li>
+<strong>Agents and tool use</strong>: LLM applications that call
+tools or chain multiple model calls (e.g., Bedrock Agents).</li>
 <li>
-<strong>Additional AWS services</strong> beyond SageMaker, Bedrock
-and S3.</li>
+<strong>Full-parameter fine-tuning and multi-GPU training</strong>:
+the lesson fine-tunes with LoRA on one GPU and explains what larger runs
+cost, but does not run one.</li>
+<li>
+<strong>Evaluation beyond a single metric</strong>: LLM-as-judge,
+human evaluation, and benchmark suites.</li>
+<li>
+<strong>MLOps</strong>: pipelines, experiment tracking, model
+registries, and scheduled retraining.</li>
 </ul><p>If there’s a specific ML or AI workflow or AWS service you’d like to
 see included in this curriculum, please let us know! We’re happy to
 develop additional content to meet the needs of researchers, students,
