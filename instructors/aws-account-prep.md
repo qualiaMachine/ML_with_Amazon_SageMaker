@@ -25,6 +25,10 @@ Console: **Service Quotas → AWS services → Amazon SageMaker**, in the region
 
 Also check `ml.g5.xlarge for training warm pool usage` is left at its default of 0; the episodes do not use warm pools and a nonzero quota lets a student leave an idle GPU billing.
 
+## Learner access
+
+Learners sign in through IAM Identity Center with their NetID using the console link in the setup page (account `183295408236`, permission set `ml-bedrock-183295408236sagemaker`). Before the workshop, add every registered NetID to the group that carries that permission set, then ask learners to run the "verify your access" steps in the setup page; a missing assignment is the most common day-one problem and it cannot be fixed from the classroom in a hurry.
+
 ## Bedrock
 
 Console: **Service Quotas → Amazon Bedrock**, and **Bedrock → Model access**.
