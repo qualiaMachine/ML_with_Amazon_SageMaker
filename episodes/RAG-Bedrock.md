@@ -478,7 +478,7 @@ The helper below reuses a profile if one with the same name already exists, so r
 import re
 
 name = "John Doe"        # replace with your name
-project = "badgerscribe"   # replace with your challenge name
+project = "sinkorswim"   # replace with your challenge name
 purpose = "RAG-bedrock"
 
 # Bedrock tags are lowercase key/value (SageMaker jobs use Key/Value)

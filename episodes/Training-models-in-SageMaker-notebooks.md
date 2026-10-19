@@ -390,7 +390,7 @@ To avoid this, we explicitly tag each training job at launch time. This ensures 
 
 ```python
 name = "John Doe" # replace with your name
-project = "badgerscribe" # replace with your challenge name
+project = "sinkorswim" # replace with your challenge name
 purpose = "train_XGBoost"
 
 job_tags = [

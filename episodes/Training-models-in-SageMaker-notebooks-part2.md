@@ -170,7 +170,7 @@ As in the XGBoost episode, every training job needs its own tags: a job does not
 
 ```python
 name = "John Doe" # replace with your name
-project = "badgerscribe" # replace with your challenge name
+project = "sinkorswim" # replace with your challenge name
 purpose = "train_PyTorch"
 
 job_tags = [
