@@ -10,8 +10,6 @@ This workshop introduces machine learning workflows on AWS using **Amazon SageMa
 2. **Retrieval-Augmented Generation (RAG).** Building a RAG pipeline over a corpus of research papers two ways: with **Amazon Bedrock** (pay per token, nothing left running) and with SageMaker **Processing jobs** serving an open-weight model that Bedrock does not offer.
 3. **Fine-tuning.** Fine-tuning a 3B open-weight vision-language model with LoRA as a SageMaker training job, for handwriting transcription, with before/after evaluation on held-out pages.
 
-Three optional self-study episodes can be skipped without affecting the rest: pushing code to GitHub from a notebook instance, running the RAG pipeline on a GPU notebook instance, and CLI equivalents of the lesson's commands.
-
 ### Cost controls
 
 Every episode applies the same controls: cost-allocation tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end. The final episode covers monitoring and cleanup. Run as written, the full workshop costs a few dollars per learner.
