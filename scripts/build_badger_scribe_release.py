@@ -7,7 +7,7 @@ data version is a GitHub Release on the lesson repository with three zip
 assets, each well under GitHub's 2 GiB per-asset limit:
 
     badger-scribe-v<N>-labels.zip        train.csv, test.csv, metadata.csv, metric.py,
-                                         sample_submission.csv, *.md   (< 1 MB)
+                                         sample_submission.csv, transcription_conventions.md
     badger-scribe-v<N>-images-train.zip  images/<page_id>.jpg for every page in train.csv
     badger-scribe-v<N>-images-test.zip   images/<page_id>.jpg for every page in test.csv
 
@@ -28,10 +28,11 @@ import zipfile
 
 import pandas as pd
 
+# The lesson reads the first four; the last two are context (submission
+# format, and what "verbatim" means). Other competition docs are not shipped.
 LABEL_FILES = [
-    "train.csv", "test.csv", "metadata.csv", "metric.py", "sample_submission.csv",
-    "transcription_conventions.md", "RESOURCES.md", "WRITEUP_TEMPLATE.md",
-    "CONTRIBUTION_TEMPLATE.md", "contributing_transcriptions.md",
+    "train.csv", "test.csv", "metadata.csv", "metric.py",
+    "sample_submission.csv", "transcription_conventions.md",
 ]
 DEFAULT_REPO = "qualiaMachine/ML_with_Amazon_SageMaker"
 

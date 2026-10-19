@@ -6,7 +6,7 @@ The fine-tuning episode's data (the German-letter part of the Badger Scribe comp
 
 | Asset | Contents | Size |
 |---|---|---|
-| `badger-scribe-v<N>-labels.zip` | `train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`, the `.md` conventions and templates | < 1 MB |
+| `badger-scribe-v<N>-labels.zip` | `train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`, `transcription_conventions.md` | < 1 MB |
 | `badger-scribe-v<N>-images-train.zip` | `images/<page_id>.jpg` for every page in `train.csv` | see release |
 | `badger-scribe-v<N>-images-test.zip` | `images/<page_id>.jpg` for every page in `test.csv` | see release |
 
