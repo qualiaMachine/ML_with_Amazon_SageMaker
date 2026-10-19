@@ -24,7 +24,7 @@ This episode introduces the major ways to build RAG systems on AWS, explains why
 - Understand that RAG does *not* require training or fine‑tuning a model.
 - Recognize the major architectural patterns for RAG systems on AWS.
 - Explain why pay‑per‑token Bedrock inference is the safe default for most research RAG work.
-- Identify the specific situations where self‑managed GPU compute (Processing Jobs, notebook GPUs, or endpoints) is actually worth it.
+- Identify the specific situations where self‑managed GPU compute (Processing Jobs, notebook GPUs, or endpoints) is worth it.
 - Understand the core cost and control trade‑offs that drive which approach to use.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -60,9 +60,9 @@ The reason this is the default comes down to **how you are billed**:
 | **Model updates** | Managed by AWS / the provider | Your problem (containers, CUDA, VRAM) |
 | **Model choice** | Curated catalog (incl. proprietary models) | Any open‑weight model you can load |
 
-A GPU instance is a rental that keeps the meter running until *you* turn it off. Forgetting to do so is the single most common way research teams burn through cloud budgets. Bedrock has no equivalent failure mode: if you stop calling it, you stop paying.
+A GPU instance is a rental that keeps the meter running until *you* turn it off. Forgetting to do so is the most common way research teams overspend on cloud compute. Bedrock has no equivalent failure mode: if you stop calling it, you stop paying.
 
-### What forgetting actually costs
+### What forgetting costs
 
 To make this concrete, here is what a GPU notebook instance costs if it is left running after you close your laptop (us-east-1 on‑demand prices from the AWS price list, October 2026; see the [instances page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)):
 
@@ -102,7 +102,7 @@ Bedrock is not free of downsides; it's just that none of them are "you forgot an
 
 ## Approaches to Running RAG on AWS
 
-With that framing, here are the main patterns, ordered from "reach for this first" to "only when you really need it."
+With that framing, here are the main patterns, ordered from "reach for this first" to "only when nothing else fits."
 
 ### 1. Amazon Bedrock — managed embedding and generation APIs (default)
 
