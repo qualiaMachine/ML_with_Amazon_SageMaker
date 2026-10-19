@@ -18,7 +18,7 @@ exercises: 15
 - Reuse the WattBot metadata, questions, and `chunks.jsonl` that the Bedrock episode stored in S3.
 - Implement a simple, explicit “from scratch” embedding pipeline with a self-hosted sentence-transformer, without relying on FAISS or production vector DBs.
 - Build a small retrieval helper that finds the most relevant chunks for a question using cosine similarity in embedding space.
-- Serve a 32B open-weight generator (Qwen2.5-32B-Instruct, 4-bit AWQ, via vLLM) on the notebook's GPU and wire it to the retriever to produce WattBot-format answers (including `answer`, `ref_id`, `ref_url`, and `supporting_materials`).
+- Serve a 27B open-weight generator (Qwen3.8-27B in FP8, via vLLM) on the notebook's GPU and wire it to the retriever to produce WattBot-format answers (including `answer`, `ref_id`, `ref_url`, and `supporting_materials`).
 - Explain why inference uses quantized weights rather than bf16, and what a self-hosted GPU costs per hour, per forgotten weekend, and per forgotten month.
 - Add a second LLM pass that generates short explanations and marks whether the evidence comes from text, figures, tables, or a combination.
 
@@ -28,9 +28,9 @@ exercises: 15
 
 ## When Bedrock does not have your model
 
-In the previous episode we built the full WattBot pipeline on **Amazon Bedrock**, the recommended default for RAG inference because it bills per token and leaves nothing running between calls. Bedrock's catalog is curated, though. It has Amazon's own models, Anthropic, Meta, Mistral, DeepSeek, and a handful of others, and even within a family it carries a few sizes: for Qwen, the serverless lineup is Qwen3-32B, Qwen3-235B and the Qwen3-Coder models. Hugging Face hosts well over a million open-weight checkpoints. The one you want (a specific size, a specific fine-tune, a model a paper just released, a model tuned on scientific text) is usually not on Bedrock, and never will be.
+In the previous episode we built the full WattBot pipeline on **Amazon Bedrock**, the recommended default for RAG inference because it bills per token and leaves nothing running between calls. Bedrock's catalog is curated, though. It has Amazon's own models, Anthropic, Meta, Mistral, DeepSeek, and a handful of others, and even within a family it carries a few sizes and lags the releases: for Qwen, the serverless lineup is still the Qwen3 generation (Qwen3-32B, Qwen3-235B and the Qwen3-Coder models). Hugging Face hosts well over a million open-weight checkpoints. The one you want (the newest release, a specific size, a specific fine-tune, a model tuned on scientific text) is usually not on Bedrock, and often never will be.
 
-When that happens you host the model yourself on a GPU you rent. This episode does that in its simplest form: a single GPU notebook instance, with **Qwen2.5-32B-Instruct** as the generator. It is a 32-billion-parameter open-weight model that is not offered on Bedrock, large enough to follow the WattBot answer format reliably, and small enough to fit on one 48 GB GPU once its weights are quantized to 4 bits. Everything Bedrock abstracts away (loading an embedding model, loading a generator, fitting both in GPU memory) becomes visible as plain Python. Treat it as a learning exercise and a prototyping workbench, not a deployment pattern.
+When that happens you host the model yourself on a GPU you rent. This episode does that in its simplest form: a single GPU notebook instance, with **Qwen3.8-27B** as the generator. It is a 27-billion-parameter open-weight (Apache 2.0) model released in August 2026 that is not offered on Bedrock, large enough to follow the WattBot answer format reliably, and small enough to fit on one 48 GB GPU once its weights are stored in 8-bit floating point. Everything Bedrock abstracts away (loading an embedding model, loading a generator, fitting both in GPU memory) becomes visible as plain Python. Treat it as a learning exercise and a prototyping workbench, not a deployment pattern.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
@@ -51,7 +51,7 @@ Compare the Bedrock episode, where the whole WattBot evaluation cost about fifte
 Two further charges people do not expect:
 
 - **A stopped instance still bills for its storage.** We give this notebook a 100 GB volume for model weights. SageMaker charges $0.14 per GB-month for notebook storage, so a stopped-but-not-deleted instance costs about **$14 a month** forever. When you are done with the episode, delete the instance, not just stop it, unless you will use it again within days.
-- **Idle is billed the same as busy.** There is no discount for a GPU that is loaded and waiting. Loading a 32B model takes a few minutes, which tempts people to leave the instance up "so I don't have to reload". That is the $1,906.
+- **Idle is billed the same as busy.** There is no discount for a GPU that is loaded and waiting. Loading a 27B model takes a few minutes, which tempts people to leave the instance up "so I don't have to reload". That is the $1,906.
 
 The habits that keep this safe:
 
@@ -82,7 +82,7 @@ In this episode we will:
    - Embed chunks with a sentence-transformer (`thenlper/gte-large`) running on the notebook's GPU.
    - Implement cosine-similarity search over the embedding matrix.
 3. **Serve an open-weight generator that Bedrock does not offer.**
-   - Load Qwen2.5-32B-Instruct with 4-bit (AWQ) weights through vLLM on a single `ml.g6e.xlarge` GPU.
+   - Load Qwen3.8-27B with FP8 weights through vLLM on a single `ml.g6e.xlarge` GPU.
    - Construct WattBot-style answers that we can compare against `train_QA.csv`.
 4. **Add an explanation pass.**
    - Use an LLM to look at the retrieved evidence, the answer, and citations.
@@ -91,9 +91,9 @@ In this episode we will:
 
 ## Notebook + dataset setup
 
-For this episode you need a notebook instance with a GPU that can hold the quantized 32B model plus the embedding model plus working memory for generation. Create a new notebook instance (same steps as the controller-notebook episode, same three tags) with:
+For this episode you need a notebook instance with a GPU that can hold the FP8 27B model plus the embedding model plus working memory for generation. Create a new notebook instance (same steps as the controller-notebook episode, same three tags) with:
 
-- **Instance type:** `ml.g6e.xlarge` (1 × L40S, 48 GB GPU memory, $2.61/h). The 4-bit weights are ~19 GB; the rest is for the embedding model and the KV cache that generation needs for long prompts. A 24 GB instance such as `ml.g5.xlarge` cannot hold this model; a 16 GB `ml.g4dn.xlarge` cannot hold anything in this size class.
+- **Instance type:** `ml.g6e.xlarge` (1 × L40S, 48 GB GPU memory, $2.61/h). The FP8 weights are ~27 GB; the rest is for the embedding model and the KV cache that generation needs for long prompts. The L40S runs FP8 natively. A 24 GB instance such as `ml.g5.xlarge` cannot hold this model; a 16 GB `ml.g4dn.xlarge` cannot hold anything in this size class.
 - **Volume size:** `100` GB (the default of 5 GB will not fit the weights or the vLLM install). This volume bills at $0.14 per GB-month even while the instance is stopped.
 - **Tags:** the same `Project`, `Name`, `Purpose` keys as every other resource. `Purpose` could be `RAG-GPU-notebook`.
 
@@ -465,13 +465,13 @@ for r in test_retrieved:
 ```
 
 
-### 5. Serve the generator: Qwen2.5-32B-Instruct, 4-bit, via vLLM
+### 5. Serve the generator: Qwen3.8-27B in FP8, via vLLM
 
-For this episode we use **Qwen2.5-32B-Instruct**, an open-weight model that Bedrock does not carry, in its official **AWQ 4-bit** release (`Qwen/Qwen2.5-32B-Instruct-AWQ`), served with [vLLM](https://docs.vllm.ai/).
+For this episode we use **Qwen3.8-27B**, an open-weight model that Bedrock does not carry, in its **FP8** release (`Qwen/Qwen3.8-27B-FP8`), served with [vLLM](https://docs.vllm.ai/). It is a dense 27B model with a hybrid attention design (most layers use a linear-attention variant with a fixed-size state, so the KV cache stays small even for long prompts), a native 262K context, and a "thinking" mode that is on by default and that we turn off, because WattBot wants a JSON answer, not a reasoning trace.
 
-**Why 4-bit weights and not bf16?** Inference is not training. No gradients, no optimizer state, nothing is updated, so the only memory that matters is the weights themselves plus the KV cache for the prompt being processed. A 32B model in bf16 is 64 GB of weights and does not fit on any single-GPU instance below the 8-GPU tier. Quantizing the *weights* to 4 bits (activations stay in 16-bit) brings that to about 19 GB, fits comfortably in 48 GB, and makes generation faster too, because decoding is limited by how fast the GPU can read weights from memory. For a model this size the accuracy cost of AWQ is small; a bf16 7B model would fit the GPU and would be worse at the task. For inference on rented GPUs, quantized weights are the norm, and bf16 is what you use when you have memory to spare and a model small enough not to need it.
+**Why FP8 weights and not bf16?** Inference is not training. No gradients, no optimizer state, nothing is updated, so the only memory that matters is the weights themselves plus the KV cache for the prompt being processed. A 27B model in bf16 is about 54 GB of weights and does not fit a 48 GB GPU; the same weights in 8-bit floating point are about 27 GB, which fits with room for the embedding model and generation. FP8 is near-lossless for a model this size, and it is faster, because decoding is limited by how fast the GPU can read weights from memory. For inference on rented GPUs, reduced-precision weights are the norm (FP8 where the GPU supports it, 4-bit integer where it does not or where memory is tighter); bf16 is what you use when you have memory to spare and a model small enough not to need it.
 
-**Why vLLM and not `transformers.pipeline`?** vLLM is an inference server: it runs quantized models with optimized kernels, batches requests, and manages the KV cache so long prompts do not run out of memory. It is what you would deploy behind an API, and its offline `LLM` class is a two-line replacement for the pipeline we used before.
+**Why vLLM and not `transformers.pipeline`?** vLLM is an inference server: it has the kernels for FP8 and for this model's hybrid attention, batches requests, and manages the KV cache so long prompts do not run out of memory. It is what you would deploy behind an API, and its offline `LLM` class is a two-line replacement for the pipeline we used before.
 
 We will:
 
@@ -482,14 +482,14 @@ We will:
 
 ### Installing vLLM takes a few minutes, and the meter is running
 
-`pip install vllm` downloads several gigabytes (it brings its own CUDA kernels and may replace the kernel's PyTorch build) and takes 5–10 minutes. The 19 GB of model weights take another 3–5 minutes to download the first time. At $2.61 an hour that is about 50 cents of waiting, which is fine; what is not fine is doing it twice because the instance was deleted and recreated. Keep the Hugging Face cache on the 100 GB volume (the `HF_HOME` line below does that) so the weights survive a stop/start.
+`pip install vllm` downloads several gigabytes (it brings its own CUDA kernels and may replace the kernel's PyTorch build) and takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer. The 27 GB of model weights take another 4–6 minutes to download the first time. At $2.61 an hour that is about 60 cents of waiting, which is fine; what is not fine is doing it twice because the instance was deleted and recreated. Keep the Hugging Face cache on the 100 GB volume (the `HF_HOME` line below does that) so the weights survive a stop/start.
 
 If the install changes PyTorch, restart the kernel (**Kernel → Restart**) before continuing.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ```python
-%pip install -q vllm
+%pip install -q "vllm>=0.17"
 ```
 
 ```python
@@ -499,14 +499,13 @@ os.environ["HF_HOME"] = "/home/ec2-user/SageMaker/hf_cache"
 
 from vllm import LLM, SamplingParams
 
-qwen_model_id = "Qwen/Qwen2.5-32B-Instruct-AWQ"
+qwen_model_id = "Qwen/Qwen3.8-27B-FP8"
 
 llm = LLM(
     model=qwen_model_id,
-    quantization="awq",           # 4-bit weight-only; vLLM picks the fastest AWQ kernel for the GPU
-    dtype="half",                 # activations and KV cache in fp16
-    max_model_len=8192,           # longest prompt + answer we will need; smaller = less KV cache memory
-    gpu_memory_utilization=0.80,  # leave ~10 GB for the embedding model and PyTorch overhead
+    max_model_len=8192,                          # longest prompt + answer we need; the model allows 262K, we do not
+    gpu_memory_utilization=0.85,                 # leave ~7 GB for the embedding model and PyTorch overhead
+    limit_mm_per_prompt={"image": 0, "video": 0},  # text only: skip reserving memory for the vision encoder
 )
 print("vLLM engine ready:", qwen_model_id)
 ```
@@ -525,7 +524,12 @@ def call_qwen_chat(system_prompt: str, user_prompt: str, max_new_tokens: int = 3
         {"role": "user", "content": user_prompt},
     ]
     params = SamplingParams(temperature=0.0, max_tokens=max_new_tokens)
-    outputs = llm.chat(messages, sampling_params=params, use_tqdm=False)
+    outputs = llm.chat(
+        messages,
+        sampling_params=params,
+        chat_template_kwargs={"enable_thinking": False},   # answer directly; no reasoning trace
+        use_tqdm=False,
+    )
     return outputs[0].outputs[0].text.strip()
 
 print("Generator model and helper loaded.")
@@ -1343,8 +1347,8 @@ In the next episode, we move the GPU work out of the notebook and into short-liv
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- **Why self-host at all**: Bedrock's catalog is curated; most open-weight models (including Qwen2.5-32B-Instruct) are not on it. When the model you need is not offered, you rent a GPU and serve it yourself.
-- **Inference uses quantized weights**: no gradients means the weights are the memory cost. 4-bit AWQ puts a 32B model on one 48 GB GPU (`ml.g6e.xlarge`); bf16 would need 64 GB and an 8-GPU instance.
+- **Why self-host at all**: Bedrock's catalog is curated and lags releases; most open-weight models (including Qwen3.8-27B) are not on it. When the model you need is not offered, you rent a GPU and serve it yourself.
+- **Inference uses reduced-precision weights**: no gradients means the weights are the memory cost. FP8 puts a 27B model on one 48 GB GPU (`ml.g6e.xlarge`); bf16 would need 54 GB and a multi-GPU instance.
 - **The meter never stops on its own**: `ml.g6e.xlarge` is $2.61/h, $167 per forgotten weekend, $1,906 per forgotten month, plus $14/month for the storage volume even when stopped. Stop it when you stand up; delete it when the episode is over.
 - **Local-first RAG**: For teaching (and small corpora), we avoid an external vector database
   and instead perform cosine similarity search over in-memory embeddings.
