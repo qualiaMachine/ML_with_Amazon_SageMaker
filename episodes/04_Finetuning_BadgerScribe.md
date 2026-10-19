@@ -137,7 +137,7 @@ Compare the classic mistake: doing all of this interactively on a `ml.g5.xlarge`
 
 This episode runs from a **CPU** notebook instance (`ml.t3.medium` or `ml.m5.xlarge`). The notebook is only a controller: it stages data, launches jobs, and reads results. The GPU lives in the job.
 
-There is no data upload in this episode. The competition data is published as a [release on the lesson repository](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) (three zip files: labels, train images, test images), and your instructor has staged it in a shared read-only bucket:
+There is no data upload in this episode. The competition data is published as a [release on the lesson repository](https://github.com/qualiaMachine/ML_with_Amazon_SageMaker/releases) (three zip files: labels, train images, test images), and your instructor has staged it in a shared read-only bucket:
 
 - `s3://<shared-bucket>/badger-scribe/train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`
 - `s3://<shared-bucket>/badger-scribe/images/<page_id>.jpg`: train and test pages together, about 2 GB
@@ -154,7 +154,7 @@ Download the three assets of the data release and sync them into a bucket of you
 ```bash
 %%bash
 V=9   # data release version; check the releases page for the latest
-R=https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases/download/badger-scribe-data-v$V
+R=https://github.com/qualiaMachine/ML_with_Amazon_SageMaker/releases/download/badger-scribe-data-v$V
 mkdir -p badger-scribe && cd badger-scribe
 for a in labels images-train images-test; do
   curl -L -o $a.zip $R/badger-scribe-v$V-$a.zip && unzip -q -o $a.zip && rm $a.zip

@@ -16,7 +16,7 @@ Usage (from a folder containing the Kaggle download, i.e. train.csv and images/)
     python build_badger_scribe_release.py --src ~/Downloads/badger-scribe --version 9
 
 Then follow the printed `gh release create` command (needs the GitHub CLI
-logged in with write access to the lesson repo). Unzipping all three assets
+logged in with write access to the repo; pass --repo to publish elsewhere). Unzipping all three assets
 into one directory recreates the original layout, which is what the
 episode's training job and the shared S3 bucket expect.
 """
@@ -33,7 +33,7 @@ LABEL_FILES = [
     "transcription_conventions.md", "RESOURCES.md", "WRITEUP_TEMPLATE.md",
     "CONTRIBUTION_TEMPLATE.md", "contributing_transcriptions.md",
 ]
-REPO = "carpentries-incubator/ML_with_AWS_SageMaker"
+DEFAULT_REPO = "qualiaMachine/ML_with_Amazon_SageMaker"
 
 
 def add_images(zf, src, page_ids, label):
@@ -53,6 +53,7 @@ def main():
     ap.add_argument("--src", required=True, help="folder with the Kaggle download (train.csv, images/, ...)")
     ap.add_argument("--version", required=True, type=int, help="Kaggle dataset version number, e.g. 9")
     ap.add_argument("--out", default="release", help="output folder for the zips")
+    ap.add_argument("--repo", default=DEFAULT_REPO, help="GitHub repo that hosts the release (owner/name)")
     args = ap.parse_args()
 
     v = f"v{args.version}"
@@ -91,10 +92,10 @@ def main():
 
     tag = f"badger-scribe-data-{v}"
     print(f"""
-publish (GitHub CLI, logged in with write access to {REPO}):
+publish (GitHub CLI, logged in with write access to {args.repo}):
 
   gh release create {tag} \\
-      --repo {REPO} \\
+      --repo {args.repo} \\
       --title "Badger Scribe data {v}" \\
       --notes-file release_notes_{v}.md \\
       {args.out}/badger-scribe-{v}-labels.zip \\
@@ -102,7 +103,7 @@ publish (GitHub CLI, logged in with write access to {REPO}):
       {args.out}/badger-scribe-{v}-images-test.zip
 
 download URL pattern the lesson uses:
-  https://github.com/{REPO}/releases/download/{tag}/badger-scribe-{v}-<asset>.zip
+  https://github.com/{args.repo}/releases/download/{tag}/badger-scribe-{v}-<asset>.zip
 """)
 
 
