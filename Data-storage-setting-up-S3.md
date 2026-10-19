@@ -243,7 +243,7 @@ Using the S3 Standard rate in us-east-1. The 100 SageMaker reads cost only the r
    - **One download**: 1024 GB × $0.09 = $92.16  
    - **Total Cost**: **≈ $115.71**
 
-Two things to notice. The reads by SageMaker are essentially free no matter how many times a job loads the data, which is why the lesson keeps data in S3 and reads it from jobs in the same region. And the single download to a laptop costs four times the month of storage: egress is the line item to watch, so pull results out of AWS once, not repeatedly, and leave large datasets in the bucket (or delete them) rather than downloading them "just in case".
+Two things to notice: the reads by SageMaker are essentially free no matter how many times a job loads the data, which is why the lesson keeps data in S3 and reads it from jobs in the same region. And the single download to a laptop costs four times the month of storage: egress is the line item to watch, so pull results out of AWS once, not repeatedly, and leave large datasets in the bucket (or delete them) rather than downloading them "just in case".
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 

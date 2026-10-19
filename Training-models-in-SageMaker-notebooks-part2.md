@@ -7,7 +7,7 @@ exercises: 15
 :::::::::::::::::::::::::::::::::::::: questions 
 
 - When should you consider using a GPU instance for training neural networks in SageMaker, and what are the benefits and limitations?
-- What does `instance_count=2` actually do to a training job, and what does real distributed training require?
+- What does `instance_count=2` do to a training job, and what does distributed training require?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -318,7 +318,7 @@ A GPU pays off when the per-step work is large enough to keep it busy: bigger mo
 #### GPUs can be slow for small datasets/models
 This performance discrepancy might be due to the following factors:
 
-1. **Small dataset/model size**: When datasets and models are small, the overhead of transferring data between the CPU and GPU, as well as managing the GPU, can actually slow things down. For very small models and datasets, CPUs are often faster since there's minimal data to process.
+1. **Small dataset/model size**: When datasets and models are small, the overhead of transferring data between the CPU and GPU, as well as managing the GPU, can slow things down. For very small models and datasets, CPUs are often faster since there's minimal data to process.
 
 2. **GPU initialization overhead**: Every time a training job starts on a GPU, there's a small overhead for initializing CUDA libraries. For short jobs, this setup time can make the GPU appear slower overall.
 
@@ -379,9 +379,9 @@ print(f"Single-instance job billed {desc_cpu['BillableTimeInSeconds']/60:.1f} mi
 Look at the CloudWatch log for this job (SageMaker console, Training jobs, your job, View logs): there are two log streams, `algo-1` and `algo-2`, and each one prints all 1000 epochs. The wall-clock time is about the same as the single-instance run (slightly longer, if anything, because two instances have to be provisioned), and the billable minutes are double.
 
 ::::::::::::::::::::::::::::::::::::::: callout
-#### What real distributed training needs
+#### What distributed training needs
 
-To actually split the work across instances you need two things the demo above did not have:
+To split the work across instances you need two things the demo above did not have:
 
 - **Data parallelism** (the common case; each instance holds a full copy of the model and trains on a different slice of the data, exchanging gradients after every step). For PyTorch, pass `distribution={"torch_distributed": {"enabled": True}}` to the estimator *and* write the script for it: initialise a process group, wrap the model in `DistributedDataParallel`, and give each rank a different shard of the data (e.g. a `DistributedSampler`). SageMaker's own data-parallel library (`smdistributed.dataparallel`) is the same idea with a faster all-reduce on supported GPU instances.
 - **Model parallelism** (for models too large for one device's memory; the layers themselves are spread across devices). This is for large language models and the like, needs `smdistributed.modelparallel` or an equivalent library, and is well beyond what a tabular network needs.
