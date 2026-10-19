@@ -433,6 +433,17 @@ vision-language model with LoRA as a SageMaker training job, for
 handwriting transcription, with before/after evaluation on held-out
 pages.</li>
 </ol><div class="section level3">
+<h3 id="who-this-workshop-is-for">Who this workshop is for<a class="anchor" aria-label="anchor" href="#who-this-workshop-is-for"></a></h3>
+<p>Researchers and students who already train models and want to run
+that work on AWS. The lesson assumes a basic machine learning
+background: you have trained a model before, and you know what training,
+hyperparameter tuning, fine-tuning, embeddings and retrieval-augmented
+generation are. It does not teach these concepts; instructors may
+briefly review some of them depending on the audience, but the default
+schedule does not include that time. Python and Jupyter are used
+throughout; no prior AWS experience is needed.</p>
+</div>
+<div class="section level3">
 <h3 id="cost-controls">Cost controls<a class="anchor" aria-label="anchor" href="#cost-controls"></a></h3>
 <p>Every episode applies the same controls: cost-allocation tags on
 every resource, a runtime cap on every job, a cost estimate before each
@@ -448,10 +459,6 @@ fine-tuned model behind an always-on API.</li>
 <li>
 <strong>Agents and tool use</strong>: LLM applications that call
 tools or chain multiple model calls (e.g., Bedrock Agents).</li>
-<li>
-<strong>Full-parameter fine-tuning and multi-GPU training</strong>:
-the lesson fine-tunes with LoRA on one GPU and explains what larger runs
-cost, but does not run one.</li>
 <li>
 <strong>Evaluation beyond a single metric</strong>: LLM-as-judge,
 human evaluation, and benchmark suites.</li>
