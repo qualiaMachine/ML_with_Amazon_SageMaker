@@ -18,10 +18,9 @@ ML Marathon and Research Bazaar, usable by anyone with an AWS account.
 | Fine-tuning | LoRA fine-tune of CHURRO-3B as a training job | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
 | Wrap-up | Resource management and cleanup (plus an optional episode on the CLI equivalents: look, stop, copy, launch) | |
 
-Cost control runs through every episode: cost-allocation tags on every
-resource, `max_run` caps on every job, estimates written down before a launch
-and compared to the bill afterwards, and a standing rule to stop and delete
-notebook instances.
+Every episode uses the same cost practices: cost-allocation tags on every
+resource, `max_run` caps on every job, an estimate before each launch compared
+to the bill afterwards, and stopping and deleting notebook instances when done.
 
 ## Repository layout
 

@@ -123,7 +123,7 @@ import sagemaker
 session = sagemaker.Session()
 region = session.boto_region_name
 
-# Base model IDs. These are the models we actually want to call, but we will NOT pass
+# Base model IDs. These are the models we want to call, but we will NOT pass
 # them to the runtime directly -- see "Cost tracking" below for why.
 # Any chat model in the Bedrock catalog works here (e.g. a Claude or Llama model ID)
 # because we call it through the provider-neutral `converse` API.

@@ -8,7 +8,7 @@ exercises: 15
 
 - What are the differences between local training and SageMaker-managed training?
 - How do Estimator classes in SageMaker streamline the training process for various frameworks?
-- How do you estimate what a training job will cost before launching it, and check what it actually cost afterwards?
+- How do you estimate what a training job will cost before launching it, and check what it cost afterwards?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -465,7 +465,7 @@ The `hyperparameters` section in this code defines the input arguments of `train
 Additionally, we define a `TrainingInput` object containing the training data's S3 path, to pass to `.fit({'train': train_input})`. SageMaker uses `TrainingInput` to download your dataset from S3 to a temporary location on the training instance (`/opt/ml/input/data/train/`, which the script reads via the `SM_CHANNEL_TRAIN` environment variable).
 
 #### What did that cost?
-Now ask SageMaker what it actually charged for. `describe_training_job` returns two durations: `TrainingTimeInSeconds` (your script running) and `BillableTimeInSeconds` (the wall-clock time the instance was reserved for you, which also includes pulling the container and downloading data). SageMaker bills per second, so cost is simply billable seconds x instance count x hourly rate. We'll wrap this in a small helper and call it after every job in this lesson, so you always see the bill next to the run.
+Now ask SageMaker what it charged for. `describe_training_job` returns two durations: `TrainingTimeInSeconds` (your script running) and `BillableTimeInSeconds` (the wall-clock time the instance was reserved for you, which also includes pulling the container and downloading data). SageMaker bills per second, so cost is simply billable seconds x instance count x hourly rate. We'll wrap this in a small helper and call it after every job in this lesson, so you always see the bill next to the run.
 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
@@ -667,7 +667,7 @@ Following these steps helps ensure you only interact with and modify jobs you ow
 When training time becomes excessive, two options can improve efficiency in SageMaker:
 
 - **Option 1: Upgrade to a more powerful instance.** This is the preferred approach and should always be explored first. A bigger CPU instance, or a GPU instance for neural networks, needs no code changes and avoids the coordination overhead of a multi-instance setup. Check the [Instances for ML page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) for guidance.
-- **Option 2: Use multiple instances (distributed training).** This only helps when your script and data are actually set up to split the work, and it is only worth the effort in two situations: the dataset no longer fits in the memory of the largest single instance you can justify (tens of GB or more), or a single-instance run takes longer than about 10 hours. That is the one rule of thumb we use throughout this lesson, and it is why every estimator so far has `instance_count=1`.
+- **Option 2: Use multiple instances (distributed training).** This only helps when your script and data are set up to split the work, and it is only worth the effort in two situations: the dataset no longer fits in the memory of the largest single instance you can justify (tens of GB or more), or a single-instance run takes longer than about 10 hours. That is the one rule of thumb we use throughout this lesson, and it is why every estimator so far has `instance_count=1`.
 
 In the next episode we train a PyTorch network, try Option 1 (a GPU instance), and then run a two-instance job to see for ourselves what `instance_count=2` does and does not do.
 
