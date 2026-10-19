@@ -34,7 +34,7 @@ LABEL_FILES = [
     "train.csv", "test.csv", "metadata.csv", "metric.py",
     "sample_submission.csv", "transcription_conventions.md",
 ]
-DEFAULT_REPO = "qualiaMachine/ML_with_Amazon_SageMaker"
+DEFAULT_REPO = "carpentries-incubator/ML_with_AWS_SageMaker"
 
 
 def add_images(zf, src, page_ids, label):

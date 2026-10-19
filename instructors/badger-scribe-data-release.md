@@ -26,10 +26,10 @@ Do this whenever the competition data changes (new pages pass review, labels are
    ```
 
    The script checks that every page id in the CSVs has an image, writes the three zips to `release/`, prints their sizes, and prints the publish command.
-3. Write `release_notes_v1.md` (template below) and run the printed `gh release create ...` command, logged in to the GitHub CLI with write access to the repository that hosts the release (currently `qualiaMachine/ML_with_Amazon_SageMaker`; pass `--repo` to the build script to change it). Uploading ~2 GB takes a few minutes.
+3. Write `release_notes_v1.md` (template below) and run the printed `gh release create ...` command, logged in to the GitHub CLI with write access to the repository that hosts the release (`carpentries-incubator/ML_with_AWS_SageMaker`; pass `--repo` to the build script to publish elsewhere, e.g. on a fork while developing). Uploading ~2 GB takes a few minutes.
 4. Update the version number (`V=1`) in the episode's self-paced callout and in the staging step below. Earlier releases stay available, so a learner mid-way through an old version is not broken.
 
-The release currently lives on the `qualiaMachine/ML_with_Amazon_SageMaker` fork. When the lesson is synced to `carpentries-incubator/ML_with_AWS_SageMaker`, either re-publish the same assets there (`--repo carpentries-incubator/ML_with_AWS_SageMaker`) and change the URL in the episode, the setup page and this page, or leave the release on the fork; the download URL works from anywhere.
+The lesson's URLs point at the release on `carpentries-incubator/ML_with_AWS_SageMaker`. A copy of the same release also exists on the `qualiaMachine/ML_with_Amazon_SageMaker` fork, where it was first published; the zips are byte-identical, so either URL serves the same data.
 
 ### Release notes template
 
@@ -61,7 +61,7 @@ Students read the data from a shared read-only bucket; nothing is downloaded fro
 
 ```bash
 V=1
-R=https://github.com/qualiaMachine/ML_with_Amazon_SageMaker/releases/download/badger-scribe-data-v$V
+R=https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases/download/badger-scribe-data-v$V
 mkdir -p badger-scribe && cd badger-scribe
 for a in labels images-train images-test; do
   curl -L -o $a.zip $R/badger-scribe-v$V-$a.zip && unzip -q -o $a.zip && rm $a.zip
