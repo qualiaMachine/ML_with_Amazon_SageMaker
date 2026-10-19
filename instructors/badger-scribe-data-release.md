@@ -16,25 +16,25 @@ Why a release and not the alternatives: git would keep every version of every JP
 
 ## Publishing a new data version
 
-Do this whenever the competition data changes (new pages pass review, labels are corrected). `<N>` is the Kaggle dataset version number so the lesson and the competition stay in step.
+Do this whenever the competition data changes (new pages pass review, labels are corrected). `<N>` is the lesson's own release number (1, 2, 3, ...); the release notes record which Kaggle dataset version it was taken from.
 
 1. Download the current data from the competition's data tab into a folder, e.g. `~/Downloads/badger-scribe` (it should contain `train.csv` and `images/`).
 2. Build the assets:
 
    ```bash
-   python scripts/build_badger_scribe_release.py --src ~/Downloads/badger-scribe --version 9
+   python scripts/build_badger_scribe_release.py --src ~/Downloads/badger-scribe --version 1
    ```
 
    The script checks that every page id in the CSVs has an image, writes the three zips to `release/`, prints their sizes, and prints the publish command.
-3. Write `release_notes_v9.md` (template below) and run the printed `gh release create ...` command, logged in to the GitHub CLI with write access to the repository that hosts the release (currently `qualiaMachine/ML_with_Amazon_SageMaker`; pass `--repo` to the build script to change it). Uploading ~2 GB takes a few minutes.
-4. Update the version number (`V=9`) in the episode's self-paced callout and in the staging step below. Earlier releases stay available, so a learner mid-way through an old version is not broken.
+3. Write `release_notes_v1.md` (template below) and run the printed `gh release create ...` command, logged in to the GitHub CLI with write access to the repository that hosts the release (currently `qualiaMachine/ML_with_Amazon_SageMaker`; pass `--repo` to the build script to change it). Uploading ~2 GB takes a few minutes.
+4. Update the version number (`V=1`) in the episode's self-paced callout and in the staging step below. Earlier releases stay available, so a learner mid-way through an old version is not broken.
 
 The release currently lives on the `qualiaMachine/ML_with_Amazon_SageMaker` fork. When the lesson is synced to `carpentries-incubator/ML_with_AWS_SageMaker`, either re-publish the same assets there (`--repo carpentries-incubator/ML_with_AWS_SageMaker`) and change the URL in the episode, the setup page and this page, or leave the release on the fork; the download URL works from anywhere.
 
 ### Release notes template
 
 ```markdown
-Badger Scribe competition data, version 9 (2026-09-17 on Kaggle).
+Lesson data release v1: the German-letter (Kade) pages of the Badger Scribe competition data, taken from Kaggle dataset version 9 (2026-09-17). 295 train pages, 141 test pages, all human-transcribed.
 
 Three assets; unzip all three into one directory to recreate the layout
 (`train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `images/<page_id>.jpg`).
@@ -60,7 +60,7 @@ Not for redistribution or commercial use; do not crawl the UWDC catalogs.
 Students read the data from a shared read-only bucket; nothing is downloaded from GitHub during class. From any machine with the AWS CLI (CloudShell works):
 
 ```bash
-V=9
+V=1
 R=https://github.com/qualiaMachine/ML_with_Amazon_SageMaker/releases/download/badger-scribe-data-v$V
 mkdir -p badger-scribe && cd badger-scribe
 for a in labels images-train images-test; do

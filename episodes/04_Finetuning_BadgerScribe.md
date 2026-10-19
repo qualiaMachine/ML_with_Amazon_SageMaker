@@ -153,7 +153,7 @@ Download the three assets of the data release and sync them into a bucket of you
 
 ```bash
 %%bash
-V=9   # data release version; check the releases page for the latest
+V=1   # data release version; check the releases page for the latest
 R=https://github.com/qualiaMachine/ML_with_Amazon_SageMaker/releases/download/badger-scribe-data-v$V
 mkdir -p badger-scribe && cd badger-scribe
 for a in labels images-train images-test; do
