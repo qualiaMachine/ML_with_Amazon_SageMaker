@@ -294,7 +294,7 @@
 <div class="accordion accordion-flush" id="accordionFlush6">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading6">
-        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing to GitHub from a SageMaker Notebook with a Personal Access Token</a>
+        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing Your Notebooks to GitHub from SageMaker</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -544,23 +544,25 @@ budgets.</li>
 <li>Upload analysis results to your bucket under a prefix per episode
 (<code>docs/</code>, <code>xgboost/</code>, …) and keep one bucket for
 the whole workshop.</li>
-<li>Clone your fork of <code>AWS_helpers</code> once, into
-<code>/home/ec2-user/SageMaker/</code>, where it survives stopping the
-instance.</li>
-</ul></section><section id="Interacting-with-code-repo"><h2 class="section-heading"><a href="Interacting-with-code-repo.html">(Optional) Pushing to GitHub from a SageMaker Notebook with a Personal Access Token</a></h2>
+<li>Clone the lesson repository once, into
+<code>/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/</code>; every
+later episode starts with the same guarded clone-and-import cell, so the
+code is there whichever episode you open first.</li>
+</ul></section><section id="Interacting-with-code-repo"><h2 class="section-heading"><a href="Interacting-with-code-repo.html">(Optional) Pushing Your Notebooks to GitHub from SageMaker</a></h2>
 <hr class="half-width">
 <ul>
-<li>Use a GitHub PAT for HTTPS-based authentication in temporary
-SageMaker notebook instances.</li>
-<li>Securely enter sensitive information in notebooks using
-<code>getpass</code>.</li>
-<li>Converting <code>.ipynb</code> files to <code>.py</code> files helps
-with cleaner version control and easier review of changes.</li>
-<li>Adding <code>.ipynb</code> files (and large binaries such as
-<code>.npz</code>) to <code>.gitignore</code> keeps your repository
-organized and reduces storage.</li>
-<li>You clone your fork once, in the Accessing S3 episode; this episode
-works inside that same clone.</li>
+<li>Your own work belongs in your own repository: create one on GitHub,
+<code>git init</code> a folder under
+<code>/home/ec2-user/SageMaker/</code>, and connect the two with
+<code>git remote add</code>.</li>
+<li>Authenticate over HTTPS with a scoped, expiring Personal Access
+Token entered through <code>getpass</code>; nothing is saved on the
+instance, and the token is revoked when you are done.</li>
+<li>Version <code>.py</code> copies of notebooks (Jupytext converts both
+ways) and ignore <code>*.ipynb</code>, caches and data archives in
+<code>.gitignore</code>.</li>
+<li>Pull before you push; the first pull into a freshly initialised
+folder needs <code>--allow-unrelated-histories</code>.</li>
 </ul></section><section id="Training-models-in-SageMaker-notebooks"><h2 class="section-heading"><a href="Training-models-in-SageMaker-notebooks.html">Training Models in SageMaker: Intro</a></h2>
 <hr class="half-width">
 <ul>

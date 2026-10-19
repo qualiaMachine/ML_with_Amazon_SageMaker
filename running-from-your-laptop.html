@@ -241,7 +241,7 @@
 <div class="accordion accordion-flush" id="accordionFlush6">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading6">
-        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing to GitHub from a SageMaker Notebook with a Personal Access Token</a>
+        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing Your Notebooks to GitHub from SageMaker</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -407,15 +407,14 @@
 
         
 
-<p>Every episode in this lesson runs on a small SageMaker notebook
-instance, and the workshop keeps it that way on purpose: the instance’s
-execution role is your identity, so no credential ever has to be
-installed on a laptop, and everyone gets the same Python environment.
-After the workshop, though, the natural way to use what you learned is
-from JupyterLab on your own machine, with the same cells launching the
-same jobs. This page is the list of what changes. It is short, because
-the lesson’s point is that the <em>jobs</em> do the work and the
-controller is cheap: a laptop is just another controller.</p>
+<p>Every episode in this lesson runs on a SageMaker notebook instance,
+and the <em>Notebooks as Controllers</em> episode explains why: the
+instance’s role is the identity, so no credential is installed on
+anyone’s machine, and everyone has the same environment. If you later
+want to run the same cells from JupyterLab on your own computer, this
+page lists what changes. It is short, because the <em>jobs</em> do the
+work and the controller is cheap: a laptop is just another
+controller.</p>
 <section><h2 class="section-heading" id="authenticate-with-short-lived-credentials-never-with-access-keys">1. Authenticate with short-lived credentials, never with access
 keys<a class="anchor" aria-label="anchor" href="#authenticate-with-short-lived-credentials-never-with-access-keys"></a></h2>
 <hr class="half-width"><p>Install the <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" class="external-link">AWS
@@ -486,9 +485,9 @@ does.</td>
 </tr><tr><td>Accessing S3, PyTorch episodes</td>
 <td>
 <code>%cd /home/ec2-user/SageMaker/</code>, paths under it</td>
-<td>Any folder you like; keep the <code>AWS_helpers/</code> clone next
-to your notebooks so the <code>sys.path</code> lines still find
-<code>helpers.py</code>.</td>
+<td>Any folder you like; clone the lesson repository there and point the
+<code>sys.path.insert</code> line at its <code>scripts/</code>
+folder.</td>
 </tr><tr><td>PyTorch episode</td>
 <td>
 <code>helpers.get_notebook_instance_info(...)</code> to label the
@@ -518,9 +517,8 @@ SDK does not care where it is called from.</p>
 <hr class="half-width"><p>You lose the uniform environment: the version of the SageMaker SDK on
 your laptop is yours to keep current
 (<code>pip install -U sagemaker</code>), and a cell that works for you
-may fail for a colleague with a two-year-old install. You gain the thing
-researchers actually want, which is your own editor, your own files, and
-no instance to remember to stop.</p>
+may fail for a colleague with a two-year-old install. You gain your own
+editor, your own files, and no instance to remember to stop.</p>
 <!--
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.

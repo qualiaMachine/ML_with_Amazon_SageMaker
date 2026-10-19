@@ -252,7 +252,7 @@
 <div class="accordion accordion-flush" id="accordionFlush6">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading6">
-        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing to GitHub from a SageMaker Notebook with a Personal Access Token</a>
+        <a href="Interacting-with-code-repo.html">5. (Optional) Pushing Your Notebooks to GitHub from SageMaker</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -526,15 +526,15 @@ involved in pushing new data back to S3 from a notebook?
 <span class="visually-hidden">Duration: </span>01h 40m
 </td>
 <td>
- 5. <a href="Interacting-with-code-repo.html">(Optional) Pushing to
-GitHub from a SageMaker Notebook with a Personal Access Token</a>
+ 5. <a href="Interacting-with-code-repo.html">(Optional) Pushing Your
+Notebooks to GitHub from SageMaker</a>
 </td>
 <td>
-How can I securely push/pull code to and from GitHub within a SageMaker
-notebook?<br>What steps are necessary to set up a GitHub PAT for
-authentication in SageMaker?<br>How can I convert notebooks to
-<code>.py</code> files and ignore <code>.ipynb</code> files in version
-control?
+How can I put the code I write on a SageMaker notebook instance under
+version control on GitHub?<br>How do I authenticate to GitHub from a
+notebook instance without leaving a password or key behind?<br>How can
+I convert notebooks to <code>.py</code> files and keep
+<code>.ipynb</code> files out of version control?
 </td>
 </tr><tr><td>
 <span class="visually-hidden">Duration: </span>02h 15m
@@ -676,8 +676,8 @@ any links that you are not going to use.
 steps to ensure you can follow along smoothly. The main requirements
 are:</p>
 <ol style="list-style-type: decimal"><li>
-<strong>GitHub Account</strong> – Create an account and be ready to
-fork a repository.</li>
+<strong>GitHub Account (optional)</strong> – Only needed for the
+optional episode on pushing your own code to GitHub.</li>
 <li>
 <strong>AWS Access</strong> – Use a <strong>shared AWS
 account</strong> (if attending Machine Learning Marathon or Research
@@ -685,9 +685,6 @@ Bazaar) or sign up for an AWS Free Tier account.</li>
 <li>
 <strong>Data</strong> – Download one small zip (Titanic CSVs); the
 two larger datasets are staged for you.</li>
-<li>
-<strong>Workshop Repository</strong> – Fork the provided GitHub
-repository for use in AWS.</li>
 <li>
 <strong>Visit Glossary</strong> — Find and briefly review the
 workshop glossary</li>
@@ -697,12 +694,14 @@ overview of AWS, visit the <a href="https://skillbuilder.aws/search?searchText=G
 Started with the AWS Cloud Essentials</a> course</li>
 </ol><p>Details on each step are outlined below.</p>
 <div class="section level3">
-<h3 id="github-account">1. GitHub Account<a class="anchor" aria-label="anchor" href="#github-account"></a></h3>
-<p>You will need a GitHub account to access the code provided during
-this lesson. If you don’t already have a GitHub account, please <a href="https://github.com/" class="external-link">sign up for GitHub</a> to create a free
-account. Don’t worry if you’re a little rusty on using GitHub/git; we
-will only use a couple of git commands during the lesson, and the
-instructor will provide guidance on these steps.</p>
+<h3 id="github-account-optional">1. GitHub Account (optional)<a class="anchor" aria-label="anchor" href="#github-account-optional"></a></h3>
+<p>All of the workshop’s code lives in the lesson repository itself,
+which you clone (read-only, no account needed) onto your notebook
+instance in the <em>Accessing S3</em> episode with one command that
+every later episode repeats. A GitHub account is only needed for the
+optional self-study episode on pushing your own notebooks to GitHub from
+SageMaker. If you plan to do that episode and don’t have an account, <a href="https://github.com/" class="external-link">sign up for GitHub</a> (free); the episode
+walks through the rest.</p>
 </div>
 <div class="section level3">
 <h3 id="aws-account">2. AWS Account<a class="anchor" aria-label="anchor" href="#aws-account"></a></h3>
@@ -836,26 +835,7 @@ instructors stage before class; the instructor tells you its name at the
 start of the RAG and fine-tuning episodes.</p>
 </div>
 <div class="section level3">
-<h3 id="get-access-to-workshop-code-fork-github-repo">4. Get Access To Workshop Code (Fork GitHub Repo)<a class="anchor" aria-label="anchor" href="#get-access-to-workshop-code-fork-github-repo"></a></h3>
-<p>You will need a copy of our AWS_helpers repo on GitHub to explore how
-to manage your repo in AWS. This setup will allow you to follow along
-with the workshop and test out the Interacting with Repositories
-episode.</p>
-<p>To do this:</p>
-<ol style="list-style-type: decimal"><li>Go to the <a href="https://github.com/UW-Madison-DataScience/AWS_helpers" class="external-link">AWS_helpers
-GitHub repository</a>.</li>
-<li>Click <strong>Fork</strong> (top right) to create your own copy of
-the repository under your GitHub account. You will only need the main
-branch. You can leave “Copy the main branch only” selected.</li>
-<li>Once forked, you don’t need to do anything else. The fork is cloned
-<strong>once</strong>, in the <em>Accessing S3</em> episode, into
-<code>/home/ec2-user/SageMaker/AWS_helpers/</code> on your notebook
-instance, and the optional GitHub PAT episode pushes changes back to it
-from that same clone. The clone command you will run there is:</li>
-</ol><pre class="text"><code>!git clone https://github.com/YOUR_GITHUB_USERNAME/AWS_helpers.git</code></pre>
-</div>
-<div class="section level3">
-<h3 id="review-the-workshop-glossary-page">5. Review the Workshop Glossary Page<a class="anchor" aria-label="anchor" href="#review-the-workshop-glossary-page"></a></h3>
+<h3 id="review-the-workshop-glossary-page">4. Review the Workshop Glossary Page<a class="anchor" aria-label="anchor" href="#review-the-workshop-glossary-page"></a></h3>
 <p>When learning cloud tools for the first time, understanding new
 terminology is half the battle. We encourage learners to <em>briefly
 review</em> the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html#glossary" class="external-link">Glossary
@@ -868,7 +848,7 @@ workshop, please ask the instructor for assistance or refer back to the
 glossary.</p>
 </div>
 <div class="section level3">
-<h3 id="optional-aws-skill-builder-getting-started-with-the-aws-cloud-essentials">6. (Optional) AWS Skill Builder — Getting Started with the AWS Cloud
+<h3 id="optional-aws-skill-builder-getting-started-with-the-aws-cloud-essentials">5. (Optional) AWS Skill Builder — Getting Started with the AWS Cloud
 Essentials<a class="anchor" aria-label="anchor" href="#optional-aws-skill-builder-getting-started-with-the-aws-cloud-essentials"></a></h3>
 <p>Attendees who want a stronger foundational understanding of AWS
 before diving into SageMaker and other ML services are encouraged to
