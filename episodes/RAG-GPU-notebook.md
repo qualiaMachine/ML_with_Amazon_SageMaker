@@ -182,7 +182,7 @@ def download_s3_object(bucket: str, key: str, local_path: str) -> None:
 
 ```python
 shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only inputs, from your instructor
-bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks live here)
+bucket_name = "badgerscribe-doejohn"     # <-- EDIT ME: your own bucket (chunks live here)
 
 # Local working directory in the notebook instance
 local_data_dir = "./data"

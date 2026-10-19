@@ -72,7 +72,7 @@ We'll use our notebook instance name again to label the training jobs launched i
 ```python
 import boto3
 
-notebook_instance_name = 'sinkorswim-DoeJohn-TrainClassifier' # adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.
+notebook_instance_name = 'badgerscribe-doejohn-trainclassifier' # adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.
 
 # the following code just verifies you have the right name for your notebook instance
 region = boto3.Session().region_name  # inherited from the notebook instance; do not hard-code a region
@@ -89,7 +89,7 @@ print(f"Instance Type: {local_instance}")
 
 ```python
 name = "John Doe" # replace with your name
-project = "sinkorswim" # replace with your team name
+project = "badgerscribe" # replace with your challenge name
 purpose = "tune_PyTorch"
 
 job_tags = [
@@ -110,7 +110,7 @@ from sagemaker import get_execution_role
 
 # Initialize role, bucket, and SageMaker session variables
 role = get_execution_role()
-bucket_name = 'sinkorswim-doejohn'  # replace with your S3 bucket name
+bucket_name = 'badgerscribe-doejohn'  # replace with your S3 bucket name
 session = sagemaker.Session()
 s3 = boto3.client('s3')
 
