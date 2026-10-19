@@ -132,7 +132,7 @@ base_embedding_model_id = "amazon.titan-embed-text-v2:0"
 
 # Buckets: the shared one is read-only (inputs); yours receives everything derived.
 shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: the name your instructor gives you
-bucket_name = "badgerscribe-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode
+bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode
 
 # Keys in the shared bucket (inputs) and in your bucket (derived artifacts)
 metadata_key = "wattbot/metadata.csv"

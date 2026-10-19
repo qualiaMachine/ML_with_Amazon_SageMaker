@@ -105,7 +105,7 @@ region = session.boto_region_name
 role = get_execution_role()
 
 shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only inputs, from your instructor
-bucket_name = "badgerscribe-doejohn"     # <-- EDIT ME: your own bucket (chunks in, outputs out)
+bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks in, outputs out)
 s3_client = boto3.client("s3", region_name=region)
 
 local_data_dir = "./data"
