@@ -1,83 +1,68 @@
-# The Carpentries Workbench Template Markdown Lesson
+# Machine Learning with Amazon SageMaker
 
-This lesson is a template lesson that uses [The Carpentries Workbench][workbench]. 
+A Carpentries-style lesson on running machine learning work on AWS without
+losing control of the bill: SageMaker notebooks as controllers, training and
+tuning jobs, retrieval-augmented generation on Bedrock and on rented GPUs, and
+fine-tuning an open-weight vision-language model. Built for the UW–Madison
+ML Marathon and Research Bazaar, usable by anyone with an AWS account.
 
-## Note about lesson life cycle stage
-Although the `config.yaml` states the life cycle stage as pre-alpha, **the template is stable and ready to use**. The life cycle stage is preset to `"pre-alpha"` as this setting is appropriate for new lessons initialised using the template.
+**Rendered lesson:** https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/
 
-## Create a new repository from this template
+## What the lesson covers
 
-To use this template to start a new lesson repository, 
-make sure you're logged into Github.   
-Visit https://github.com/carpentries/workbench-template-md/generate
-and follow the instructions.
-Checking the 'Include all branches' option will save some time waiting for the first website build
-when your new repository is initialised.
+| Part | Episodes | Hands-on problem |
+|---|---|---|
+| SageMaker foundations | Overview, S3 setup, notebooks as controllers, accessing S3, code repos | Titanic survival classifier |
+| Training and tuning | Training jobs (XGBoost, PyTorch), hyperparameter tuning | Titanic, CPU vs GPU, parallel jobs |
+| Retrieval-augmented generation | Overview, Bedrock, a rented GPU notebook, Processing jobs | [WattBot](https://www.kaggle.com/competitions/WattBot2025) energy-literature Q&A |
+| Fine-tuning | LoRA fine-tune of CHURRO-3B as a training job | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
+| Wrap-up | Resource management and cleanup | |
 
-If you have any questions, contact [@tobyhodges](https://github.com/tobyhodges)
+Cost control runs through every episode: cost-allocation tags on every
+resource, `max_run` caps on every job, estimates written down before a launch
+and compared to the bill afterwards, and a standing rule to stop and delete
+notebook instances.
 
-## Configure a new lesson
+## Repository layout
 
-Follow the steps below to
-complete the initial configuration of a new lesson repository built from this template:
+| Path | What it is |
+|---|---|
+| `episodes/*.md` | The lesson text. **Edit these**; everything else below derives from them. |
+| `notebooks/*.ipynb` | Jupyter notebooks generated from the episodes by `scripts/md_to_ipynb.py`. Regenerated automatically on every push to `main`; do not edit by hand. |
+| `scripts/` | Training, processing and helper scripts that the episodes clone into SageMaker (`train_nn.py`, `wattbot_rag_batch.py`, `finetune_churro_lora.py`, ...), plus the notebook generator and the data-release builder. |
+| `learners/` | Setup instructions, glossary, instance-selection guide. |
+| `instructors/` | Instructor notes: account preparation and quotas, per-episode cost estimates, data staging, end-of-workshop cleanup with aws-nuke. |
+| `data/data.zip` | The Titanic CSVs used in the first half of the lesson. |
+| `config.yaml` | Lesson configuration and episode order ([Workbench docs](https://carpentries.github.io/sandpaper-docs/)). |
 
-1. **Make sure GitHub Pages is activated:**
-   navigate to _Settings_,
-   select _Pages_ from the left sidebar,
-   and make sure that `gh-pages` is selected as the branch to build from.
-   If no `gh-pages` branch is available, check _Actions_ to see if the first
-   website build workflows are still running.
-   The branch should become available when those have completed.
-1. **Adjust the `config.yaml` file:**
-   this file contains global parameters for your lesson site.
-   Individual fields within the file are documented with comments (beginning with `#`)
-   At minimum, you should adjust all the fields marked 'FIXME':
-   - `title`
-   - `created`
-   - `keywords`
-   - `life_cycle` (the default, _pre-alpha_, is the appropriate for brand new lessons)
-   - `contact`
-1. **Annotate the repository** with site URL and topic tags:
-   navigate back to the repository landing page and
-   click on the gear wheel/cog icon (similar to ⚙️) 
-   at the top-right of the _About_ box.
-   Check the "Use your GitHub Pages website" option,
-   and [add some keywords and other annotations to describe your lesson](https://cdh.carpentries.org/the-carpentries-incubator.html#topic-tags)
-   in the _Topics_ field.
-   At minimum, these should include:
-   - `lesson`
-   - the life cycle of the lesson (e.g. `pre-alpha`)
-   - the human language the lesson is written in (e.g. `deutsch`)
-1. **Adjust the 
-   `CITATION.cff`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, and `LICENSE.md` files**
-   as appropriate for your project.
-   -  `CITATION.cff`:
-      this file contains information that people can use to cite your lesson,
-      for example if they publish their own work based on it.
-      You should [update the CFF][cff-sandpaper-docs] now to include information about your lesson,
-      and remember to return to it periodicallt, keeping it updated as your
-      author list grows and other details become available or need to change.
-      The [Citation File Format home page][cff-home] gives more information about the format,
-      and the [`cffinit` webtool][cffinit] can be used to create new and update existing CFF files.
-   -  `CODE_OF_CONDUCT.md`: 
-      if you are using this template for a project outside The Carpentries,
-      you should adjust this file to describe 
-      who should be contacted with Code of Conduct reports,
-      and how those reports will be handled.
-   -  `CONTRIBUTING.md`:
-      depending on the current state and maturity of your project,
-      the contents of the template Contributing Guide may not be appropriate.
-      You should adjust the file to help guide contributors on how best
-      to get involved and make an impact on your lesson.
-   -  `LICENSE.md`:
-      in line with the terms of the CC-BY license,
-      you should ensure that the copyright information 
-      provided in the license file is accurate for your project.
-1. **Update this README with 
-   [relevant information about your lesson](https://carpentries.github.io/lesson-development-training/collaborating-newcomers.html#readme)**
-   and delete this section.
+## Data
 
-[cff-home]: https://citation-file-format.github.io/
-[cff-sandpaper-docs]:  https://carpentries.github.io/sandpaper-docs/editing.html#making-your-lesson-citable
-[cffinit]: https://citation-file-format.github.io/cff-initializer-javascript/
-[workbench]: https://carpentries.github.io/sandpaper-docs/
+- **Titanic** (training episodes): `data/data.zip` in this repository; learners download it before the workshop.
+- **WattBot** (RAG episodes): PDFs and question files in the same `data.zip`; learners upload them to their own S3 bucket in the Bedrock episode.
+- **Badger Scribe** (fine-tuning episode): published as a [GitHub Release](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases) on this repository (`badger-scribe-data-v1`: 295 train and 141 test pages of the Anna Seifert correspondence, Max Kade Institute, with human transcriptions). Instructors stage it in a shared S3 bucket before class; learners do not need a Kaggle account. See `instructors/badger-scribe-data-release.md` for publishing a new version.
+
+## Running the workshop
+
+Before class, work through `instructors/aws-account-prep.md` (service quotas,
+Bedrock model access, cost-allocation tags) and the per-episode pages in
+`instructors/`. GPU quota increases can take weeks; file them early. After
+class, `instructors/instructor-notes.md` covers cleaning the shared account
+with aws-nuke.
+
+## Contributing
+
+Edit the Markdown in `episodes/` and open a pull request; the site and the
+notebooks rebuild automatically. Code blocks in an episode become notebook
+cells, so keep each block runnable on its own. Issues and suggestions:
+https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/issues or
+endemann@wisc.edu.
+
+The lesson is developed on the [qualiaMachine fork](https://github.com/qualiaMachine/ML_with_Amazon_SageMaker)
+and synced to the incubator repository by pull request.
+
+## Citation and license
+
+Please cite the lesson using `CITATION.cff`. The instructional material is
+licensed CC-BY 4.0 and the code MIT; see `LICENSE.md`. The Badger Scribe
+page images and transcriptions carry their own rights statements, recorded
+in the release notes and in `instructors/badger-scribe-data-release.md`.
