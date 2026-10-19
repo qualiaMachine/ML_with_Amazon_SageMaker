@@ -11,15 +11,21 @@ SageMaker passes hyperparameters as command-line flags and mounts the
 What gets written to $SM_MODEL_DIR (SageMaker tars it into model.tar.gz):
 
     adapter_config.json, adapter_model.safetensors   the LoRA adapter
-    processor files                                  so inference needs no base download
+    processor files                                  the resize/tokenizer settings used in
+                                                     training, so inference matches them
+                                                     (the base weights are still needed)
     holdout_page_ids.csv                             pages held out of training
     eval_before.csv, eval_after.csv                  per-page CER on sampled holdout pages,
                                                      base model vs. fine-tuned (same pages)
     train_summary.json                               what this run did and scored
 
-The base weights are never modified: a LoRA adapter is a few tens of MB that
-sits on top of the frozen 3B model. That is what makes this fit on a 24 GB
-GPU and finish in about an hour.
+The base weights are never modified: a LoRA adapter is ~100 MB that sits on
+top of the frozen 3B model. That is what makes this fit on a 24 GB GPU and
+finish in about half an hour.
+
+If a `model` channel is mounted (a staged copy of the base weights in S3),
+SageMaker sets $SM_CHANNEL_MODEL and the script loads from that directory
+instead of pulling from Hugging Face.
 """
 
 import argparse
@@ -27,6 +33,9 @@ import json
 import os
 import random
 import time
+
+# Silence the tokenizers fork warning from the dataloader workers.
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 import pandas as pd
 import torch
@@ -48,7 +57,9 @@ from badger_common import (
 def parse_args():
     p = argparse.ArgumentParser()
     # --- what to train ---
-    p.add_argument("--model_id", type=str, default="stanford-oval/churro-3B")
+    # A local directory works as a model id for from_pretrained; SageMaker sets
+    # SM_CHANNEL_MODEL when the estimator is given a "model" channel.
+    p.add_argument("--model_id", type=str, default=os.environ.get("SM_CHANNEL_MODEL", "stanford-oval/churro-3B"))
     p.add_argument("--epochs", type=float, default=2.0)
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--lora_r", type=int, default=16)
@@ -154,10 +165,18 @@ def transcribe(model, processor, image, prompt, max_new_tokens):
 def evaluate(model, processor, df, images_dir, doc_ctx, max_pixels, n_pages, max_new_tokens, seed, label, out_dir):
     """Transcribe a fixed sample of holdout pages and report CER. Called with
     the same seed before and after training, so both scores are on the same
-    pages. Writes eval_<label>.csv with one row per page."""
+    pages. Writes eval_<label>.csv with one row per page.
+
+    The sample is the first n of a seeded shuffle of the sorted page ids, so
+    it depends only on the holdout set and the seed, not on row order or on
+    n: a 40-page sample contains the 15-page sample by construction. That is
+    what lets the instructor's full run be compared against a student's."""
     if n_pages <= 0 or len(df) == 0:
         return None
-    sample = df.sample(n=min(n_pages, len(df)), random_state=seed)
+    ids = sorted(df["page_id"])
+    random.Random(seed).shuffle(ids)
+    n = min(n_pages, len(ids))
+    sample = df.set_index("page_id").loc[ids[:n]].reset_index()
     was_training = model.training
     model.eval()
     processor.tokenizer.padding_side = "left"

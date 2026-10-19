@@ -1,8 +1,8 @@
 """Package a Badger Scribe data download into the zip assets the lesson's
 GitHub Release expects, and print the command that publishes them.
 
-The lesson does not keep the competition images in git (1.95 GB of JPEGs
-would make every clone slow and blow through Git LFS limits). Instead each
+The lesson does not keep the page images in git (hundreds of JPEGs would
+make every clone slow and blow through Git LFS limits). Instead each
 data version is a GitHub Release on the lesson repository with three zip
 assets, each well under GitHub's 2 GiB per-asset limit:
 

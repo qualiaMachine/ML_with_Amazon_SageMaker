@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 class TitanicNet(nn.Module):
     """A simple feed-forward neural network for binary classification."""
@@ -20,12 +22,6 @@ class TitanicNet(nn.Module):
         x = torch.relu(self.fc2(x))
         x = torch.sigmoid(self.fc3(x))
         return x
-
-# Inside test_AWS/scripts/train_nn.py
-
-import pandas as pd
-import numpy as np
-from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 def preprocess_data(df, scaler=None):
     """

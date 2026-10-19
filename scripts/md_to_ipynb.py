@@ -55,10 +55,17 @@ def split_markdown(md_content):
         if before_code:
             cells.append(new_markdown_cell(before_code, id=stable_cell_id(before_code, seen_ids)))
 
-        # Extract code block content
+        # Only ```python fences become code cells. Any other fence (bash, json,
+        # text, yaml, an untagged block) is explanatory and stays in Markdown,
+        # so the generated notebook never contains a cell that cannot run.
+        lang = (match.group(1) or "").lower()
         code_content = match.group(2).strip()
-        if code_content:
-            cells.append(new_code_cell(code_content, id=stable_cell_id(code_content, seen_ids)))
+        if lang == "python":
+            if code_content:
+                cells.append(new_code_cell(code_content, id=stable_cell_id(code_content, seen_ids)))
+        else:
+            block_md = match.group(0).strip()
+            cells.append(new_markdown_cell(block_md, id=stable_cell_id(block_md, seen_ids)))
 
         position = match.end()
 

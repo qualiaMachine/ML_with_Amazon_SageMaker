@@ -7,10 +7,14 @@ Inputs (mounted under --input_dir, one ProcessingInput each):
     data/metadata.csv              optional catalog context
     data/<page_ids_csv>            optional: restrict to these page_ids (e.g. the holdout list)
     adapter/model.tar.gz           optional: the training job's output
+    model/                         optional: a staged copy of the base model; pass its path
+                                   as --model_id so the job reads S3 instead of Hugging Face
 
 Outputs (written to --output_dir):
     predictions.csv                page_id, text  -- the competition submission format
-    scores.json                    CER per category, if pages.csv had a text column
+    scores.json                    CER per category over the rows of pages.csv that have a
+                                   non-empty text column (test pages, whose text is empty,
+                                   are transcribed but never scored)
 
 Run it twice with the same pages: once without --adapter_tar (the base
 model) and once with it. The difference is what your fine-tune bought.
@@ -38,7 +42,9 @@ from badger_common import (
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--model_id", type=str, default="stanford-oval/churro-3B")
+    # A local directory works as a model id: SageMaker sets SM_CHANNEL_MODEL when a
+    # "model" channel is mounted (training jobs); Processing jobs pass the path explicitly.
+    p.add_argument("--model_id", type=str, default=os.environ.get("SM_CHANNEL_MODEL", "stanford-oval/churro-3B"))
     p.add_argument("--input_dir", type=str, default="/opt/ml/processing/input")
     p.add_argument("--output_dir", type=str, default="/opt/ml/processing/output")
     p.add_argument("--pages_csv", type=str, default="pages.csv", help="file name inside input_dir/data")
@@ -69,19 +75,26 @@ def main():
     doc_ctx = load_metadata(meta_path) if (args.use_metadata and os.path.exists(meta_path)) else {}
     print(f"transcribing {len(pages)} pages")
 
-    processor = AutoProcessor.from_pretrained(args.model_id, min_pixels=args.min_pixels, max_pixels=args.max_pixels)
+    # Unpack the adapter first: the training job saved its processor next to the
+    # adapter, and using that copy keeps the inference resize identical to training.
+    adapter_dir = ""
+    if args.adapter_tar:
+        adapter_dir = "/tmp/adapter"
+        os.makedirs(adapter_dir, exist_ok=True)
+        with tarfile.open(args.adapter_tar) as tar:
+            tar.extractall(adapter_dir, filter="data")
+        print("adapter files:", sorted(os.listdir(adapter_dir)))
+
+    processor_src = adapter_dir if (adapter_dir and os.path.exists(os.path.join(adapter_dir, "preprocessor_config.json"))) else args.model_id
+    print(f"loading processor from {processor_src}; model from {args.model_id}")
+    processor = AutoProcessor.from_pretrained(processor_src, min_pixels=args.min_pixels, max_pixels=args.max_pixels)
     processor.tokenizer.padding_side = "left"  # batched generation needs left padding
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         args.model_id, torch_dtype=torch.bfloat16, attn_implementation="sdpa"
     ).to("cuda")
 
-    if args.adapter_tar:
+    if adapter_dir:
         from peft import PeftModel
-        adapter_dir = "/tmp/adapter"
-        os.makedirs(adapter_dir, exist_ok=True)
-        with tarfile.open(args.adapter_tar) as tar:
-            tar.extractall(adapter_dir)
-        print("adapter files:", sorted(os.listdir(adapter_dir)))
         model = PeftModel.from_pretrained(model, adapter_dir).merge_and_unload()
         print("LoRA adapter merged into base weights")
     model.eval()
@@ -111,13 +124,17 @@ def main():
     pages[["page_id"]].assign(text=preds).to_csv(os.path.join(args.output_dir, "predictions.csv"), index=False)
     print(f"wrote predictions.csv ({len(pages)} rows) in {(time.time() - t0) / 60:.1f} min")
 
-    if "text" in pages.columns and pages["text"].str.len().sum() > 0:
-        macro, by_cat = macro_cer(pages.rename(columns={"text": "text_ref"}))
-        scores = {"adapter": bool(args.adapter_tar), "n_pages": int(len(pages)),
-                  "macro_cer": round(macro, 4), "per_category": by_cat.round(4).to_dict()}
-        print(json.dumps(scores, indent=2))
-        with open(os.path.join(args.output_dir, "scores.json"), "w") as f:
-            json.dump(scores, f, indent=2)
+    # Score only rows that carry a reference. Test pages have an empty text
+    # column; counting them would score every one of them as CER 1.0.
+    if "text" in pages.columns:
+        scored = pages[pages["text"].str.len() > 0]
+        if len(scored) > 0:
+            macro, by_cat = macro_cer(scored.rename(columns={"text": "text_ref"}))
+            scores = {"adapter": bool(args.adapter_tar), "n_pages": int(len(pages)), "n_scored": int(len(scored)),
+                      "macro_cer": round(macro, 4), "per_category": by_cat.round(4).to_dict()}
+            print(json.dumps(scores, indent=2))
+            with open(os.path.join(args.output_dir, "scores.json"), "w") as f:
+                json.dump(scores, f, indent=2)
 
 
 if __name__ == "__main__":
