@@ -466,13 +466,18 @@ student, possibly at once)</td>
 left at its default of 0; the episodes do not use warm pools and a
 nonzero quota lets a student leave an idle GPU billing.</p>
 </section><section><h2 class="section-heading" id="learner-access">Learner access<a class="anchor" aria-label="anchor" href="#learner-access"></a></h2>
-<hr class="half-width"><p>Learners sign in through IAM Identity Center with their NetID using
-the console link in the setup page (account <code>183295408236</code>,
-permission set <code>ml-bedrock-183295408236sagemaker</code>). Before
-the workshop, add every registered NetID to the group that carries that
-permission set, then ask learners to run the “verify your access” steps
-in the setup page; a missing assignment is the most common day-one
-problem and it cannot be fixed from the classroom in a hurry.</p>
+<hr class="half-width"><p>Learners sign in through IAM Identity Center with their university
+login. Before the workshop, add every registered user to the group that
+carries the workshop permission set, then email them the Identity Center
+console link for that account and permission set (the
+<code>.../start/#/console?account_id=...&amp;role_name=...</code> deep
+link), together with the account name and region to expect. The link is
+deliberately not printed in the public lesson: it is not a credential,
+but a public start URL plus role name is the raw material for a
+convincing phishing page, and the lesson is reused outside UW. Ask
+learners to run the “verify your access” steps in the setup page; a
+missing assignment is the most common day-one problem and it cannot be
+fixed from the classroom in a hurry.</p>
 </section><section><h2 class="section-heading" id="bedrock">Bedrock<a class="anchor" aria-label="anchor" href="#bedrock"></a></h2>
 <hr class="half-width"><p>Console: <strong>Service Quotas → Amazon Bedrock</strong>, and
 <strong>Bedrock → Model access</strong>.</p>
