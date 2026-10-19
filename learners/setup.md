@@ -66,7 +66,7 @@ The workshop uses three datasets. You download only the first; the other two are
 
 The `wattbot/` folder holds the two WattBot CSVs (`metadata.csv`, `train_QA.csv`) for anyone staging their own bucket; in the workshop you will not use them from your laptop, because the shared bucket already has them alongside the PDF corpus, which is not in the zip.
 
-In the S3 episode (*Data Storage: Setting up S3*), you will create one S3 bucket of your own, upload the Titanic data to it, and use that bucket for your outputs for the whole workshop. The WattBot and Badger Scribe data live in a shared, read-only bucket that the instructors stage before class; the instructor tells you its name at the start of the RAG and fine-tuning episodes. No Kaggle account is required for any part of the workshop.
+In the S3 episode (*Data Storage: Setting up S3*), you will create one S3 bucket of your own, upload the Titanic data to it, and use that bucket for your outputs for the whole workshop. The WattBot and Badger Scribe data live in a shared, read-only bucket that the instructors stage before class; the instructor tells you its name at the start of the RAG and fine-tuning episodes.
 
 ### 4. Get Access To Workshop Code (Fork GitHub Repo)
 
