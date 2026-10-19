@@ -20,6 +20,7 @@ Run as written, the full workshop costs a few dollars per learner. Every episode
 
 ### What This Workshop Does Not Cover
 
+- **General ML/AI concepts**: the focus is on moving existing ML and AI work to the cloud, not on teaching training, fine-tuning or RAG themselves.
 - **Deploying models as endpoints**: serving a trained or fine-tuned model behind an always-on API.
 - **Agents and tool use**: LLM applications that call tools or chain multiple model calls (e.g., Bedrock Agents).
 
