@@ -6,7 +6,7 @@ Planning notes for running the *Fine-tuning a Vision-Language Model with Trainin
 
 ## The in-class design
 
-The full 619-page fine-tune takes about 65 minutes, which does not fit a 3-hour class. In class, every student runs one ~25-minute job instead: it scores 15 held-out German-letter (`kade_letters`) pages with the base model, trains on 120 German-letter pages for 2 epochs, scores the same 15 pages again, and saves the adapter. The German letters were chosen because every label is human-transcribed (the survey and account-book labels are mostly machine drafts) and because they are most of the hidden test set. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the optional Kaggle submission are homework.
+The full 295-page fine-tune takes about 45 minutes, which does not fit a 3-hour class once setup and discussion are added. In class, every student runs one ~25-minute job instead: it scores 15 held-out German-letter (`kade_letters`) pages with the base model, trains on 120 German-letter pages for 2 epochs, scores the same 15 pages again, and saves the adapter. The lesson ships only the German letters (295 train, 141 test pages) because every label is human-transcribed (the competition's survey and account-book labels are mostly machine drafts), because they are most of the hidden test set, and because the scans are smaller. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the optional Kaggle submission are homework.
 
 Students compare their mini adapter against a full run **you** ran before class (see "Before class" below). That is what makes the "powerful when done right" point without anyone waiting an hour.
 
@@ -20,11 +20,11 @@ Launches use `wait=True` and an explicit `job_name=f"badger-{username}-mini-v1"`
 | In-class mini fine-tune (120 German-letter pages × 2 epochs, 15 pages scored before and after) | `ml.g5.xlarge` ($1.41/h) | ~25 min | $0.60 |
 | Exercise 1: same job at 2 megapixels | `ml.g5.xlarge` | ~35 min | $0.80 |
 | **In class** | | **~1 GPU-hour** | **~$1.55** |
-| Homework: full fine-tune (526 pages × 2 epochs, 60 pages scored before and after) | `ml.g5.xlarge` | ~65 min | $1.53 |
-| Homework: base and fine-tuned over holdout + test (~300 pages, two Processing jobs) | `ml.g5.xlarge` | ~25 min each | $1.18 |
-| **In class + homework** | | **~3 GPU-hours** | **~$4.30** |
+| Homework: full fine-tune (251 pages × 2 epochs, 40 pages scored before and after) | `ml.g5.xlarge` | ~45 min | $1.05 |
+| Homework: base and fine-tuned over holdout + test (~185 pages, two Processing jobs) | `ml.g5.xlarge` | ~15 min each | $0.70 |
+| **In class + homework** | | **~2.3 GPU-hours** | **~$3.30** |
 
-Assumptions behind the training lines: CHURRO-3B in bf16 with LoRA rank 16, gradient checkpointing, one page per step, `max_pixels` of 1280 × 28 × 28 (about one megapixel, ~1,300 visual tokens plus ~300 text tokens per page), about 2.5 s per page-pass and ~10 s per page for greedy generation on an A10G, plus ~10 minutes of fixed startup (container pull, 2 GB of images, 7 GB of weights). These are estimates, not measurements; a 2x miss either way would not be surprising until you have timed a run. Every job is capped (`max_run` of 45 min on the mini job, 2 h on the full run, 1 h on each Processing job), so the worst case from the scripted steps is about $9 per student.
+Assumptions behind the training lines: CHURRO-3B in bf16 with LoRA rank 16, gradient checkpointing, one page per step, `max_pixels` of 1280 × 28 × 28 (about one megapixel, ~1,300 visual tokens plus ~300 text tokens per page), about 2.5 s per page-pass and ~10 s per page for greedy generation on an A10G, plus ~10 minutes of fixed startup (container pull, 2 GB of images, 7 GB of weights). These are estimates, not measurements; a 2x miss either way would not be surprising until you have timed a run. Every job is capped (`max_run` of 45 min on the mini job, 90 min on the full run, 45 min on each Processing job), so the worst case from the scripted steps is about $6 per student.
 
 ## What the class spends
 
@@ -33,7 +33,7 @@ Assumptions behind the training lines: CHURRO-3B in bf16 with LoRA rank 16, grad
 | In class, one clean pass each (mini job + Exercise 1) | $1.55 | $80 |
 | In class, realistic (one extra relaunch each) | ~$2.20 | ~$110 |
 | In class, everything hits its `max_run` cap | ~$3.20 | ~$160 |
-| Homework, if everyone does it | ~$2.70 | ~$135 |
+| Homework, if everyone does it | ~$1.75 | ~$90 |
 | **Budget to request** (realistic class + homework + 50%) | | **$400** |
 
 For comparison, teaching the same material on `ml.g5.xlarge` *notebook* instances costs about the same during class ($1.41 × 3 h × 50 = $212) but adds the forgotten-instance risk: each one left running costs $34/day, $237/week, $1,029/month. Two forgotten instances over a long weekend exceed the entire jobs-based budget above. That difference is the point of the episode, and it is worth saying out loud to the class.
@@ -110,13 +110,13 @@ Then attach a bucket policy that lets the students' execution role read it. This
 
 ### 2. Run the full fine-tune yourself and stage its output
 
-Run the episode's homework estimator (all categories, 2 epochs, `eval_pages` 60) under your own account a day or two before class. Then copy three files from its `model.tar.gz` into the shared bucket, where Step 3 of the episode expects them:
+Run the episode's homework estimator (all 251 training pages, 2 epochs, `eval_pages` 40) under your own account a day or two before class. Then copy three files from its `model.tar.gz` into the shared bucket, where Step 3 of the episode expects them:
 
 - `badger-scribe/instructor/full-run/train_summary.json`
 - `badger-scribe/instructor/full-run/eval_before.csv`
 - `badger-scribe/instructor/full-run/eval_after.csv`
 
-The holdout split is seeded, so your 60 evaluation pages include the students' 15 German-letter pages as long as everyone keeps `seed` and `holdout_frac` at their defaults. While you are at it, note the job's `BillableTimeInSeconds` and `seconds_per_page` and replace the time estimates in the episode's Step 0 tables with measured ones. The episode tells students to compare their bill to the estimate; the estimate should be a real number.
+The holdout split is seeded, so your 40 evaluation pages include the students' 15 pages as long as everyone keeps `seed` and `holdout_frac` at their defaults. While you are at it, note the job's `BillableTimeInSeconds` and `seconds_per_page` and replace the time estimates in the episode's Step 0 tables with measured ones. The episode tells students to compare their bill to the estimate; the estimate should be a real number.
 
 ### 3. The rest
 

@@ -2,15 +2,15 @@
 title: 'Badger Scribe data: publishing a release'
 ---
 
-The fine-tuning episode's data (the Badger Scribe competition data: ~620 labelled train pages, ~210 test pages, 1.95 GB of JPEG scans plus a few CSVs) lives as a **GitHub Release** on the lesson repository, not in the git tree and not on Kaggle. Learners never need a Kaggle account. Each data version is one release with three zip assets:
+The fine-tuning episode's data (the German-letter part of the Badger Scribe competition data: 295 labelled train pages, 141 test pages, 436 JPEG scans plus a few CSVs) lives as a **GitHub Release** on the lesson repository, not in the git tree and not on Kaggle. Learners never need a Kaggle account. Each data version is one release with three zip assets:
 
 | Asset | Contents | Size |
 |---|---|---|
 | `badger-scribe-v<N>-labels.zip` | `train.csv`, `test.csv`, `metadata.csv`, `metric.py`, `sample_submission.csv`, the `.md` conventions and templates | < 1 MB |
-| `badger-scribe-v<N>-images-train.zip` | `images/<page_id>.jpg` for every page in `train.csv` | ~1.4 GB |
-| `badger-scribe-v<N>-images-test.zip` | `images/<page_id>.jpg` for every page in `test.csv` | ~0.5 GB |
+| `badger-scribe-v<N>-images-train.zip` | `images/<page_id>.jpg` for every page in `train.csv` | see release |
+| `badger-scribe-v<N>-images-test.zip` | `images/<page_id>.jpg` for every page in `test.csv` | see release |
 
-Unzipping all three into one directory recreates the original layout (`train.csv` next to `images/`), which is what the episode's training channel and the shared S3 bucket expect. GitHub allows 2 GiB per asset with free, unlimited download bandwidth; the images are split by split so each zip stays well under the limit even as the dataset grows.
+Unzipping all three into one directory recreates the original layout (`train.csv` next to `images/`), which is what the episode's training channel and the shared S3 bucket expect. GitHub allows 2 GiB per asset with free, unlimited download bandwidth; the images are split by train/test so each zip stays well under the limit even if the lesson later adds the other collections.
 
 Why a release and not the alternatives: git would keep every version of every JPEG forever and slow every clone; Git LFS has a 1 GB free bandwidth cap that 50 clones exhaust in minutes; Google Drive throttles large downloads and `gdown` breaks regularly. A release is permanent, versioned, free, and sits next to the lesson.
 

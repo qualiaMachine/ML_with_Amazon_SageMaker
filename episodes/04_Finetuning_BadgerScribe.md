@@ -35,18 +35,16 @@ That combination is why fine-tuning is where research teams see the surprise bil
 
 ### The task: Badger Scribe
 
-[Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) is a Kaggle challenge built from UW Digital Collections material: 19th-century surveyors' field notebooks, craftsmen's account books, and German immigrant letters in Kurrent script. Given a page image, produce a verbatim transcription. The score is character error rate (CER), macro-averaged over the three document categories, so a pipeline has to read German Kurrent *and* pencil survey notes to do well.
+[Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) is a Kaggle challenge built from UW Digital Collections material: 19th-century surveyors' field notebooks, craftsmen's account books, and German immigrant letters in Kurrent script. Given a page image, produce a verbatim transcription. The score is character error rate (CER): edits per reference character, lower is better.
 
-The released train set is small:
+This lesson uses the German letters, the Anna Seifert correspondence held by the Max Kade Institute: 191 letters and postcards written in Kurrent between 1932 and 1942 by one woman to her son, transcribed by the Institute's Kurrent Transcription Group. It is the part of the competition data where every label was produced by a person, and it is most of the hidden test set.
 
-| category | train pages | label source |
-|---|---|---|
-| `kade_letters` (German Kurrent) | 295 | all human-transcribed |
-| `survey_notes` (pencil field notes) | 288 | 16 human, 272 machine draft |
-| `dominy_accounts` (account books, letters) | 36 | 2 human, 34 machine draft |
-| **total** | **619** | ~709 characters per page on average |
+| split | pages | documents | label source |
+|---|---|---|---|
+| train | 295 | 4 letter bundles | all human-transcribed, ~620 characters per page |
+| test | 141 | 5 other letter bundles | labels held by Kaggle |
 
-Small is the point. 619 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material. In class we train on the German letters: every one of their labels was produced by a person, and they are most of the hidden test set, so a gain there is a gain that counts.
+Small is the point. 295 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material. Kurrent is also a genuinely different script from modern German cursive, so this is a case where the model has to learn something, not just adjust its style.
 
 We will fine-tune [CHURRO-3B](https://github.com/stanford-oval/Churro), a 3-billion-parameter open-weight vision-language model from Stanford that was itself fine-tuned from Qwen2.5-VL-3B on roughly 100,000 pages of historical documents in 46 language clusters. It already reads old handwriting better than its base model does; we are teaching it *these* hands and *these* transcription conventions.
 
@@ -71,7 +69,7 @@ The cost of a run is GPU-hours × the hourly rate, and GPU-hours scale with **mo
 | Run | Hardware | GPU-hours | Cost |
 |---|---|---|---|
 | **This episode:** 3B, LoRA, 120 Kurrent pages × 2 epochs | 1 × A10G (`ml.g5.xlarge`, $1.41/h), ~25 min | 0.4 | **~$0.60** |
-| Homework: 3B, LoRA, all 619 pages × 2 epochs | 1 × A10G, ~65 min | 1.1 | ~$1.50 |
+| Homework: 3B, LoRA, all 295 pages × 2 epochs | 1 × A10G, ~45 min | 0.75 | ~$1.05 |
 | 7B full fine-tune, ~50k documents, a few epochs | 8 × A100 (`ml.p4d.24xlarge`, $25.25/h), ~10 h | 80 | ~$250 |
 | 70B LoRA, one day | 8 × A100, 24 h | 192 | ~$600 |
 | CHURRO-3B itself: full fine-tune, 100k pages, 5 epochs | 32 × H100 for ~25 h (4 × `ml.p5.48xlarge`, $63.30/h) | 800 | ~$6,300 |
@@ -313,8 +311,7 @@ estimator = HuggingFace(
     sagemaker_session=session,
     hyperparameters={
         "model_id": "stanford-oval/churro-3B",
-        "categories": "kade_letters",     # one category in class; the homework uses all three
-        "max_train_pages": 120,
+        "max_train_pages": 120,           # a slice in class; the homework uses all 250 training pages
         "epochs": 2,
         "lr": 2e-4,
         "lora_r": 16,
@@ -364,7 +361,7 @@ Open a second browser tab on the SageMaker console: **SageMaker AI → Training 
 
 Things to find in the log while you wait:
 
-- `pages: 619 total -> ... train / ... holdout`: the split, then the category filter.
+- `pages: 295 total -> 251 train / 44 holdout`: the split, before the 120-page slice.
 - `trainable params: ...`: what fraction of the 3B parameters LoRA actually trains.
 - `[eval before] 15 holdout pages in ...s (... s/page) -> macro CER ...`: the base model's score, and the per-page time that the homework inference jobs will cost.
 - The Trainer's loss lines every 5 steps.
@@ -439,12 +436,12 @@ print("\nTUNED\n", after.set_index("page_id").loc[best, "text_pred"][:500])
 ### Was the estimate right?
 
 1. Compare the billable time from `job_cost_report` with the ~25 minutes estimated in Step 0. Which phase was off, and by how much? (`train_minutes` and `seconds_per_page` in `train_summary.json` tell you.)
-2. Using your measured seconds per page, estimate the homework run: 526 pages × 2 epochs, plus 60 evaluation pages before and after, plus the same startup overhead. Write the number down; you will compare it to the real bill after the homework.
+2. Using your measured seconds per page, estimate the homework run: 251 pages × 2 epochs, plus 40 evaluation pages before and after, plus the same startup overhead. Write the number down; you will compare it to the real bill after the homework.
 
 :::::::::::::::::::::::: solution
 
 1. Expect startup to be close to 10 minutes and the two evaluations to be 2–4 minutes each. Training is the line most likely to differ: if you measured 2.5 s/page, 240 page-passes is 10 minutes; at 4 s/page it is 16.
-2. At 2.5 s/page: 1,052 passes is 44 minutes, plus ~10 minutes of evaluation at 10 s/page, plus 10 minutes startup, so about 65 minutes and $1.50. Scale every line by the ratio you measured.
+2. At 2.5 s/page: 502 passes is 21 minutes, plus ~13 minutes of evaluation at 10 s/page, plus 10 minutes startup, so about 45 minutes and $1.05. Scale every line by the ratio you measured.
 
 :::::::::::::::::::::::::::::::::
 
@@ -452,7 +449,7 @@ print("\nTUNED\n", after.set_index("page_id").loc[best, "text_pred"][:500])
 
 ## Step 3: What a full run buys
 
-Your instructor ran the same script before class on all 619 pages (all three categories, 2 epochs, 60 evaluation pages). Its output is in the shared bucket. The holdout split is deterministic, so its evaluation pages include yours.
+Your instructor ran the same script before class on all 251 training pages (2 epochs, 40 evaluation pages). Its output is in the shared bucket. The holdout split is deterministic, so its evaluation pages include yours.
 
 ```python
 full_dir = os.path.join(local_data_dir, "instructor-full-run")
@@ -477,13 +474,13 @@ print(three.round(3).to_string(index=False))
 print("\nmean on", len(three), "shared pages:", three[["cer_base", "cer_tuned", "cer_full"]].mean().round(3).to_dict())
 ```
 
-Three numbers: the base model, 10 minutes of training on 120 pages, and 50 minutes on 619. The second gap is what more data and more time buy, and it cost about a dollar. Whether that dollar is worth it depends on the gap; whether the next $250 is worth it is the same question at a different scale, and the only way to answer it is to measure, as you just did.
+Three numbers: the base model, 10 minutes of training on 120 pages, and 20 minutes on 251. The second gap is what more data and more time buy, and it cost about fifty cents. Whether that dollar is worth it depends on the gap; whether the next $250 is worth it is the same question at a different scale, and the only way to answer it is to measure, as you just did.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
 ### Why the holdout number flatters you
 
-The script holds out 15% of *pages*, so the same writer's hand appears in both the training and holdout halves. The competition's hidden test set is split by *document*: whole letter bundles and notebooks the model has never seen. Expect the leaderboard CER to be worse than the holdout CER, especially on `dominy_accounts`, where 36 pages come from 20 different writers. (The Kade letters are all one correspondent, which softens this for the class run, but not for the other categories.) A document-level holdout is the fix; it is left as an exercise because with only four German letter bundles in train, it means giving up a quarter of the German data.
+The script holds out 15% of *pages*, so pages from the same letter bundle appear in both the training and holdout halves. The competition's hidden test set is split by *document*: the five test bundles are letters the model has never seen. All the letters are from one writer, which softens the gap here, but her hand, pen and paper change over a decade, so expect the leaderboard CER to be somewhat worse than the holdout CER. A document-level holdout is the fix; it is left as an exercise because with only four bundles in train, holding one out means giving up a quarter of the data.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -551,11 +548,11 @@ Checkpointing. If the instance is reclaimed, the job restarts and, as written, s
 
 ## Homework: the full run and (optionally) a Kaggle submission
 
-Everything below is the same pattern at a larger scale: about $1.50 for the fine-tune and $1.20 for inference, roughly two hours of wall-clock time that you do not need to sit through. Launch, go do something else, come back.
+Everything below is the same pattern at a larger scale: about $1.05 for the fine-tune and $0.80 for inference, roughly an hour and a half of wall-clock time that you do not need to sit through. Launch, go do something else, come back.
 
 ### The full fine-tune
 
-Same estimator with the category filter removed, all pages, and a two-hour cap. Write your estimate down first (Step 2's challenge). Launch with `wait=False` here only because you will not be watching: it returns immediately and you poll later. The explicit job name still protects you from a double launch.
+Same estimator with the page slice removed, all 251 training pages, and a 90-minute cap. Write your estimate down first (Step 2's challenge). Launch with `wait=False` here only because you will not be watching: it returns immediately and you poll later. The explicit job name still protects you from a double launch.
 
 ```python
 full_estimator = HuggingFace(
@@ -566,7 +563,7 @@ full_estimator = HuggingFace(
     instance_type=instance_type,
     instance_count=1,
     volume_size=50,
-    max_run=2 * 60 * 60,                  # 2 hours: twice the estimate
+    max_run=90 * 60,                      # 90 minutes: twice the estimate
     transformers_version="4.56",
     pytorch_version="2.8",
     py_version="py312",
@@ -581,7 +578,7 @@ full_estimator = HuggingFace(
         "grad_accum": 8,
         "max_pixels": 1280 * 28 * 28,
         "holdout_frac": 0.15,
-        "eval_pages": 60,
+        "eval_pages": 40,
         "eval_before": 1,
     },
 )
@@ -602,7 +599,7 @@ if desc["TrainingJobStatus"] == "Completed":
 
 ### Base vs. fine-tuned over the holdout and the test set
 
-The evaluation inside the training job covers a sample. To score the whole holdout *and* produce predictions for the 208 test pages, run the transcription script as a Processing job, once without the adapter and once with it. Each run transcribes about 300 pages in roughly 25 minutes.
+The evaluation inside the training job covers a sample. To score the whole holdout *and* produce predictions for the 141 test pages, run the transcription script as a Processing job, once without the adapter and once with it. Each run transcribes about 185 pages in roughly 15 minutes.
 
 First, build the list of pages and upload it together with the metadata.
 
@@ -652,7 +649,7 @@ def run_transcription_job(label: str, adapter_uri: str = None):
         pytorch_version="2.8",
         py_version="py312",
         sagemaker_session=session,
-        max_runtime_in_seconds=60 * 60,   # 1 hour cap; the estimate is 25 minutes
+        max_runtime_in_seconds=45 * 60,   # 45 minute cap; the estimate is 15 minutes
     )
     processor.run(
         code="churro_transcribe_batch.py",
