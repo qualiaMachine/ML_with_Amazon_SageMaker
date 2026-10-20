@@ -458,36 +458,31 @@ all of them.</li>
 <p>Amazon SageMaker is AWS’s managed platform for training, tuning and
 running machine learning models. You bring your own scripts and data;
 AWS provides the machines, the containers with common ML frameworks
-installed, and the bookkeeping. This episode is about when that is worth
-it for a researcher who already has a campus cluster or a lab
-workstation.</p>
+installed, and the bookkeeping. This episode compares it with the
+compute researchers usually already have.</p>
 <div class="section level3">
 <h3 id="cloud-vs--the-cluster-down-the-hall">Cloud vs. the cluster down the hall<a class="anchor" aria-label="anchor" href="#cloud-vs--the-cluster-down-the-hall"></a></h3>
-<p>Most researchers already have somewhere to run ML: a campus HPC
-cluster, a departmental GPU server, or a workstation under the desk. The
-cloud is a different trade. Three things matter most:</p>
+<p>Most researchers already have somewhere to run ML, such as a campus
+HPC cluster, a departmental GPU server, or a lab workstation. How the
+cloud compares:</p>
 <ul><li>
 <strong>Hardware generation.</strong> A cluster or lab server is
 bought once and used for five or more years, so its GPUs are whatever
-generation was current at purchase. Cloud providers carry each new
-generation (H100, H200 and newer) from the month it ships, in single-GPU
-instances up to 8-GPU nodes. If a model or a method needs the current
-generation’s memory or speed, the cloud is often the only place to get
-it without waiting for a procurement cycle.</li>
+was current at purchase. Cloud providers offer each new generation
+(H100, H200 and newer) soon after release, from single-GPU instances to
+8-GPU nodes.</li>
 <li>
-<strong>Efficiency of spend.</strong> Cloud instances bill per
-second and only while they run. A job that needs an H100 for forty
-minutes costs forty minutes of an H100; the rest of the day costs
-nothing. Owned hardware costs the same whether it is busy or idle. For
+<strong>Cost.</strong> Cloud instances bill per second, only while
+they run. Owned hardware costs the same whether it is busy or idle. For
 bursty work, renting is cheaper; for GPUs that stay busy, owning
 is.</li>
 <li>
-<strong>Control and data.</strong> On-prem gives you full control:
-your own software stack, no quotas, no egress charges, and data that
-never leaves campus, which matters for restricted datasets. In the cloud
-you work within quotas and an account’s permissions, and anything you
-move in or out crosses the network. An idle rented GPU costs the same as
-a busy one, so every job in this lesson has a runtime cap.</li>
+<strong>Control and data.</strong> On-prem gives full control over
+the software stack, no quotas, no egress charges, and data that never
+leaves campus. In the cloud you work within quotas and account
+permissions, and data moved in or out crosses the network. An idle
+rented GPU costs the same as a busy one, so every job in this lesson has
+a runtime cap.</li>
 </ul><table class="table"><colgroup><col width="25%"><col width="25%"><col width="25%"><col width="25%"></colgroup><thead><tr><th></th>
 <th>Campus cluster</th>
 <th>Lab workstation</th>
@@ -519,7 +514,7 @@ a busy one, so every job in this lesson has a runtime cap.</li>
 </tr></tbody></table></div>
 <div class="section level3">
 <h3 id="why-use-sagemaker-for-machine-learning">Why use SageMaker for machine learning?<a class="anchor" aria-label="anchor" href="#why-use-sagemaker-for-machine-learning"></a></h3>
-<p>Within AWS, SageMaker is the service built for ML workloads:</p>
+<p>Within AWS, SageMaker is the service for ML workloads.</p>
 <ul><li><p><strong>High-performance compute only when needed</strong>:
 SageMaker lets you develop interactively in lightweight, inexpensive
 notebook environments (or your own laptop) and then launch training,
