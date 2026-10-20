@@ -57,7 +57,7 @@ s3 = boto3.client('s3')
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-Print what we just created. The role is the identity every call from this notebook uses; the region is where your bucket must be.
+Print what we just created. The role is the identity every call from this notebook uses. Check the region line against the bucket you made in the S3 episode: the two must match, or the training jobs in later episodes will fail to find their data and anything you do read will be billed as cross-region transfer. If they differ, the fix is a new bucket in this region, not a new notebook instance.
 
 ```python
 # Print relevant details 
@@ -112,7 +112,7 @@ train_data.head()
 ```
 
 ### B) Download copy into notebook environment
-In some cases, downloading a local copy of the dataset may be useful, such as when performing repeated reads in an interactive notebook session. This download costs nothing: it moves data from S3 to an instance in the same region, which AWS does not bill. The same `download_file` run on your laptop would be a transfer out of AWS at $0.09 per GB.
+In some cases, downloading a local copy of the dataset may be useful, such as when performing repeated reads in an interactive notebook session. This download costs nothing: it moves data from S3 to a SageMaker notebook instance in the same region, which AWS does not bill. The same `download_file` run on your laptop would be a transfer out of AWS at $0.09 per GB.
 
 **Pros**:
 
