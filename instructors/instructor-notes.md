@@ -94,7 +94,7 @@ aws-nuke --version
 To make aws-nuke stay on your PATH in later CloudShell sessions:
 
 `echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc`
-source \~/.bashrc**
+`source ~/.bashrc`
 
 Reminder: CloudShell is based on Amazon Linux, and software saved in `$HOME`
 persists; software installed elsewhere may disappear after the session ends.
