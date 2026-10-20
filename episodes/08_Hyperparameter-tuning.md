@@ -239,9 +239,12 @@ Estimate first: one child job is the same ~1 minute of training plus ~3 minutes 
 train_input = TrainingInput(f"s3://{bucket_name}/train_data.npz", content_type="application/x-npz")
 val_input = TrainingInput(f"s3://{bucket_name}/val_data.npz", content_type="application/x-npz")
 
+import time as t
+
 # Launch the hyperparameter tuning job (blocks until the single job has finished)
+start_time = t.time()
 tuner.fit({"train": train_input, "val": val_input})
-print("Hyperparameter tuning job finished.")
+print(f"Hyperparameter tuning job finished in {t.time() - start_time:.1f} seconds (wall-clock, including instance startup)")
 ```
 
 #### 6. Monitor tuning job from SageMaker console

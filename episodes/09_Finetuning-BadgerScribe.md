@@ -434,7 +434,9 @@ training_job_name = f"badger-{username}-mini-v1"
 
 # two channels: "train" is mounted at /opt/ml/input/data/train, "model" at /opt/ml/input/data/model inside the container
 # wait=True blocks this cell and streams the log here; the job keeps running (and billing) even if you interrupt the cell
+start = time.time()
 estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=training_job_name, wait=True)
+print(f"Wall-clock from launch to finish: {(time.time() - start) / 60:.1f} min (the billed part is reported below)")
 ```
 
 ::::::::::::::::::::::::::::::::::::: callout
