@@ -44,11 +44,25 @@ def stable_cell_id(source, seen_ids):
     return cell_id
 
 
+# Figures live in episodes/fig/ and the episodes reference them as fig/<name>.
+# The generated notebooks sit in notebooks/, where that relative path does not
+# exist, so point them at the published lesson site instead, which serves the
+# same files with the right content types. The Workbench {alt="..."} attribute
+# block is dropped because Jupyter would print it literally.
+SITE_FIG_URL = "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/fig/"
+figure_pattern = re.compile(r"!\[([^\]]*)\]\(fig/([^)\s]+)\)(\{[^}]*\})?")
+
+
+def rewrite_figure_links(md_content):
+    return figure_pattern.sub(lambda m: f"![{m.group(1)}]({SITE_FIG_URL}{m.group(2)})", md_content)
+
+
 def split_markdown(md_content):
     """Splits Markdown content into separate Markdown and Code cells."""
     cells = []
     seen_ids = set()
     position = 0
+    md_content = rewrite_figure_links(md_content)
 
     for match in code_block_pattern.finditer(md_content):
         # Extract text before the code block as Markdown
