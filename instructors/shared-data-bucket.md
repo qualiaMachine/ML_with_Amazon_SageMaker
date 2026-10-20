@@ -102,7 +102,7 @@ About 7.5 GB; it only needs redoing if the Hub repository changes or the bucket 
 
 ## From a SageMaker notebook
 
-The same procedure as the script, as cells for a notebook on a `ml.t3.medium` instance with the `conda_python3` kernel. The notebook's role must be allowed to create buckets and set bucket policies; if cell 2 fails with `AccessDenied`, create the bucket and paste the policy through the console (as in the S3 episode) and continue from cell 3. **Cell 1: names.** The shared bucket follows the lesson's example name; the account id and region come from the session.
+The same procedure as the script, as cells for a notebook on a `ml.t3.medium` instance with the `conda_python3` kernel. If cell 3's upload is refused, the learner role cannot write to the bucket: run cells 3 to 5 from CloudShell as your own identity instead (set `work = "/tmp/stage"` and drop the leading `!`). **Cell 1: names.** The shared bucket follows the lesson's example name; the account id and region come from the session.
 
 ```python
 import json, boto3, sagemaker
@@ -119,28 +119,50 @@ repo = "https://github.com/carpentries-incubator/ML_with_AWS_SageMaker"
 print(region, account_id, shared_bucket)
 ```
 
-**Cell 2: create the bucket, tag it, block public access, attach the read-only policy.**
+**Cell 2: create the bucket, then tag it, block public access and attach the read-only policy.** The notebook's learner role can usually only do the first; the cell prints the console steps for whatever it cannot do.
 
 ```python
+# The notebook's execution role (a learner role) can usually create a bucket but not administer it.
+# Each admin step below is attempted; if it is refused, the cell says what to set in the console
+# as your own (SSO) identity: S3 -> the bucket -> Properties (tags) and Permissions (bucket policy).
+from botocore.exceptions import ClientError
+
 try:
     s3.head_bucket(Bucket=shared_bucket)
     print("bucket exists")
-except s3.exceptions.ClientError:
+except ClientError:
     s3.create_bucket(Bucket=shared_bucket, CreateBucketConfiguration={"LocationConstraint": region})
     print("bucket created")
 
-s3.put_bucket_tagging(Bucket=shared_bucket, Tagging={"TagSet": [
-    {"Key": "Project", "Value": "Workshop"}, {"Key": "Name", "Value": "Everyone"}, {"Key": "Purpose", "Value": "Storage"}]})
-s3.put_public_access_block(Bucket=shared_bucket, PublicAccessBlockConfiguration={
-    "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})
-
+tags = [{"Key": "Project", "Value": "Workshop"}, {"Key": "Name", "Value": "Everyone"}, {"Key": "Purpose", "Value": "Storage"}]
 policy = {"Version": "2012-10-17", "Statement": [{
     "Effect": "Allow",
     "Principal": {"AWS": [f"arn:aws:iam::{account_id}:role/{r}" for r in roles]},
     "Action": ["s3:GetObject", "s3:ListBucket"],
     "Resource": [f"arn:aws:s3:::{shared_bucket}", f"arn:aws:s3:::{shared_bucket}/*"]}]}
-s3.put_bucket_policy(Bucket=shared_bucket, Policy=json.dumps(policy))
-print("read-only policy attached for", roles)
+
+todo = []
+for label, call in [
+    ("tags", lambda: s3.put_bucket_tagging(Bucket=shared_bucket, Tagging={"TagSet": tags})),
+    ("public access block", lambda: s3.put_public_access_block(Bucket=shared_bucket, PublicAccessBlockConfiguration={
+        "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})),
+    ("bucket policy", lambda: s3.put_bucket_policy(Bucket=shared_bucket, Policy=json.dumps(policy))),
+]:
+    try:
+        call(); print(f"{label}: set")
+    except ClientError as e:
+        if e.response["Error"]["Code"] != "AccessDenied":
+            raise
+        todo.append(label); print(f"{label}: AccessDenied for this role; set it in the console")
+
+if todo:
+    print("\nIn the console, as your own identity, open S3 ->", shared_bucket)
+    if "tags" in todo:
+        print("  Properties -> Tags:", ", ".join(f"{t['Key']}={t['Value']}" for t in tags))
+    if "public access block" in todo:
+        print("  Permissions -> Block public access: leave 'Block all public access' on (the account-level block already applies)")
+    if "bucket policy" in todo:
+        print("  Permissions -> Bucket policy -> Edit, paste:\n" + json.dumps(policy, indent=2))
 ```
 
 **Cell 3: WattBot inputs** (metadata, questions, and the PDF corpus built from the metadata). `/tmp` on a notebook instance is a small RAM disk, so the work directory goes on the persistent volume; these files are a few hundred MB.
