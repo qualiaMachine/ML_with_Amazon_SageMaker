@@ -495,13 +495,17 @@ desc = job_cost_report(xgboost_estimator.latest_training_job.name, price_per_hou
 
 Compare this with the estimate you made above. The job's log (scroll up in the `fit()` output) shows the script itself trained in a fraction of a second, yet the bill is about two minutes. The rest is container pull, data download and model upload: the fixed overhead of every job, the same whether you train for one minute or one hour. The extra minute between calling `fit()` and the first billed second is SageMaker finding an instance, which is free.
 
-#### Model results
-With this code, the training results and model artifacts are saved in a subfolder called `xgboost` in your specified S3 bucket. This folder (`s3://{bucket_name}/xgboost/`) will be automatically created if it doesn't already exist, and will contain:
+#### What landed in S3
+Open the [S3 console](https://us-east-2.console.aws.amazon.com/s3/home?region=us-east-2) and look at what the job wrote.
 
-1. **Model "artifacts"**: The trained model file (often a `.tar.gz` file) that SageMaker saves in the `output_path`.
-2. **Logs and metrics**: Any metrics and logs related to the training job, stored in the same `xgboost` folder.
- 
-This setup allows for convenient access to both the trained model and related output for later evaluation or deployment.
+In **your bucket**, under `xgboost/<job-name>/` (the prefix from `output_path` plus the job name):
+
+1. `output/model.tar.gz`: the model artifacts, a tarball of whatever the script saved to `SM_MODEL_DIR` (here `xgboost-model.json`). This is the file we download below.
+2. `profiler-output/` and `debug-output/`: small files from SageMaker's built-in profiler, written for every training job. Ignore them; they can be turned off with `disable_profiler=True` on the estimator.
+
+The job's log is not in S3; it is in CloudWatch, reachable from the job's page in the SageMaker console.
+
+A **second bucket** also appeared, `sagemaker-<region>-<account-id>`. The SageMaker SDK creates this *default bucket* the first time it needs somewhere to stage files: before the job started, `fit()` zipped `source_dir` and uploaded it there as `<job-name>/source/sourcedir.tar.gz` for the training instance to download. It holds kilobytes per job and nothing you need, but it is shared by everyone in the account and carries no tags, so it is one more thing on the cleanup list. If you want everything in your own bucket, create the session as `sagemaker.Session(default_bucket=bucket_name)`.
 
 ### Extracting trained model from S3 for final evaluation
 To evaluate the model on a test set after training, we'll go through these steps:
