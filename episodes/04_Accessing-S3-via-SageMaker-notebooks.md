@@ -262,7 +262,7 @@ As your analysis generates new files or demands additional documentation, you ca
 ```python
 notes_file_path = "/home/ec2-user/SageMaker/Notes.txt"
 with open(notes_file_path, "w") as f:
-    f.write("Workshop notes: Titanic data uploaded from the S3 episode; outputs go under per-episode prefixes.\n")
+    f.write("Workshop notes.\n")
 
 !ls -l "/home/ec2-user/SageMaker/Notes.txt"
 ```
@@ -301,7 +301,7 @@ file_list
 ### Challenge: before and after
 
 1. Using `helpers.get_s3_bucket_size(bucket_name)`, record the size of your bucket. Then create a second file (say `docs/Notes2.txt` with a few lines of text), upload it under the `docs/` prefix, and measure the bucket size again. By how much did it grow, and what does that cost per month at $0.023 per GB?
-2. The next episodes train an XGBoost model with a SageMaker training job that writes its outputs to your bucket. Looking at how this episode organized `Notes.txt`, which prefix do you expect those outputs to land under, and why does the lesson use one bucket with prefixes instead of a new bucket per episode?
+2. The next episode launches a training job that writes its outputs to your bucket. Why does the lesson keep everything in one bucket, organised with prefixes like `docs/`, rather than creating a bucket per task?
 
 :::::::::::::::::::::::::::::::::::: solution
 
@@ -320,7 +320,7 @@ print(size_before, size_after)
 
 The bucket grows by the size of the file (a few hundred bytes here), and at $0.023 per GB-month that is well under a thousandth of a cent per month. The same two lines, run before and after a training job, tell you what the job wrote and whether something is accumulating that you should clean up.
 
-2. The training episode writes under `xgboost/` (`s3://sinkorswim-doejohn/xgboost/`), the same way this episode wrote under `docs/`; the PyTorch episode uses `pytorch/`, the RAG episodes `wattbot/`, and the fine-tuning episode `badger-scribe/`. One bucket with prefixes keeps a single bucket policy, a single set of tags, and a single thing to delete at the end of the workshop; one bucket per episode would mean repeating the policy and tag setup five times and a longer cleanup list.
+2. A prefix is just part of the object key, so `docs/Notes.txt`, `xgboost/output/...` and `wattbot/chunks.jsonl` can all live in one bucket and still be listed, downloaded or deleted as groups. One bucket means one policy, one set of tags, one region to get right, and one thing to empty and delete at the end; a bucket per task would repeat the setup each time and lengthen the cleanup list.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
