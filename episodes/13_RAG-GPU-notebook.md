@@ -156,6 +156,7 @@ import boto3
 import pandas as pd
 import numpy as np
 
+os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"   # the kernel ships SDK v2; the Accessing S3 episode explains
 import sagemaker
 from sagemaker import get_execution_role
 

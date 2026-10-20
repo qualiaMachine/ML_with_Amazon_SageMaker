@@ -32,6 +32,11 @@ To begin each notebook, it's important to set up an AWS environment that will al
 Starting with these initializations prepares our notebook environment to efficiently interact with AWS resources for model development, data management, and deployment.
 
 ```python
+import os
+import logging
+os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"            # see the callout below
+logging.getLogger("sagemaker.config").setLevel(logging.WARNING)  # hide the "Not applying SDK defaults" lines
+
 import boto3
 import sagemaker
 from sagemaker import get_execution_role
@@ -40,10 +45,19 @@ from sagemaker import get_execution_role
 role = sagemaker.get_execution_role() # specifies your permissions to use AWS tools
 session = sagemaker.Session() 
 s3 = boto3.client('s3')
-
 ```
 
-Preview variable details.
+::::::::::::::::::::::::::::::::::::: callout
+
+### Two messages you will see without the first two lines
+
+`sagemaker.config INFO - Not applying SDK defaults from location: ...` means the SDK looked for an optional defaults file in two standard places and found none. Nothing is wrong; the logging line above hides it.
+
+`SageMakerV2DeprecationWarning: You are using the SageMaker Python SDK v2 ... v3 is the actively developed major version` is more important. The notebook kernels ship **version 2** of the SageMaker Python SDK, and this lesson is written for it: `Estimator`, `HuggingFace`, `HyperparameterTuner` and the rest. Version 3 is a rewrite with a different API, so do not `pip install` it into these kernels to make the warning go away; the environment variable above silences it instead. The v2 API keeps working; when you start a project of your own, look at the [migration guide](https://github.com/aws/sagemaker-python-sdk/blob/master/migration.md) and decide which version to build on.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+Print what we just created. The role is the identity every call from this notebook uses; the region is where your bucket must be.
 
 ```python
 # Print relevant details 
