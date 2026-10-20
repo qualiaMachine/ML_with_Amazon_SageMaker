@@ -109,7 +109,7 @@ A SageMaker training or processing job reads only from buckets in its own region
 
 **Tags (NOT OPTIONAL)**: tags are how the bill is broken down by project, person and purpose; this is the one section you must fill in. Add the following three keys, spelled exactly (they are the account's approved cost-allocation keys, see [KB 72454](https://kb.wisc.edu/72454)). You will put the same three keys on every resource you create in this lesson.
 
-- **Project**: your challenge name, e.g. `SinkOrSwim`
+- **Project**: your challenge name (`SinkOrSwim`, `WattBot2026`, `BadgerScribe`, `BadgerCode`, ...), e.g. `SinkOrSwim`
 - **Name**: your last and first name run together, e.g. `DoeJohn`
 - **Purpose**: one of five fixed values, here `Storage`
 
