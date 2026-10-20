@@ -402,6 +402,10 @@ In our previous episode, we converted our train dataset into train/validate subs
 **Note**: It's always a good idea to keep preprocessing code as a function so you can apply the same exact procedure across datasets with ease. We'll import our preprocessing function from `train_nn.py`, and pass it the scaler that was fit on the training data (saved as `scaler.joblib` in the previous episode). Calling `preprocess_data(test_df)` without the scaler would fit a new one on the test set and transform the features differently from what the model saw in training.
 
 ```python
+!pip install scikit-learn   # train_nn.py imports it; not in the conda_pytorch_p310 kernel
+```
+
+```python
 import pandas as pd
 import numpy as np
 import joblib
