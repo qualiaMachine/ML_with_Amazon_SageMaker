@@ -32,11 +32,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 ### SageMaker and Bedrock
 
-**Amazon SageMaker** is AWS's managed service for machine learning. It runs on the same instances as plain EC2, but adds a job model built for ML: you submit a script and an instance type, AWS provisions the machine with a framework container (PyTorch, scikit-learn, Hugging Face, ...) installed, runs the script, saves the outputs to S3, and terminates the instance. Renting a bare EC2 GPU gets you the hardware; with SageMaker you do not install the frameworks, move the data by hand, or remember to shut the machine down.
-
-**Amazon Bedrock** is the other AWS service this lesson uses. Where SageMaker runs your script on a machine you rent by the second, Bedrock serves models that AWS hosts (DeepSeek, Claude, Amazon's own, and others) through an API billed per token. There is no instance to choose, start or stop; when you stop calling it, you stop paying. The RAG part of the lesson uses Bedrock first for that reason, and turns to SageMaker only for a model Bedrock does not offer.
-
-### Why use SageMaker for machine learning?
+**Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. In practice that means:
 
 - **High-performance compute only when needed**: SageMaker lets you develop interactively in lightweight, inexpensive notebook environments (or your own laptop) and then launch training, tuning, or inference jobs on more powerful [instance types](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html#cloud-compute-essentials) only when necessary. You pay for expensive compute only while a job runs.
   
@@ -54,6 +50,14 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 - **Ease of orchestration / Simplified ML pipelines**: Traditional high-performance computing (HPC) or high-throughput computing (HTC) environments often require researchers to break ML workflows into separate batch jobs, manually orchestrating each step (e.g., submitting preprocessing, training, cross-validation, and evaluation as distinct tasks and stitching the results together later). In SageMaker, a training or tuning job is launched from a notebook with the script, the data location and the instance type, and the orchestration is handled for you.
 
 - **Cost tracking**: every job reports its billable seconds, and every resource can be tagged so that the bill can be broken down by project. For many common research workloads SageMaker is cheap. For example, training roughly 100 small to medium-sized models (e.g., logistic regression, random forests, or lightweight deep learning models with a few million parameters) on a small dataset (under 10GB) can cost under $20, making it accessible for many research projects.
+
+**Amazon Bedrock** is the other AWS service this lesson uses. Instead of running your script on a machine, Bedrock serves models that AWS hosts through an API. In practice that means:
+
+- **Nothing to start or stop**: you call the API and pay per token; when you stop calling it, you stop paying. There is no instance to size, launch, or forget.
+- **A catalog of hosted models**: DeepSeek, Claude, Amazon's own models and others, for generation and for embeddings, each selectable by model ID with no download or GPU.
+- **Cheap at research scale**: embedding a few thousand document chunks and answering a few dozen questions costs cents, which is why the RAG part of the lesson starts here.
+- **Only the catalog**: if the model you need is not on it, Bedrock cannot serve it. That is the one case where the lesson moves RAG onto SageMaker.
+- **Cost tracking by inference profile**: Bedrock calls carry no tags by default; the lesson routes them through tagged application inference profiles so they show up on the bill like everything else.
 
 ### Lesson outline
 
