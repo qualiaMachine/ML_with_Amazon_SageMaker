@@ -377,6 +377,35 @@ print(f"instructions: {n_prompt - n_image} tokens;  transcription: {len(row.text
 print(f"tokens the model sees for this page: {n_total}")
 ```
 
+One page is a point, not an average. Text length varies a lot from page to page; image tokens hardly vary, because almost every scan is larger than `max_pixels` and gets resized to the same cap. So count text tokens for every training page with the tokenizer alone, which needs no images and takes seconds, and image tokens over a sample of pages.
+
+```python
+text_tokens = train_df.text.map(lambda t: len(processor.tokenizer(t)["input_ids"]))   # every page, tokenizer only
+
+sample = train_df.sample(20, random_state=0)
+image_tokens = []
+for pid in sample.page_id:
+    path = os.path.join(local_data_dir, f"{pid}.jpg")
+    if not os.path.exists(path):
+        s3_client.download_file(shared_bucket, f"{data_prefix}/images/{pid}.jpg", path)
+    grid = processor.image_processor(images=[bc.load_page_image(path, bc.DEFAULT_MAX_PIXELS)], return_tensors="pt")["image_grid_thw"]
+    image_tokens.append(int((grid.prod(dim=1) // 4).sum()))
+
+n_instructions = n_prompt - n_image                      # the same for every page
+avg_text, avg_image = text_tokens.mean(), sum(image_tokens) / len(image_tokens)
+avg_tokens_per_page = avg_image + n_instructions + avg_text
+print(f"text tokens per page, all {len(train_df)} training pages: mean {avg_text:.0f}, min {text_tokens.min()}, max {text_tokens.max()}")
+print(f"image tokens per page, {len(image_tokens)} sampled pages: mean {avg_image:.0f}")
+print(f"average tokens per page: {avg_image:.0f} image + {n_instructions} instructions + {avg_text:.0f} text = {avg_tokens_per_page:.0f}")
+```
+
+That average is the `tokens_per_example` the estimate should have used. Re-run the estimator with it and compare with the 1,600 guess:
+
+```python
+helpers.estimate_finetune_cost(params_billions=3.75, examples=120, tokens_per_example=int(avg_tokens_per_page), epochs=3,
+                               method="lora", instance_type="ml.g5.xlarge")
+```
+
 Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is the knob Exercise 1 turns.
 
 ### The scripts
