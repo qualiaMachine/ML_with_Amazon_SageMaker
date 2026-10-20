@@ -44,7 +44,7 @@ If you are not attending through the shared account, follow these steps:
 
 :::::::::::::::::::::::::::::::::::::
 
-Once your AWS account is set up, log in to the **AWS Management Console** to get started with SageMaker.
+Once your AWS account is set up, log in to the **AWS Management Console**. For the shared account that means the sign-in link from your instructor's email, of the form `https://<org>.awsapps.com/start/#/console?account_id=...&role_name=...`; for your own account, the regular console sign-in at `https://console.aws.amazon.com/`.
 
 ### 3. Download the Data
 
