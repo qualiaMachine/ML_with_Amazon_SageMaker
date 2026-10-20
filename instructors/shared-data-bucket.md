@@ -4,7 +4,7 @@ title: 'Shared data bucket: staging before each term'
 
 Learners create exactly one bucket of their own (S3 episode) and write every output there. Everything larger than the Titanic CSVs lives in **one shared, read-only bucket** that instructors stage before class, so the class holds one copy of each dataset instead of fifty. This page is the whole staging procedure; the episodes assume the layout below.
 
-The whole procedure below is also a script, `instructors/stage-shared-bucket.sh`: set the bucket name, region and account id at its top and run it from a notebook instance terminal. The sections below explain what it does.
+The ready-to-paste version is the *From CloudShell* section at the end of this page; the sections before it explain each step.
 
 ## Layout
 
@@ -100,123 +100,74 @@ rm -rf churro-3B
 
 About 7.5 GB; it only needs redoing if the Hub repository changes or the bucket is rebuilt.
 
-## From a SageMaker notebook
+## The whole procedure, from CloudShell
 
-The same procedure as the script, as cells for a notebook on a `ml.t3.medium` instance with the `conda_python3` kernel. If cell 3's upload is refused, the learner role cannot write to the bucket: run cells 3 to 5 from CloudShell as your own identity instead (set `work = "/tmp/stage"` and drop the leading `!`). **Cell 1: names.** The shared bucket follows the lesson's example name; the account id and region come from the session.
+The learner execution role on a notebook instance can create the bucket but is refused on tagging, bucket policy and uploads (the bucket policy deliberately grants it read only). So the staging is done as your own SSO identity in **CloudShell** (console toolbar, same region). Three blocks, pasted in order. CloudShell's home is 1 GB, which is why the work happens one asset at a time under `/tmp` and the model is streamed rather than downloaded.
 
-```python
-import json, boto3, sagemaker
+**Block 1: bucket, tags, public access, policy.** Fill in the account id.
 
-session = sagemaker.Session()
-region = session.boto_region_name
-account_id = boto3.client("sts").get_caller_identity()["Account"]
-s3 = boto3.client("s3", region_name=region)
-
-shared_bucket = "ml-marathon-shared"
-roles = ["ml-sagemaker-use", "ml-sagemaker-bedrock-use"]   # execution roles that may read the bucket
-release_v = 1                                               # Badger Scribe data release version
-repo = "https://github.com/carpentries-incubator/ML_with_AWS_SageMaker"
-print(region, account_id, shared_bucket)
+```bash
+BUCKET=ml-marathon-shared
+REGION=us-east-2
+ACCOUNT_ID=123456789012
+aws s3api head-bucket --bucket $BUCKET 2>/dev/null || aws s3api create-bucket --bucket $BUCKET --region $REGION --create-bucket-configuration LocationConstraint=$REGION
+aws s3api put-bucket-tagging --bucket $BUCKET --tagging 'TagSet=[{Key=Project,Value=Workshop},{Key=Name,Value=Everyone},{Key=Purpose,Value=Storage}]'
+aws s3api put-public-access-block --bucket $BUCKET --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+cat > /tmp/policy.json <<JSON
+{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",
+  "Principal": {"AWS": ["arn:aws:iam::$ACCOUNT_ID:role/ml-sagemaker-use", "arn:aws:iam::$ACCOUNT_ID:role/ml-sagemaker-bedrock-use"]},
+  "Action": ["s3:GetObject", "s3:ListBucket"],
+  "Resource": ["arn:aws:s3:::$BUCKET", "arn:aws:s3:::$BUCKET/*"]}]}
+JSON
+aws s3api put-bucket-policy --bucket $BUCKET --policy file:///tmp/policy.json
 ```
 
-**Cell 2: create the bucket, then tag it, block public access and attach the read-only policy.** The notebook's learner role can usually only do the first; the cell prints the console steps for whatever it cannot do.
+**Block 2: WattBot and Badger Scribe.**
 
-```python
-# The notebook's execution role (a learner role) can usually create a bucket but not administer it.
-# Each admin step below is attempted; if it is refused, the cell says what to set in the console
-# as your own (SSO) identity: S3 -> the bucket -> Properties (tags) and Permissions (bucket policy).
-from botocore.exceptions import ClientError
-
-try:
-    s3.head_bucket(Bucket=shared_bucket)
-    print("bucket exists")
-except ClientError:
-    s3.create_bucket(Bucket=shared_bucket, CreateBucketConfiguration={"LocationConstraint": region})
-    print("bucket created")
-
-tags = [{"Key": "Project", "Value": "Workshop"}, {"Key": "Name", "Value": "Everyone"}, {"Key": "Purpose", "Value": "Storage"}]
-policy = {"Version": "2012-10-17", "Statement": [{
-    "Effect": "Allow",
-    "Principal": {"AWS": [f"arn:aws:iam::{account_id}:role/{r}" for r in roles]},
-    "Action": ["s3:GetObject", "s3:ListBucket"],
-    "Resource": [f"arn:aws:s3:::{shared_bucket}", f"arn:aws:s3:::{shared_bucket}/*"]}]}
-
-todo = []
-for label, call in [
-    ("tags", lambda: s3.put_bucket_tagging(Bucket=shared_bucket, Tagging={"TagSet": tags})),
-    ("public access block", lambda: s3.put_public_access_block(Bucket=shared_bucket, PublicAccessBlockConfiguration={
-        "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})),
-    ("bucket policy", lambda: s3.put_bucket_policy(Bucket=shared_bucket, Policy=json.dumps(policy))),
-]:
-    try:
-        call(); print(f"{label}: set")
-    except ClientError as e:
-        if e.response["Error"]["Code"] != "AccessDenied":
-            raise
-        todo.append(label); print(f"{label}: AccessDenied for this role; set it in the console")
-
-if todo:
-    print("\nIn the console, as your own identity, open S3 ->", shared_bucket)
-    if "tags" in todo:
-        print("  Properties -> Tags:", ", ".join(f"{t['Key']}={t['Value']}" for t in tags))
-    if "public access block" in todo:
-        print("  Permissions -> Block public access: leave 'Block all public access' on (the account-level block already applies)")
-    if "bucket policy" in todo:
-        print("  Permissions -> Bucket policy -> Edit, paste:\n" + json.dumps(policy, indent=2))
+```bash
+REPO=https://github.com/carpentries-incubator/ML_with_AWS_SageMaker
+V=1   # Badger Scribe data release version
+rm -rf /tmp/stage && mkdir -p /tmp/stage && cd /tmp/stage
+git clone -q --depth 1 $REPO lesson
+pip install -q --user pandas requests huggingface_hub
+unzip -q -o lesson/data/data.zip -d data
+mkdir -p wattbot && cp data/data/wattbot/metadata.csv data/data/wattbot/train_QA.csv wattbot/
+python3 lesson/scripts/build_wattbot_corpus.py --metadata wattbot/metadata.csv --out wattbot/corpus.zip
+aws s3 sync wattbot/ s3://$BUCKET/wattbot/
+R=$REPO/releases/download/badger-scribe-data-v$V
+for a in labels images-train images-test; do
+  rm -rf bs && mkdir -p bs
+  curl -sSL -o bs/$a.zip $R/badger-scribe-v$V-$a.zip
+  unzip -q -o bs/$a.zip -d bs/badger-scribe && rm bs/$a.zip
+  aws s3 sync bs/badger-scribe/ s3://$BUCKET/badger-scribe/
+  rm -rf bs
+done
 ```
 
-**Cell 3: WattBot inputs** (metadata, questions, and the PDF corpus built from the metadata). `/tmp` on a notebook instance is a small RAM disk, so the work directory goes on the persistent volume; these files are a few hundred MB.
+**Block 3: CHURRO-3B weights**, streamed from Hugging Face into S3 file by file (about 7.5 GB, ten minutes or so, nothing written to disk).
 
-```python
-work = "/home/ec2-user/SageMaker/stage"
-!rm -rf {work} && mkdir -p {work}
-%cd {work}
-!git clone -q --depth 1 {repo} lesson
-!pip install -q pandas requests huggingface_hub
-!unzip -q -o lesson/data/data.zip -d data
-!mkdir -p wattbot && cp data/data/wattbot/metadata.csv data/data/wattbot/train_QA.csv wattbot/
-!python lesson/scripts/build_wattbot_corpus.py --metadata wattbot/metadata.csv --out wattbot/corpus.zip
-!aws s3 sync wattbot/ s3://{shared_bucket}/wattbot/
-```
-
-**Cell 4: Badger Scribe data release**, one asset at a time.
-
-```python
-R = f"{repo}/releases/download/badger-scribe-data-v{release_v}"
-for a in ["labels", "images-train", "images-test"]:
-    !rm -rf bs && mkdir -p bs
-    !curl -sSL -o bs/{a}.zip {R}/badger-scribe-v{release_v}-{a}.zip
-    !unzip -q -o bs/{a}.zip -d bs/badger-scribe && rm bs/{a}.zip
-    !aws s3 sync bs/badger-scribe/ s3://{shared_bucket}/badger-scribe/
-!rm -rf bs
-```
-
-**Cell 5: CHURRO-3B weights**, streamed from Hugging Face into S3 file by file (about 7.5 GB in total; nothing is written to the instance's disk, so the volume size does not matter).
-
-```python
-import requests
+```bash
+python3 - <<'EOF'
+import boto3, requests
 from huggingface_hub import HfApi, hf_hub_url
-
-model_id = "stanford-oval/churro-3B"
-prefix = "badger-scribe/model/churro-3B"
-files = [f for f in HfApi().list_repo_files(model_id) if not f.startswith(".")]
-for f in files:
+s3 = boto3.client("s3")
+bucket, model_id, prefix = "ml-marathon-shared", "stanford-oval/churro-3B", "badger-scribe/model/churro-3B"
+for f in [f for f in HfApi().list_repo_files(model_id) if not f.startswith(".")]:
     with requests.get(hf_hub_url(model_id, f), stream=True, timeout=60) as r:
-        r.raise_for_status()
-        r.raw.decode_content = True
-        s3.upload_fileobj(r.raw, shared_bucket, f"{prefix}/{f}")   # multipart upload straight from the stream
+        r.raise_for_status(); r.raw.decode_content = True
+        s3.upload_fileobj(r.raw, bucket, f"{prefix}/{f}")
     print("uploaded", f)
+EOF
 ```
 
-**Cell 6: check**, then clean up.
+**Check, then clean up.**
 
-```python
-!aws s3 ls s3://{shared_bucket}/ --recursive --summarize | tail -2
-!aws s3 ls s3://{shared_bucket}/badger-scribe/
-!aws s3 ls s3://{shared_bucket}/badger-scribe/model/churro-3B/
-!aws s3 ls s3://{shared_bucket}/wattbot/
-%cd /home/ec2-user/SageMaker
-!rm -rf {work}
+```bash
+aws s3 ls s3://$BUCKET/ --recursive --summarize | tail -2
+aws s3 ls s3://$BUCKET/wattbot/
+aws s3 ls s3://$BUCKET/badger-scribe/
+aws s3 ls s3://$BUCKET/badger-scribe/model/churro-3B/
+cd / && rm -rf /tmp/stage
 ```
 
 Still by hand: run the fine-tuning episode's homework estimator once and copy `train_summary.json`, `eval_before.csv` and `eval_after.csv` from its `model.tar.gz` to `s3://ml-marathon-shared/badger-scribe/instructor/full-run/`.
