@@ -6,7 +6,7 @@ exercises: 75
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- When is fine-tuning worth it, and how is it different from RAG or prompting?
+- When is fine-tuning worth it?
 - Why does fine-tuning cost anywhere from a dollar to tens of thousands, and how do I estimate where my run falls *before* I launch it?
 - How do I run a GPU fine-tune as a SageMaker training job so the meter stops the moment it finishes?
 - How do I measure whether the fine-tune helped?
