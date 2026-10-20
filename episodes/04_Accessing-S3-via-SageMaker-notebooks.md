@@ -257,19 +257,21 @@ print(f"Estimated annual cost ({storage_size_gb:.4f} GB): ${monthly_cost*12:.5f}
 For detailed and up-to-date information on AWS S3 pricing, please refer to the [AWS S3 Pricing page](https://aws.amazon.com/s3/pricing/).
 
 ## Writing output files to S3
-As your analysis generates new files or demands additional documentation, you can upload files to your bucket as demonstrated below. For this demo, you can create a blank `Notes.txt` file to upload to your bucket. To do so, go to **File** -> **New** -> **Text file**, and save it out as `Notes.txt`. (The code below also writes the file, so the notebook runs end to end.)
+As your analysis generates new files or demands additional documentation, you can upload files to your bucket as demonstrated below. For this demo, we write a small `Notes.txt` file on the instance and check that it exists:
 
 ```python
-# Define the S3 bucket name and the file paths
-notes_file_path = "Notes.txt" # assuming your file is in root directory of jupyter notebook (check file explorer tab)
+notes_file_path = "/home/ec2-user/SageMaker/Notes.txt"
 with open(notes_file_path, "w") as f:
     f.write("Workshop notes: Titanic data uploaded from the S3 episode; outputs go under per-episode prefixes.\n")
 
-# Upload the training file to a new folder called "docs". You can also just place it in the bucket's root directory if you prefer (remove docs/ in code below).
+!ls -l "/home/ec2-user/SageMaker/Notes.txt"
+```
+
+Then upload it. Here it goes under a `docs/` prefix; drop the `docs/` to put it in the bucket's root instead.
+
+```python
 s3.upload_file(notes_file_path, bucket_name, "docs/Notes.txt")
-
-print("Files uploaded successfully.")
-
+print("Uploaded Notes.txt to docs/Notes.txt")
 ```
 
 After uploading, we can view the objects/files available on our bucket using...
