@@ -24,9 +24,10 @@ exercises: 75
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb`. Select the **`conda_pytorch`** kernel (`conda_pytorch_p310` on older instances).
-## Why a fine-tuning episode
 
-The training episodes so far trained small models from scratch on a few hundred rows. Fine-tuning starts from a large pretrained model and changes its weights, and that puts it in a different class of workload:
+## Fine-tuning
+
+The training episodes so far built small models from scratch on a few hundred rows. Fine-tuning starts from a large pretrained model and keeps training it on your data, so that it learns your task without forgetting what it already knows. On AWS it is a different class of workload from anything we have run so far:
 
 - It needs a GPU for the whole run, not just for inference calls.
 - It is iterative. Nobody gets the learning rate, the image resolution or the data split right the first time, so the first run is never the last.
