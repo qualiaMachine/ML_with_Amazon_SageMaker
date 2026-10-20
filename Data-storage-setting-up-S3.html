@@ -905,13 +905,33 @@ region.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="request-costs">Request costs<a class="anchor" aria-label="anchor" href="#request-costs"></a></h3>
-<ul><li>GET requests are $0.0004 per 1,000 requests. In the context of
-Amazon S3, “GET” requests refer to the action of retrieving or
-downloading data from an S3 bucket. Each time a file or object is
-accessed in S3, it incurs a small cost per request. This means that if
-you have code that reads data from S3 frequently, such as loading
-datasets repeatedly, each read operation counts as a GET request.</li>
-</ul><p><strong><em>To calculate specific costs based on your needs, storage
+<p>Every operation on a bucket is an API request, and each one is billed
+by count. Two kinds matter: <strong>GET</strong> (<code>$0.0004</code>
+per 1,000), charged every time an object is read, and
+<strong>PUT/LIST</strong> (<code>$0.005</code> per 1,000), charged every
+time an object is written or a prefix is listed. One request is one
+object, whatever its size: reading a 5 GB file is one GET; reading 5,000
+one-kilobyte files is 5,000 GETs.</p>
+<p>A GET happens whenever code opens an object:
+<code>pd.read_csv("s3://...")</code>,
+<code>s3.download_file(...)</code>, a training job pulling its input
+channel (one GET per object in the prefix), a PyTorch
+<code>Dataset</code> that fetches images from S3 one by one. The last
+case is the one that bites in ML: a dataset of 100,000 images read once
+per epoch is 100,000 GETs per epoch, and a 50-epoch run is 5 million
+requests, about $2. Still small, but no longer zero, and a
+hyperparameter sweep multiplies it by the number of trials. The usual
+fix is the one SageMaker already uses for input channels: copy the data
+to the instance once (<code>File</code> mode) and read it from local
+disk during training.</p>
+<p>For this lesson, requests round to nothing: two CSVs read a few dozen
+times. Over a research project, the costs rank in a stable order:
+<strong>storage</strong> is the one that accumulates (every dataset,
+model and output you forget to delete keeps billing monthly),
+<strong>transfer out</strong> is the one that spikes (one bulk download
+of results to a laptop), and <strong>requests</strong> matter only with
+many small files read repeatedly.</p>
+<p><strong><em>To calculate specific costs based on your needs, storage
 class, and region, refer to AWS’s <a href="https://aws.amazon.com/s3/pricing/" class="external-link">S3 Pricing
 Information</a>.</em></strong></p>
 <div id="challenge-estimating-storage-costs" class="callout challenge">
@@ -944,6 +964,10 @@ model training will incur one <code>GET</code> request)</li>
 Pricing</a> page for more details.</li>
 </ul><p><strong>2. Repeat the above calculation using the following dataset
 sizes: 10 GB, 100 GB, 1 TB (1024 GB)</strong></p>
+<p><strong>3. Wrong region.</strong> Suppose the 100 GB bucket had been
+created in us-east-1 but the SageMaker jobs run in us-east-2. The 100
+training reads are now cross-region transfers at $0.02 per GB each. What
+does that add, and how does it compare to the download charge?</p>
 </div>
 </div>
 </div>
@@ -952,7 +976,7 @@ sizes: 10 GB, 100 GB, 1 TB (1024 GB)</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal"><li>
@@ -1017,7 +1041,22 @@ $0.00004<br></li>
 </ul></li>
 </ol><p>These costs assume no additional request charges beyond those for
 storage, the download, and <code>GET</code> requests for training.</p>
-</div>
+<p>Two things to notice. The <code>GET</code> line is the same
+four-thousandths of a cent at every size: request costs depend on how
+many objects you touch, not how big they are. And the download line
+grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a
+dataset of any size, moving it out of AWS costs several times more than
+keeping it there for a month, so plan to keep large data in the region
+and bring code to it, not the other way round.</p>
+<ol start="3" style="list-style-type: decimal"><li>
+<strong>Wrong region, 100 GB</strong>: 100 reads x 100 GB x $0.02 =
+<strong>$200</strong> of inter-region transfer, on top of the $11.30
+above. The one-time download to a laptop was $9; the misplaced bucket
+costs twenty times that, silently, and keeps costing with every job.
+This is why the region is the first setting on the create-bucket form
+and why the warning above tells you to check it before clicking
+Create.</li>
+</ol></div>
 </div>
 </div>
 </div>
@@ -1030,13 +1069,17 @@ other datasets)</strong></p>
 <ul><li>Go to S3, navigate to the bucket.</li>
 <li>Select files to delete, then <strong>Actions &gt;
 Delete</strong>.</li>
+<li>An empty bucket costs nothing: S3 bills for stored bytes and
+requests, and an empty bucket has neither. Keeping it is fine; the
+lesson’s end-of-workshop cleanup deletes it only because the shared
+account is swept between terms.</li>
 </ul><p><strong>Option 2: Delete the S3 bucket entirely (you no longer need
 the bucket or data)</strong></p>
 <ul><li>Select the bucket, click <strong>Actions &gt; Delete</strong>.</li>
 <li>Type the bucket name to confirm deletion.</li>
 </ul><p><strong><em>Please complete option 2 following this
-workshop</em></strong>. Deleting the bucket stops all costs associated
-with storage, requests, and data transfer.</p>
+workshop</em></strong>. On your own account, either option stops the
+bill: the charges come from the objects, not the bucket.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
