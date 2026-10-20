@@ -122,19 +122,19 @@ Two rules of thumb answer most of the question before you touch a console. They 
 
 Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: each step's update is too small for 8-bit or 4-bit numbers to hold, so every trained weight keeps a 32-bit copy plus Adam's two averages, 16 bytes against 2. **That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them, at `$25` to `$63` an hour.** LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
 
-**2. Time: how many GPU-hours?** Each token costs about 6 floating-point operations per weight to train on (2 forward, 4 backward), or 4 with LoRA, since the frozen base skips its weight updates. Multiply by the weights and the tokens, divide by the GPU's speed:
+**2. Time: how many GPU-hours?** Training a token costs three matrix products per layer, each one multiply and one add per weight. Full fine-tuning does all three; LoRA skips the weight update for the frozen base.
+
+![Three matrix products per token: forward (2 FLOPs per weight), error passed back to the inputs (2), and the weight update (2); full fine-tuning does all three for 6, LoRA skips the update for 4](fig/flops-per-token.svg){alt="A layer W with an input arrow, an output arrow, an error arrow going back and an update arrow into W, each labelled 2 FLOPs; a box totals 6 for full fine-tuning and 4 for LoRA"}
 
 ```text
 tokens      = examples × tokens per example × passes over the data
 FLOPs       = 6 × parameters × tokens      (4 × for LoRA)
-GPU-seconds = FLOPs ÷ (GPU peak FLOPS × utilization)
+GPU-seconds = FLOPs ÷ (GPU peak FLOPS × 0.25)      a real job reaches about a quarter of the data-sheet peak
 ```
 
-Peak FLOPS is on the GPU's data sheet: about 70 trillion per second for an A10G, 312 for an A100, 989 for an H100.
+Peak FLOPS is on the GPU's data sheet: about 70 trillion per second for an A10G, 312 for an A100, 989 for an H100. Cost is GPU-hours × the hourly rate, plus about 10 minutes of startup per job.
 
-Utilization is how much of that peak you reach. A small job with gradient checkpointing gets 20–30%; a well-tuned multi-GPU job 40–50%. Use 25% until you have measured, and add 50% to the FLOPs if gradient checkpointing is on. Cost is GPU-hours × the hourly rate, plus about 10 minutes of startup per job.
-
-The class run: 120 pages × 1,600 tokens × 3 passes = 576k tokens. LoRA on 3.75B parameters: 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. An A10G at 25% of 70 TFLOPS does 17 TFLOPS, so about 500 seconds, call it 9 minutes; the table below says 15 to cover image preprocessing and checkpointing.
+The class run: 120 pages × 1,600 tokens × 3 passes = 576k tokens. LoRA on 3.75B parameters: 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. A quarter of an A10G's 70 TFLOPS is 17 TFLOPS, so about 500 seconds, call it 9 minutes; the table below says 15 to cover image preprocessing and checkpointing.
 
 `helpers.estimate_finetune_cost` does the same arithmetic for any model size, example count, tokens per example and passes. It picks the cheapest instance that fits, or the one you name, and prints memory, GPU-hours, cost per run and per project, and the `max_run` to set:
 
@@ -174,7 +174,7 @@ A lab wants to **fully fine-tune a 7B model** on 50,000 documents of ~2,000 toke
 
 It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320 GB holds it with the model sharded.
 
-Tokens: 50,000 × 2,000 × 3 = 3 × 10^8. FLOPs: 6 × 7 × 10^9 × 3 × 10^8 ≈ 1.26 × 10^19. Per GPU at 312 TFLOPS × 25% utilization = 78 TFLOPS: 1.26 × 10^19 / 7.8 × 10^13 ≈ 1.6 × 10^5 GPU-seconds ≈ 45 GPU-hours, which is about 6 hours of wall-clock on 8 GPUs, about `$140` for one run (the "7B full fine-tune" row in the table above). A team that has measured 40% utilization on its own jobs would get 28 GPU-hours and ~`$90`; the rule is for before you have measured. The helper gives the same answer:
+Tokens: 50,000 × 2,000 × 3 = 3 × 10^8. FLOPs: 6 × 7 × 10^9 × 3 × 10^8 ≈ 1.26 × 10^19. A quarter of an A100's 312 TFLOPS is 78 TFLOPS: 1.26 × 10^19 / 7.8 × 10^13 ≈ 1.6 × 10^5 GPU-seconds ≈ 45 GPU-hours, which is about 6 hours of wall-clock on 8 GPUs, about `$140` for one run (the "7B full fine-tune" row in the table above). The helper gives the same answer:
 
 ```python
 helpers.estimate_finetune_cost(params_billions=7, examples=50_000, tokens_per_example=2000, epochs=3,
