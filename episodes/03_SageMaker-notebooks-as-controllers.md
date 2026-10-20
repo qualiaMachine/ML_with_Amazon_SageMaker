@@ -72,7 +72,7 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
 The previous episode's callout on why these keys, and only these, show up on the bill applies here unchanged: tags never propagate, so this instance needs its own copy.
 
-- Click **Create notebook instance**. It may take a few minutes for the instance to start. Once its status is **InService**, you can open the notebook instance and start coding.
+- Click **Create notebook instance**. It may take a few minutes for the instance to start. Once its status is **InService**, click **Open JupyterLab**.
 
 ### Load pre-filled Jupyter notebooks
 The new instance appears in the list with status `Pending`; after a few minutes it changes to `InService`. Once it does, click **Open JupyterLab** next to it. From there, we can create as many Jupyter notebooks as we would like within the instance environment. 
