@@ -30,19 +30,19 @@ Paste the blocks in order in one CloudShell tab, so the variables set in step 1 
 
 ## 1. Create the bucket
 
-Same naming rules as the S3 episode, in the class region, with the three cost-allocation tags, and all public access blocked. Fill in your account ID first; it is used again in step 2.
+Same naming rules as the S3 episode, in the class region, with the three cost-allocation tags, and all public access blocked. The account ID is read from your identity; the `echo` line is there so you can check it is the class account before anything is created.
 
 ```bash
 BUCKET=ml-marathon-shared
 REGION=us-east-2
-ACCOUNT_ID=123456789012
-aws sts get-caller-identity
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+echo $ACCOUNT_ID
 aws s3api create-bucket --bucket $BUCKET --region $REGION --create-bucket-configuration LocationConstraint=$REGION
 aws s3api put-bucket-tagging --bucket $BUCKET --tagging 'TagSet=[{Key=Project,Value=Workshop},{Key=Name,Value=Everyone},{Key=Purpose,Value=Storage}]'
 aws s3api put-public-access-block --bucket $BUCKET --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 ```
 
-If the bucket already exists (created in the console, or left from last term), skip the `create-bucket` line; the other two are safe to re-run.
+If the bucket already exists (created in the console, or left from last term), `create-bucket` reports `BucketAlreadyOwnedByYou` and nothing else changes; the other two lines are safe to re-run.
 
 ## 2. Make it readable by the learner roles
 
@@ -71,7 +71,7 @@ aws s3api put-bucket-policy --bucket $BUCKET --policy file:///tmp/policy.json
 aws s3api get-bucket-policy --bucket $BUCKET --output text
 ```
 
-The same JSON can be pasted into the console instead (bucket → Permissions → Bucket policy), with the account ID and bucket name written in.
+The same JSON can be pasted into the console instead (bucket → Permissions → Bucket policy), with the account ID and bucket name written in. `MalformedPolicy: Invalid principal` means an ARN in the `Principal` list does not exist: a wrong account ID, or a role name that differs from what IAM has (`aws iam list-roles --query 'Roles[].RoleName'` lists them).
 
 ## 3. Stage WattBot (RAG episodes)
 
