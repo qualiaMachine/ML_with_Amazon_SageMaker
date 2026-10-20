@@ -34,7 +34,7 @@ The notebook is the box on the left of the diagram from the overview episode. Ev
 ### Why we work from a notebook instance in this lesson
 The SageMaker SDK runs anywhere Python does, so the lesson could be run from a laptop. We use a notebook instance for three reasons:
 
-- **Identity comes from the instance, not from a file on your machine.** The IAM role attached to the notebook is what authorizes every call it makes. Nobody installs the AWS CLI, configures credentials, or has an access key that can end up in a notebook, a shell history or a GitHub commit.
+- **No credential setup.** The IAM role attached to the instance authorizes every call made from it, so there is nothing to install or log in to. Working from a laptop is not hard, `aws configure sso` and `aws sso login` take a few minutes, but in a room of a hundred people that is a hundred setups, plus SSO sessions expiring mid-episode and the occasional person pasting an access key instead. The role sidesteps all of it.
 - **Everyone has the same environment.** The kernels, the SDK version and the paths are identical for every learner, so a cell that works for the instructor works for you.
 - **No egress charges.** AWS bills data transfer when it leaves AWS, not when it moves within a region. The notebook instance sits in the same region as your bucket, so reading or downloading files from S3 to the instance is free. Pulling the same files to a laptop costs $0.09 per GB wherever the laptop is: "region" means the AWS data center your resources live in, and a machine outside AWS is never in one.
 
