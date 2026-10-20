@@ -304,13 +304,14 @@ After you are done using your data, it's important to practice good resource ste
 
 - Go to S3, navigate to the bucket.
 - Select files to delete, then **Actions > Delete**.
+- An empty bucket costs nothing: S3 bills for stored bytes and requests, and an empty bucket has neither. Keeping it is fine; the lesson's end-of-workshop cleanup deletes it only because the shared account is swept between terms.
 
 **Option 2: Delete the S3 bucket entirely (you no longer need the bucket or data)**
 
 - Select the bucket, click **Actions > Delete**.
 - Type the bucket name to confirm deletion.
 
-***Please complete option 2 following this workshop***. Deleting the bucket stops all costs associated with storage, requests, and data transfer.
+***Please complete option 2 following this workshop***. On your own account, either option stops the bill: the charges come from the objects, not the bucket.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
