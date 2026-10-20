@@ -53,7 +53,7 @@ By managing these settings and configuring metrics properly, you can achieve a b
 Just to make sure we are all on the same directory starting point, let's cd to our instance's root directory
 
 ```python
-%cd /home/ec2-user/SageMaker/
+%cd /home/ec2-user/SageMaker/   # work from the instance root: the %run, source_dir and download paths below are relative to it
 import sys
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
 import helpers
@@ -390,7 +390,7 @@ local_model_path = "best_model.tar.gz"
 model_bucket, model_key = best_model_s3_uri.split('/')[2], '/'.join(best_model_s3_uri.split('/')[3:])  # s3://bucket/key -> bucket, key
 s3.download_file(model_bucket, model_key, local_model_path)
 
-# Extract the model files from the tar.gz archive (nn_model.pth lands in the current directory)
+# Extract the model files from the tar.gz archive
 with tarfile.open(local_model_path, 'r:gz') as tar:
     tar.extractall()
 print("Best model downloaded and extracted.")
@@ -429,7 +429,7 @@ import torch
 
 # Load the model (saved as 'nn_model.pth' by train_nn.py)
 model = TitanicNet()
-model.load_state_dict(torch.load("nn_model.pth", map_location="cpu"))  # map_location: load onto this CPU notebook whatever device trained it
+model.load_state_dict(torch.load("nn_model.pth", map_location="cpu"))
 model.eval()
 
 # Load test data
@@ -438,7 +438,7 @@ X_test = torch.tensor(test_data['X_test'], dtype=torch.float32)
 y_test = torch.tensor(test_data['y_test'], dtype=torch.float32).unsqueeze(1)
 
 # Evaluate the model on the test set
-with torch.no_grad():  # no gradients needed for evaluation
+with torch.no_grad():
     predictions = model(X_test)
     accuracy = calculate_accuracy(predictions, y_test)
     print(f"Test Accuracy: {accuracy:.4f}")
