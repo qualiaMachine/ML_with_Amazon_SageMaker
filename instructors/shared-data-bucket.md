@@ -79,7 +79,7 @@ Clone the lesson repository, build the corpus from the data it ships, and sync:
 
 ```bash
 rm -rf /tmp/stage && mkdir -p /tmp/stage && cd /tmp/stage
-pip install -q --user pandas requests huggingface_hub
+pip install -q pandas requests huggingface_hub
 git clone -q --depth 1 https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git lesson
 unzip -q -o lesson/data/data.zip -d data
 mkdir -p wattbot
