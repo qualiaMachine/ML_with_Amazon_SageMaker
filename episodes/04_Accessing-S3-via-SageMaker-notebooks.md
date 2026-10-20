@@ -270,8 +270,9 @@ with open(notes_file_path, "w") as f:
 Then upload it. Here it goes under a `docs/` prefix; drop the `docs/` to put it in the bucket's root instead.
 
 ```python
-s3.upload_file(notes_file_path, bucket_name, "docs/Notes.txt")
-print("Uploaded Notes.txt to docs/Notes.txt")
+notes_s3_key = "docs/Notes.txt"   # the object key: a "docs/" prefix plus the file name
+s3.upload_file(notes_file_path, bucket_name, notes_s3_key)
+print(f"Uploaded {notes_file_path} to s3://{bucket_name}/{notes_s3_key}")
 ```
 
 After uploading, we can view the objects/files available on our bucket using...
