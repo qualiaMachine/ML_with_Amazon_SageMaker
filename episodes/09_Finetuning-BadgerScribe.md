@@ -68,14 +68,6 @@ Small is the point. 295 labelled pages is a realistic amount of data for a libra
 
 We fine-tune CHURRO-3B. It already reads old handwriting across 46 language clusters; we are teaching it *these* hands and *these* transcription conventions.
 
-::::::::::::::::::::::::::::::::::::: callout
-
-### Fine-tune, RAG, or prompt?
-
-Ask what the model is missing. If it lacks **facts** (your documents, your data), retrieval-augmented generation (RAG, the subject of the next part of the lesson) looks them up and puts them in the prompt at inference time; no training is needed. If it lacks a **skill or a style** (reading Kurrent, following your lab's labelling conventions, producing output in a strict format), you need to change the weights, and that is fine-tuning. Badger Scribe is squarely the second case: no amount of context will teach a model what a Kurrent "e" looks like.
-
-::::::::::::::::::::::::::::::::::::::::::::::::
-
 ## Step 0: Estimate the cost before you launch anything
 
 Before launching a fine-tune, write down what it should cost. If the bill is 3x your number, something is wrong, and you want to know on the first run, not the fiftieth.
