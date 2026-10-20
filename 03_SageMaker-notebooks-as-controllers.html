@@ -475,9 +475,12 @@ that AWS runs for you with JupyterLab already installed, a set of Python
 kernels that come with the AWS SDKs (<code>boto3</code> and the
 SageMaker Python SDK), and an IAM role attached that decides what the
 code running on it may do in your account. You create it from the
-console and open JupyterLab in a browser tab. It is billed per second
-while it is running and nothing while it is stopped, and the files you
-keep under <code>/home/ec2-user/SageMaker/</code> survive a stop.</p>
+console and open JupyterLab in a browser tab. Compute is billed per
+second while it is running and not while it is stopped. The instance’s
+disk is separate: the files you keep under
+<code>/home/ec2-user/SageMaker/</code> survive a stop, and that storage
+volume keeps billing at about $0.14 per GB-month (about $0.70 a month
+for the default 5 GB) until the instance is deleted.</p>
 </div>
 <div class="section level3">
 <h3 id="using-the-notebook-as-a-controller">Using the notebook as a controller<a class="anchor" aria-label="anchor" href="#using-the-notebook-as-a-controller"></a></h3>
