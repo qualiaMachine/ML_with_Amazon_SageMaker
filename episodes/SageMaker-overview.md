@@ -59,6 +59,12 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 - **Only the catalog**: if the model you need is not on it, Bedrock cannot serve it. That is the one case where the lesson moves RAG onto SageMaker.
 - **Cost tracking by inference profile**: Bedrock calls carry no tags by default; the lesson routes them through tagged application inference profiles so they show up on the bill like everything else.
 
+### How the pieces fit together
+
+![S3 holds data and outputs; a small notebook instance launches SageMaker jobs that read from and write to S3 and end on their own; Bedrock is called as an API per token](fig/aws-ml-ecosystem.svg){alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API"}
+
+Everything in the lesson is one of these four boxes. S3 holds your data and every job's outputs. The notebook instance is where you work; it is small because it only launches things. SageMaker jobs are where compute happens, on an instance that exists only for the job. Bedrock is an API: no instance at all.
+
 ### Lesson outline
 
 The rest of the lesson is hands-on, in three parts:
