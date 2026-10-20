@@ -451,8 +451,8 @@ tagging, the bucket policy and every upload, because the policy in step
 in step 1 are still there for the later steps. CloudShell’s home
 directory is 1 GB, which is why the data steps work one asset at a time
 under <code>/tmp</code> and the model is streamed rather than
-downloaded. The whole thing takes about half an hour, most of it the
-model copy.</p>
+downloaded. The whole thing takes about ten minutes; a run on 2026-10-20
+ended with 461 objects and 7.7 GB in the bucket.</p>
 </section><section><h2 class="section-heading" id="create-the-bucket">1. Create the bucket<a class="anchor" aria-label="anchor" href="#create-the-bucket"></a></h2>
 <hr class="half-width"><p>Same naming rules as the S3 episode, in the class region, with the
 three cost-allocation tags, and all public access blocked. The account
@@ -554,7 +554,8 @@ nothing larger than one zip is ever on disk.</p>
 from the bucket as a <code>model</code> channel, so that 100 jobs
 starting in the same minute copy it from S3 instead of each pulling 7.5
 GB from Hugging Face. This streams each file from Hugging Face straight
-into S3, nothing written to disk: about 7.5 GB, ten minutes or so.</p>
+into S3, nothing written to disk: about 7.5 GB, which took under two
+minutes from CloudShell.</p>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
