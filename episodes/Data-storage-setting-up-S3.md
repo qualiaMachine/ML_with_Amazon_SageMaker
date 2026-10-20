@@ -134,11 +134,10 @@ AWS allows tag values of up to 256 characters made of letters, digits, spaces an
 Click **Create bucket** at the bottom.
 
 ##### 4. Edit bucket policy
-Once the bucket is created, you'll be brought to a page that shows all of your current buckets (and those on our shared account). We'll have to edit our bucket's policy to allow ourselves proper access to any files stored there (e.g., read from bucket, write to bucket). To set these permissions...
+Once the bucket is created, the console opens the new bucket's page (a green "Successfully created bucket" banner at the top, an empty **Objects** list below). If you land on the bucket list instead, click your bucket's name. We'll have to edit our bucket's policy to allow ourselves proper access to any files stored there (e.g., read from bucket, write to bucket). To set these permissions:
 
-1. Click on the name of your bucket to bring up additional options and settings.
-2. Click the Permissions tab
-3. Scroll down to Bucket policy and click Edit. Paste the following policy, **editing the bucket name "sinkorswim-doejohn"** to reflect your bucket's name and replacing `<account-id>` with the 12-digit AWS account ID shown at the top right of the console (your instructor will also give it to you)
+1. Click the **Permissions** tab (next to Objects, Metadata, Properties).
+2. Scroll down to **Bucket policy** and click **Edit**. Paste the following policy, **editing the bucket name "sinkorswim-doejohn"** to reflect your bucket's name and replacing `<account-id>` with the 12-digit AWS account ID shown at the top right of the console (your instructor will also give it to you)
 
 ```json
 {
