@@ -14,13 +14,13 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Compare cloud compute with campus HPC and lab hardware on hardware generation, cost and control.
-- Introduce SageMaker.
+- Introduce SageMaker and Bedrock.
 - Preview the three parts of the lesson.
   
 ::::::::::::::::::::::::::::::::::::::::::::::
 
 
-This episode compares cloud compute with the compute researchers usually already have, then introduces SageMaker, the AWS service this lesson is built on.
+This episode compares cloud compute with the compute researchers usually already have, then introduces the two AWS services the lesson uses, SageMaker and Bedrock.
 
 ### Cloud vs. the cluster down the hall
 
@@ -30,9 +30,11 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 - **Energy efficiency tracks facility scale.** Power usage effectiveness (PUE) is total facility power divided by IT power; 1.0 is perfect. Hyperscale and flagship HPC facilities are in the same range: AWS reports a global average of [1.14 for 2025](https://aws.amazon.com/sustainability/), and a [2025 survey of US research HPC](https://arxiv.org/html/2506.19019v1) puts TACC at about 1.15 and MGHPCC near 1.14. Smaller facilities do worse: the [Uptime Institute's 2025 survey](https://datacenter.uptimeinstitute.com/rs/711-RIA-145/images/2025.Annual.Survey.Report.pdf?version=0) puts enterprise and colocation data centers at 1.58-1.80, and a departmental server room is typically in that range or above. So the cloud is a large efficiency gain over a lab server, and roughly a wash against a campus HPC center. (Figures are self-reported, and PUE measures the building, not whether the GPUs in it are busy.)
 - **Control and data.** On-prem gives full control over the software stack, no quotas, no egress charges, and data that never leaves campus. In the cloud you work within quotas and account permissions, and data moved in or out crosses the network. An idle rented GPU costs the same as a busy one, so every job in this lesson has a runtime cap.
 
-### What SageMaker is
+### SageMaker and Bedrock
 
 Amazon SageMaker is AWS's managed service for machine learning. It runs on the same instances as plain EC2, but adds a job model built for ML: you submit a script and an instance type, AWS provisions the machine with a framework container (PyTorch, scikit-learn, Hugging Face, ...) installed, runs the script, saves the outputs to S3, and terminates the instance. Renting a bare EC2 GPU gets you the hardware; with SageMaker you do not install the frameworks, move the data by hand, or remember to shut the machine down.
+
+**Amazon Bedrock** is the other AWS service this lesson uses. Where SageMaker runs your script on a machine you rent by the second, Bedrock serves models that AWS hosts (DeepSeek, Claude, Amazon's own, and others) through an API billed per token. There is no instance to choose, start or stop; when you stop calling it, you stop paying. The RAG part of the lesson uses Bedrock first for exactly that reason, and turns to SageMaker only for a model Bedrock does not offer.
 
 ### Why use SageMaker for machine learning?
 
