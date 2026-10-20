@@ -218,7 +218,11 @@ S3 bucket storage incurs costs based on data storage, data transfer, and request
 - **Deleting** objects is free.
 
 ### Request costs
-- GET requests are $0.0004 per 1,000 requests. In the context of Amazon S3, "GET" requests refer to the action of retrieving or downloading data from an S3 bucket. Each time a file or object is accessed in S3, it incurs a small cost per request. This means that if you have code that reads data from S3 frequently, such as loading datasets repeatedly, each read operation counts as a GET request.
+Every operation on a bucket is an API request, and each one is billed by count. Two kinds matter: **GET** (`$0.0004` per 1,000), charged every time an object is read, and **PUT/LIST** (`$0.005` per 1,000), charged every time an object is written or a prefix is listed. One request is one object, whatever its size: reading a 5 GB file is one GET; reading 5,000 one-kilobyte files is 5,000 GETs.
+
+A GET happens whenever code opens an object: `pd.read_csv("s3://...")`, `s3.download_file(...)`, a training job pulling its input channel (one GET per object in the prefix), a PyTorch `Dataset` that fetches images from S3 one by one. The last case is the one that bites in ML: a dataset of 100,000 images read once per epoch is 100,000 GETs per epoch, and a 50-epoch run is 5 million requests, about $2. Still small, but no longer zero, and a hyperparameter sweep multiplies it by the number of trials. The usual fix is the one SageMaker already uses for input channels: copy the data to the instance once (`File` mode) and read it from local disk during training.
+
+For this lesson, requests round to nothing: two CSVs read a few dozen times. Over a research project, the costs rank in a stable order: **storage** is the one that accumulates (every dataset, model and output you forget to delete keeps billing monthly), **transfer out** is the one that spikes (one bulk download of results to a laptop), and **requests** matter only with many small files read repeatedly.
 
 ***To calculate specific costs based on your needs, storage class, and region, refer to AWS's [S3 Pricing Information](https://aws.amazon.com/s3/pricing/).***
 
@@ -244,6 +248,8 @@ S3 bucket storage incurs costs based on data storage, data transfer, and request
 - Check the [AWS S3 Pricing](https://aws.amazon.com/s3/pricing/) page for more details.
  
 **2. Repeat the above calculation using the following dataset sizes: 10 GB, 100 GB, 1 TB (1024 GB)**
+
+**3. Wrong region.** Suppose the 100 GB bucket had been created in us-east-1 but the SageMaker jobs run in us-east-2. The 100 training reads are now cross-region transfers at $0.02 per GB each. What does that add, and how does it compare to the download charge?
 
 :::::::::::::::::::::::::::::::::::: solution
 
@@ -281,6 +287,10 @@ Using the S3 Standard rate in us-east-1:
 
 These costs assume no additional request charges beyond those for storage, the download, and `GET` requests for training.
 
+Two things to notice. The `GET` line is the same four-thousandths of a cent at every size: request costs depend on how many objects you touch, not how big they are. And the download line grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a dataset of any size, moving it out of AWS costs several times more than keeping it there for a month, so plan to keep large data in the region and bring code to it, not the other way round.
+
+3. **Wrong region, 100 GB**: 100 reads x 100 GB x $0.02 = **$200** of inter-region transfer, on top of the $11.30 above. The one-time download to a laptop was $9; the misplaced bucket costs twenty times that, silently, and keeps costing with every job. This is why the region is the first setting on the create-bucket form and why the warning above tells you to check it before clicking Create.
+
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -294,13 +304,14 @@ After you are done using your data, it's important to practice good resource ste
 
 - Go to S3, navigate to the bucket.
 - Select files to delete, then **Actions > Delete**.
+- An empty bucket costs nothing: S3 bills for stored bytes and requests, and an empty bucket has neither. Keeping it is fine; the lesson's end-of-workshop cleanup deletes it only because the shared account is swept between terms.
 
 **Option 2: Delete the S3 bucket entirely (you no longer need the bucket or data)**
 
 - Select the bucket, click **Actions > Delete**.
 - Type the bucket name to confirm deletion.
 
-***Please complete option 2 following this workshop***. Deleting the bucket stops all costs associated with storage, requests, and data transfer.
+***Please complete option 2 following this workshop***. On your own account, either option stops the bill: the charges come from the objects, not the bucket.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
