@@ -32,10 +32,11 @@ The notebook instance is a *controller*: a small, cheap machine where you write 
 The notebook is the box on the left of the diagram from the overview episode. Everything else in the picture is launched or called from it, and every later episode uses this same instance.
 
 ### Why we work from a notebook instance in this lesson
-The SageMaker SDK runs anywhere Python does, so the lesson could be run from a laptop. We use a notebook instance for three reasons:
+The SageMaker SDK runs anywhere Python does, so the lesson could be run from a laptop. We use a notebook instance for four reasons:
 
 - **No credential setup.** The IAM role attached to the instance authorizes every call made from it, so there is nothing to install or log in to. Working from a laptop is not hard, `aws configure sso` and `aws sso login` take a few minutes, but in a room of a hundred people that is a hundred setups, plus SSO sessions expiring mid-episode and the occasional person pasting an access key instead. The role sidesteps all of it.
 - **Everyone has the same environment.** The kernels, the SDK version and the paths are identical for every learner, so a cell that works for the instructor works for you.
+- **Instructors can see what happened.** Every notebook instance in the shared account shows up in the console, and an instructor can open yours and see the notebook that launched a job, with its outputs. Jobs launched from a laptop are just as visible in the job list, but the code that launched them is on your machine, so when something breaks or a charge looks wrong there is less to go on.
 - **No egress charges.** AWS bills data transfer when it leaves AWS, not when it moves within a region. The notebook instance sits in the same region as your bucket, so reading or downloading files from S3 to the instance is free. Pulling the same files to a laptop costs $0.09 per GB wherever the laptop is: "region" means the AWS data center your resources live in, and a machine outside AWS is never in one.
 
 We'll follow these steps to create our first "SageMaker notebook instance".
