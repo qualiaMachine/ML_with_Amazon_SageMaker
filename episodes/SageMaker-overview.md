@@ -52,7 +52,7 @@ Renting a bare GPU instance from AWS (EC2) gets you the hardware above, but you 
 
 - **Cost tracking**: every job reports its billable seconds, and every resource can be tagged so that the bill can be broken down by project. For many common research workloads SageMaker is cheap. For example, training roughly 100 small to medium-sized models (e.g., logistic regression, random forests, or lightweight deep learning models with a few million parameters) on a small dataset (under 10GB) can cost under $20, making it accessible for many research projects.
 
-### What comes next
+### Lesson outline
 
 The rest of the lesson is hands-on, in three parts:
 
@@ -60,7 +60,7 @@ The rest of the lesson is hands-on, in three parts:
 2. **Retrieval-augmented generation (RAG).** Build a RAG pipeline over research papers on Amazon Bedrock, then run the same pipeline as SageMaker Processing jobs with an open-weight model.
 3. **Fine-tuning.** Fine-tune a vision-language model for handwriting transcription as a SageMaker training job.
 
-Every job along the way is tagged, capped, estimated before launch and checked against the bill after. The next episode starts with the bucket.
+Every job is tagged, capped, estimated before launch and checked against the bill after.
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
