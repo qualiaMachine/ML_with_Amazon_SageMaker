@@ -63,7 +63,7 @@ We'll follow these steps to create our first "SageMaker notebook instance".
   |---|---|
   | `Project` | your challenge name, e.g. `SinkOrSwim` |
   | `Name` | your name, e.g. `DoeJohn` |
-  | `Purpose` | what this resource is for, here `Controller` |
+  | `Purpose` | what this resource is for, `Notebook` |
 
 ![Tag Setup Example](fig/notebook_tags.PNG){alt="Screenshot showing required tags for a SageMaker notebook instance"}
 
