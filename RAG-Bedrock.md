@@ -479,7 +479,7 @@ import re
 
 name = "DoeJohn"         # replace with your name
 project = "SinkOrSwim"   # replace with your challenge name
-purpose = "RAG-Bedrock"
+purpose = "Inference"
 
 # Bedrock tags are lowercase key/value (SageMaker jobs use Key/Value)
 profile_tags = [

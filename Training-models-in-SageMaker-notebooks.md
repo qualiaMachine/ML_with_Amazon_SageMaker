@@ -384,7 +384,7 @@ To avoid this, we explicitly tag each training job at launch time. This ensures 
 ```python
 name = "DoeJohn" # replace with your name
 project = "SinkOrSwim" # replace with your challenge name
-purpose = "Train-XGBoost"
+purpose = "Training"
 
 job_tags = [
     {"Key": "Name", "Value": name},

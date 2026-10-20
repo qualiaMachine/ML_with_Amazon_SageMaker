@@ -146,7 +146,7 @@ cat > train-xgboost.json <<'JSON'
   "Tags": [
     { "Key": "Project", "Value": "<ChallengeName>" },
     { "Key": "Name",    "Value": "<LastnameFirstname>" },
-    { "Key": "Purpose", "Value": "Train-XGBoost-CLI" }
+    { "Key": "Purpose", "Value": "Training" }
   ]
 }
 JSON
