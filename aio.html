@@ -1418,7 +1418,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2889,7 +2889,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -4833,7 +4833,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5954,7 +5954,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6000,7 +6000,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6347,8 +6347,8 @@ October 2026):</p>
 <tbody>
 <tr>
 <td>
-<strong>This episode:</strong> 3B, LoRA, 120 Kurrent pages × 2
-epochs</td>
+<strong>This episode:</strong> 3B LoRA, 120 Kurrent pages, 0.4M
+tokens seen</td>
 <td>1 × A10G</td>
 <td>1 × <code>ml.g5.xlarge</code> (<code>$1.41</code>)</td>
 <td>0.4</td>
@@ -6356,16 +6356,17 @@ epochs</td>
 <td><strong>~<code>$0.60</code></strong></td>
 </tr>
 <tr>
-<td>Homework: 3B, LoRA, all 251 training pages × 2 epochs</td>
+<td>Homework for Badger Scribe teams: 3B LoRA, the whole train set (619
+pages, all three categories), 2M tokens</td>
 <td>1 × A10G</td>
 <td>1 × <code>ml.g5.xlarge</code> (<code>$1.41</code>)</td>
-<td>0.75</td>
-<td>0.75</td>
-<td>~<code>$1.05</code>
+<td>1.6</td>
+<td>1.6</td>
+<td>~<code>$2.25</code>
 </td>
 </tr>
 <tr>
-<td>7B full fine-tune, 50k documents × 3 epochs (the challenge
+<td>7B full fine-tune, 50k documents, 300M tokens (the challenge
 below)</td>
 <td>8 × A100</td>
 <td>1 × <code>ml.p4d.24xlarge</code> (<code>$25.25</code>)</td>
@@ -6382,7 +6383,7 @@ below)</td>
 <td><strong>~<code>$600</code></strong></td>
 </tr>
 <tr>
-<td>CHURRO-3B’s own training: full fine-tune, 100k pages, 5 epochs</td>
+<td>CHURRO-3B’s own training: full fine-tune, 100k pages</td>
 <td>32 × H100</td>
 <td>4 × <code>ml.p5.48xlarge</code> (<code>$63.30</code>)</td>
 <td>25</td>
@@ -6407,6 +6408,19 @@ below)</td>
 </tr>
 </tbody>
 </table>
+<p>Tokens seen is examples × tokens per example × passes over the data,
+and it is what the time rule below multiplies by model size. The number
+of passes is a knob you tune, and the class rows’ two passes are a
+budget choice for a 25-minute class, not a recommendation: large
+instruction-tuning corpora are usually passed over one to three times,
+but a few hundred examples often take five to ten passes before the loss
+settles. Each extra pass adds one more unit of the same row, so a
+ten-pass run over the whole train set is about <code>$10</code>, and the
+sweep row still applies on top.</p>
+<p>The homework row is the competition’s full training set, scaled from
+the class run at the same seconds per page; the shared bucket holds only
+the German letters, so a team trains on everything from the
+competition’s own data download.</p>
 <p>GPUs come in fixed boxes: an <code>ml.g5.xlarge</code> is one A10G,
 an <code>ml.p4d.24xlarge</code> is eight A100s, an
 <code>ml.p5.48xlarge</code> is eight H100s, and you rent whole boxes. So
@@ -6415,7 +6429,7 @@ hours: 100 instance-hours at <code>$63.30</code> is <code>$6,330</code>.
 GPU-hours (GPUs × hours) is what the time estimate below produces;
 divide by the GPUs per box to get instance-hours, and multiply by the
 box’s price to get the bill.</p>
-<figure><img src="fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.60, homework 1.05, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from sixty cents
+<figure><img src="fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.60, homework on the full Badger Scribe train set 2.25, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from sixty cents
 for this episode’s LoRA run to twelve thousand dollars for a 70B full
 fine-tune; a ten-run sweep shifts every bar up by one decade</div>
 </figure><p>Two rows to note. The CHURRO row is the model you are about to
@@ -10448,7 +10462,7 @@ total compare with the cost callout, and with the Bedrock run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10509,7 +10523,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -11987,7 +12001,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
