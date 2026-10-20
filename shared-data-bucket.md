@@ -26,7 +26,7 @@ Learners set `shared_bucket = "<this bucket's name>"` in the first cell of the R
 
 Everything below runs in **CloudShell** (console toolbar, with the region set to the class region), where you act as your own SSO identity. It cannot be done from a notebook instance: the learner execution role there can create a bucket but is refused on tagging, the bucket policy and every upload, because the policy in step 2 deliberately gives it read-only access.
 
-Paste the blocks in order in one CloudShell tab, so the variables set in step 1 are still there for the later steps. CloudShell's home directory is 1 GB, which is why the data steps work one asset at a time under `/tmp` and the model is streamed rather than downloaded. The whole thing takes about half an hour, most of it the model copy.
+Paste the blocks in order in one CloudShell tab, so the variables set in step 1 are still there for the later steps. CloudShell's home directory is 1 GB, which is why the data steps work one asset at a time under `/tmp` and the model is streamed rather than downloaded. The whole thing takes about ten minutes; a run on 2026-10-20 ended with 461 objects and 7.7 GB in the bucket.
 
 ## 1. Create the bucket
 
@@ -108,7 +108,7 @@ done
 
 ## 5. Stage the CHURRO-3B weights (fine-tuning episode)
 
-Every training and processing job in the episode reads the base model from the bucket as a `model` channel, so that 100 jobs starting in the same minute copy it from S3 instead of each pulling 7.5 GB from Hugging Face. This streams each file from Hugging Face straight into S3, nothing written to disk: about 7.5 GB, ten minutes or so.
+Every training and processing job in the episode reads the base model from the bucket as a `model` channel, so that 100 jobs starting in the same minute copy it from S3 instead of each pulling 7.5 GB from Hugging Face. This streams each file from Hugging Face straight into S3, nothing written to disk: about 7.5 GB, which took under two minutes from CloudShell.
 
 ```bash
 python3 - <<EOF
