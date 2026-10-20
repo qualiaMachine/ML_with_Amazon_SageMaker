@@ -227,38 +227,6 @@ There is no data upload in this episode. The competition data is published as a 
 
 The training job reads the images and the model straight from that bucket; the only files your notebook downloads are the small CSVs. Outputs go to your own bucket from the S3 episode, under `badger-scribe/`.
 
-::::::::::::::::::::::::::::::::::::: callout
-
-### Working on your own account?
-
-Download the three assets of the data release and sync them into a bucket of yours under the same `badger-scribe/` prefix, then set `shared_bucket` below to that bucket. From a terminal with the AWS CLI (the notebook instance's terminal works), one asset at a time so nothing larger than one zip sits on disk:
-
-```bash
-%%bash
-V=1   # data release version; check the releases page for the latest
-R=https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/releases/download/badger-scribe-data-v$V
-for a in labels images-train images-test; do
-  rm -rf /tmp/bs && mkdir -p /tmp/bs
-  curl -L -o /tmp/bs/$a.zip $R/badger-scribe-v$V-$a.zip
-  unzip -q -o /tmp/bs/$a.zip -d /tmp/bs/badger-scribe && rm /tmp/bs/$a.zip
-  aws s3 sync /tmp/bs/badger-scribe/ s3://<your-bucket>/badger-scribe/
-  rm -rf /tmp/bs
-done
-```
-
-The jobs below also expect a copy of the base model in the bucket (one 7.5 GB download instead of one per job):
-
-```bash
-%%bash
-pip install -q huggingface_hub
-huggingface-cli download stanford-oval/churro-3B --local-dir /tmp/churro-3B
-aws s3 sync /tmp/churro-3B/ s3://<your-bucket>/badger-scribe/model/churro-3B/ && rm -rf /tmp/churro-3B
-```
-
-The Step 3 comparison against an instructor full run will not apply; run the homework's full fine-tune yourself instead.
-
-::::::::::::::::::::::::::::::::::::::::::::::::
-
 ```python
 import os
 import json
