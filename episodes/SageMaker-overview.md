@@ -51,7 +51,13 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 - **Cost tracking**: every job reports its billable seconds, and every resource can be tagged so that the bill can be broken down by project. For many common research workloads SageMaker is cheap. For example, training roughly 100 small to medium-sized models (e.g., logistic regression, random forests, or lightweight deep learning models with a few million parameters) on a small dataset (under 10GB) can cost under $20, making it accessible for many research projects.
 
-**Amazon Bedrock** is the other AWS service this lesson uses. Instead of running your script on a machine, Bedrock serves models that AWS hosts (DeepSeek, Claude, Amazon's own, and others) through an API billed per token. There is no machine to choose, start or stop; when you stop calling it, you stop paying. The RAG part of the lesson uses Bedrock first for that reason, and turns to SageMaker only for a model Bedrock does not offer.
+**Amazon Bedrock** is the other AWS service this lesson uses. Instead of running your script on a machine, Bedrock serves models that AWS hosts through an API. In practice that means:
+
+- **Nothing to start or stop**: you call the API and pay per token; when you stop calling it, you stop paying. There is no instance to size, launch, or forget.
+- **A catalog of hosted models**: DeepSeek, Claude, Amazon's own models and others, for generation and for embeddings, each selectable by model ID with no download or GPU.
+- **Cheap at research scale**: embedding a few thousand document chunks and answering a few dozen questions costs cents, which is why the RAG part of the lesson starts here.
+- **Only the catalog**: if the model you need is not on it, Bedrock cannot serve it. That is the one case where the lesson moves RAG onto SageMaker.
+- **Cost tracking by inference profile**: Bedrock calls carry no tags by default; the lesson routes them through tagged application inference profiles so they show up on the bill like everything else.
 
 ### Lesson outline
 
