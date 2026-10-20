@@ -49,7 +49,7 @@ print(f"AWS Region: {session.boto_region_name}")  # The region of the notebook i
 
 `sagemaker.config INFO - Not applying SDK defaults from location: ...`: an info line, not an error. The SDK looked for an optional defaults file in two standard places and found none.
 
-`SageMakerV2DeprecationWarning: You are using the SageMaker Python SDK v2 ... v3 is the actively developed major version`: the notebook kernels ship version 2 of the SageMaker Python SDK, and this lesson is written for it (`Estimator`, `HuggingFace`, `HyperparameterTuner`). Version 3 is a rewrite with a different API, so do not `pip install` it into these kernels. The v2 API keeps working; for a project of your own, read the [migration guide](https://github.com/aws/sagemaker-python-sdk/blob/master/migration.md) and pick a version. You will see this warning once per kernel; ignore it.
+`SageMakerV2DeprecationWarning: You are using the SageMaker Python SDK v2 ...`: the kernels ship SDK v2 and this lesson is written for it. v3 is a rewrite with a different API, so do not install it here. Ignore the warning.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
