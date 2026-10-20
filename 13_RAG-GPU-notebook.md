@@ -465,12 +465,14 @@ from vllm import LLM, SamplingParams
 
 qwen_model_id = "Qwen/Qwen3.8-27B-FP8"   # pre-quantized FP8 checkpoint; vLLM reads that from its config, so no quantization= argument is needed
 
+load_start = time.time()
 llm = LLM(
     model=qwen_model_id,                         # Hugging Face id; the weights download to HF_HOME on first use
     max_model_len=8192,                          # longest prompt + answer we need; the model allows 262K, we do not
     gpu_memory_utilization=0.85,                 # leave ~7 GB for the embedding model and PyTorch overhead
     limit_mm_per_prompt={"image": 0, "video": 0},  # text only: skip reserving memory for the vision encoder
 )
+print(f"Model loaded in {(time.time() - load_start) / 60:.1f} min (download on first use, then weights into GPU memory)")
 print("vLLM engine ready:", qwen_model_id)
 ```
 
@@ -545,6 +547,7 @@ docid_to_url = build_docid_to_url(metadata_df)
 
 all_results = []
 max_N = np.inf   # set to e.g. 5 for a smoke test
+run_start = time.time()
 
 for idx, row in train_df.iterrows():
     if idx >= max_N:
@@ -570,6 +573,7 @@ for idx, row in train_df.iterrows():
     all_results.append(res)
 
 solutions_df = pd.DataFrame(all_results)
+print(f"Answered {len(solutions_df)} questions in {(time.time() - run_start) / 60:.1f} min on the notebook GPU")
 solutions_path = os.path.join(local_data_dir, "train_solutions_qwen.csv")
 solutions_df.to_csv(solutions_path, index=False)
 
