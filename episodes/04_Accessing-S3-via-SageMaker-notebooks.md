@@ -32,11 +32,6 @@ To begin each notebook, it's important to set up an AWS environment that will al
 Starting with these initializations prepares our notebook environment to efficiently interact with AWS resources for model development, data management, and deployment.
 
 ```python
-import os
-import logging
-os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"            # see the callout below
-logging.getLogger("sagemaker.config").setLevel(logging.WARNING)  # hide the "Not applying SDK defaults" lines
-
 import boto3
 import sagemaker
 from sagemaker import get_execution_role
@@ -49,11 +44,11 @@ s3 = boto3.client('s3')
 
 ::::::::::::::::::::::::::::::::::::: callout
 
-### Two messages you will see without the first two lines
+### Two messages this cell prints
 
-`sagemaker.config INFO - Not applying SDK defaults from location: ...` means the SDK looked for an optional defaults file in two standard places and found none. Nothing is wrong; the logging line above hides it.
+`sagemaker.config INFO - Not applying SDK defaults from location: ...`: the SDK looked for an optional defaults file in two standard places and found none. Nothing is wrong.
 
-`SageMakerV2DeprecationWarning: You are using the SageMaker Python SDK v2 ... v3 is the actively developed major version` is more important. The notebook kernels ship **version 2** of the SageMaker Python SDK, and this lesson is written for it: `Estimator`, `HuggingFace`, `HyperparameterTuner` and the rest. Version 3 is a rewrite with a different API, so do not `pip install` it into these kernels to make the warning go away; the environment variable above silences it instead. The v2 API keeps working; when you start a project of your own, look at the [migration guide](https://github.com/aws/sagemaker-python-sdk/blob/master/migration.md) and decide which version to build on.
+`SageMakerV2DeprecationWarning: You are using the SageMaker Python SDK v2 ... v3 is the actively developed major version`: the notebook kernels ship version 2 of the SageMaker Python SDK, and this lesson is written for it (`Estimator`, `HuggingFace`, `HyperparameterTuner`). Version 3 is a rewrite with a different API, so do not `pip install` it into these kernels. The v2 API keeps working; for a project of your own, read the [migration guide](https://github.com/aws/sagemaker-python-sdk/blob/master/migration.md) and pick a version. You will see this warning once per kernel; ignore it.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 

@@ -101,8 +101,6 @@ job_tags = [
 Next, we'll configure the baseline estimator that we plan to do hyperparameter search on.
 
 ```python
-import os
-os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"   # the kernel ships SDK v2; the Accessing S3 episode explains
 import sagemaker
 from sagemaker.tuner import HyperparameterTuner, IntegerParameter, ContinuousParameter, CategoricalParameter
 from sagemaker.pytorch import PyTorch
