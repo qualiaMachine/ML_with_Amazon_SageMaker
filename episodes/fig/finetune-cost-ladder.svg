@@ -14,15 +14,15 @@
     <line x1="960" y1="460" x2="960" y2="466" stroke="#444"/><text x="960" y="484">$1 M</text>
     </g>
   <g stroke="#eee"><line x1="420" y1="80" x2="420" y2="460"/><line x1="510" y1="80" x2="510" y2="460"/><line x1="600" y1="80" x2="600" y2="460"/><line x1="690" y1="80" x2="690" y2="460"/><line x1="780" y1="80" x2="780" y2="460"/><line x1="870" y1="80" x2="870" y2="460"/></g>
-  <text x="315" y="117" text-anchor="end" font-weight="bold">This episode: 3B LoRA, 120 pages</text>
+  <text x="315" y="117" text-anchor="end" font-weight="bold">This episode: 3B LoRA, 120 pages, 2 passes</text>
   <rect x="330" y="100" width="160" height="24" fill="#fdd0a2"/>
   <rect x="330" y="100" width="70" height="24" fill="#2b8cbe" stroke="#444"/>
   <text x="495" y="118" font-weight="bold">$0.60</text>
-  <text x="315" y="167" text-anchor="end">Homework: 3B LoRA, 619 pages</text>
+  <text x="315" y="167" text-anchor="end">Homework: 3B LoRA, 619 pages, 2 passes</text>
   <rect x="330" y="150" width="212" height="24" fill="#fdd0a2"/>
   <rect x="330" y="150" width="122" height="24" fill="#2b8cbe" stroke="#444" stroke-dasharray="4 3"/>
   <text x="547" y="168">$2.25</text>
-  <text x="315" y="217" text-anchor="end">7B full fine-tune, 50k docs</text>
+  <text x="315" y="217" text-anchor="end">7B full fine-tune, 50k docs, 3 passes</text>
   <rect x="330" y="200" width="373" height="24" fill="#fdd0a2"/>
   <rect x="330" y="200" width="283" height="24" fill="#e6550d" stroke="#444"/>
   <text x="708" y="218" font-weight="bold">$140</text>
@@ -38,5 +38,6 @@
   <rect x="330" y="350" width="547" height="24" fill="#fdd0a2"/>
   <rect x="330" y="350" width="457" height="24" fill="#a50f15" stroke="#444"/>
   <text x="882" y="368" font-weight="bold">$12,000</text>
-  <text x="500" y="525" text-anchor="middle" font-size="15" fill="#333">Each grid line is 10×; a sweep moves every bar one decade right. Dashed bar: estimated, not run.</text>
+  <text x="500" y="508" text-anchor="middle" font-size="15" fill="#333">Each grid line is 10×; a sweep moves every bar one decade right. Dashed bar: estimated, not run.</text>
+  <text x="500" y="530" text-anchor="middle" font-size="15" fill="#333">Passes over the data are the class budget, not a norm: large corpora usually get 1 to 3, a few hundred examples 5 to 10. Each extra pass adds the same again.</text>
 </svg>
