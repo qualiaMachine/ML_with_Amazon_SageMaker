@@ -32,7 +32,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 ### Why use SageMaker for machine learning?
 
-Within AWS, SageMaker is the service for ML workloads.
+Renting a bare GPU instance from AWS (EC2) gets you the hardware above, but you still install the frameworks, move the data, and remember to shut the machine down. SageMaker wraps the same instances in a job model built for ML: you submit a script and an instance type, AWS provisions the machine with the framework container installed, runs the script, saves the outputs to S3, and terminates the instance. What that gives you:
 
 
 - **High-performance compute only when needed**: SageMaker lets you develop interactively in lightweight, inexpensive notebook environments (or your own laptop) and then launch training, tuning, or inference jobs on more powerful [instance types](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html#cloud-compute-essentials) only when necessary. You pay for expensive compute only while a job runs.
