@@ -1424,7 +1424,7 @@ does that add, and how does it compare to the download charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2363,7 +2363,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2876,7 +2876,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3273,10 +3273,12 @@ directory).</p></li>
 <li><p><strong>Training and Saving the Model</strong>: The dataset is
 converted into <strong>XGBoost’s <code>DMatrix</code> format</strong>,
 which is optimized for memory and computation efficiency. The trained
-model is saved using <code>joblib.dump()</code> to
-<code>xgboost-model</code>, stored either in the SageMaker
+model is saved with XGBoost’s own <code>save_model()</code> as
+<code>xgboost-model.json</code>, stored either in the SageMaker
 <code>SM_MODEL_DIR</code> (if running in SageMaker) or in the local
-directory.</p></li>
+directory. The JSON format can be loaded by any later XGBoost version,
+which matters here because the SageMaker container and the notebook
+kernel do not run the same version.</p></li>
 </ol>
 </div>
 </div>
@@ -3432,20 +3434,20 @@ notebook instance.</p>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1" aria-label="code-block-10-3"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1" aria-label="code-block-10-4"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1" aria-label="code-block-10-5"></a><span class="im">import</span> joblib</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1" aria-label="code-block-10-6"></a><span class="im">from</span> train_xgboost <span class="im">import</span> preprocess_data  <span class="co"># importable because scripts/ is on sys.path</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1" aria-label="code-block-10-7"></a></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1" aria-label="code-block-10-8"></a><span class="co"># Load the test data</span></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1" aria-label="code-block-10-9"></a>test_data <span class="op">=</span> pd.read_csv(<span class="st">'./titanic_test.csv'</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1" aria-label="code-block-10-10"></a></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1" aria-label="code-block-10-11"></a><span class="co"># Preprocess the test data using the imported preprocess_data function</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1" aria-label="code-block-10-12"></a>X_test, y_test <span class="op">=</span> preprocess_data(test_data)</span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1" aria-label="code-block-10-13"></a></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1" aria-label="code-block-10-14"></a><span class="co"># Convert the test features to DMatrix for XGBoost</span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1" aria-label="code-block-10-15"></a>dtest <span class="op">=</span> xgb.DMatrix(X_test)</span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1" aria-label="code-block-10-16"></a></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1" aria-label="code-block-10-17"></a><span class="co"># Load the trained model from the saved file</span></span>
-<span id="cb10-18"><a href="#cb10-18" tabindex="-1" aria-label="code-block-10-18"></a>model <span class="op">=</span> joblib.load(<span class="st">'./xgboost-model'</span>)  <span class="co"># the file the local %run wrote to the current directory</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1" aria-label="code-block-10-5"></a><span class="im">from</span> train_xgboost <span class="im">import</span> preprocess_data  <span class="co"># importable because scripts/ is on sys.path</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1" aria-label="code-block-10-6"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1" aria-label="code-block-10-7"></a><span class="co"># Load the test data</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1" aria-label="code-block-10-8"></a>test_data <span class="op">=</span> pd.read_csv(<span class="st">'./titanic_test.csv'</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1" aria-label="code-block-10-9"></a></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1" aria-label="code-block-10-10"></a><span class="co"># Preprocess the test data using the imported preprocess_data function</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1" aria-label="code-block-10-11"></a>X_test, y_test <span class="op">=</span> preprocess_data(test_data)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1" aria-label="code-block-10-12"></a></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1" aria-label="code-block-10-13"></a><span class="co"># Convert the test features to DMatrix for XGBoost</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1" aria-label="code-block-10-14"></a>dtest <span class="op">=</span> xgb.DMatrix(X_test)</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1" aria-label="code-block-10-15"></a></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1" aria-label="code-block-10-16"></a><span class="co"># Load the trained model from the saved file</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1" aria-label="code-block-10-17"></a>model <span class="op">=</span> xgb.Booster()</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1" aria-label="code-block-10-18"></a>model.load_model(<span class="st">'./xgboost-model.json'</span>)  <span class="co"># the file the local %run wrote to the current directory</span></span>
 <span id="cb10-19"><a href="#cb10-19" tabindex="-1" aria-label="code-block-10-19"></a></span>
 <span id="cb10-20"><a href="#cb10-20" tabindex="-1" aria-label="code-block-10-20"></a><span class="co"># Make predictions on the test set</span></span>
 <span id="cb10-21"><a href="#cb10-21" tabindex="-1" aria-label="code-block-10-21"></a>preds <span class="op">=</span> model.predict(dtest)</span>
@@ -3867,28 +3869,35 @@ needed.</p>
 <div class="section level4">
 <h4 id="what-did-that-cost">What did that cost?<a class="anchor" aria-label="anchor" href="#what-did-that-cost"></a>
 </h4>
-<p><img src="../fig/job-billable-time.svg" alt="Timeline of a SageMaker training job showing which phases count as training time and which as billable time" class="figure"><code>describe_training_job</code> returns two durations:
-<code>TrainingTimeInSeconds</code> (your script running) and
-<code>BillableTimeInSeconds</code> (the time the instance was reserved
-for you, which also includes pulling the container and downloading
-data). SageMaker bills per second, with no rounding, so cost is billable
-seconds x instance count x hourly rate. We’ll wrap this in a small
-helper and call it after every job in this lesson.</p>
+<p><img src="../fig/job-billable-time.svg" alt="Timeline of a SageMaker training job showing the unbilled wait for an instance and the billed phases from container pull to model upload" class="figure"><code>describe_training_job</code> returns
+<code>BillableTimeInSeconds</code>: the seconds the instance was yours,
+from container pull to model upload, per instance. It also returns
+<code>TrainingTimeInSeconds</code>, which on on-demand instances is the
+same number (it only differs on spot instances), so do not expect it to
+isolate your script. The minute or so before that, while SageMaker finds
+an instance, is not billed. SageMaker bills per second, with no
+rounding, so cost is billable seconds x instance count x hourly rate.
+We’ll wrap this in a small helper and call it after every job in this
+lesson.</p>
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="kw">def</span> job_cost_report(job_name: <span class="bu">str</span>, price_per_hour: <span class="bu">float</span>):</span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a>    desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>job_name)  <span class="co"># the job's full record: status, timings, resources, output</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1" aria-label="code-block-14-3"></a>    <span class="co"># TrainingTimeInSeconds: your script running; BillableTimeInSeconds: from instance ready to released, per instance</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1" aria-label="code-block-14-4"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1" aria-label="code-block-14-5"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">: status </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">, training </span><span class="sc">{</span>desc<span class="sc">.</span>get(<span class="st">'TrainingTimeInSeconds'</span>, <span class="dv">0</span>)<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min, billable </span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min, cost $</span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">3600</span><span class="op">*</span>price_per_hour<span class="sc">:.2f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1" aria-label="code-block-14-3"></a>    n <span class="op">=</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1" aria-label="code-block-14-4"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> n   <span class="co"># BillableTimeInSeconds: container pull to model upload, charged per instance</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1" aria-label="code-block-14-5"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">: status </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">, billable </span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss"> instance(s), cost $</span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">3600</span><span class="op">*</span>price_per_hour<span class="sc">:.3f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1" aria-label="code-block-14-6"></a>    <span class="cf">return</span> desc</span>
 <span id="cb14-7"><a href="#cb14-7" tabindex="-1" aria-label="code-block-14-7"></a></span>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1" aria-label="code-block-14-8"></a>desc <span class="op">=</span> job_cost_report(xgboost_estimator.latest_training_job.name, price_per_hour)  <span class="co"># latest_training_job: the job fit() just ran</span></span></code></pre>
 </div>
-<p>Compare this with the estimate you made above. The gap between
-training time and billable time is the startup overhead of every job; it
-is the same whether you train for one minute or one hour.</p>
+<p>Compare this with the estimate you made above. The job’s log (scroll
+up in the <code>fit()</code> output) shows the script itself trained in
+a fraction of a second, yet the bill is about two minutes. The rest is
+container pull, data download and model upload: the fixed overhead of
+every job, the same whether you train for one minute or one hour. The
+extra minute between calling <code>fit()</code> and the first billed
+second is SageMaker finding an instance, which is free.</p>
 </div>
 <div class="section level4">
 <h4 id="model-results">Model results<a class="anchor" aria-label="anchor" href="#model-results"></a>
@@ -3959,20 +3968,20 @@ add them in place of or alongside accuracy.</p>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a><span class="im">import</span> joblib</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a><span class="im">from</span> train_xgboost <span class="im">import</span> preprocess_data</span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1" aria-label="code-block-16-8"></a><span class="co"># Load the test data</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1" aria-label="code-block-16-9"></a>test_data <span class="op">=</span> pd.read_csv(<span class="st">'./titanic_test.csv'</span>)</span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1" aria-label="code-block-16-10"></a></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1" aria-label="code-block-16-11"></a><span class="co"># Preprocess the test data using the imported preprocess_data function</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1" aria-label="code-block-16-12"></a>X_test, y_test <span class="op">=</span> preprocess_data(test_data)</span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1" aria-label="code-block-16-13"></a></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1" aria-label="code-block-16-14"></a><span class="co"># Convert the test features to DMatrix for XGBoost</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1" aria-label="code-block-16-15"></a>dtest <span class="op">=</span> xgb.DMatrix(X_test)</span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1" aria-label="code-block-16-16"></a></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1" aria-label="code-block-16-17"></a><span class="co"># Load the trained model from the saved file</span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1" aria-label="code-block-16-18"></a>model <span class="op">=</span> joblib.load(<span class="st">'./xgboost-model'</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a><span class="im">from</span> train_xgboost <span class="im">import</span> preprocess_data</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a><span class="co"># Load the test data</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1" aria-label="code-block-16-8"></a>test_data <span class="op">=</span> pd.read_csv(<span class="st">'./titanic_test.csv'</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1" aria-label="code-block-16-9"></a></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1" aria-label="code-block-16-10"></a><span class="co"># Preprocess the test data using the imported preprocess_data function</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1" aria-label="code-block-16-11"></a>X_test, y_test <span class="op">=</span> preprocess_data(test_data)</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1" aria-label="code-block-16-12"></a></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1" aria-label="code-block-16-13"></a><span class="co"># Convert the test features to DMatrix for XGBoost</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1" aria-label="code-block-16-14"></a>dtest <span class="op">=</span> xgb.DMatrix(X_test)</span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1" aria-label="code-block-16-15"></a></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1" aria-label="code-block-16-16"></a><span class="co"># Load the trained model from the saved file (the container's XGBoost 1.7 wrote it; the kernel's newer XGBoost reads it)</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1" aria-label="code-block-16-17"></a>model <span class="op">=</span> xgb.Booster()</span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1" aria-label="code-block-16-18"></a>model.load_model(<span class="st">'./xgboost-model.json'</span>)</span>
 <span id="cb16-19"><a href="#cb16-19" tabindex="-1" aria-label="code-block-16-19"></a></span>
 <span id="cb16-20"><a href="#cb16-20" tabindex="-1" aria-label="code-block-16-20"></a><span class="co"># Make predictions on the test set</span></span>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1" aria-label="code-block-16-21"></a>preds <span class="op">=</span> model.predict(dtest)</span>
@@ -4633,9 +4642,9 @@ startup, i.e. about $0.01 on <code>ml.m5.large</code>.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="kw">def</span> job_cost_report(job_name: <span class="bu">str</span>, price_per_hour: <span class="bu">float</span>):</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a>    desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>job_name)  <span class="co"># the job record the console shows</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>    <span class="co"># BillableTimeInSeconds = startup + training, charged per instance; TrainingTimeInSeconds is the script alone</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">: status </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">, training </span><span class="sc">{</span>desc<span class="sc">.</span>get(<span class="st">'TrainingTimeInSeconds'</span>, <span class="dv">0</span>)<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min, billable </span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min, cost $</span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">3600</span><span class="op">*</span>price_per_hour<span class="sc">:.2f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>    n <span class="op">=</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> n   <span class="co"># container pull to model upload, charged per instance</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">: status </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">, billable </span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss"> instance(s), cost $</span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">3600</span><span class="op">*</span>price_per_hour<span class="sc">:.3f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a>    <span class="cf">return</span> desc</span>
 <span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a></span>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a><span class="co"># us-east-1 on-demand rates (2026-10-16); check the instances page for your region</span></span>
@@ -4991,9 +5000,10 @@ format is optimized for efficient loading, reducing I/O overhead and
 enabling batch compatibility for PyTorch’s <code>DataLoader</code>.</li>
 <li>
 <strong>Startup dominates small jobs</strong>: Every SageMaker
-training job pays a few minutes of provisioning, container pull and data
-download; <code>job_cost_report()</code> shows how much of the bill that
-is.</li>
+training job waits a minute or so for an instance (not billed), then
+spends one to three minutes on container pull and data download (billed)
+before the script runs; for a job whose script finishes in seconds, that
+overhead is the whole bill.</li>
 <li>
 <strong>GPU training</strong>: While beneficial for larger models or
 datasets, GPUs may introduce overhead for smaller tasks; selecting the
@@ -5513,22 +5523,23 @@ with its hyperparameters and final objective value).</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="kw">def</span> job_cost_report(job_name: <span class="bu">str</span>, price_per_hour: <span class="bu">float</span>):</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a>    desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>job_name)</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">: status </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">, training </span><span class="sc">{</span>desc<span class="sc">.</span>get(<span class="st">'TrainingTimeInSeconds'</span>, <span class="dv">0</span>)<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min, billable </span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min, cost $</span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">3600</span><span class="op">*</span>price_per_hour<span class="sc">:.2f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a>    <span class="cf">return</span> desc</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a><span class="kw">def</span> tuning_cost_report(tuner, price_per_hour):</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a>    <span class="co">"""Call job_cost_report on every training job the tuner launched; return the total cost in dollars."""</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a>    jobs_df <span class="op">=</span> tuner.analytics().dataframe()  <span class="co"># one row per child training job: its hyperparameters, FinalObjectiveValue and TrainingJobName</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1" aria-label="code-block-9-10"></a>    total_billable <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1" aria-label="code-block-9-11"></a>    <span class="cf">for</span> job_name <span class="kw">in</span> jobs_df[<span class="st">"TrainingJobName"</span>]:</span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1" aria-label="code-block-9-12"></a>        desc <span class="op">=</span> job_cost_report(job_name, price_per_hour)</span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1" aria-label="code-block-9-13"></a>        total_billable <span class="op">+=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1" aria-label="code-block-9-14"></a>    total_cost <span class="op">=</span> total_billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour</span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1" aria-label="code-block-9-15"></a>    <span class="bu">print</span>(<span class="ss">f"Tuning job </span><span class="sc">{</span>tuner<span class="sc">.</span>latest_tuning_job<span class="sc">.</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">len</span>(jobs_df)<span class="sc">}</span><span class="ss"> training jobs, </span><span class="sc">{</span>total_billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> billable min, $</span><span class="sc">{</span>total_cost<span class="sc">:.2f}</span><span class="ss"> total"</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1" aria-label="code-block-9-16"></a>    <span class="cf">return</span> total_cost</span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1" aria-label="code-block-9-17"></a></span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1" aria-label="code-block-9-18"></a>tuning_cost_report(tuner, price_per_hour)</span></code></pre>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>    n <span class="op">=</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> n</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">: status </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">, billable </span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss"> instance(s), cost $</span><span class="sc">{</span>billable<span class="op">/</span><span class="dv">3600</span><span class="op">*</span>price_per_hour<span class="sc">:.3f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a>    <span class="cf">return</span> desc</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a><span class="kw">def</span> tuning_cost_report(tuner, price_per_hour):</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a>    <span class="co">"""Call job_cost_report on every training job the tuner launched; return the total cost in dollars."""</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1" aria-label="code-block-9-10"></a>    jobs_df <span class="op">=</span> tuner.analytics().dataframe()  <span class="co"># one row per child training job: its hyperparameters, FinalObjectiveValue and TrainingJobName</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1" aria-label="code-block-9-11"></a>    total_billable <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1" aria-label="code-block-9-12"></a>    <span class="cf">for</span> job_name <span class="kw">in</span> jobs_df[<span class="st">"TrainingJobName"</span>]:</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1" aria-label="code-block-9-13"></a>        desc <span class="op">=</span> job_cost_report(job_name, price_per_hour)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1" aria-label="code-block-9-14"></a>        total_billable <span class="op">+=</span> desc[<span class="st">"BillableTimeInSeconds"</span>] <span class="op">*</span> desc[<span class="st">"ResourceConfig"</span>][<span class="st">"InstanceCount"</span>]</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1" aria-label="code-block-9-15"></a>    total_cost <span class="op">=</span> total_billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1" aria-label="code-block-9-16"></a>    <span class="bu">print</span>(<span class="ss">f"Tuning job </span><span class="sc">{</span>tuner<span class="sc">.</span>latest_tuning_job<span class="sc">.</span>name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">len</span>(jobs_df)<span class="sc">}</span><span class="ss"> training jobs, </span><span class="sc">{</span>total_billable<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> billable min, $</span><span class="sc">{</span>total_cost<span class="sc">:.2f}</span><span class="ss"> total"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1" aria-label="code-block-9-17"></a>    <span class="cf">return</span> total_cost</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1" aria-label="code-block-9-18"></a></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1" aria-label="code-block-9-19"></a>tuning_cost_report(tuner, price_per_hour)</span></code></pre>
 </div>
 </div>
 </div>
@@ -5850,25 +5861,21 @@ on the test set. However, this performance does come at a cost (albeit
 manageable if you’ve stuck with our advice thus far). This next section
 will help you assess the total compute time that was used by your tuning
 job.</p>
-<p>In SageMaker, training time and billing time (extracted in our code
-above) are expected to differ for training jobs, including the child
-jobs of a tuning job; the tuning job itself costs nothing. Here’s a
-breakdown of what’s happening:</p>
+<p>Each child job is billed like any training job; the tuning job itself
+costs nothing. Here’s a breakdown of what’s happening:</p>
 <ul>
-<li><p>Training Time (<code>TrainingTimeInSeconds</code>): This is the
-time that each training job’s script takes to run, from start to end.
-This metric represents the pure time spent on training without
-considering the compute resources.</p></li>
-<li><p>Billing Time (<code>BillableTimeInSeconds</code>): This includes
-the training time plus the startup overhead of pulling the container and
-downloading the data, and is adjusted for the resources used. Billing
-time considers:</p></li>
+<li><p>Billable Time (<code>BillableTimeInSeconds</code>): the seconds
+each child job’s instance was yours, from container pull through the
+script to model upload. The wait for an instance before that is not
+billed. (<code>TrainingTimeInSeconds</code> is the same number on
+on-demand instances; it only differs on spot.)</p></li>
+<li><p>Instance Count: billable seconds are multiplied by the number of
+instances the job used.</p></li>
+<li><p>Per-Second Billing: SageMaker bills per second, with no rounding
+to minutes or hours. For short jobs like ours, container pull and data
+download are most of the bill, which is why ten short jobs cost more
+than one job that trained ten times as long.</p></li>
 </ul>
-<p>Instance Count: The number of instances used for training affects
-billing time. Per-Second Billing: SageMaker bills per second, with no
-rounding to minutes or hours, and multiplies the billable seconds by the
-instance count used. For short jobs, the startup overhead makes the
-difference between training and billing time more pronounced.</p>
 <p>For convenience, we have added this as a function in helpers.py</p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -6039,8 +6046,8 @@ tags are inherited.</li>
 <li>
 <strong>Read the bill from the child jobs</strong>: SageMaker bills
 per second of <code>BillableTimeInSeconds</code> x instance count on
-each training job; the gap to <code>TrainingTimeInSeconds</code> is
-startup overhead, and it dominates short jobs.</li>
+each training job; container pull and data download are inside that
+number and dominate short jobs.</li>
 <li>
 <strong>Transform the test set with the training scaler</strong>:
 Load the saved scaler and pass it to
@@ -6444,7 +6451,7 @@ does one run cost? What does a realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -6705,7 +6712,7 @@ description and compare.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; five things have to be
 in place before the session. Each is written out in the instructor
@@ -7105,25 +7112,24 @@ number to compare against the estimate every time.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="kw">def</span> job_cost_report(job_name: <span class="bu">str</span>, price_per_hour: <span class="bu">float</span>):</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a>    desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>job_name)</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>]           <span class="co"># the bill: container pull, 7.5 GB model copy, then the script</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a>    training <span class="op">=</span> desc.get(<span class="st">"TrainingTimeInSeconds"</span>, <span class="dv">0</span>)    <span class="co"># the script alone; the gap is the fixed startup overhead</span></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a>    <span class="bu">print</span>(<span class="ss">f"job:            </span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>    <span class="bu">print</span>(<span class="ss">f"status:         </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>    <span class="bu">print</span>(<span class="ss">f"training time:  </span><span class="sc">{</span>training <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (script running)"</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a>    <span class="bu">print</span>(<span class="ss">f"billable time:  </span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (what you pay for, incl. download)"</span>)</span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a>    <span class="bu">print</span>(<span class="ss">f"cost:           $</span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour<span class="sc">:.2f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>    <span class="cf">return</span> desc</span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a></span>
-<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>   <span class="co"># ml.g5.xlarge, us-east-1 on-demand, $/hour</span></span>
-<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a>desc <span class="op">=</span> job_cost_report(training_job_name, g5_price)</span>
-<span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]   <span class="co"># the model.tar.gz this job uploaded to output_path</span></span>
-<span id="cb17-15"><a href="#cb17-15" tabindex="-1" aria-label="code-block-17-15"></a><span class="bu">print</span>(<span class="st">"adapter:"</span>, adapter_s3_uri)</span></code></pre>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>]           <span class="co"># the bill: container pull, 7.5 GB model copy, the script, model upload</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a>    <span class="bu">print</span>(<span class="ss">f"job:            </span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a>    <span class="bu">print</span>(<span class="ss">f"status:         </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>    <span class="bu">print</span>(<span class="ss">f"billable time:  </span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (what you pay for; the script's own timing is in train_summary.json)"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>    <span class="bu">print</span>(<span class="ss">f"cost:           $</span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour<span class="sc">:.3f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a>    <span class="cf">return</span> desc</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>   <span class="co"># ml.g5.xlarge, us-east-1 on-demand, $/hour</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a>desc <span class="op">=</span> job_cost_report(training_job_name, g5_price)</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]   <span class="co"># the model.tar.gz this job uploaded to output_path</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a><span class="bu">print</span>(<span class="st">"adapter:"</span>, adapter_s3_uri)</span></code></pre>
 </div>
-<p>The gap between <em>training time</em> and <em>billable time</em> is
-the fixed overhead of every job: container pull, data download, the 7.5
-GB model copy from S3. It is the same whether you train for one minute
-or one hour, which is why a small first run is cheap and why batching
-work into fewer, longer jobs is cheaper than many tiny ones.</p>
+<p>Compare the billable minutes with <code>train_minutes</code> in the
+summary you download next: the difference is the fixed overhead of every
+job, container pull, data download and the 7.5 GB model copy from S3. It
+is the same whether you train for one minute or one hour, which is why a
+small first run is cheap and why batching work into fewer, longer jobs
+is cheaper than many tiny ones.</p>
 <p>The whole output of the job is a <code>model.tar.gz</code> of about
 100 MB: the LoRA adapter, the processor configuration, the holdout list,
 the two evaluation files and a summary. The 3B base model is never
@@ -7200,7 +7206,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect startup to be close to 10 minutes and the two evaluations to
@@ -7318,7 +7324,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -7358,7 +7364,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Startup (~10 min, $0.44 at $2.61/h) does not speed up: the container
 pull and the S3 downloads are the same on any instance. For the class
@@ -7406,7 +7412,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p>Checkpointing. If the instance is reclaimed, the job restarts and, as
 written, starts training from scratch. For a 25-minute job that costs 25
@@ -9093,7 +9099,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -9403,7 +9409,7 @@ whole WattBot pipeline on Bedrock”, and with one hour of the
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10227,7 +10233,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10286,7 +10292,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -11568,15 +11574,15 @@ to what you asked about.</p>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1" aria-label="code-block-3-6"></a><span class="ex">aws</span> sagemaker list-endpoints       <span class="co"># must print an empty list on the workshop account</span></span></code></pre>
 </div>
 <p><code>describe-training-job</code> is the call behind
-<code>job_cost_report()</code> in the training episodes. The same two
-numbers are there: training time, and billable time, which includes the
-startup you paid for.</p>
+<code>job_cost_report()</code> in the training episodes. The same number
+is there: billable time, which includes the container pull and data
+download you paid for.</p>
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="va">JOB</span><span class="op">=&lt;</span>a <span class="ex">training</span> job name from the list above<span class="op">&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="va">$JOB</span> <span class="dt">\</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, training_s:TrainingTimeInSeconds, billable_s:BillableTimeInSeconds, tags:Tags}'</span></span></code></pre>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, tags:Tags}'</span></span></code></pre>
 </div>
 <p>Cost is billable seconds × instance count × the hourly rate, exactly
 as in the notebooks. Tags are returned by a separate call, which is also
@@ -11744,7 +11750,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>

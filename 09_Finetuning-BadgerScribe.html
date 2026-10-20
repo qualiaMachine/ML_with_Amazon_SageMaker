@@ -743,7 +743,7 @@ does one run cost? What does a realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -1271,25 +1271,24 @@ number to compare against the estimate every time.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="kw">def</span> job_cost_report(job_name: <span class="bu">str</span>, price_per_hour: <span class="bu">float</span>):</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a>    desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>job_name)</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>]           <span class="co"># the bill: container pull, 7.5 GB model copy, then the script</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a>    training <span class="op">=</span> desc.get(<span class="st">"TrainingTimeInSeconds"</span>, <span class="dv">0</span>)    <span class="co"># the script alone; the gap is the fixed startup overhead</span></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a>    <span class="bu">print</span>(<span class="ss">f"job:            </span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>    <span class="bu">print</span>(<span class="ss">f"status:         </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>    <span class="bu">print</span>(<span class="ss">f"training time:  </span><span class="sc">{</span>training <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (script running)"</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a>    <span class="bu">print</span>(<span class="ss">f"billable time:  </span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (what you pay for, incl. download)"</span>)</span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a>    <span class="bu">print</span>(<span class="ss">f"cost:           $</span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour<span class="sc">:.2f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>    <span class="cf">return</span> desc</span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a></span>
-<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>   <span class="co"># ml.g5.xlarge, us-east-1 on-demand, $/hour</span></span>
-<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a>desc <span class="op">=</span> job_cost_report(training_job_name, g5_price)</span>
-<span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]   <span class="co"># the model.tar.gz this job uploaded to output_path</span></span>
-<span id="cb17-15"><a href="#cb17-15" tabindex="-1" aria-label="code-block-17-15"></a><span class="bu">print</span>(<span class="st">"adapter:"</span>, adapter_s3_uri)</span></code></pre>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>    billable <span class="op">=</span> desc[<span class="st">"BillableTimeInSeconds"</span>]           <span class="co"># the bill: container pull, 7.5 GB model copy, the script, model upload</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a>    <span class="bu">print</span>(<span class="ss">f"job:            </span><span class="sc">{</span>job_name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a>    <span class="bu">print</span>(<span class="ss">f"status:         </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>    <span class="bu">print</span>(<span class="ss">f"billable time:  </span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (what you pay for; the script's own timing is in train_summary.json)"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>    <span class="bu">print</span>(<span class="ss">f"cost:           $</span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour<span class="sc">:.3f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a>    <span class="cf">return</span> desc</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>   <span class="co"># ml.g5.xlarge, us-east-1 on-demand, $/hour</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a>desc <span class="op">=</span> job_cost_report(training_job_name, g5_price)</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]   <span class="co"># the model.tar.gz this job uploaded to output_path</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a><span class="bu">print</span>(<span class="st">"adapter:"</span>, adapter_s3_uri)</span></code></pre>
 </div>
-<p>The gap between <em>training time</em> and <em>billable time</em> is
-the fixed overhead of every job: container pull, data download, the 7.5
-GB model copy from S3. It is the same whether you train for one minute
-or one hour, which is why a small first run is cheap and why batching
-work into fewer, longer jobs is cheaper than many tiny ones.</p>
+<p>Compare the billable minutes with <code>train_minutes</code> in the
+summary you download next: the difference is the fixed overhead of every
+job, container pull, data download and the 7.5 GB model copy from S3. It
+is the same whether you train for one minute or one hour, which is why a
+small first run is cheap and why batching work into fewer, longer jobs
+is cheaper than many tiny ones.</p>
 <p>The whole output of the job is a <code>model.tar.gz</code> of about
 100 MB: the LoRA adapter, the processor configuration, the holdout list,
 the two evaluation files and a summary. The 3B base model is never
@@ -1363,7 +1362,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Expect startup to be close to 10 minutes and the two evaluations to
 be 2–4 minutes each. Training is the line most likely to differ: if you
@@ -1475,7 +1474,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -1515,7 +1514,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Startup (~10 min, $0.44 at $2.61/h) does not speed up: the container
 pull and the S3 downloads are the same on any instance. For the class
@@ -1563,7 +1562,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p>Checkpointing. If the instance is reclaimed, the job restarts and, as
 written, starts training from scratch. For a 25-minute job that costs 25
