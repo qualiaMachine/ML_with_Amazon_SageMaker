@@ -14,7 +14,7 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Compare cloud compute with campus HPC and lab hardware on hardware generation, cost and control.
-- Introduce SageMaker and the controller-plus-jobs pattern.
+- Introduce SageMaker.
 - Preview the three parts of the lesson.
   
 ::::::::::::::::::::::::::::::::::::::::::::::
@@ -69,7 +69,6 @@ Every job is tagged, capped, estimated before launch and checked against the bil
 - The cloud offers the current GPU generation on demand and bills per second while a job runs; on-prem hardware offers full control and a fixed cost but a fixed generation and a queue.
 - Renting is cheaper for bursty research work; owning is cheaper for GPUs that stay busy.
 - An idle rented GPU costs the same as a busy one, so every job in this lesson is launched with a runtime cap and a stopping rule.
-- A cheap controller notebook launches jobs that run on separate instances and end on their own; each job carries tags and a cost estimate.
 - SageMaker runs custom scripts in preconfigured framework containers, and parallelizes training and hyperparameter tuning with little extra code.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
