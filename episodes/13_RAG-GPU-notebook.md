@@ -142,7 +142,7 @@ If the install changes PyTorch, restart the kernel (**Kernel → Restart**) befo
 
 ```python
 # Several GB; it may replace torch, so restart the kernel (Kernel -> Restart) if the log says it did
-%pip install -q "vllm>=0.17"
+%pip install -q "vllm>=0.17" sentence-transformers
 ```
 
 
