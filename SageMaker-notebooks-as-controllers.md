@@ -61,7 +61,7 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
   | Key | Value |
   |---|---|
-  | `Project` | your challenge name, e.g. `SinkOrSwim` |
+  | `Project` | your challenge name (`SinkOrSwim`, `WattBot2026`, `BadgerScribe`, `BadgerCode`, ...), e.g. `SinkOrSwim` |
   | `Name` | your name, e.g. `DoeJohn` |
   | `Purpose` | what this resource is for, `Notebook` |
 
