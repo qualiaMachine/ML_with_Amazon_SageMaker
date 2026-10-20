@@ -697,7 +697,7 @@ e.g. <code>SinkOrSwim</code>
 e.g. <code>DoeJohn</code>
 </li>
 <li>
-<strong>Purpose</strong>: what the resource is for, here
+<strong>Purpose</strong>: one of five fixed values, here
 <code>Storage</code>
 </li>
 </ul><p>AWS allows tag values of up to 256 characters made of letters,
@@ -705,7 +705,22 @@ digits, spaces and <code>+ - = . _ : / @</code>, and they are
 case-sensitive. We use capitalised words with no spaces, and the same
 spelling on every resource: <code>SinkOrSwim</code> and
 <code>sinkorswim</code> would be separate rows in Cost Explorer.</p>
-<figure><img src="../fig/bucket_tags2.png" alt="Screenshot showing required tags for an S3 bucket" class="figure mx-auto d-block"><div class="figcaption">Example of Tags for an S3 Bucket</div>
+<p><code>Purpose</code> takes one of five values, so that the bill can
+be summed by kind of work rather than by individual job. Which job it
+was is already in the job’s name.</p>
+<table class="table"><thead><tr><th><code>Purpose</code></th>
+<th>Used for</th>
+</tr></thead><tbody><tr><td><code>Storage</code></td>
+<td>your bucket</td>
+</tr><tr><td><code>Notebook</code></td>
+<td>the controller notebook instance</td>
+</tr><tr><td><code>Training</code></td>
+<td>training jobs, including the fine-tune</td>
+</tr><tr><td><code>Tuning</code></td>
+<td>hyperparameter tuning jobs</td>
+</tr><tr><td><code>Inference</code></td>
+<td>Bedrock calls, RAG jobs, batch transcription</td>
+</tr></tbody></table><figure><img src="../fig/bucket_tags2.png" alt="Screenshot showing required tags for an S3 bucket" class="figure mx-auto d-block"><div class="figcaption">Example of Tags for an S3 Bucket</div>
 </figure><p><strong>Default encryption</strong>: leave SSE-S3 (the default).
 Objects are encrypted at rest with keys S3 manages; KMS keys only matter
 when you need to control the keys yourself.</p>
@@ -913,7 +928,7 @@ sizes: 10 GB, 100 GB, 1 TB (1024 GB)</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal"><li>
