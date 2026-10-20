@@ -30,17 +30,6 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 - **Energy efficiency.** Power usage effectiveness (PUE) is total facility power divided by IT power, so 1.0 is perfect. AWS reports a global average of 1.14 for 2025; the Uptime Institute's 2025 industry survey average is 1.54, and Amazon cites 1.63 for on-premises enterprise data centers. There is no comparable survey of university data centers, the cloud figures are self-reported, and PUE says nothing about whether the GPUs inside are busy. The direction is still clear: a hyperscale facility wastes less power on cooling and distribution than a typical campus machine room.
 - **Control and data.** On-prem gives full control over the software stack, no quotas, no egress charges, and data that never leaves campus. In the cloud you work within quotas and account permissions, and data moved in or out crosses the network. An idle rented GPU costs the same as a busy one, so every job in this lesson has a runtime cap.
 
-| | Campus cluster | Lab workstation | Cloud (SageMaker) |
-|---|---|---|---|
-| GPU generation | Fixed at purchase | Fixed at purchase | Current, by the hour |
-| Cooling | Usually air | Air | Air and liquid (newest systems) |
-| Facility PUE | Varies, often 1.5+ | n/a | ~1.14 (AWS, 2025) |
-| Wait to start | Queue | None | Minutes (within quota) |
-| Cost to you | Allocation or free at use | Already paid | Per second while running |
-| Idle cost | None to you | Power | Full price until stopped |
-| Control | Shared, admin-managed | Full | Within account permissions |
-| Data | Stays on campus | Stays local | Transfer in and out |
-
 ### Why use SageMaker for machine learning?
 
 Within AWS, SageMaker is the service for ML workloads.
