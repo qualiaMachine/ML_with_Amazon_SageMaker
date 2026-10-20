@@ -650,7 +650,7 @@ until deleted.</li>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="co"># Initialize the S3 client and download the file</span></span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>s3.download_file(bucket_name, key, local_file_path)</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a><span class="op">!</span>ls</span></code></pre>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a><span class="op">!</span>ls <span class="st">"/home/ec2-user/SageMaker/"</span></span></code></pre>
 </div>
 <p><strong>Note</strong>: You may need to hit refresh on the file
 explorer panel to the left to see this file. If you get any permission
@@ -890,7 +890,7 @@ prefixes instead of a new bucket per episode?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>One way to do it:</li>
 </ol><div class="codewrapper sourceCode" id="cb14">
