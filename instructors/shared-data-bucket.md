@@ -100,6 +100,102 @@ rm -rf churro-3B
 
 About 7.5 GB; it only needs redoing if the Hub repository changes or the bucket is rebuilt.
 
+## From a SageMaker notebook
+
+The same procedure as the script, as cells for a notebook on a `ml.t3.medium` instance with the `conda_python3` kernel. The notebook's role must be allowed to create buckets and set bucket policies; if cell 2 fails with `AccessDenied`, create the bucket and paste the policy through the console (as in the S3 episode) and continue from cell 3. Check free scratch space first: the model copy needs about 8 GB under `/tmp`.
+
+```python
+!df -h /tmp
+```
+
+**Cell 1: names.** The shared bucket follows the lesson's example name; the account id and region come from the session.
+
+```python
+import json, boto3, sagemaker
+
+session = sagemaker.Session()
+region = session.boto_region_name
+account_id = boto3.client("sts").get_caller_identity()["Account"]
+s3 = boto3.client("s3", region_name=region)
+
+shared_bucket = "ml-marathon-shared"
+roles = ["ml-sagemaker-use", "ml-sagemaker-bedrock-use"]   # execution roles that may read the bucket
+release_v = 1                                               # Badger Scribe data release version
+repo = "https://github.com/carpentries-incubator/ML_with_AWS_SageMaker"
+print(region, account_id, shared_bucket)
+```
+
+**Cell 2: create the bucket, tag it, block public access, attach the read-only policy.**
+
+```python
+try:
+    s3.head_bucket(Bucket=shared_bucket)
+    print("bucket exists")
+except s3.exceptions.ClientError:
+    s3.create_bucket(Bucket=shared_bucket, CreateBucketConfiguration={"LocationConstraint": region})
+    print("bucket created")
+
+s3.put_bucket_tagging(Bucket=shared_bucket, Tagging={"TagSet": [
+    {"Key": "Project", "Value": "Workshop"}, {"Key": "Name", "Value": "Instructor"}, {"Key": "Purpose", "Value": "Storage"}]})
+s3.put_public_access_block(Bucket=shared_bucket, PublicAccessBlockConfiguration={
+    "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})
+
+policy = {"Version": "2012-10-17", "Statement": [{
+    "Effect": "Allow",
+    "Principal": {"AWS": [f"arn:aws:iam::{account_id}:role/{r}" for r in roles]},
+    "Action": ["s3:GetObject", "s3:ListBucket"],
+    "Resource": [f"arn:aws:s3:::{shared_bucket}", f"arn:aws:s3:::{shared_bucket}/*"]}]}
+s3.put_bucket_policy(Bucket=shared_bucket, Policy=json.dumps(policy))
+print("read-only policy attached for", roles)
+```
+
+**Cell 3: WattBot inputs** (metadata, questions, and the PDF corpus built from the metadata).
+
+```python
+%cd /tmp
+!rm -rf stage && mkdir stage
+%cd /tmp/stage
+!git clone -q --depth 1 {repo} lesson
+!pip install -q pandas requests huggingface_hub
+!unzip -q -o lesson/data/data.zip -d data
+!mkdir -p wattbot && cp data/data/wattbot/metadata.csv data/data/wattbot/train_QA.csv wattbot/
+!python lesson/scripts/build_wattbot_corpus.py --metadata wattbot/metadata.csv --out wattbot/corpus.zip
+!aws s3 sync wattbot/ s3://{shared_bucket}/wattbot/
+```
+
+**Cell 4: Badger Scribe data release**, one asset at a time.
+
+```python
+R = f"{repo}/releases/download/badger-scribe-data-v{release_v}"
+for a in ["labels", "images-train", "images-test"]:
+    !rm -rf bs && mkdir -p bs
+    !curl -sSL -o bs/{a}.zip {R}/badger-scribe-v{release_v}-{a}.zip
+    !unzip -q -o bs/{a}.zip -d bs/badger-scribe && rm bs/{a}.zip
+    !aws s3 sync bs/badger-scribe/ s3://{shared_bucket}/badger-scribe/
+!rm -rf bs
+```
+
+**Cell 5: CHURRO-3B weights** (about 7.5 GB; ten minutes or so).
+
+```python
+from huggingface_hub import snapshot_download
+snapshot_download("stanford-oval/churro-3B", local_dir="/tmp/stage/churro-3B")
+!aws s3 sync /tmp/stage/churro-3B/ s3://{shared_bucket}/badger-scribe/model/churro-3B/
+!rm -rf /tmp/stage/churro-3B
+```
+
+**Cell 6: check**, then clean up the scratch space.
+
+```python
+!aws s3 ls s3://{shared_bucket}/ --recursive --summarize | tail -2
+!aws s3 ls s3://{shared_bucket}/badger-scribe/
+!aws s3 ls s3://{shared_bucket}/wattbot/
+%cd /tmp
+!rm -rf stage
+```
+
+Still by hand: run the fine-tuning episode's homework estimator once and copy `train_summary.json`, `eval_before.csv` and `eval_after.csv` from its `model.tar.gz` to `s3://ml-marathon-shared/badger-scribe/instructor/full-run/`.
+
 ## 5. Keep it, or rebuild it
 
 The end-of-workshop cleanup (`instructors/instructor-notes.md`, aws-nuke) deletes every S3 bucket in the account unless excluded. Either add the shared bucket to the nuke config's exclude filter, or accept that it goes and redo steps 1 to 4 next term; the data steps take about fifteen minutes and the model copy as long as a 7.5 GB download takes where you are. Storage is ~130 MB for Badger Scribe plus the WattBot corpus, and ~7.5 GB for the model copy: well under a dollar a month.
