@@ -227,7 +227,6 @@ def get_current_costs(days=1):
     total_cost = sum(float(day['Total']['UnblendedCost']['Amount']) for day in response['ResultsByTime'])
     return total_cost
 
-import os
 
 def convert_files(direction="notebook_to_python", directory="."):
     """Convert every notebook in ``directory`` to a .py script, or every .py script
@@ -278,3 +277,120 @@ if __name__ == "__main__":
     # Example: Get the total AWS cost across all services over the last 7 days
     total_cost = get_current_costs(days=7)
     print(f"Total AWS costs over the last 7 days: ${total_cost:.2f}")
+
+
+# ---------------------------------------------------------------------------
+# Fine-tuning cost estimator (fine-tuning episode, "Back of the envelope")
+# ---------------------------------------------------------------------------
+
+# SageMaker training instances the lesson refers to: GPUs per box, GPU memory per GPU (GB),
+# bf16 dense peak per GPU (TFLOPS, from NVIDIA's data sheets), and the us-east-1 on-demand
+# price per instance-hour from the AWS price list of 2026-10-16. The price is for the whole box.
+GPU_INSTANCES = {
+    "ml.g4dn.xlarge":   {"gpus": 1, "gpu": "T4",        "gpu_mem_gb": 16, "tflops_bf16": 65,  "price": 0.74,  "note": "no bf16 support; modern LLM fine-tuning is slow or fails"},
+    "ml.g6.xlarge":     {"gpus": 1, "gpu": "L4",        "gpu_mem_gb": 24, "tflops_bf16": 121, "price": 1.13},
+    "ml.g5.xlarge":     {"gpus": 1, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 1.41},
+    "ml.g5.2xlarge":    {"gpus": 1, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 1.52},
+    "ml.g6e.xlarge":    {"gpus": 1, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 2.61},
+    "ml.g6e.2xlarge":   {"gpus": 1, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 2.80},
+    "ml.g5.12xlarge":   {"gpus": 4, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 7.09},
+    "ml.g6e.12xlarge":  {"gpus": 4, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 13.12},
+    "ml.p4d.24xlarge":  {"gpus": 8, "gpu": "A100 40GB", "gpu_mem_gb": 40, "tflops_bf16": 312, "price": 25.25},
+    "ml.p5.48xlarge":   {"gpus": 8, "gpu": "H100 80GB", "gpu_mem_gb": 80, "tflops_bf16": 989, "price": 63.30},
+}
+
+# Bytes of GPU memory per model parameter, from the fine-tuning episode's table.
+BYTES_PER_PARAM = {"lora": 2.5, "full": 16.0}
+
+# Multiplier on parameters x tokens: 6 for a full fine-tune (forward + backward through
+# every weight), 4 for LoRA (no weight gradients for the frozen base).
+FLOPS_PER_PARAM_TOKEN = {"lora": 4.0, "full": 6.0}
+
+
+def estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs=2, method="lora",
+                           instance_type=None, runs=1, utilization=0.25, gradient_checkpointing=True,
+                           activations_gb=4.0, startup_minutes=10, verbose=True):
+    """
+    Back-of-the-envelope cost of a fine-tuning run, using the two rules from the
+    fine-tuning episode. Good to within about a factor of two, which is enough to tell
+    a $5 run from a $500 one before anything is launched.
+
+    Rule 1, memory: bytes per parameter x parameters + activations must fit the GPU memory
+    (summed across GPUs on a multi-GPU box, where the model is sharded).
+    Rule 2, time: FLOPs = k x parameters x tokens (k = 4 for LoRA, 6 for full), divided by
+    the GPU's peak bf16 rate x utilization; +50% when gradient checkpointing recomputes
+    the forward pass. Cost = instance-hours x price per instance-hour + startup.
+
+    Parameters
+    ----------
+    params_billions : float   total parameters of the model you train (3, 7, 27, 70 ...).
+                              For a vision-language model include the vision tower (CHURRO-3B ~3.75).
+    examples : int            training examples (pages, documents, images, recordings ...)
+    tokens_per_example : int  tokens the model sees per example. Text: words x 1.3. An image on a
+                              Qwen-VL style model: pixels / 784 (about 1,300 for one megapixel) plus
+                              the text. An EEG window or audio clip: ask the model card what one
+                              example becomes after tokenisation.
+    epochs : float            passes over the data
+    method : "lora" | "full"
+    instance_type : str       a key of helpers.GPU_INSTANCES; None picks the cheapest that fits
+    runs : int                how many runs the project will need (a first run is never the last;
+                              five to ten is realistic before any hyperparameter sweep)
+    utilization : float       fraction of peak the GPU achieves; 0.25 unless you have measured
+    gradient_checkpointing : bool   adds ~50% compute; needed on small GPUs
+    activations_gb : float    headroom for activations; raise for long sequences or big batches
+    startup_minutes : float   per-job fixed overhead (container pull, data download, model load)
+
+    Returns a dict with the numbers and prints a report when verbose.
+    """
+    method = method.lower()
+    if method not in BYTES_PER_PARAM:
+        raise ValueError("method must be 'lora' or 'full'")
+    params = params_billions * 1e9
+    tokens = examples * tokens_per_example * epochs
+    mem_gb = BYTES_PER_PARAM[method] * params / 1e9 + activations_gb
+    flops = FLOPS_PER_PARAM_TOKEN[method] * params * tokens * (1.5 if gradient_checkpointing else 1.0)
+
+    def fits(spec):
+        return spec["gpus"] * spec["gpu_mem_gb"] >= mem_gb
+
+    if instance_type is None:
+        candidates = [k for k, v in GPU_INSTANCES.items() if fits(v) and "note" not in v]
+        if not candidates:
+            raise ValueError(f"needs ~{mem_gb:.0f} GB of GPU memory; nothing in GPU_INSTANCES holds it. "
+                             "Use LoRA, a smaller model, or more than one box.")
+        instance_type = min(candidates, key=lambda k: GPU_INSTANCES[k]["price"])
+    spec = GPU_INSTANCES[instance_type]
+
+    gpu_seconds = flops / (spec["tflops_bf16"] * 1e12 * utilization)
+    gpu_hours = gpu_seconds / 3600
+    instance_hours = gpu_hours / spec["gpus"] + startup_minutes / 60
+    cost_per_run = instance_hours * spec["price"]
+    max_run_minutes = max(15, round(2 * instance_hours * 60 / 5) * 5)
+    result = {
+        "method": method, "params_billions": params_billions, "tokens": tokens,
+        "memory_gb_needed": round(mem_gb, 1), "instance_type": instance_type,
+        "fits": fits(spec), "gpu_hours": round(gpu_hours, 2),
+        "wall_clock_hours": round(instance_hours, 2), "cost_per_run": round(cost_per_run, 2),
+        "runs": runs, "cost_total": round(cost_per_run * runs, 2),
+        "max_run_seconds": int(max_run_minutes * 60),
+    }
+    if verbose:
+        gpus = f'{spec["gpus"]} x {spec["gpu"]}'
+        print(f"{method.upper()} fine-tune of a {params_billions:g}B model: {examples:,} examples x "
+              f"{tokens_per_example:,} tokens x {epochs:g} epochs = {tokens/1e6:,.1f}M tokens")
+        print(f"memory:     ~{mem_gb:.0f} GB needed; {instance_type} has {spec['gpus'] * spec['gpu_mem_gb']} GB ({gpus})"
+              f"{'' if fits(spec) else '  -> DOES NOT FIT'}")
+        print(f"compute:    {flops:.2e} FLOPs at {spec['tflops_bf16']} TFLOPS x {utilization:.0%} utilization "
+              f"= {gpu_hours:.2f} GPU-hours")
+        print(f"wall-clock: ~{instance_hours * 60:.0f} min including {startup_minutes:g} min startup")
+        print(f"cost:       ~${cost_per_run:.2f} per run at ${spec['price']}/h; ~${cost_per_run * runs:.2f} for {runs} run(s)")
+        print(f"set max_run={result['max_run_seconds']}  ({max_run_minutes:.0f} min, about twice the estimate)")
+        if "note" in spec:
+            print(f"warning:    {spec['gpu']}: {spec['note']}")
+        if method == "full":
+            print("warning:    full fine-tuning updates every weight; do not run one on the class account")
+        if method == "lora" and params_billions > 7:
+            print("warning:    LoRA above 7B is outside what the class account allows")
+        if spec["gpus"] > 1:
+            print("warning:    multi-GPU instance; not allowed on the class account, and more GPUs do not make the run cheaper")
+    return result
