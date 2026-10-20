@@ -53,7 +53,7 @@ By managing these settings and configuring metrics properly, you can achieve a b
 Just to make sure we are all on the same directory starting point, let's cd to our instance's root directory
 
 ```python
-%cd /home/ec2-user/SageMaker/
+%cd /home/ec2-user/SageMaker/   # work from the instance root: the %run, source_dir and download paths below are relative to it
 import sys
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
 import helpers
