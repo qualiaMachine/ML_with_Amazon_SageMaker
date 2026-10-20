@@ -81,6 +81,7 @@ Work through this list before you sign off for the last time.
 - **Notebook instances**: Stop, then **Delete** (SageMaker → Notebook instances). Includes the optional GPU notebook instance if you created one.
 - **Lifecycle configurations**: if you created one (for example, a script that auto-stops an idle notebook instance), delete it (SageMaker → Notebook instances → Lifecycle configurations). It costs nothing but is yours to remove.
 - **S3 bucket**: empty and delete your `challenge-lastnamefirstname` bucket (S3 → select bucket → Empty, then Delete). Download anything you want to keep first, once: egress is `$0.09`/GB. Leave the shared data bucket alone; it is the instructors'.
+- **Default SDK bucket** `sagemaker-<region>-<account-id>`: created automatically the first time a job staged its code. In the shared account the instructors delete it; on your own account, empty and delete it with the rest.
 - **Training, tuning and Processing jobs**: confirm none are still running (SageMaker → each job list, filter by status *InProgress*). Completed jobs hold no billable resource; their artifacts are in your bucket and go with it.
 - **Bedrock application inference profiles**: delete the ones you created (from the Bedrock console, or with `bedrock.delete_inference_profile(...)` as shown in the RAG on Bedrock episode).
 - **GitHub personal access token**: revoke it on GitHub (Settings → Developer settings → Personal access tokens) if you made one for the optional PAT episode.
@@ -117,6 +118,7 @@ A complete list for someone who did every episode, including the optional ones:
 | Resource | Created in | Bills while it exists? | Where it is deleted |
 |---|---|---|---|
 | S3 bucket `challenge-lastnamefirstname` and everything in it (the Titanic files and `.npz` arrays at the root, and the `docs/`, `xgboost/`, `output_nn/`, `wattbot/` and `badger-scribe/` prefixes) | S3 episode | Yes: storage per GB-month | S3 console → Empty bucket → Delete bucket |
+| The SDK's default bucket `sagemaker-<region>-<account-id>` (code tarballs staged by every `fit()` and `run()`) | Training episode, automatically | Yes, a little: storage per GB-month, shared by the whole account | Instructors delete it at the end of term; on your own account, empty and delete it like any other bucket |
 | Controller notebook instance (`ml.t3.medium`) | Notebooks as controllers | Yes while InService; its volume bills while Stopped | SageMaker → Notebook instances → Stop → Delete |
 | Training jobs (XGBoost, PyTorch), tuning jobs, Processing jobs | Training, tuning, RAG and fine-tuning episodes | Only while running; all capped by `max_run` / `max_runtime_in_seconds` | SageMaker → job lists → Stop if InProgress; nothing to delete afterwards |
 | Bedrock application inference profiles | RAG on Bedrock | No (the calls billed per token when made) | Bedrock console or `bedrock.delete_inference_profile(...)` |
