@@ -817,46 +817,48 @@ page</a>.</p>
 </section><section><h2 class="section-heading" id="writing-output-files-to-s3">Writing output files to S3<a class="anchor" aria-label="anchor" href="#writing-output-files-to-s3"></a></h2>
 <hr class="half-width"><p>As your analysis generates new files or demands additional
 documentation, you can upload files to your bucket as demonstrated
-below. For this demo, you can create a blank <code>Notes.txt</code> file
-to upload to your bucket. To do so, go to <strong>File</strong> -&gt;
-<strong>New</strong> -&gt; <strong>Text file</strong>, and save it out
-as <code>Notes.txt</code>. (The code below also writes the file, so the
-notebook runs end to end.)</p>
+below. For this demo, we write a small <code>Notes.txt</code> file on
+the instance and check that it exists:</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="co"># Define the S3 bucket name and the file paths</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a>notes_file_path <span class="op">=</span> <span class="st">"Notes.txt"</span> <span class="co"># assuming your file is in root directory of jupyter notebook (check file explorer tab)</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a><span class="cf">with</span> <span class="bu">open</span>(notes_file_path, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a>    f.write(<span class="st">"Workshop notes: Titanic data uploaded from the S3 episode; outputs go under per-episode prefixes.</span><span class="ch">\n</span><span class="st">"</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a><span class="co"># Upload the training file to a new folder called "docs". You can also just place it in the bucket's root directory if you prefer (remove docs/ in code below).</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a>s3.upload_file(notes_file_path, bucket_name, <span class="st">"docs/Notes.txt"</span>)</span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a><span class="bu">print</span>(<span class="st">"Files uploaded successfully."</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a>notes_file_path <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/Notes.txt"</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a><span class="cf">with</span> <span class="bu">open</span>(notes_file_path, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>    f.write(<span class="st">"Workshop notes.</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a><span class="op">!</span>ls <span class="op">-</span>l <span class="st">"/home/ec2-user/SageMaker/Notes.txt"</span></span></code></pre>
 </div>
-<p>After uploading, we can view the objects/files available on our
-bucket using…</p>
+<p>Then upload it. Here it goes under a <code>docs/</code> prefix; drop
+the <code>docs/</code> to put it in the bucket’s root instead.</p>
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a><span class="co"># List and print all objects in the bucket</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a>response <span class="op">=</span> s3.list_objects_v2(Bucket<span class="op">=</span>bucket_name)</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1" aria-label="code-block-12-3"></a></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1" aria-label="code-block-12-4"></a><span class="co"># Check if there are objects in the bucket</span></span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1" aria-label="code-block-12-5"></a><span class="cf">if</span> <span class="st">'Contents'</span> <span class="kw">in</span> response:</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1" aria-label="code-block-12-6"></a>    <span class="cf">for</span> obj <span class="kw">in</span> response[<span class="st">'Contents'</span>]:</span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1" aria-label="code-block-12-7"></a>        <span class="bu">print</span>(obj[<span class="st">'Key'</span>])  <span class="co"># Print the object's key (its path in the bucket)</span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1" aria-label="code-block-12-8"></a><span class="cf">else</span>:</span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1" aria-label="code-block-12-9"></a>    <span class="bu">print</span>(<span class="st">"The bucket is empty or does not exist."</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a>notes_s3_key <span class="op">=</span> <span class="st">"docs/Notes.txt"</span>   <span class="co"># the object key: a "docs/" prefix plus the file name</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a>s3.upload_file(notes_file_path, bucket_name, notes_s3_key)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1" aria-label="code-block-12-3"></a><span class="bu">print</span>(<span class="ss">f"Uploaded </span><span class="sc">{</span>notes_file_path<span class="sc">}</span><span class="ss"> to s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>notes_s3_key<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>Alternatively, we can substitute this for a helper function call as
-well.</p>
+<p>After uploading, we can view the objects/files available on our
+bucket using…</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a>file_list <span class="op">=</span> helpers.list_S3_objects(bucket_name)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a>file_list</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="co"># List and print all objects in the bucket</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a>response <span class="op">=</span> s3.list_objects_v2(Bucket<span class="op">=</span>bucket_name)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a><span class="co"># Check if there are objects in the bucket</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a><span class="cf">if</span> <span class="st">'Contents'</span> <span class="kw">in</span> response:</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a>    <span class="cf">for</span> obj <span class="kw">in</span> response[<span class="st">'Contents'</span>]:</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1" aria-label="code-block-13-7"></a>        <span class="bu">print</span>(obj[<span class="st">'Key'</span>])  <span class="co"># Print the object's key (its path in the bucket)</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1" aria-label="code-block-13-8"></a><span class="cf">else</span>:</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1" aria-label="code-block-13-9"></a>    <span class="bu">print</span>(<span class="st">"The bucket is empty or does not exist."</span>)</span></code></pre>
+</div>
+<p>Alternatively, we can substitute this for a helper function call as
+well.</p>
+<div class="codewrapper sourceCode" id="cb14">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a>file_list <span class="op">=</span> helpers.list_S3_objects(bucket_name)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a>file_list</span></code></pre>
 </div>
 <div id="challenge-before-and-after" class="callout challenge">
 <div class="callout-square">
@@ -872,11 +874,10 @@ the size of your bucket. Then create a second file (say
 the <code>docs/</code> prefix, and measure the bucket size again. By how
 much did it grow, and what does that cost per month at $0.023 per
 GB?</li>
-<li>The next episodes train an XGBoost model with a SageMaker training
-job that writes its outputs to your bucket. Looking at how this episode
-organized <code>Notes.txt</code>, which prefix do you expect those
-outputs to land under, and why does the lesson use one bucket with
-prefixes instead of a new bucket per episode?</li>
+<li>The next episode launches a training job that writes its outputs to
+your bucket. Why does the lesson keep everything in one bucket,
+organised with prefixes like <code>docs/</code>, rather than creating a
+bucket per task?</li>
 </ol></div>
 </div>
 </div>
@@ -888,32 +889,30 @@ prefixes instead of a new bucket per episode?</li>
 <div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>One way to do it:</li>
-</ol><div class="codewrapper sourceCode" id="cb14">
+</ol><div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a>size_before <span class="op">=</span> helpers.get_s3_bucket_size(bucket_name)</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1" aria-label="code-block-14-3"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"Notes2.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1" aria-label="code-block-14-4"></a>    f.write(<span class="st">"A second note, to see the bucket grow.</span><span class="ch">\n</span><span class="st">"</span> <span class="op">*</span> <span class="dv">20</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1" aria-label="code-block-14-5"></a>s3.upload_file(<span class="st">"Notes2.txt"</span>, bucket_name, <span class="st">"docs/Notes2.txt"</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1" aria-label="code-block-14-6"></a></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1" aria-label="code-block-14-7"></a>size_after <span class="op">=</span> helpers.get_s3_bucket_size(bucket_name)</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1" aria-label="code-block-14-8"></a><span class="bu">print</span>(size_before, size_after)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" tabindex="-1" aria-label="code-block-15-1"></a>size_before <span class="op">=</span> helpers.get_s3_bucket_size(bucket_name)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1" aria-label="code-block-15-2"></a></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1" aria-label="code-block-15-3"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"Notes2.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1" aria-label="code-block-15-4"></a>    f.write(<span class="st">"A second note, to see the bucket grow.</span><span class="ch">\n</span><span class="st">"</span> <span class="op">*</span> <span class="dv">20</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1" aria-label="code-block-15-5"></a>s3.upload_file(<span class="st">"Notes2.txt"</span>, bucket_name, <span class="st">"docs/Notes2.txt"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1" aria-label="code-block-15-6"></a></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1" aria-label="code-block-15-7"></a>size_after <span class="op">=</span> helpers.get_s3_bucket_size(bucket_name)</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1" aria-label="code-block-15-8"></a><span class="bu">print</span>(size_before, size_after)</span></code></pre>
 </div>
 <p>The bucket grows by the size of the file (a few hundred bytes here),
 and at $0.023 per GB-month that is well under a thousandth of a cent per
 month. The same two lines, run before and after a training job, tell you
 what the job wrote and whether something is accumulating that you should
 clean up.</p>
-<ol start="2" style="list-style-type: decimal"><li>The training episode writes under <code>xgboost/</code>
-(<code>s3://sinkorswim-doejohn/xgboost/</code>), the same way this
-episode wrote under <code>docs/</code>; the PyTorch episode uses
-<code>pytorch/</code>, the RAG episodes <code>wattbot/</code>, and the
-fine-tuning episode <code>badger-scribe/</code>. One bucket with
-prefixes keeps a single bucket policy, a single set of tags, and a
-single thing to delete at the end of the workshop; one bucket per
-episode would mean repeating the policy and tag setup five times and a
-longer cleanup list.</li>
+<ol start="2" style="list-style-type: decimal"><li>A prefix is just part of the object key, so
+<code>docs/Notes.txt</code>, <code>xgboost/output/...</code> and
+<code>wattbot/chunks.jsonl</code> can all live in one bucket and still
+be listed, downloaded or deleted as groups. One bucket means one policy,
+one set of tags, one region to get right, and one thing to empty and
+delete at the end; a bucket per task would repeat the setup each time
+and lengthen the cleanup list.</li>
 </ol></div>
 </div>
 </div>
