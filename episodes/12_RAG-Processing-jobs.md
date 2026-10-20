@@ -93,6 +93,7 @@ import os
 import json
 
 import boto3
+import time
 import numpy as np
 import pandas as pd
 import sagemaker
@@ -237,6 +238,7 @@ embedding_processor = HuggingFaceProcessor(
 )
 
 # run() uploads the code, starts the instance, streams the job's log here and returns when the script ends (wait=True is the default)
+start = time.time()
 embedding_processor.run(
     code="embedding_inference.py",     # the script the container runs...
     source_dir="code_embed/",          # ...uploaded with everything beside it, requirements.txt included
@@ -262,7 +264,7 @@ embedding_processor.run(
     ],
 )
 
-print("Embedding job complete.")
+print(f"Embedding job complete: {(time.time() - start) / 60:.1f} min wall-clock, including instance startup")
 ```
 
 ### Check on the running job in the AWS Console
@@ -336,6 +338,7 @@ rag_processor = HuggingFaceProcessor(
     max_runtime_in_seconds=2 * 60 * 60,   # cap: the estimate is 30 minutes
 )
 
+start = time.time()
 rag_processor.run(
     code="wattbot_rag_batch.py",
     source_dir="code_rag/",            # wattbot_rag_batch.py + wattbot_rag.py + requirements.txt
@@ -374,7 +377,7 @@ rag_processor.run(
     ],
 )
 
-print("RAG batch job complete.")
+print(f"RAG batch job complete: {(time.time() - start) / 60:.1f} min wall-clock, including instance startup and the pip install")
 ```
 
 While it runs, open the job's CloudWatch log from the console page above. You will see, in order: pip installing vLLM, the weight download (27 GB in shards), vLLM loading the model and reporting how much GPU memory it reserved, then one line per question. The whole job is the 30 minutes in the cost callout; the generation is the last third of it.

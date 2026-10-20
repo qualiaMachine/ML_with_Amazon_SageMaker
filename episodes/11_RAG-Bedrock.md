@@ -112,6 +112,7 @@ from typing import Dict, Any, List
 from pathlib import Path
 
 import boto3
+import time
 from botocore.config import Config
 from botocore.exceptions import ClientError
 import pandas as pd
@@ -625,6 +626,7 @@ else:
     all_embeddings = list(np.load(emb_partial_path)) if emb_partial_path.exists() else []
     start = len(all_embeddings)
     print(f"Computing embeddings via Bedrock from chunk {start} of {len(chunked_docs)}...")
+    t0 = time.time()
 
     for idx in range(start, len(chunked_docs)):
         all_embeddings.append(bedrock_embed_text(chunked_docs[idx]["text"]))
@@ -632,6 +634,7 @@ else:
             np.save(emb_partial_path, np.array(all_embeddings, dtype="float32"))
             print(f"Embedded {idx + 1} / {len(chunked_docs)} chunks (progress saved)")
 
+    print(f"Embedded {len(chunked_docs) - start} chunks in {time.time() - t0:.1f} seconds")
     chunk_embeddings = np.array(all_embeddings, dtype="float32")   # the embedding matrix: one row per chunk, one column per dimension
     np.save(emb_save_path, chunk_embeddings)
     emb_partial_path.unlink(missing_ok=True)
@@ -717,6 +720,7 @@ and explanation phases call local models instead of Bedrock-hosted ones.
 
 ```python
 results = []
+run_start = time.time()
 
 # For quick smoke tests, slice train_df (e.g., train_df.head(5))
 for _, row in train_df.iterrows():
@@ -741,6 +745,7 @@ for _, row in train_df.iterrows():
     results.append(out)
 
 results_df = pd.DataFrame(results)
+print(f"Answered {len(results_df)} questions in {(time.time() - run_start) / 60:.1f} min")
 
 output_dir = "outputs"
 os.makedirs(output_dir, exist_ok=True)
