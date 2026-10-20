@@ -1246,7 +1246,7 @@ needed.</p>
 </div>
 <div class="section level4">
 <h4 id="what-did-that-cost">What did that cost?<a class="anchor" aria-label="anchor" href="#what-did-that-cost"></a></h4>
-<p><code>describe_training_job</code> returns two durations:
+<p><img src="../fig/job-billable-time.svg" alt="Timeline of a SageMaker training job showing which phases count as training time and which as billable time" class="figure"><code>describe_training_job</code> returns two durations:
 <code>TrainingTimeInSeconds</code> (your script running) and
 <code>BillableTimeInSeconds</code> (the time the instance was reserved
 for you, which also includes pulling the container and downloading
