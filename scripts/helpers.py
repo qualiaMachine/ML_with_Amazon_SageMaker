@@ -377,10 +377,23 @@ def estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs
     if verbose:
         gpus = f'{spec["gpus"]} x {spec["gpu"]}'
         print(f"{method.upper()} fine-tune of a {params_billions:g}B model: {examples:,} examples x "
-              f"{tokens_per_example:,} tokens x {epochs:g} epochs = {tokens/1e6:,.1f}M tokens")
-        print(f"memory:     ~{mem_gb:.0f} GB needed; {instance_type} has {spec['gpus'] * spec['gpu_mem_gb']} GB ({gpus})"
-              f"{'' if fits(spec) else '  -> DOES NOT FIT'}")
-        print(f"compute:    {flops:.2e} FLOPs at {spec['tflops_bf16']} TFLOPS x {utilization:.0%} utilization "
+              f"{tokens_per_example:,} tokens x {epochs:g} passes = {tokens/1e6:,.1f}M tokens")
+        print(f"memory:     ~{mem_gb:.0f} GB needed; {instance_type} has {spec['gpus'] * spec['gpu_mem_gb']} GB ({gpus})")
+        if not fits(spec):
+            fitting = [k for k, v in GPU_INSTANCES.items() if fits(v) and "note" not in v]
+            cheapest = min(fitting, key=lambda k: GPU_INSTANCES[k]["price"]) if fitting else None
+            print(f"\n*** DOES NOT FIT: {instance_type} cannot hold this job. It would start, bill ~{startup_minutes:g} min of startup "
+                  f"(~${startup_minutes / 60 * spec['price']:.2f}), then die with a CUDA out-of-memory error. ***")
+            if cheapest:
+                c = GPU_INSTANCES[cheapest]
+                print(f"    smallest instance that fits: {cheapest} ({c['gpus']} x {c['gpu']}, {c['gpus'] * c['gpu_mem_gb']} GB, ${c['price']}/h); "
+                      f"rerun with instance_type=\"{cheapest}\"")
+            else:
+                print("    nothing in GPU_INSTANCES holds it: use LoRA, a smaller model, or more than one box")
+            if method == "full":
+                print("    or switch to method=\"lora\": about %.0f GB instead of %.0f" % (BYTES_PER_PARAM["lora"] * params / 1e9 + activations_gb, mem_gb))
+            print("    the numbers below are what the run WOULD cost on this instance if it fit")
+        print(f"compute:    {flops:.2e} FLOPs at {utilization:.0%} of the {spec['tflops_bf16']} TFLOPS peak "
               f"= {gpu_hours:.2f} GPU-hours")
         print(f"wall-clock: ~{instance_hours * 60:.0f} min including {startup_minutes:g} min startup")
         print(f"cost:       ~${cost_per_run:.2f} per run at ${spec['price']}/h; ~${cost_per_run * runs:.2f} for {runs} run(s)")
