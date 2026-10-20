@@ -529,7 +529,7 @@ s3.download_file(bucket_name, model_s3_path, local_model_path)
 # Extract the model file
 import tarfile
 with tarfile.open(local_model_path) as tar:
-    tar.extractall()  # unpacks the xgboost-model file into the current directory, replacing the local test's copy
+    tar.extractall()
 ```
 
 ```python
