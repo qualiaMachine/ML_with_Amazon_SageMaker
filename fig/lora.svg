@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="440" viewBox="0 0 1100 440" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <rect width="1100" height="440" fill="#ffffff"/>
+  <text x="550" y="28" text-anchor="middle" font-weight="bold" font-size="16">Full fine-tuning vs. LoRA, for one weight matrix in one layer</text>
+  <text x="550" y="48" text-anchor="middle" font-size="12" fill="#555">blue = frozen, orange = trained; shapes to scale for d = 2048, r = 16</text>
+
+  <!-- LEFT: full fine-tune -->
+  <text x="220" y="80" text-anchor="middle" font-weight="bold">Full fine-tuning</text>
+  <rect x="110" y="100" width="220" height="220" fill="#fdae6b" stroke="#444"/>
+  <text x="220" y="205" text-anchor="middle" font-weight="bold" font-size="18">W</text>
+  <text x="220" y="228" text-anchor="middle" font-size="12">d × d = 4.2 M weights</text>
+  <text x="220" y="244" text-anchor="middle" font-size="12">every one updated</text>
+  <text x="95" y="215" text-anchor="end" font-size="12">d</text>
+  <text x="220" y="340" text-anchor="middle" font-size="12">d</text>
+  <text x="220" y="372" text-anchor="middle" font-size="12">per weight: value + gradient + fp32 copy + 2 optimizer moments</text>
+  <text x="220" y="390" text-anchor="middle" font-size="12" font-weight="bold">16 bytes × 4.2 M = 67 MB for this matrix</text>
+  <text x="220" y="410" text-anchor="middle" font-size="12">16 bytes × all 3 B weights of the model = 48 GB</text>
+
+  <!-- divider -->
+  <line x1="470" y1="70" x2="470" y2="420" stroke="#ccc" stroke-dasharray="4 4"/>
+
+  <!-- RIGHT: LoRA -->
+  <text x="790" y="80" text-anchor="middle" font-weight="bold">LoRA</text>
+  <rect x="520" y="100" width="220" height="220" fill="#9ecae1" stroke="#444"/>
+  <text x="630" y="205" text-anchor="middle" font-weight="bold" font-size="18">W</text>
+  <text x="630" y="228" text-anchor="middle" font-size="12">frozen, kept in bf16</text>
+  <text x="630" y="244" text-anchor="middle" font-size="12">2 bytes each, no gradients</text>
+  <text x="630" y="340" text-anchor="middle" font-size="12">d</text>
+
+  <text x="765" y="215" text-anchor="middle" font-size="22">+</text>
+
+  <!-- B: d x r, tall and thin -->
+  <rect x="790" y="100" width="4" height="220" fill="#fdae6b" stroke="#444"/>
+  <text x="792" y="340" text-anchor="middle" font-size="12">B: d × r</text>
+
+  <text x="820" y="215" text-anchor="middle" font-size="22">·</text>
+
+  <!-- A: r x d, short and wide -->
+  <rect x="845" y="208" width="220" height="4" fill="#fdae6b" stroke="#444"/>
+  <text x="955" y="200" text-anchor="middle" font-size="12">A: r × d</text>
+  <text x="955" y="340" text-anchor="middle" font-size="12">d</text>
+
+  <text x="790" y="372" text-anchor="middle" font-size="12">trained: 2 × d × r = 65 k weights, 1.6 % of W</text>
+  <text x="790" y="390" text-anchor="middle" font-size="12" font-weight="bold">16 bytes × 65 k = 1 MB, plus 8 MB for the frozen W</text>
+  <text x="790" y="410" text-anchor="middle" font-size="12">the layer computes W·x + B·A·x; after training, B·A is the adapter</text>
+</svg>

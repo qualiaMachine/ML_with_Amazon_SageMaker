@@ -549,6 +549,12 @@ syncs gradients each step.</div>
 <hr class="half-width"></section><section id="09_Finetuning-BadgerScribe"><h2 class="section-heading"><a href="09_Finetuning-BadgerScribe.html">Fine-tuning a Vision-Language Model with Training Jobs</a></h2>
 <hr class="half-width">
 <h3 id="09_Finetuning-BadgerScribe-figure-1">Figure 1</h3>
+<p aria-hidden="true">Image 1 of 1: ‘Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x.’</p>
+<figure><img src="fig/lora.svg" alt="Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x." class="figure mx-auto d-block"><div class="figcaption">Full fine-tuning updates every entry of a d × d
+weight matrix; LoRA freezes it and trains two thin matrices of rank r
+whose product is added to its output</div>
+</figure><hr>
+<h3 id="09_Finetuning-BadgerScribe-figure-2">Figure 2</h3>
 <p aria-hidden="true">Image 1 of 1: ‘Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning’</p>
 <figure><img src="fig/memory-per-parameter.svg" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption">Bars of GPU memory per parameter: 1 byte for FP8
 inference, 2 for bf16 inference, about 2.5 for a LoRA fine-tune, 16 for
