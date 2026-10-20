@@ -90,7 +90,7 @@ print(f"Instance Type: {local_instance}")
 ```python
 name = "DoeJohn" # replace with your name
 project = "SinkOrSwim" # replace with your challenge name
-purpose = "Tune-PyTorch"
+purpose = "Tuning"
 
 job_tags = [
     {"Key": "Name", "Value": name},

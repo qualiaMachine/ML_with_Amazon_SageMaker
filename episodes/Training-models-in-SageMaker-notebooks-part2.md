@@ -171,7 +171,7 @@ As in the XGBoost episode, every training job needs its own tags: a job does not
 ```python
 name = "DoeJohn" # replace with your name
 project = "SinkOrSwim" # replace with your challenge name
-purpose = "Train-PyTorch"
+purpose = "Training"
 
 job_tags = [
     {"Key": "Name", "Value": name},

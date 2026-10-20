@@ -111,9 +111,19 @@ A SageMaker training or processing job reads only from buckets in its own region
 
 - **Project**: your challenge name, e.g. `SinkOrSwim`
 - **Name**: your last and first name run together, e.g. `DoeJohn`
-- **Purpose**: what the resource is for, here `Storage`
+- **Purpose**: one of five fixed values, here `Storage`
 
 AWS allows tag values of up to 256 characters made of letters, digits, spaces and `+ - = . _ : / @`, and they are case-sensitive. We use capitalised words with no spaces, and the same spelling on every resource: `SinkOrSwim` and `sinkorswim` would be separate rows in Cost Explorer.
+
+`Purpose` takes one of five values, so that the bill can be summed by kind of work rather than by individual job. Which job it was is already in the job's name.
+
+| `Purpose` | Used for |
+|---|---|
+| `Storage` | your bucket |
+| `Notebook` | the controller notebook instance |
+| `Training` | training jobs, including the fine-tune |
+| `Tuning` | hyperparameter tuning jobs |
+| `Inference` | Bedrock calls, RAG jobs, batch transcription |
 
 ![Example of Tags for an S3 Bucket](fig/bucket_tags2.png){alt="Screenshot showing required tags for an S3 bucket"}
 
