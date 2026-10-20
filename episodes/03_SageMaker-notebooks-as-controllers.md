@@ -98,15 +98,15 @@ The table's rule of thumb is RAM of at least 1.5× the dataset, so 20 GB of data
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-### Before you leave: stop the instance
+### At the end of class: stop the instance
 
-A notebook instance bills for every second it is **InService**. When you step away for the day, go to **Notebook instances**, select yours and choose **Stop**. Your files under `/home/ec2-user/SageMaker` (including the repos you clone) survive a Stop and are there when you start it again; packages you `pip install` are not, so expect to reinstall them. When the workshop is over, **Delete** the instance: a stopped instance still bills for its storage volume ($0.14 per GB-month), and the cleanup episode walks through this.
+A notebook instance bills for every second it is **InService**. At the end of class, go to **Notebook instances**, select yours and choose **Stop**. Your files under `/home/ec2-user/SageMaker` (including the repos you clone) survive a Stop and are there when you start it again; packages you `pip install` are not, so expect to reinstall them. When the workshop is over, **Delete** the instance: a stopped instance still bills for its storage volume ($0.14 per GB-month), and the cleanup episode walks through this.
 
 ::::::::::::::::::::::::::::::::::::: keypoints 
 
 - Use a minimal SageMaker notebook instance as a controller to manage larger, resource-intensive tasks.
 - The notebook does not do the heavy computation; later episodes use it to launch training, tuning and processing jobs on separate instances.
 - Every resource gets the same three tags; they never propagate, so each new resource needs its own.
-- Stop the notebook instance whenever you leave, and delete it when the workshop is over.
+- Stop the notebook instance at the end of class, and delete it when the workshop is over.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
