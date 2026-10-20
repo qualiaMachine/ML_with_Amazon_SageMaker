@@ -102,13 +102,7 @@ About 7.5 GB; it only needs redoing if the Hub repository changes or the bucket 
 
 ## From a SageMaker notebook
 
-The same procedure as the script, as cells for a notebook on a `ml.t3.medium` instance with the `conda_python3` kernel. The notebook's role must be allowed to create buckets and set bucket policies; if cell 2 fails with `AccessDenied`, create the bucket and paste the policy through the console (as in the S3 episode) and continue from cell 3. Check free scratch space first: the model copy needs about 8 GB under `/tmp`.
-
-```python
-!df -h /tmp
-```
-
-**Cell 1: names.** The shared bucket follows the lesson's example name; the account id and region come from the session.
+The same procedure as the script, as cells for a notebook on a `ml.t3.medium` instance with the `conda_python3` kernel. The notebook's role must be allowed to create buckets and set bucket policies; if cell 2 fails with `AccessDenied`, create the bucket and paste the policy through the console (as in the S3 episode) and continue from cell 3. **Cell 1: names.** The shared bucket follows the lesson's example name; the account id and region come from the session.
 
 ```python
 import json, boto3, sagemaker
@@ -149,12 +143,12 @@ s3.put_bucket_policy(Bucket=shared_bucket, Policy=json.dumps(policy))
 print("read-only policy attached for", roles)
 ```
 
-**Cell 3: WattBot inputs** (metadata, questions, and the PDF corpus built from the metadata).
+**Cell 3: WattBot inputs** (metadata, questions, and the PDF corpus built from the metadata). `/tmp` on a notebook instance is a small RAM disk, so the work directory goes on the persistent volume; these files are a few hundred MB.
 
 ```python
-%cd /tmp
-!rm -rf stage && mkdir stage
-%cd /tmp/stage
+work = "/home/ec2-user/SageMaker/stage"
+!rm -rf {work} && mkdir -p {work}
+%cd {work}
 !git clone -q --depth 1 {repo} lesson
 !pip install -q pandas requests huggingface_hub
 !unzip -q -o lesson/data/data.zip -d data
@@ -175,23 +169,32 @@ for a in ["labels", "images-train", "images-test"]:
 !rm -rf bs
 ```
 
-**Cell 5: CHURRO-3B weights** (about 7.5 GB; ten minutes or so).
+**Cell 5: CHURRO-3B weights**, streamed from Hugging Face into S3 file by file (about 7.5 GB in total; nothing is written to the instance's disk, so the volume size does not matter).
 
 ```python
-from huggingface_hub import snapshot_download
-snapshot_download("stanford-oval/churro-3B", local_dir="/tmp/stage/churro-3B")
-!aws s3 sync /tmp/stage/churro-3B/ s3://{shared_bucket}/badger-scribe/model/churro-3B/
-!rm -rf /tmp/stage/churro-3B
+import requests
+from huggingface_hub import HfApi, hf_hub_url
+
+model_id = "stanford-oval/churro-3B"
+prefix = "badger-scribe/model/churro-3B"
+files = [f for f in HfApi().list_repo_files(model_id) if not f.startswith(".")]
+for f in files:
+    with requests.get(hf_hub_url(model_id, f), stream=True, timeout=60) as r:
+        r.raise_for_status()
+        r.raw.decode_content = True
+        s3.upload_fileobj(r.raw, shared_bucket, f"{prefix}/{f}")   # multipart upload straight from the stream
+    print("uploaded", f)
 ```
 
-**Cell 6: check**, then clean up the scratch space.
+**Cell 6: check**, then clean up.
 
 ```python
 !aws s3 ls s3://{shared_bucket}/ --recursive --summarize | tail -2
 !aws s3 ls s3://{shared_bucket}/badger-scribe/
+!aws s3 ls s3://{shared_bucket}/badger-scribe/model/churro-3B/
 !aws s3 ls s3://{shared_bucket}/wattbot/
-%cd /tmp
-!rm -rf stage
+%cd /home/ec2-user/SageMaker
+!rm -rf {work}
 ```
 
 Still by hand: run the fine-tuning episode's homework estimator once and copy `train_summary.json`, `eval_before.csv` and `eval_after.csv` from its `model.tar.gz` to `s3://ml-marathon-shared/badger-scribe/instructor/full-run/`.
