@@ -608,10 +608,20 @@ applies here too.</p>
 JupyterLab</strong> next to it. In JupyterLab, create a new notebook
 with the <code>conda_python3</code> kernel (we aren’t training anything
 yet, so the plain Python environment is enough).</p>
+<p>The instance’s home directory holds AWS’s own setup: the
+<code>anaconda3</code> folder with the conda environments behind the
+kernel list, AWS’s <code>sample-notebooks</code>, and a pile of license
+files. One folder is different: <code>/home/ec2-user/SageMaker</code> is
+a separate disk, the storage volume you saw as a setting when creating
+the instance. Everything else in the home directory lives on the system
+disk and is reset when the instance stops; <code>SageMaker/</code> is
+the only place that survives a stop. JupyterLab’s file browser opens
+there for that reason, and it is where everything in this lesson
+goes.</p>
 <p>In that notebook, run the following cell to clone the lesson
-repository into the instance’s persistent directory. The
-<code>test -d ... ||</code> guard makes it a no-op if the folder already
-exists, and every later episode starts with the same cell:</p>
+repository into that persistent folder. The <code>test -d ... ||</code>
+guard makes it a no-op if the folder already exists, and every later
+episode starts with the same cell:</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -621,25 +631,22 @@ exists, and every later episode starts with the same cell:</p>
 <p>Then open
 <code>ML_with_AWS_SageMaker/notebooks/04_Accessing-S3-via-SageMaker-notebooks.ipynb</code>
 from the file browser to begin the first notebook.</p>
-<div id="challenge-pick-an-instance-and-decide-what-to-tag" class="callout challenge">
+<div id="challenge-pick-an-instance" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="challenge-pick-an-instance-and-decide-what-to-tag" class="callout-inner">
-<h3 class="callout-title">Challenge: pick an instance, and decide what
-to tag</h3>
+<div id="challenge-pick-an-instance" class="callout-inner">
+<h3 class="callout-title">Challenge: pick an instance</h3>
 <div class="callout-content">
 <p>Open the supplemental <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page and answer:</p>
-<ol style="list-style-type: decimal"><li>A colleague has a <strong>20 GB tabular dataset</strong> (a CSV of
+<p>A colleague has a <strong>20 GB tabular dataset</strong> (a CSV of
 sensor readings) and wants to train gradient-boosted trees on it. Which
 instance would you pick for the <em>training job</em>, and why? What
 would you pick for the <em>controller notebook</em> that launches
-it?</li>
-<li>List every resource this colleague will create during that project,
-and say which of them need the three tags.</li>
-</ol></div>
+it?</p>
+</div>
 </div>
 </div>
 <div id="accordionSolution1" class="accordion challenge-accordion accordion-flush">
@@ -647,26 +654,19 @@ and say which of them need the three tags.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
-<ol style="list-style-type: decimal"><li>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
+<p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
 vCPU, 32 GiB, about $0.46/h) is the natural fit for a tree-ensemble
-training job, with <code>ml.m5.4xlarge</code> (64 GiB) as the safe
-choice if the feature engineering doubles the frame. No GPU:
-gradient-boosted trees on tabular data are CPU work, so a
-<code>g4dn</code> or <code>g5</code> would cost more and run no faster.
-The controller stays <code>ml.t3.medium</code> ($0.05/h): it only
-submits the job and reads the results back from S3, so it never needs to
-hold the dataset in memory.</li>
-<li>At least four: the S3 bucket, the notebook instance, each training
-job, and (if they tune) each hyperparameter tuning job. Every one of
-them needs its own copy of <code>Name</code>, <code>Project</code> and
-<code>Purpose</code>, because tags never propagate from one resource to
-another. The training-job instance itself is not a separate resource to
-tag: it is created and destroyed by the job, and the job’s tags cover
-it.</li>
-</ol></div>
+training job, or <code>ml.m5.4xlarge</code> (64 GiB) if feature
+engineering will add many columns. No GPU: gradient-boosted trees on
+tabular data are CPU work, so a <code>g4dn</code> or <code>g5</code>
+would cost more and run no faster. The controller stays
+<code>ml.t3.medium</code> ($0.05/h): it only submits the job and reads
+the results back from S3, so it never needs to hold the dataset in
+memory.</p>
+</div>
 </div>
 </div>
 </div>
