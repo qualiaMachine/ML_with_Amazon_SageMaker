@@ -111,6 +111,10 @@ In summary, saving the data in `.npz` files ensures a smooth workflow from data 
 We reuse the `preprocess_data()` function from the lesson's `scripts/train_nn.py` rather than re-typing the preprocessing here: the same function will later be applied to the test set, so train and test are transformed identically. It returns the fitted `StandardScaler`, and we save it with `joblib` so the next episode can load it.
 
 ```python
+!pip install scikit-learn   # the conda_pytorch_p310 kernel does not ship it; train_nn.py imports it
+```
+
+```python
 import numpy as np
 import joblib
 from sklearn.model_selection import train_test_split

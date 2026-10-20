@@ -225,7 +225,7 @@ helpers.get_notebook_instance_info(notebook_instance_name, region)
 Test train.py on this notebook's instance (or when possible, on your own machine) before doing anything more complicated (e.g., hyperparameter tuning on multiple instances)
 
 ```python
-!pip install xgboost # need to add this to environment to run train.py
+!pip install xgboost scikit-learn   # the conda_pytorch_p310 kernel ships neither; the script imports both
 ```
 
 ### Local test
