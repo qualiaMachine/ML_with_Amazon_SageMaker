@@ -158,7 +158,7 @@ After reviewing, discuss any questions or observations with your group.
 
 4. **Handling Local vs. SageMaker Runs**: The script uses `os.environ.get("SM_CHANNEL_TRAIN", ".")` and `os.environ.get("SM_MODEL_DIR", ".")` to detect whether it's running in SageMaker. `SM_CHANNEL_TRAIN` is the directory where SageMaker stores input training data, and `SM_MODEL_DIR` is the directory where trained models should be saved. If these environment variables are *not set* (e.g., running locally), the script defaults to `"."` (current directory).
 
-5. **Training and Saving the Model**: The dataset is converted into **XGBoost's `DMatrix` format**, which is optimized for memory and computation efficiency. The trained model is saved using `joblib.dump()` to `xgboost-model`, stored either in the SageMaker `SM_MODEL_DIR` (if running in SageMaker) or in the local directory.
+5. **Training and Saving the Model**: The dataset is converted into **XGBoost's `DMatrix` format**, which is optimized for memory and computation efficiency. The trained model is saved with XGBoost's own `save_model()` as `xgboost-model.json`, stored either in the SageMaker `SM_MODEL_DIR` (if running in SageMaker) or in the local directory. The JSON format can be loaded by any later XGBoost version, which matters here because the SageMaker container and the notebook kernel do not run the same version.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -263,7 +263,6 @@ import xgboost as xgb
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-import joblib
 from train_xgboost import preprocess_data  # importable because scripts/ is on sys.path
 
 # Load the test data
@@ -276,7 +275,8 @@ X_test, y_test = preprocess_data(test_data)
 dtest = xgb.DMatrix(X_test)
 
 # Load the trained model from the saved file
-model = joblib.load('./xgboost-model')  # the file the local %run wrote to the current directory
+model = xgb.Booster()
+model.load_model('./xgboost-model.json')  # the file the local %run wrote to the current directory
 
 # Make predictions on the test set
 preds = model.predict(dtest)
@@ -539,7 +539,6 @@ import xgboost as xgb
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-import joblib
 from train_xgboost import preprocess_data
 
 # Load the test data
@@ -551,8 +550,9 @@ X_test, y_test = preprocess_data(test_data)
 # Convert the test features to DMatrix for XGBoost
 dtest = xgb.DMatrix(X_test)
 
-# Load the trained model from the saved file
-model = joblib.load('./xgboost-model')
+# Load the trained model from the saved file (the container's XGBoost 1.7 wrote it; the kernel's newer XGBoost reads it)
+model = xgb.Booster()
+model.load_model('./xgboost-model.json')
 
 # Make predictions on the test set
 preds = model.predict(dtest)
