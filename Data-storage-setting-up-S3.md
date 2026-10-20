@@ -185,7 +185,7 @@ Everything above transfers; only the role name changes.
 2. **Put that ARN in the policy** as the only entry under `Principal`, and your bucket name under `Resource`.
 3. **Or skip the bucket policy** by putting `sagemaker` in the bucket name: the console-created role carries the `AmazonSageMakerFullAccess` policy, which already grants read and write on any bucket whose name contains `sagemaker`. A bucket named `sinkorswim-doejohn` is not covered, which is why the bucket policy is needed at all.
 
-Either way, access comes from one of two places: the role's own IAM policy (what the role may do anywhere) or the bucket's policy (what this bucket allows). In the same account, allowing in either one is enough. The [SageMaker execution role documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html) covers the role side.
+Either way, access comes from one of two places: the role's own IAM policy (what the role may do anywhere) or the bucket's policy (what this bucket allows). In the same account, allowing in either one is enough. The [SageMaker execution role documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html) covers the role side. UW-Madison researchers can bring questions about roles, policies and accounts to the Public Cloud team's weekly [office hours](https://kb.wisc.edu/page.php?id=101516) (Thursdays at 2 pm on Zoom) or email cloud-services@cio.wisc.edu.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -198,7 +198,7 @@ Two buckets appear in this workshop, and this is the only one you create. Your b
 		- `~/Downloads/data/titanic/titanic_train.csv`
 		- `~/Downloads/data/titanic/titanic_test.csv`
 - Navigate to the Objects tab of your bucket, then **Upload**.
-- **Add Files** (`titanic_train.csv`, `titanic_test.csv`) and click **Upload** to complete.
+- **Add Files** (`titanic_train.csv`, `titanic_test.csv`) and click **Upload** to complete. These two files are what the next episodes read: the *Accessing S3* episode loads them into a notebook straight from this bucket, and the training and tuning episodes point their jobs at the same two objects.
 
 ##### 6. Take note of S3 URI for your data
 - After uploading a file to S3, click on the file to locate its **Object URI** (e.g., `s3://sinkorswim-doejohn/titanic_train.csv`). The Uniform Resource Identifier (URI) is a unique address that specifies the location of the file within S3. This URI is essential for referencing data in AWS services like SageMaker, where it will be used to load data for processing and model training.
