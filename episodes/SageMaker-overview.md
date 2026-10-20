@@ -62,7 +62,6 @@ The lesson has three parts:
 
 Every episode applies the same cost controls: tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end.
 
-Most research groups use both. This lesson covers the cloud half.
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
