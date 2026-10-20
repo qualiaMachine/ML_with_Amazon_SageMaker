@@ -93,7 +93,7 @@ Open the supplemental [Instances for ML](https://carpentries-incubator.github.io
 
 :::::::::::::::::::::::::::::::::::: solution
 
-1. The table's rule of thumb is RAM of at least 1.5× the dataset, so 20 GB of data wants about 32 GB of memory: `ml.m5.2xlarge` (8 vCPU, 32 GiB, about $0.46/h) is the natural fit for a tree-ensemble training job, with `ml.m5.4xlarge` (64 GiB) as the safe choice if the feature engineering doubles the frame. No GPU: gradient-boosted trees on tabular data are CPU work, so a `g4dn` or `g5` would cost more and run no faster. The controller stays `ml.t3.medium` ($0.05/h): it only submits the job and reads the results back from S3, so it never needs to hold the dataset in memory.
+1. The table's rule of thumb is RAM of at least 1.5× the dataset, so 20 GB of data wants about 32 GB of memory: `ml.m5.2xlarge` (8 vCPU, 32 GiB, about $0.46/h) is the natural fit for a tree-ensemble training job, or `ml.m5.4xlarge` (64 GiB) if feature engineering will add many columns. No GPU: gradient-boosted trees on tabular data are CPU work, so a `g4dn` or `g5` would cost more and run no faster. The controller stays `ml.t3.medium` ($0.05/h): it only submits the job and reads the results back from S3, so it never needs to hold the dataset in memory.
 2. At least four: the S3 bucket, the notebook instance, each training job, and (if they tune) each hyperparameter tuning job. Every one of them needs its own copy of `Name`, `Project` and `Purpose`, because tags never propagate from one resource to another. The training-job instance itself is not a separate resource to tag: it is created and destroyed by the job, and the job's tags cover it.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
