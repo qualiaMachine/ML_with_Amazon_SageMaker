@@ -408,6 +408,7 @@ job_tags = [
     {"Key": "Project", "Value": project},
     {"Key": "Purpose", "Value": purpose},
 ]
+print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 ```
 
 #### Estimate before you launch
