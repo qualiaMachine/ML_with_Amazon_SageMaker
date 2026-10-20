@@ -27,10 +27,10 @@ If you are attending this lesson at UW-Madison, the instructors will provide a s
 * Before the workshop, the instructor adds you to the shared account and emails you a **sign-in link**. It opens the AWS console directly in the workshop account and role after you sign in with your UW–Madison NetID. Bookmark it; it is the link you will use every session. The link is sent by email rather than posted here on purpose: treat it like any other sign-in page and only use the one your instructor sent.
 * **Verify your access before the workshop**: open the link and sign in. If you see a "no access" or "not assigned" message, email the instructor with your username. Check that the account name and region in the top-right of the console match the email.
 * This setup ensures that all participants have the same environment and eliminates concerns about unexpected costs for attendees.
-* These shared AWS credits should not be wasted, as we repurpose them for additional training events each year.
-  * Attendees are expected to **stick to the lesson materials** to ensure expensive pipelines (e.g., training/tuning LLMs) do not lead to high costs and wasted credits.
-  * Do not use any tools we do not explicitly cover without discussing with the instructors first.
-  * Stop (and at the end of the workshop, delete) every notebook instance you create. A GPU notebook left running costs about $60 a day.
+* These shared AWS credits should not be wasted, as we repurpose them for additional training events each year. Three rules follow from that:
+    * Stick to the lesson materials, so that expensive pipelines (e.g., training/tuning LLMs) do not lead to high costs and wasted credits.
+    * Do not use any tools we do not explicitly cover without discussing with the instructors first.
+    * Stop (and at the end of the workshop, delete) every notebook instance you create. A GPU notebook left running costs about $60 a day.
 
 ### Your own AWS account
 
