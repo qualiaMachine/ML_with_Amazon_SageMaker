@@ -37,7 +37,9 @@ Fine-tuning is ordinary training that starts from a trained model instead of ran
 
 ### Full fine-tuning is expensive
 
-Nudging every weight means keeping, for every parameter, the weight itself, its gradient, a full-precision master copy and the optimizer's two running averages. Training cannot run on the compressed 8-bit or 4-bit weights that inference uses: gradient updates are tiny numbers that vanish at that precision, so the master copy has to be 32-bit float. That comes to about 16 bytes per parameter against 2 for inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune; a 7B model needs 112 GB, which is already a multi-GPU instance at `$25` an hour or more, and the bill scales with every epoch and every retry.
+Nudging every weight means keeping, for every parameter, the weight itself, its gradient, a full-precision master copy and the optimizer's two running averages. Training cannot run on the compressed 8-bit or 4-bit weights that inference uses: gradient updates are tiny numbers that vanish at that precision, so the master copy has to be 32-bit float. That comes to about 16 bytes per parameter against 2 for inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune; a 7B model needs 112 GB, which is already a multi-GPU instance at **`$25` an hour or more**, and the bill scales with every epoch and every retry.
+
+**Do not fully fine-tune anything in this workshop, and do not fine-tune a model larger than 3B on the class account.** A full fine-tune of a 7B model is a few hundred dollars per run; a 70B model is **`$6,000` to `$12,000` per run**, and a hyperparameter sweep multiplies that by ten. Those runs exist in this episode only as estimates, so that you can recognise one before you launch it.
 
 ### LoRA
 
@@ -84,15 +86,17 @@ The cost of a run is GPU-hours × the hourly rate, and GPU-hours scale with **mo
 |---|---|---|---|
 | **This episode:** 3B, LoRA, 120 Kurrent pages × 2 epochs | 1 × A10G (`ml.g5.xlarge`, `$1.41`/h), ~25 min | 0.4 | **~`$0.60`** |
 | Homework: 3B, LoRA, all 251 training pages × 2 epochs | 1 × A10G, ~45 min | 0.75 | ~`$1.05` |
-| 7B full fine-tune, 50k documents × 3 epochs (the challenge below) | 8 × A100 (`ml.p4d.24xlarge`, `$25.25`/h), ~6 h | 45 | ~`$140` |
-| 70B LoRA, one day | 8 × A100, 24 h | 192 | ~`$600` |
-| CHURRO-3B itself: full fine-tune, 100k pages, 5 epochs | 32 × H100 for ~25 h (4 × `ml.p5.48xlarge`, `$63.30`/h) | 800 | ~`$6,300` |
-| 70B full fine-tune, two days | 4 × `ml.p5.48xlarge`, 48 h | 1,536 | ~`$12,000` |
-| Any row above × a 10-run hyperparameter sweep | | | × 10 |
+| 7B full fine-tune, 50k documents × 3 epochs (the challenge below) | 8 × A100 (`ml.p4d.24xlarge`, `$25.25`/h), ~6 h | 45 | **~`$140`** |
+| 70B LoRA, one day | 8 × A100, 24 h | 192 | **~`$600`** |
+| CHURRO-3B itself: full fine-tune, 100k pages, 5 epochs | 32 × H100 for ~25 h (4 × `ml.p5.48xlarge`, `$63.30`/h) | 800 | **~`$6,300`** |
+| 70B full fine-tune, two days | 4 × `ml.p5.48xlarge`, 48 h | 1,536 | **~`$12,000`** |
+| Any row above × a 10-run hyperparameter sweep | | | **× 10** |
+
+![Cost per run on a log scale, from sixty cents for this episode's LoRA run to twelve thousand dollars for a 70B full fine-tune; a ten-run sweep shifts every bar up by one decade](fig/finetune-cost-ladder.svg){alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.60, homework 1.05, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar"}
 
 Two rows to note. The CHURRO row is the model you are about to fine-tune: Stanford spent on the order of 800 H100-hours making it, and you get the benefit for sixty cents because you are *adapting* it, not retraining it. Starting from a model that already knows most of the task is the largest cost saving available, and it is decided before any GPU is involved. The sweep row: a first run is rarely the last, so a "`$140` fine-tune" is usually a `$700` to `$1,400` project. That is the number that surprises research groups. (The 7B row is worked out in the challenge below; the 70B rows are rule-of-thumb magnitudes; the CHURRO figures come from a published review of the paper.)
 
-The habits in this episode are cheap practice at sixty cents a run. At `$140` a run they are the difference between a project and a budget incident.
+The habits in this episode are cheap practice at sixty cents a run. **At `$140` a run they are the difference between a project and a budget incident; at `$6,000` a run, one forgotten `max_run` or one wrong instance type is a grant line.**
 
 ### Back of the envelope: will it fit, and how long will it take?
 
@@ -110,7 +114,7 @@ Two rules of thumb answer most of the question before you touch a console. They 
 | LoRA fine-tune | ~2.5 | frozen bf16 weights + a small adapter with its gradients and optimizer + activations | 8 GB | 18 GB | 68 GB | 175 GB |
 | Full fine-tune, mixed precision | 16 | bf16 weights 2 + bf16 gradients 2 + fp32 master weights 4 + Adam's two moments 8 | 48 GB | 112 GB | 430 GB | 1.1 TB |
 
-Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: gradient updates are tiny numbers that vanish in 8-bit or 4-bit precision, so every trainable parameter keeps a full-precision master copy plus two Adam moments, 16 bytes against 2. That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them. LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
+Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: gradient updates are tiny numbers that vanish in 8-bit or 4-bit precision, so every trainable parameter keeps a full-precision master copy plus two Adam moments, 16 bytes against 2. **That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them, at `$25` to `$63` an hour.** LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
 
 **2. Time: how many GPU-hours?** Training compute is roughly proportional to parameters × tokens seen:
 
@@ -173,7 +177,7 @@ max_run=6 * 60 * 60,                                     # from the Step 0 estim
 
 Each GPU holds a full copy of the model, so the effective batch becomes `batch_size x grad_accum x number of GPUs`, and the learning rate usually needs a modest increase. Two lines in the script should be wrapped in `if trainer.is_world_process_zero():` so that evaluation and saving run once rather than on every process. When the model, its optimizer state and a batch do not fit on one GPU (a full fine-tune of 7B or more; see the bytes-per-parameter table), data parallelism is not enough: pass `fsdp="full_shard"` in `TrainingArguments` (or a DeepSpeed ZeRO config) so the model is sharded across the GPUs, and use `instance_count=2` or more for multi-node runs.
 
-The cost controls do not change with size: estimate GPU-hours from the Step 0 rules, set `max_run` to about twice that estimate, tag the job, and run a slice of the data on one GPU first so that a bug costs a dollar rather than a few hundred.
+**The cost controls do not change with size, but the stakes do.** An `ml.p4d.24xlarge` bills **`$25.25` an hour** and an `ml.p5.48xlarge` **`$63.30` an hour** from the moment the job starts, and a `max_run` of six hours is a **`$150` to `$380`** ceiling on a single launch. Estimate GPU-hours from the Step 0 rules, set `max_run` to about twice that estimate, tag the job, and run a slice of the data on one GPU first so that a bug costs a dollar rather than a few hundred. **Do not launch a multi-GPU job on the class account.**
 
 ### The run
 
