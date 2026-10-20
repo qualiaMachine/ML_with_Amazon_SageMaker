@@ -183,18 +183,15 @@ print(f"Total size of bucket '{bucket_name}': {total_size_mb:.2f} MB")
 ### Using the lesson's helper functions
 We have added code to calculate bucket size to a helper function called `get_s3_bucket_size(bucket_name)` for your convenience. There are also some other helper functions in `scripts/helpers.py` of the lesson repository, which you cloned to `/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/` in the previous episode.
 
-#### Directory setup
-Let's make sure we're starting in the root directory of this instance, and tell Python where the `scripts/` folder is:
+Tell Python where the lesson's `scripts/` folder is:
 
 ```python
-%cd /home/ec2-user/SageMaker/
 import sys
 # Put the lesson's scripts/ folder first on Python's import path
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
 import helpers  # the lesson's helper functions (bucket size, cost estimate, object listing)
 ```
 
-`sys.path.insert` tells Python where to find the lesson's `scripts/` folder; after it, `import helpers` works from any directory.
 
 Our helpers.py file can be found in `ML_with_AWS_SageMaker/scripts/helpers.py`. With this file downloaded, you can call this function via...
 
