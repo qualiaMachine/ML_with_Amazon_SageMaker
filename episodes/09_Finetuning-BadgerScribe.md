@@ -15,7 +15,7 @@ exercises: 75
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Explain what drives the cost of a fine-tuning run (model size × tokens × epochs × number of attempts) and why the same three habits apply at `$1` and at `$10,000`: a time cap, a small first run, and an estimate written down before launch.
+- Explain what drives the cost of a fine-tuning run (model size × tokens × epochs × number of attempts) and why the same four habits apply at `$1` and at `$10,000`: a time cap, a small first run, and an estimate written down before launch.
 - Launch a LoRA fine-tune of a 3B vision-language model (CHURRO-3B) as a `HuggingFace` training job on a single 24 GB GPU, with tags, a unique job name and a `max_run` cap.
 - Read a job's billable time and compare it to the estimate.
 - Compare the base model and the fine-tuned model on held-out pages using the competition's own character error rate (CER).
@@ -208,11 +208,12 @@ Compare the classic mistake: doing all of this interactively on a `ml.g5.xlarge`
 
 ::::::::::::::::::::::::::::::::::::: callout
 
-### The three habits
+### The four habits
 
 1. **Cap it.** Every job gets `max_run`. Every notebook GPU instance gets stopped when you stand up.
 2. **Start small.** The first launch of any training script uses a slice of the data and a short cap. The in-class run below *is* that small first run; the homework scales it up only after it has been seen to work.
 3. **Estimate it, then check.** Write the number down. After the run, read `BillableTimeInSeconds` from the job description and compare.
+4. **Checkpoint it.** Save progress to S3 as the job runs, so that a killed, interrupted or crashed run costs one epoch, not the whole bill.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -365,10 +366,40 @@ def make_job_tags(purpose: str):
 
 One job does everything: scores 15 held-out German-letter pages with the base model, trains on 120 German-letter pages for 2 epochs, scores the same 15 pages again, and saves the adapter. The hyperparameters below are what the Step 0 estimate was built from.
 
+First the guard rails, each one a named variable so that the printout below shows exactly what the job is allowed to cost and where it saves its progress.
+
+```python
+instance_type = "ml.g5.xlarge"            # one A10G GPU, 24 GB; the GPU lives in the job, not in this notebook
+g5_price = 1.41                           # $/hour, us-east-1 on-demand
+estimated_minutes = 25                    # the Step 0 estimate
+max_run_minutes = 45                      # about twice the estimate; SageMaker kills the job at this cap, whatever it is doing
+training_job_name = f"badger-{username}-mini-v1"   # must be unique in the account: a rerun fails instead of launching a second job
+checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{training_job_name}/"   # the script saves the adapter here at the end of every epoch
+
+print(f"job name:     {training_job_name}")
+print(f"instance:     {instance_type} at ${g5_price}/h")
+print(f"estimate:     {estimated_minutes} min  ->  about ${g5_price * estimated_minutes / 60:.2f}")
+print(f"max_run cap:  {max_run_minutes} min  ->  worst case ${g5_price * max_run_minutes / 60:.2f}, then SageMaker stops it")
+print(f"checkpoints:  {checkpoint_s3_uri}")
+print(f"tags:         {make_job_tags('Training')}")
+```
+
+::::::::::::::::::::::::::::::::::::: callout
+
+### Four guard rails on every fine-tuning job
+
+- **`max_run` is the only thing standing between a bug and your whole budget.** A training loop that diverges, hangs on a bad batch or waits on a dead data loader bills the same as one that works. The cap turns "whatever it takes" into a number you chose: here **`$1.06` worst case**. Set it to about twice the estimate, never leave it at the default of 24 hours, and on a **`$25`-an-hour instance treat it as the price of the launch**.
+- **A unique `job_name` prevents the double launch.** Running the launch cell twice fails with `ResourceInUse` instead of starting a second job. Without it, SageMaker generates a fresh name every time and happily runs two copies.
+- **Checkpoints to S3 bound the wasted work.** The script saves the adapter and optimizer state to `/opt/ml/checkpoints` at the end of every epoch, SageMaker syncs that folder to `checkpoint_s3_uri` while the job runs, and when a job is launched with the same `checkpoint_s3_uri` the script resumes from the latest checkpoint. A job killed by `max_run`, a spot interruption or a crash costs at most one epoch, not the whole run. **On a ten-hour run, this is the difference between losing ten minutes and losing `$150`.**
+- **Tags make the bill readable.** Every job carries `Name`, `Project` and `Purpose`; without them a GPU job is anonymous spend that nobody can attribute.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+Now the estimator itself.
+
 ```python
 from sagemaker.huggingface import HuggingFace
 
-instance_type = "ml.g5.xlarge"   # one A10G GPU, 24 GB; the GPU lives in the job, not in this notebook
 model_output_path = f"s3://{bucket_name}/{data_prefix}/models/"   # the job's model.tar.gz lands under here, in your own bucket
 
 estimator = HuggingFace(
@@ -379,7 +410,9 @@ estimator = HuggingFace(
     instance_type=instance_type,
     instance_count=1,
     volume_size=50,                       # GB of disk for the container, weights and images
-    max_run=45 * 60,                      # 45 minutes: about twice the estimate, never "whatever it takes"
+    max_run=max_run_minutes * 60,         # the cap, in seconds: SageMaker stops the job here no matter what
+    checkpoint_s3_uri=checkpoint_s3_uri,  # SageMaker syncs checkpoint_local_path to here while the job runs
+    checkpoint_local_path="/opt/ml/checkpoints",   # where the script writes a checkpoint at the end of each epoch
     # the three versions select the prebuilt Hugging Face training image (transformers + PyTorch + Python)
     transformers_version="4.56",
     pytorch_version="2.8",
@@ -409,15 +442,12 @@ session.sagemaker_client.list_training_jobs(StatusEquals="InProgress", NameConta
 
 Now launch. Two details in this one line matter:
 
-- `job_name` is set explicitly. SageMaker requires training job names to be unique in the account, so running this cell a second time fails immediately with `ResourceInUse` and nothing is launched. To run again on purpose, change `v1` to `v2`.
+- `job_name` is the one defined with the guard rails. SageMaker requires training job names to be unique in the account, so running this cell a second time fails immediately with `ResourceInUse` and nothing is launched. To run again on purpose, change `v1` to `v2` in both `training_job_name` and (automatically) `checkpoint_s3_uri`; to **resume** a job that was killed, keep the `checkpoint_s3_uri` and change only the job name.
 - `wait=True` (the default) blocks the notebook until the job ends and streams its log here. For a 25-minute job that is the right choice: you cannot accidentally queue a second launch while you wait, and everything worth doing in the meantime happens in the console, not in this notebook.
 
 The second input channel, `model`, is the copy of CHURRO-3B your instructor staged in the shared bucket: SageMaker mounts it at `/opt/ml/input/data/model` and the script loads from there, so a hundred jobs starting in the same minute copy 7.5 GB from S3 instead of each pulling it from Hugging Face.
 
 ```python
-# job_name must be unique in the account: rerunning this cell fails with ResourceInUse instead of launching a second job
-training_job_name = f"badger-{username}-mini-v1"
-
 # two channels: "train" is mounted at /opt/ml/input/data/train, "model" at /opt/ml/input/data/model inside the container
 # wait=True blocks this cell and streams the log here; the job keeps running (and billing) even if you interrupt the cell
 start = time.time()
@@ -464,7 +494,6 @@ def job_cost_report(job_name: str, price_per_hour: float):
     print(f"cost:           ${billable / 3600 * price_per_hour:.3f} at ${price_per_hour}/h")
     return desc
 
-g5_price = 1.41   # ml.g5.xlarge, us-east-1 on-demand, $/hour
 desc = job_cost_report(training_job_name, g5_price)
 adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]   # the model.tar.gz this job uploaded to output_path
 print("adapter:", adapter_s3_uri)
@@ -628,7 +657,7 @@ What else would the script need before this is safe to rely on for a 10-hour run
 
 :::::::::::::::::::::::: solution
 
-Checkpointing. If the instance is reclaimed, the job restarts and, as written, starts training from scratch. For a 25-minute job that costs 25 minutes; for a ten-hour job it can cost the whole run. The fix is to save checkpoints to `/opt/ml/checkpoints` (which SageMaker syncs to S3 via `checkpoint_s3_uri`) with `save_strategy="steps"` and resume from the latest one when the script starts. Spot is a large saving on long runs once that is in place; for a short class exercise with 50 people launching at once, the interruptions and capacity waits are not worth it.
+Nothing more for this run: the script already checkpoints to `/opt/ml/checkpoints` at the end of every epoch, SageMaker syncs that to `checkpoint_s3_uri`, and a job restarted after an interruption resumes from the latest checkpoint. What changes for a ten-hour run is the granularity: an epoch may be hours, so switch to `save_strategy="steps"` with a `save_steps` worth about ten minutes of training, so that an interruption costs minutes rather than hours. Spot is the right choice for long, restartable jobs and the wrong one for a 25-minute class exercise, where waiting for capacity can take longer than the job.
 
 :::::::::::::::::::::::::::::::::
 
@@ -643,6 +672,10 @@ Everything below is the same pattern at a larger scale: about `$1.05` for the fi
 Same estimator with the page slice removed, all 251 training pages, and a 90-minute cap. Write your estimate down first (Step 2's challenge). Launch with `wait=False` here only because you will not be watching: it returns immediately and you poll later. The explicit job name still protects you from a double launch.
 
 ```python
+full_job_name = f"badger-{username}-full-v1"
+full_checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{full_job_name}/"
+print(f"max_run cap: 90 min -> worst case ${g5_price * 90 / 60:.2f}; checkpoints -> {full_checkpoint_s3_uri}")
+
 full_estimator = HuggingFace(
     entry_point="finetune_churro_lora.py",
     source_dir="code/",
@@ -652,6 +685,8 @@ full_estimator = HuggingFace(
     instance_count=1,
     volume_size=50,
     max_run=90 * 60,                      # 90 minutes: twice the estimate
+    checkpoint_s3_uri=full_checkpoint_s3_uri,
+    checkpoint_local_path="/opt/ml/checkpoints",
     # Exercise 3: adding use_spot_instances=True, max_wait=3 * 60 * 60 runs this on spot capacity; max_wait (run + waiting) must be >= max_run
     transformers_version="4.56",
     pytorch_version="2.8",
@@ -672,7 +707,6 @@ full_estimator = HuggingFace(
     },
 )
 
-full_job_name = f"badger-{username}-full-v1"
 # wait=False: returns at once; poll the job with describe_training_job in the next cell
 full_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=full_job_name, wait=False)
 print("launched:", full_job_name)
@@ -810,7 +844,7 @@ Finally, rerun Step 4 and compare the total with the estimate you wrote down bef
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - Fine-tuning cost is GPU-hours × hourly rate, and GPU-hours scale with model size × tokens × epochs × attempts. The same recipe runs from under a dollar (3B, LoRA, a few hundred pages) to tens of thousands (70B, full fine-tune, days on multi-GPU nodes). Starting from a model that already knows most of the task is the biggest saving available.
-- Training jobs, not GPU notebooks, are the safe way to run it: they end, `max_run` guarantees it, and a unique `job_name` prevents a second copy launching by accident. Interrupting a notebook cell does not stop a job.
+- Training jobs, not GPU notebooks, are the safe way to run it: they end, `max_run` guarantees it, a unique `job_name` prevents a second copy launching by accident, and checkpoints synced to S3 mean a killed job costs an epoch rather than the run. Interrupting a notebook cell does not stop a job.
 - Estimate before launching (startup overhead + pages × epochs × seconds per page, at the instance's rate), then compare to `BillableTimeInSeconds`.
 - Image resolution (`max_pixels`) and epochs change cost by multiples; the instance size changes it by 5–45x, which is right when the model does not fit on one GPU and waste when it does.
 - Measure the gain on the same held-out pages before and after, with the task's own metric, and remember that a page-level holdout is optimistic when the real test is split by document.
