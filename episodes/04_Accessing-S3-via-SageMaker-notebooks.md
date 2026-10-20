@@ -138,7 +138,7 @@ local_file_path = "/home/ec2-user/SageMaker/titanic_train.csv"  # Local path to 
 
 # Initialize the S3 client and download the file
 s3.download_file(bucket_name, key, local_file_path)
-!ls
+!ls "/home/ec2-user/SageMaker/"
 ```
 
 **Note**: You may need to hit refresh on the file explorer panel to the left to see this file. If you get any permission issues...
