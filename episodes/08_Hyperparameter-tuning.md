@@ -54,7 +54,6 @@ Just to make sure we are all on the same directory starting point, let's cd to o
 
 ```python
 %cd /home/ec2-user/SageMaker/
-!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 import sys
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
 import helpers

@@ -184,15 +184,14 @@ print(f"Total size of bucket '{bucket_name}': {total_size_mb:.2f} MB")
 #print(f"Total size of bucket '{bucket_name}': {total_size_gb:.2f} GB")
 ```
 
-### Using helper functions from GitHub
-We have added code to calculate bucket size to a helper function called `get_s3_bucket_size(bucket_name)` for your convenience. There are also some other helper functions in `scripts/helpers.py` of the lesson repository to assist you with common AWS/SageMaker workflows. We'll show you how to clone this code into your notebook environment.
+### Using the lesson's helper functions
+We have added code to calculate bucket size to a helper function called `get_s3_bucket_size(bucket_name)` for your convenience. There are also some other helper functions in `scripts/helpers.py` of the lesson repository, which you cloned to `/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/` in the previous episode.
 
 #### Directory setup
-Let's make sure we're starting in the root directory of this instance, so that we all have our helpers.py file located in the same path (/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/helpers.py). This directory survives stopping the instance, so a clone placed there is still present next session. The `test -d ... ||` guard skips the clone if the folder already exists; every later episode starts with the same cell.
+Let's make sure we're starting in the root directory of this instance, and tell Python where the `scripts/` folder is:
 
 ```python
 %cd /home/ec2-user/SageMaker/
-!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 import sys
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
 import helpers
@@ -330,7 +329,7 @@ The bucket grows by the size of the file (a few hundred bytes here), and at $0.0
 - Load data from S3 into memory for efficient storage and processing.
 - Periodically check storage usage and costs to manage S3 budgets.
 - Use SageMaker to upload analysis results and maintain an organized workflow.
-- Clone the lesson repository once, into `/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/`; every later episode starts with the same guarded clone-and-import cell.
+- The lesson repository lives at `/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/`; every later episode adds its `scripts/` folder to `sys.path` and imports `helpers`.
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

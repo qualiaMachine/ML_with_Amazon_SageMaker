@@ -63,7 +63,6 @@ We should also record our local instance information to report this information 
 
 ```python
 %cd /home/ec2-user/SageMaker/
-!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 import sys
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
 import helpers
