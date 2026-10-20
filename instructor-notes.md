@@ -3,6 +3,20 @@ title: 'AWS Nuke Script Tutorial'
 name: Zain Waseem & Chris Endemann
 ---
 
+::::::::::::::::::::::::::::::::::::: callout
+
+## All instructor pages
+
+These live under the **Extras** dropdown, which the site shows only when the **Instructor View** toggle (top bar) is on.
+
+- [Account preparation checklist (quotas, Bedrock, tags)](aws-account-prep.html): before the term.
+- [Shared data bucket: staging before each term](shared-data-bucket.html): create and fill `ml-marathon-shared` from CloudShell.
+- [Badger Scribe data: publishing a release](badger-scribe-data-release.html): only when the competition data changes.
+- [Fine-tuning episode: cost, capacity and setup](finetuning-episode-cost-estimate.html)
+- This page: cleaning the account with aws-nuke after the workshop. The config it uses is [instructors/nuke-config.yml](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/blob/main/instructors/nuke-config.yml) in the repository.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 Hello all! In this document, we will show you how to run an AWS Nuke script within the ML-Marathon Sagemaker server. As you progress through the Sagemaker
 workshop, towards the end of the workshop you'll be tasked to remove and empty your notebooks \& buckets. However, depending on the size of your data, it can take a long time to remove them altogether.
 
