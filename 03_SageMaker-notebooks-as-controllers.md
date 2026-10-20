@@ -70,18 +70,7 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
   (The screenshot shows a fourth key, `ModelSize`. Leave it out: it is not an approved key, so it would never appear on the bill.)
 
-::::::::::::::::::::::::::::::::::::: callout
-
-#### Why these three keys, and why they must be spelled exactly
-
-Tags only show up in cost reports if the tag *key* has been activated as a cost allocation tag at the account level. On UW–Madison's AWS accounts that activation is done centrally by the Public Cloud team for a fixed list of approved keys, documented at [AWS - Tagging with an AWS Account (KB 72454)](https://kb.wisc.edu/72454). `Name`, `Project`, and `Purpose` are on that list; `ModelSize`, `Team`, `project` (lowercase) or any other spelling are not, and spend tagged with them is invisible in Cost Explorer. The KB page says it plainly: cut and paste, because any deviation stops the tag from reporting.
-
-Two more things to know now, because they come up in every later episode:
-
-- **Tags never propagate.** Tagging this notebook instance tags the notebook instance only. Every S3 bucket, training job, processing job and Bedrock inference profile you create later needs its own copy of the same three tags.
-- **Outside UW**, you activate the keys yourself, once, under **Billing and Cost Management → Cost allocation tags**. Until you do, the tags exist on the resources but not on the bill.
-
-::::::::::::::::::::::::::::::::::::::::::::::::
+The previous episode's callout on why these keys, and only these, show up on the bill applies here unchanged: tags never propagate, so this instance needs its own copy.
 
 - Click **Create notebook instance**. It may take a few minutes for the instance to start. Once its status is **InService**, you can open the notebook instance and start coding.
 
