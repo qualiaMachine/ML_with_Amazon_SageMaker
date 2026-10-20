@@ -155,6 +155,7 @@ Once the bucket is created, the console opens the new bucket's page (a green "Su
 				"s3:GetObject",
 				"s3:PutObject",
 				"s3:DeleteObject",
+				"s3:ListBucket",
 				"s3:ListMultipartUploadParts"
 			],
 			"Resource": [
@@ -166,24 +167,29 @@ Once the bucket is created, the console opens the new bucket's page (a green "Su
 }
 ```
 
-For workshop attendees, this policy grants the `ml-sagemaker-use` IAM role access to specific S3 bucket actions, ensuring they can use the bucket for reading, writing, deleting, and listing parts during multipart uploads. Attendees should apply this policy to their buckets to enable SageMaker to operate on stored data.
+What the policy says, line by line:
 
-Two buckets appear in this workshop, and this is the only one you create. Your bucket holds the data *you* bring (the Titanic files, uploaded below) and everything the later episodes produce. The larger datasets for the RAG and fine-tuning episodes (a corpus of PDFs, hundreds of scanned letters) live in a **shared, read-only bucket** that the instructors stage before class: one copy for everyone, instead of fifty copies of the same files. You read from it and never upload to it; your instructor will give you its name.
+- **Principal** is *who* gets access. SageMaker never acts as you; it acts as an IAM **role** attached to your notebook instance and to every job you launch (the *execution role*). In the workshop account there are two: `ml-sagemaker-use`, which the notebook and jobs use, and `ml-sagemaker-bedrock-use`, used in the Bedrock episode. The `<account-id>` is the 12-digit number shown next to the account name at the top right of the console.
+- **Action** is *what* they may do: read objects, write objects, delete objects, list the bucket's contents, and list the parts of a large upload in progress.
+- **Resource** is *where*: the bucket itself (for listing) and everything in it (`/*`, for the object actions).
+
+Without this, the notebook can see the bucket but a job's `TrainingInput` fails with "access denied" when it tries to list and download its data.
 
 ::::::::::::::::::::::::::::::::::::: callout 
 
-#### General guidance for setting up permissions outside of this workshop
-When setting up a bucket outside of this workshop, it's essential to create a similar IAM role (such as `ml-sagemaker-use`) with policies that provide controlled access to S3 resources, ensuring only the necessary actions are permitted for security and cost-efficiency.
- 
-a. **Create an IAM role**: Set up an IAM role for SageMaker to assume, with necessary S3 access permissions, such as `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject`, and `s3:ListMultipartUploadParts`, as shown in the policy above.
- 
-b. **Attach permissions to S3 buckets**: Attach bucket policies that specify this role as the principal, as in our bucket policy above
- 
-c. **More information**: For a detailed guide on setting up roles and policies for SageMaker, refer to the [AWS SageMaker documentation on IAM roles and policies](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html). This resource explains role creation, permission setups, and policy best practices tailored for SageMaker’s operations with S3 and other AWS services.
- 
-This setup ensures that your SageMaker operations will have the access needed without exposing the bucket to unnecessary permissions or external accounts.
+#### Doing this on your own account
+
+Everything above transfers; only the role name changes.
+
+1. **Find your execution role.** When you create a notebook instance (next episode) you either pick an existing role or let the console create one, named like `AmazonSageMaker-ExecutionRole-20261020T120000`. Its ARN is shown on the instance's page under **Permissions and encryption**, and looks like `arn:aws:iam::<account-id>:role/service-role/AmazonSageMaker-ExecutionRole-...`.
+2. **Put that ARN in the policy** as the only entry under `Principal`, and your bucket name under `Resource`.
+3. **Or skip the bucket policy** by putting `sagemaker` in the bucket name: the console-created role carries the `AmazonSageMakerFullAccess` policy, which already grants read and write on any bucket whose name contains `sagemaker`. A bucket named `sinkorswim-doejohn` is not covered, which is why the bucket policy is needed at all.
+
+Either way, access comes from one of two places: the role's own IAM policy (what the role may do anywhere) or the bucket's policy (what this bucket allows). In the same account, allowing in either one is enough. The [SageMaker execution role documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html) covers the role side.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
+
+Two buckets appear in this workshop, and this is the only one you create. Your bucket holds the data *you* bring (the Titanic files, uploaded below) and everything the later episodes produce. The larger datasets for the fine-tuning and RAG episodes (hundreds of scanned letters, a corpus of PDFs) live in a **shared, read-only bucket** that the instructors stage before class: one copy for everyone, instead of a hundred copies of the same files. You read from it and never upload to it; your instructor will give you its name.
 
 ##### 5. Upload files to the bucket
 - If you haven't downloaded these files yet (part of workshop setup), download the data for this workshop: [data.zip](https://raw.githubusercontent.com/carpentries-incubator/ML_with_AWS_SageMaker/main/data/data.zip)
