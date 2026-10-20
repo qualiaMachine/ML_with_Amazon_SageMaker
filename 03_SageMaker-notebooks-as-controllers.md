@@ -84,17 +84,15 @@ Then open `ML_with_AWS_SageMaker/notebooks/04_Accessing-S3-via-SageMaker-noteboo
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-### Challenge: pick an instance, and decide what to tag
+### Challenge: pick an instance
 
 Open the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page and answer:
 
-1. A colleague has a **20 GB tabular dataset** (a CSV of sensor readings) and wants to train gradient-boosted trees on it. Which instance would you pick for the *training job*, and why? What would you pick for the *controller notebook* that launches it?
-2. List every resource this colleague will create during that project, and say which of them need the three tags.
+A colleague has a **20 GB tabular dataset** (a CSV of sensor readings) and wants to train gradient-boosted trees on it. Which instance would you pick for the *training job*, and why? What would you pick for the *controller notebook* that launches it?
 
 :::::::::::::::::::::::::::::::::::: solution
 
-1. The table's rule of thumb is RAM of at least 1.5× the dataset, so 20 GB of data wants about 32 GB of memory: `ml.m5.2xlarge` (8 vCPU, 32 GiB, about $0.46/h) is the natural fit for a tree-ensemble training job, or `ml.m5.4xlarge` (64 GiB) if feature engineering will add many columns. No GPU: gradient-boosted trees on tabular data are CPU work, so a `g4dn` or `g5` would cost more and run no faster. The controller stays `ml.t3.medium` ($0.05/h): it only submits the job and reads the results back from S3, so it never needs to hold the dataset in memory.
-2. At least four: the S3 bucket, the notebook instance, each training job, and (if they tune) each hyperparameter tuning job. Every one of them needs its own copy of `Name`, `Project` and `Purpose`, because tags never propagate from one resource to another. The training-job instance itself is not a separate resource to tag: it is created and destroyed by the job, and the job's tags cover it.
+The table's rule of thumb is RAM of at least 1.5× the dataset, so 20 GB of data wants about 32 GB of memory: `ml.m5.2xlarge` (8 vCPU, 32 GiB, about $0.46/h) is the natural fit for a tree-ensemble training job, or `ml.m5.4xlarge` (64 GiB) if feature engineering will add many columns. No GPU: gradient-boosted trees on tabular data are CPU work, so a `g4dn` or `g5` would cost more and run no faster. The controller stays `ml.t3.medium` ($0.05/h): it only submits the job and reads the results back from S3, so it never needs to hold the dataset in memory.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
