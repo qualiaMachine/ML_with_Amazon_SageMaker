@@ -6,7 +6,7 @@ exercises: 75
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- When is fine-tuning worth it, and how is it different from RAG or prompting?
+- When is fine-tuning worth it?
 - Why does fine-tuning cost anywhere from a dollar to tens of thousands, and how do I estimate where my run falls *before* I launch it?
 - How do I run a GPU fine-tune as a SageMaker training job so the meter stops the moment it finishes?
 - How do I measure whether the fine-tune helped?
@@ -24,15 +24,34 @@ exercises: 75
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb`. Select the **`conda_pytorch`** kernel (`conda_pytorch_p310` on older instances).
-## Why a fine-tuning episode
 
-The training episodes so far trained small models from scratch on a few hundred rows. Fine-tuning starts from a large pretrained model and changes its weights, and that puts it in a different class of workload:
+## Why fine-tune
+
+General-purpose models are trained on the average of the internet, and research problems are rarely average. A 19th-century German hand, a lab's own annotation conventions, species names, a regional dialect, the layout of a specific archive: the largest commercial model has seen little of it, and no prompt can make up for that.
+
+Done on the right data, a small fine-tuned model beats a much larger general one. The model we fine-tune in this episode is itself the example: [CHURRO](https://github.com/stanford-oval/Churro), a 3-billion-parameter vision-language model, was fine-tuned from Qwen2.5-VL-3B on about 100,000 pages of historical documents, and its authors report that it exceeds the accuracy of Gemini 2.5 Pro on historical text recognition at 15.5x lower cost ([paper](https://arxiv.org/abs/2509.19768)). A model that size also runs on one GPU you control, which matters when the data cannot leave your institution, when results have to be reproducible with fixed weights, and when the job is a million pages rather than a demo.
+
+### The trick
+
+Fine-tuning is ordinary training that starts from a trained model instead of random weights. You show the model your examples, it computes how wrong its output was, and gradient descent nudges the weights toward your data. Because the model already knows how to read, write and look at images, it needs hundreds of examples to learn your task where training from scratch would need millions. Everything it learned before stays in the weights; you are adjusting them, not replacing them.
+
+### Full fine-tuning is expensive
+
+Nudging every weight means keeping, for every parameter, the weight itself, its gradient, a full-precision master copy and the optimizer's two running averages. Training cannot run on the compressed 8-bit or 4-bit weights that inference uses: gradient updates are tiny numbers that vanish at that precision, so the master copy has to be 32-bit float. That comes to about 16 bytes per parameter against 2 for inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune; a 7B model needs 112 GB, which is already a multi-GPU instance at `$25` an hour or more, and the bill scales with every epoch and every retry.
+
+### LoRA
+
+**LoRA** (low-rank adaptation) freezes the pretrained weights and trains a few million extra parameters in small matrices bolted onto the attention and MLP layers. The frozen weights can stay in 16-bit, since nothing updates them, and the gradients and optimizer state only exist for the adapter. The adapter is about 100 MB, trains on a single 24 GB GPU for a 3B model, and recovers most of the gain of a full fine-tune for a task like this: the model still learns your hands and your conventions, it just learns them through the adapter. This episode uses LoRA.
+
+### What makes it a different workload
+
+Even with LoRA, fine-tuning is unlike anything we have run so far:
 
 - It needs a GPU for the whole run, not just for inference calls.
 - It is iterative. Nobody gets the learning rate, the image resolution or the data split right the first time, so the first run is never the last.
 - The cost of a run depends on things that are easy to get wrong by 10x: model size, epochs, image resolution, instance type, and whether the instance is still running after you stopped paying attention.
 
-That combination is why fine-tuning is where research teams see surprise bills. Done carefully, it is also where the largest gains are: the Badger Scribe organizers report that LoRA on ~100 pages takes a small open model from 0.23 to 0.06 CER on survey notebooks in about a GPU-hour. This episode is about getting that kind of gain for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead.
+That combination is why fine-tuning is where research teams see surprise bills. This episode is about getting a gain like CHURRO's, scaled to one archive, for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead. We measure the gain ourselves: the episode ends by scoring the base model and the fine-tuned model on the same held-out pages.
 
 ### The task: Badger Scribe
 
@@ -47,17 +66,7 @@ This lesson uses the German letters, the Anna Seifert correspondence held by the
 
 Small is the point. 295 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material. Kurrent is also a genuinely different script from modern German cursive, so this is a case where the model has to learn something, not just adjust its style.
 
-We will fine-tune [CHURRO-3B](https://github.com/stanford-oval/Churro), a 3-billion-parameter open-weight vision-language model from Stanford that was itself fine-tuned from Qwen2.5-VL-3B on roughly 100,000 pages of historical documents in 46 language clusters. It already reads old handwriting better than its base model does; we are teaching it *these* hands and *these* transcription conventions.
-
-::::::::::::::::::::::::::::::::::::: callout
-
-### Fine-tune, RAG, or prompt?
-
-Ask what the model is missing. If it lacks **facts** (your documents, your data), retrieval-augmented generation (RAG, the subject of the next part of the lesson) looks them up and puts them in the prompt at inference time; no training is needed. If it lacks a **skill or a style** (reading Kurrent, following your lab's labelling conventions, producing output in a strict format), you need to change the weights, and that is fine-tuning. Badger Scribe is squarely the second case: no amount of context will teach a model what a Kurrent "e" looks like.
-
-Full fine-tuning updates all 3 billion weights and needs several times the model's size in GPU memory for optimizer state. **LoRA** (low-rank adaptation) freezes the model and trains a few million extra parameters in small matrices bolted onto the attention and MLP layers. The adapter is ~100 MB, trains on a single 24 GB GPU, and recovers most of the gain of a full fine-tune for a task like this. We use LoRA.
-
-::::::::::::::::::::::::::::::::::::::::::::::::
+We fine-tune CHURRO-3B. It already reads old handwriting across 46 language clusters; we are teaching it *these* hands and *these* transcription conventions.
 
 ## Step 0: Estimate the cost before you launch anything
 
