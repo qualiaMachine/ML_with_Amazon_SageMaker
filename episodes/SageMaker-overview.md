@@ -54,7 +54,13 @@ Renting a bare GPU instance from AWS (EC2) gets you the hardware above, but you 
 
 ### What this lesson covers
 
-The lesson has three parts. **Part one** covers the foundations: an S3 bucket for your data, a small notebook instance that acts as a *controller*, then SageMaker training jobs (XGBoost and PyTorch) and hyperparameter tuning, with guidance on CPU vs. GPU instances and when parallel instances help. **Part two** builds a retrieval-augmented generation (RAG) pipeline over a corpus of research papers two ways: on Amazon Bedrock (pay per token, nothing left running) and as SageMaker Processing jobs serving an open-weight model that Bedrock does not offer. **Part three** fine-tunes a 3B open-weight vision-language model with LoRA as a training job, for handwriting transcription, and scores it before and after. Every episode applies the same cost controls: tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end.
+The lesson has three parts:
+
+1. **SageMaker foundations and classic ML.** An S3 bucket for your data, a small notebook instance as a *controller*, then training jobs (XGBoost and PyTorch) and hyperparameter tuning, with guidance on CPU vs. GPU instances and when parallel instances help.
+2. **Retrieval-augmented generation (RAG).** A RAG pipeline over a corpus of research papers, built on Amazon Bedrock (pay per token, nothing left running) and then as SageMaker Processing jobs serving an open-weight model that Bedrock does not offer.
+3. **Fine-tuning.** A LoRA fine-tune of a 3B open-weight vision-language model as a training job, for handwriting transcription, scored before and after.
+
+Every episode applies the same cost controls: tags on every resource, a runtime cap on every job, a cost estimate before each launch compared to the bill after, and cleanup at the end.
 
 Most research groups use both. This lesson covers the cloud half.
 
