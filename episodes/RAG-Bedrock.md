@@ -477,9 +477,9 @@ The helper below reuses a profile if one with the same name already exists, so r
 ```python
 import re
 
-name = "doejohn"         # replace with your name, as in your bucket name
-project = "sinkorswim"   # replace with your challenge name
-purpose = "rag-bedrock"
+name = "DoeJohn"         # replace with your name
+project = "SinkOrSwim"   # replace with your challenge name
+purpose = "RAG-Bedrock"
 
 # Bedrock tags are lowercase key/value (SageMaker jobs use Key/Value)
 profile_tags = [
