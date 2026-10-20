@@ -25,7 +25,7 @@ exercises: 20
 ## Initial setup 
 
 #### 1. Open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch_p310`**; we will use the same kernel for the next two episodes.
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`** (on older Amazon Linux 2 instances it is called `conda_pytorch_p310`); we will use the same kernel for the next two episodes. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
 
 #### 2. CD to instance home directory
 So we all can reference the helper functions using the same path, CD to the instance's root directory and make the lesson repository's `scripts/` importable. The training scripts for this episode (`train_xgboost.py`) and the next (`train_nn.py`) are in that folder.
@@ -225,7 +225,7 @@ helpers.get_notebook_instance_info(notebook_instance_name, region)
 Test train.py on this notebook's instance (or when possible, on your own machine) before doing anything more complicated (e.g., hyperparameter tuning on multiple instances)
 
 ```python
-!pip install xgboost scikit-learn   # the conda_pytorch_p310 kernel ships neither; the script imports both
+!pip install xgboost scikit-learn   # neither notebook kernel ships scikit-learn; the script imports both
 ```
 
 ### Local test
