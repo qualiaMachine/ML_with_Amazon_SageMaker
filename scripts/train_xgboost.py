@@ -4,7 +4,6 @@ import pandas as pd
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from time import time
-import joblib
 
 def preprocess_data(df):
     """Preprocess the Titanic dataset for model training."""
@@ -38,7 +37,7 @@ if __name__ == "__main__":
 
     # Detect if running on SageMaker or locally
     input_data_path = os.path.join(os.environ.get("SM_CHANNEL_TRAIN", "."), args.train)
-    output_data_path = os.path.join(os.environ.get("SM_MODEL_DIR", "."), "xgboost-model")
+    output_data_path = os.path.join(os.environ.get("SM_MODEL_DIR", "."), "xgboost-model.json")
 
     # Load and preprocess data
     df = pd.read_csv(input_data_path)
@@ -63,5 +62,5 @@ if __name__ == "__main__":
 
     # Train the model
     model = train_model(dtrain, params, args.num_round)
-    joblib.dump(model, output_data_path)
+    model.save_model(output_data_path)  # XGBoost's own format: readable by any later XGBoost version, unlike a pickle
     print(f"Model saved to {output_data_path}")
