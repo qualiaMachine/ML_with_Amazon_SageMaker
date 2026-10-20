@@ -11,15 +11,15 @@ in:
 How each place uses it (copy `wattbot_rag.py` next to the notebook, or into
 the `code_rag/` directory shipped with a Processing job):
 
-- episodes/RAG-Bedrock.md: `embed_query` calls Titan Text Embeddings V2 and
+- episodes/11_RAG-Bedrock.md: `embed_query` calls Titan Text Embeddings V2 and
   `generate` calls DeepSeek V3 through `bedrock_runtime.converse`, both via
   tagged application inference profiles. Uses `retrieve_top_k`, `run_single_qa`
   and `compute_wattbot_score`.
-- episodes/RAG-Processing-jobs.md: the notebook only imports
+- episodes/12_RAG-Processing-jobs.md: the notebook only imports
   `compute_wattbot_score`; the job itself runs `scripts/wattbot_rag_batch.py`.
 - scripts/wattbot_rag_batch.py: `embed_query` is a sentence-transformer
   (`embed_query_with`) and `generate` is a vLLM engine serving Qwen3.8-27B.
-- episodes/RAG-GPU-notebook.md (optional): same as the batch script, but
+- episodes/13_RAG-GPU-notebook.md (optional): same as the batch script, but
   interactively, with `with_evidence_type=True` so each explanation is
   prefixed with the kind of evidence it rests on.
 
