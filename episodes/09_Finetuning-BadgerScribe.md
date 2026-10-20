@@ -29,7 +29,11 @@ Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerSc
 
 General-purpose models are trained on the average of the internet, and research problems are rarely average. A 19th-century German hand, a lab's own annotation conventions, species names, a regional dialect, the layout of a specific archive: the largest commercial model has seen little of it, and no prompt can make up for that.
 
-Done on the right data, a small fine-tuned model beats a much larger general one. The model we fine-tune in this episode is itself the example: [CHURRO](https://github.com/stanford-oval/Churro), a 3-billion-parameter vision-language model, was fine-tuned from Qwen2.5-VL-3B on about 100,000 pages of historical documents, and its authors report that it exceeds the accuracy of Gemini 2.5 Pro on historical text recognition at 15.5x lower cost ([paper](https://arxiv.org/abs/2509.19768)). A model that size also runs on one GPU you control, which matters when the data cannot leave your institution, when results have to be reproducible with fixed weights, and when the job is a million pages rather than a demo.
+Done on the right data, a small fine-tuned model beats a much larger general one. The model we fine-tune in this episode is itself the example: [CHURRO](https://github.com/stanford-oval/Churro), a 3-billion-parameter vision-language model, was fine-tuned from Qwen2.5-VL-3B on about 100,000 pages of historical documents, and its authors report that it exceeds the accuracy of Gemini 2.5 Pro on historical text recognition at 15.5x lower cost ([paper](https://arxiv.org/abs/2509.19768)). A model that size also runs on one GPU you control, which matters when the data cannot leave your institution, when results have to be reproducible with fixed weights, and when the job is a million pages rather than a demo. CHURRO is not a one-off: the same pattern shows up wherever a research task has its own data.
+
+![Three research tasks where a small specialist model scores above a much larger general one: CHURRO (3B) over Gemini 2.5 Pro on historical handwriting, Goedel-Prover-V2 (8B) over DeepSeek-Prover-V2 on formal proofs, MedGemma (27B) over GPT-4o on medical questions](fig/specialists-vs-large-models.png){alt="Dot plot of benchmark scores for three task-specific models against a much larger general model on the same benchmark; the specialist is ahead in each row by 6.5, 2.2 and 1.2 points"}
+
+Sources: [CHURRO, EMNLP 2025](https://arxiv.org/abs/2509.19768); Goedel-Prover-V2 (arXiv 2025); MedGemma (arXiv 2025). Scores are as reported by each model's authors.
 
 ### The trick
 
@@ -37,7 +41,7 @@ Fine-tuning is ordinary training that starts from a trained model instead of ran
 
 ### Full fine-tuning is expensive
 
-Nudging every weight means keeping, for every parameter, the weight itself, its gradient, a full-precision master copy and the optimizer's two running averages. Training cannot run on the compressed 8-bit or 4-bit weights that inference uses: gradient updates are tiny numbers that vanish at that precision, so the master copy has to be 32-bit float. That comes to about 16 bytes per parameter against 2 for inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune; a 7B model needs 112 GB, which is already a multi-GPU instance at **`$25` an hour or more**, and the bill scales with every epoch and every retry.
+Training every weight means storing four numbers per weight instead of one. There is the weight itself, and its gradient, which says which way to nudge it this step. Then there is what the optimizer remembers: Adam, the optimizer everyone uses, keeps for every weight a running average of its recent gradients and a running average of their squares, so that it can give each weight its own step size. And the weight has to be kept in 32-bit as well as 16-bit, because each step's nudge is far smaller than a 16-bit number can hold; applied to a 16-bit weight it would round away to nothing. Two bytes for the working weight, two for the gradient, four for the 32-bit weight and eight for Adam's two averages: 16 bytes per parameter, against 2 for inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune; a 7B model needs 112 GB, which is already a multi-GPU instance at **`$25` an hour or more**, and the bill scales with every epoch and every retry.
 
 **Do not fully fine-tune anything in this workshop, and do not fine-tune a model larger than 3B on the class account.** A full fine-tune of a 7B model is a few hundred dollars per run; a 70B model is **`$6,000` to `$12,000` per run**, and a hyperparameter sweep multiplies that by ten. Those runs exist in this episode only as estimates, so that you can recognise one before you launch it.
 
@@ -106,7 +110,7 @@ Two rules of thumb answer most of the question before you touch a console. They 
 
 **1. Memory: will it fit on the GPU?** Count bytes per parameter for what you are doing, multiply by the parameter count, then add a few GB for activations (more for long sequences and big batches).
 
-![Bars of GPU memory per parameter: 1 byte for FP8 inference, 2 for bf16 inference, about 2.5 for a LoRA fine-tune, 16 for a full mixed-precision fine-tune made of weights, gradients, fp32 master weights and Adam moments](fig/memory-per-parameter.svg){alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning"}
+![Bars of GPU memory per parameter: 1 byte for FP8 inference, 2 for bf16 inference, about 2.5 for a LoRA fine-tune, 16 for a full fine-tune made of the weight, its gradient, a 32-bit copy of the weight and the two averages Adam keeps](fig/memory-per-parameter.svg){alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning"}
 
 | What you are doing | Bytes per parameter | Why | 3B | 7B | 27B | 70B |
 |---|---|---|---|---|---|---|
@@ -114,9 +118,9 @@ Two rules of thumb answer most of the question before you touch a console. They 
 | Inference, FP8 | 1 | weights only | 3 GB | 7 GB | 27 GB | 70 GB |
 | Inference, bf16 | 2 | weights only | 6 GB | 14 GB | 54 GB | 140 GB |
 | LoRA fine-tune | ~2.5 | frozen bf16 weights + a small adapter with its gradients and optimizer + activations | 8 GB | 18 GB | 68 GB | 175 GB |
-| Full fine-tune, mixed precision | 16 | bf16 weights 2 + bf16 gradients 2 + fp32 master weights 4 + Adam's two moments 8 | 48 GB | 112 GB | 430 GB | 1.1 TB |
+| Full fine-tune, mixed precision | 16 | 16-bit weights 2 + gradients 2 + 32-bit copy of the weights 4 + Adam's two running averages 8 | 48 GB | 112 GB | 430 GB | 1.1 TB |
 
-Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: gradient updates are tiny numbers that vanish in 8-bit or 4-bit precision, so every trainable parameter keeps a full-precision master copy plus two Adam moments, 16 bytes against 2. **That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them, at `$25` to `$63` an hour.** LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
+Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: each step's update is too small for 8-bit or 4-bit numbers to hold, so every trained weight keeps a 32-bit copy plus Adam's two averages, 16 bytes against 2. **That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them, at `$25` to `$63` an hour.** LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
 
 **2. Time: how many GPU-hours?** Training compute is roughly proportional to parameters × tokens seen:
 
