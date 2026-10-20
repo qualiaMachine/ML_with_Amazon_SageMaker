@@ -87,15 +87,15 @@ Our data is stored in the S3 bucket you created in the previous episode, named '
 ```python
 import pandas as pd
 # Define the S3 bucket and object key
-bucket_name = 'sinkorswim-doejohn'  # replace with your S3 bucket name; a bucket is the top-level container, like a drive
+bucket_name = 'sinkorswim-doejohn'  # replace with your S3 bucket name
 
 # Read the train data from S3
-key = 'titanic_train.csv'  # replace with your object key; the key is the object's full path inside the bucket
+key = 'titanic_train.csv'  # the object key: the file's path inside the bucket
 response = s3.get_object(Bucket=bucket_name, Key=key)  # fetch the object; its bytes arrive as a stream in response['Body']
-train_data = pd.read_csv(response['Body'])  # pandas reads the stream straight into memory; nothing is written to disk
+train_data = pd.read_csv(response['Body'])
 
 # Read the test data from S3
-key = 'titanic_test.csv'  # replace with your object key
+key = 'titanic_test.csv'
 response = s3.get_object(Bucket=bucket_name, Key=key)
 test_data = pd.read_csv(response['Body'])
 
