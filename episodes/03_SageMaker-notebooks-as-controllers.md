@@ -72,12 +72,10 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
 The previous episode's callout on why these keys, and only these, show up on the bill applies here unchanged: tags never propagate, so this instance needs its own copy.
 
-- Click **Create notebook instance**. It may take a few minutes for the instance to start. Once its status is **InService**, click **Open JupyterLab**.
+- Click **Create notebook instance**.
 
 ### Load pre-filled Jupyter notebooks
-The new instance appears in the list with status `Pending`; after a few minutes it changes to `InService`. Once it does, click **Open JupyterLab** next to it. From there, we can create as many Jupyter notebooks as we would like within the instance environment. 
-
-We will then select the standard python3 environment (conda_python3) to start our first .ipynb notebook (Jupyter notebook). We can use the standard conda_python3 environment since we aren't doing any training/tuning just yet.
+The new instance appears in the list with status `Pending`; after a few minutes it changes to `InService`. Once it does, click **Open JupyterLab** next to it. In JupyterLab, create a new notebook with the `conda_python3` kernel (we aren't training anything yet, so the plain Python environment is enough).
 
 In that notebook, run the following cell to clone the lesson repository into the instance's persistent directory. The `test -d ... ||` guard makes it a no-op if the folder already exists, and every later episode starts with the same cell:
 
