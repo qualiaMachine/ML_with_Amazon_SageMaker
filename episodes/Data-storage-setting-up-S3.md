@@ -75,7 +75,7 @@ In order to upload our titanic dataset to an S3 bucket on AWS, we'll follow the 
 ### Detailed procedure
 
 ##### 1. Sign in to the AWS Management Console
-- Log in to AWS Console using your credentials.
+- Log in to the AWS Console through the sign-in link your instructor emailed you (it starts with `https://` and ends in `awsapps.com/start`; sign in with your university login). Working on your own account, use the regular console sign-in instead.
 
 
 ##### 2. Navigate to S3
