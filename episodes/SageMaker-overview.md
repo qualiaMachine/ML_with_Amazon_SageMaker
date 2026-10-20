@@ -15,6 +15,7 @@ exercises: 0
 
 - Compare cloud compute with campus HPC and lab hardware on hardware generation, cost and control.
 - Introduce SageMaker and the controller-plus-jobs pattern.
+- Preview the three parts of the lesson.
   
 ::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -50,6 +51,16 @@ Renting a bare GPU instance from AWS (EC2) gets you the hardware above, but you 
 - **Ease of orchestration / Simplified ML pipelines**: Traditional high-performance computing (HPC) or high-throughput computing (HTC) environments often require researchers to break ML workflows into separate batch jobs, manually orchestrating each step (e.g., submitting preprocessing, training, cross-validation, and evaluation as distinct tasks and stitching the results together later). In SageMaker, a training or tuning job is launched from a notebook with the script, the data location and the instance type, and the orchestration is handled for you.
 
 - **Cost tracking**: every job reports its billable seconds, and every resource can be tagged so that the bill can be broken down by project. For many common research workloads SageMaker is cheap. For example, training roughly 100 small to medium-sized models (e.g., logistic regression, random forests, or lightweight deep learning models with a few million parameters) on a small dataset (under 10GB) can cost under $20, making it accessible for many research projects.
+
+### What comes next
+
+The rest of the lesson is hands-on, in three parts:
+
+1. **SageMaker foundations and classic ML.** Set up an S3 bucket and a small notebook instance, then launch training jobs (XGBoost and PyTorch) and a hyperparameter tuning job from it.
+2. **Retrieval-augmented generation (RAG).** Build a RAG pipeline over research papers on Amazon Bedrock, then run the same pipeline as SageMaker Processing jobs with an open-weight model.
+3. **Fine-tuning.** Fine-tune a vision-language model for handwriting transcription as a SageMaker training job.
+
+Every job along the way is tagged, capped, estimated before launch and checked against the bill after. The next episode starts with the bucket.
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
