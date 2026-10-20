@@ -20,6 +20,8 @@ exercises: 10
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/04_Accessing-S3-via-SageMaker-notebooks.ipynb`. Select the **`conda_python3`** kernel (the same one you used in the last episode).
+
 #### Set up AWS environment
 To begin each notebook, it's important to set up an AWS environment that will allow seamless access to the necessary cloud resources. Here's what we'll do to get started:
 
