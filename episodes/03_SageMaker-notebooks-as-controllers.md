@@ -97,7 +97,7 @@ In that notebook, run the following cell to clone the lesson repository into the
 !test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 ```
 
-Then open `ML_with_AWS_SageMaker/notebooks/Accessing-S3-via-SageMaker-notebooks.ipynb` from the file browser to begin the first notebook.
+Then open `ML_with_AWS_SageMaker/notebooks/04_Accessing-S3-via-SageMaker-notebooks.ipynb` from the file browser to begin the first notebook.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
