@@ -88,9 +88,9 @@ print(f"Instance Type: {local_instance}")
 **Cost tracking**: Just like in the previous episode, we explicitly tag each training job at launch time. This ensures that compute usage is traceable to a project, a purpose, and a human-readable name, even after the job has completed. Tags on the `HyperparameterTuner` are copied to every child training job it launches, so we only need to set them once, on the tuner (we also set them on the estimator so a plain `.fit()` on it is tagged too).
 
 ```python
-name = "John Doe" # replace with your name
+name = "doejohn" # replace with your name, as in your bucket name
 project = "sinkorswim" # replace with your challenge name
-purpose = "tune_PyTorch"
+purpose = "tune-pytorch"
 
 job_tags = [
     {"Key": "Name", "Value": name},

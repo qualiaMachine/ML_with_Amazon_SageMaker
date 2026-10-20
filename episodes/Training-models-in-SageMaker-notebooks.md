@@ -382,9 +382,9 @@ When you launch a SageMaker training job from a notebook, SageMaker creates new 
 To avoid this, we explicitly tag each training job at launch time. This ensures that compute usage is traceable to a project, a purpose, and a human-readable name, even after the job has completed.
 
 ```python
-name = "John Doe" # replace with your name
+name = "doejohn" # replace with your name, as in your bucket name
 project = "sinkorswim" # replace with your challenge name
-purpose = "train_XGBoost"
+purpose = "train-xgboost"
 
 job_tags = [
     {"Key": "Name", "Value": name},
