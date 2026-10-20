@@ -71,7 +71,9 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 ### Load pre-filled Jupyter notebooks
 The new instance appears in the list with status `Pending`; after a few minutes it changes to `InService`. Once it does, click **Open JupyterLab** next to it. In JupyterLab, create a new notebook with the `conda_python3` kernel (we aren't training anything yet, so the plain Python environment is enough).
 
-In that notebook, run the following cell to clone the lesson repository into the instance's persistent directory. The `test -d ... ||` guard makes it a no-op if the folder already exists, and every later episode starts with the same cell:
+The instance's home directory holds AWS's own setup: the `anaconda3` folder with the conda environments behind the kernel list, AWS's `sample-notebooks`, and a pile of license files. One folder is different: `/home/ec2-user/SageMaker` is a separate disk, the storage volume you saw as a setting when creating the instance. Everything else in the home directory lives on the system disk and is reset when the instance stops; `SageMaker/` is the only place that survives a stop. JupyterLab's file browser opens there for that reason, and it is where everything in this lesson goes.
+
+In that notebook, run the following cell to clone the lesson repository into that persistent folder. The `test -d ... ||` guard makes it a no-op if the folder already exists, and every later episode starts with the same cell:
 
 ```sh
 %cd /home/ec2-user/SageMaker/
