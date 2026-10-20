@@ -122,22 +122,21 @@ Two rules of thumb answer most of the question before you touch a console. They 
 
 Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: each step's update is too small for 8-bit or 4-bit numbers to hold, so every trained weight keeps a 32-bit copy plus Adam's two averages, 16 bytes against 2. **That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them, at `$25` to `$63` an hour.** LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
 
-**2. Time: how many GPU-hours?** Count the arithmetic. Every token that passes through the model touches every weight once on the way forward: one multiply and one add per weight, 2 floating-point operations (FLOPs). Training then runs backward through the same weights, and that costs twice as much again: about 2 FLOPs per weight to work out how the error flows back to the previous layer, and 2 more to work out how each weight itself should change. So a full fine-tune spends about 6 FLOPs per parameter per token. With LoRA the base weights are frozen, so the last 2 are skipped for them: the error still has to flow back through every layer to reach the adapters, but no weight update is computed for the base, which leaves about 4.
+**2. Time: how many GPU-hours?** Each token costs about 6 floating-point operations per weight to train on (2 forward, 4 backward), or 4 with LoRA, since the frozen base skips its weight updates. Multiply by the weights and the tokens, divide by the GPU's speed:
 
 ```text
 tokens      = examples × tokens per example × passes over the data
-FLOPs       ≈ 6 × parameters × tokens      full fine-tune: 2 forward + 2 backward to activations + 2 for weight updates
-            ≈ 4 × parameters × tokens      LoRA: the same minus the weight updates for the frozen base
-GPU-seconds = FLOPs ÷ (the GPU's peak bf16 FLOPS × the fraction of that peak you reach)
+FLOPs       = 6 × parameters × tokens      (4 × for LoRA)
+GPU-seconds = FLOPs ÷ (GPU peak FLOPS × utilization)
 ```
 
-A GPU's peak rate is on its data sheet (an A10G is about 70 trillion FLOPs per second in bf16, an A100 312, an H100 989), so dividing total FLOPs by the peak gives the time a perfectly busy GPU would take. No training job keeps a GPU perfectly busy, which is where utilization comes in.
+Peak FLOPS is on the GPU's data sheet: about 70 trillion per second for an A10G, 312 for an A100, 989 for an H100.
 
-Utilization is the number people forget. A GPU running one page at a time with gradient checkpointing manages 20–30% of its peak; a well-tuned multi-GPU job reaches 40–50%. Use 25% unless you have measured otherwise, and add ~50% to the FLOPs when gradient checkpointing is on, because it recomputes the forward pass during the backward pass. Both corrections sit inside the factor of two the rule promises. Then cost = GPU-hours × hourly rate + the fixed startup overhead per job (~10 minutes here).
+Utilization is how much of that peak you reach. A small job with gradient checkpointing gets 20–30%; a well-tuned multi-GPU job 40–50%. Use 25% until you have measured, and add 50% to the FLOPs if gradient checkpointing is on. Cost is GPU-hours × the hourly rate, plus about 10 minutes of startup per job.
 
-Worked for the class run: 120 pages × ~1,600 tokens (1,300 visual + 300 text) × 3 epochs = 576k tokens. LoRA on a 3.75B model (3B language model plus the vision tower): 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. An A10G peaks at about 70 TFLOPS in bf16; at 25% utilization that is 17 TFLOPS, so about 500 seconds, call it 9 minutes. The "~15 min" in the table below adds the image preprocessing on four vCPUs and the checkpointing overhead. Same arithmetic, same answer within the factor of two.
+The class run: 120 pages × 1,600 tokens × 3 passes = 576k tokens. LoRA on 3.75B parameters: 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. An A10G at 25% of 70 TFLOPS does 17 TFLOPS, so about 500 seconds, call it 9 minutes; the table below says 15 to cover image preprocessing and checkpointing.
 
-The same two rules are in `helpers.estimate_finetune_cost`, so that you can run them on a job you have not launched: your own model size, example count, tokens per example and epochs. It picks the cheapest instance that fits unless you name one, prints the memory check, GPU-hours, wall-clock, cost per run and for the whole project, and the `max_run` to set. Here it is on the class run:
+`helpers.estimate_finetune_cost` does the same arithmetic for any model size, example count, tokens per example and passes. It picks the cheapest instance that fits, or the one you name, and prints memory, GPU-hours, cost per run and per project, and the `max_run` to set:
 
 ```python
 import sys
