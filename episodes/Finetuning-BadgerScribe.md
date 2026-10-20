@@ -368,7 +368,7 @@ DEFAULT_MAX_PIXELS = 1280 * 28 * 28
 As in every episode: tags do not propagate from the notebook to the jobs it launches. Pass them to every estimator.
 
 ```python
-name = "John Doe"        # replace with your name
+name = "doejohn"         # replace with your name, as in your bucket name
 project = "sinkorswim"   # replace with your challenge name
 
 def make_job_tags(purpose: str):

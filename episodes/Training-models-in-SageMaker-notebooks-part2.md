@@ -169,9 +169,9 @@ Now that we have tested things locally, we can try to train with a larger number
 As in the XGBoost episode, every training job needs its own tags: a job does not inherit the notebook instance's tags, and an untagged job is anonymous on the bill. Define them once here and pass `tags=job_tags` to every estimator below.
 
 ```python
-name = "John Doe" # replace with your name
+name = "doejohn" # replace with your name, as in your bucket name
 project = "sinkorswim" # replace with your challenge name
-purpose = "train_PyTorch"
+purpose = "train-pytorch"
 
 job_tags = [
     {"Key": "Name", "Value": name},

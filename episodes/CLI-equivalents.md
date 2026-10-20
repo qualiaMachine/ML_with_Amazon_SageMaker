@@ -145,8 +145,8 @@ cat > train-xgboost.json <<'JSON'
   "StoppingCondition": { "MaxRuntimeInSeconds": 1200 },
   "Tags": [
     { "Key": "Project", "Value": "<challenge name>" },
-    { "Key": "Name",    "Value": "<your name>" },
-    { "Key": "Purpose", "Value": "train_XGBoost_cli" }
+    { "Key": "Name",    "Value": "<lastnamefirstname>" },
+    { "Key": "Purpose", "Value": "train-xgboost-cli" }
   ]
 }
 JSON

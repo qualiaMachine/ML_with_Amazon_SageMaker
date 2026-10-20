@@ -110,10 +110,10 @@ A SageMaker training or processing job reads only from buckets in its own region
 **Tags (NOT OPTIONAL)**: tags are how the bill is broken down by project, person and purpose; this is the one section you must fill in. Add the following three keys, spelled exactly (they are the account's approved cost-allocation keys, see [KB 72454](https://kb.wisc.edu/72454)). You will put the same three keys on every resource you create in this lesson.
 
 - **Project**: your challenge name, e.g. `sinkorswim`
-- **Name**: your name, e.g. `John Doe`
-- **Purpose**: `Bucket-titanic`
+- **Name**: your last and first name run together, e.g. `doejohn`
+- **Purpose**: what the resource is for, here `storage`
 
-Tag values are case-sensitive on the bill: `SinkOrSwim` and `sinkorswim` would be two separate rows in Cost Explorer. Use the same lowercase challenge name you put in the bucket name.
+Use the same two lowercase tokens as in the bucket name, with no spaces. Tag values are case-sensitive on the bill: `SinkOrSwim` and `sinkorswim`, or `John Doe` and `doejohn`, would be separate rows in Cost Explorer.
 
 ![Example of Tags for an S3 Bucket](fig/bucket_tags2.png){alt="Screenshot showing required tags for an S3 bucket"}
 
