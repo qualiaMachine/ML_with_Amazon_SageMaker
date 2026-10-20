@@ -713,31 +713,24 @@ this code to only fetch certain objects or folders.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="using-helper-functions-from-github">Using helper functions from GitHub<a class="anchor" aria-label="anchor" href="#using-helper-functions-from-github"></a></h3>
+<h3 id="using-the-lessons-helper-functions">Using the lesson’s helper functions<a class="anchor" aria-label="anchor" href="#using-the-lessons-helper-functions"></a></h3>
 <p>We have added code to calculate bucket size to a helper function
 called <code>get_s3_bucket_size(bucket_name)</code> for your
 convenience. There are also some other helper functions in
-<code>scripts/helpers.py</code> of the lesson repository to assist you
-with common AWS/SageMaker workflows. We’ll show you how to clone this
-code into your notebook environment.</p>
+<code>scripts/helpers.py</code> of the lesson repository, which you
+cloned to <code>/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/</code>
+in the previous episode.</p>
 <div class="section level4">
 <h4 id="directory-setup">Directory setup<a class="anchor" aria-label="anchor" href="#directory-setup"></a></h4>
 <p>Let’s make sure we’re starting in the root directory of this
-instance, so that we all have our helpers.py file located in the same
-path
-(/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/helpers.py).
-This directory survives stopping the instance, so a clone placed there
-is still present next session. The <code>test -d ... ||</code> guard
-skips the clone if the folder already exists; every later episode starts
-with the same cell.</p>
+instance, and tell Python where the <code>scripts/</code> folder is:</p>
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="op">!</span>test <span class="op">-</span>d ML_with_AWS_SageMaker <span class="op">||</span> git clone https:<span class="op">//</span>github.com<span class="op">/</span>carpentries<span class="op">-</span>incubator<span class="op">/</span>ML_with_AWS_SageMaker.git</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a><span class="im">import</span> sys</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a>sys.path.insert(<span class="dv">0</span>, <span class="st">"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts"</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1" aria-label="code-block-7-5"></a><span class="im">import</span> helpers</span></code></pre>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="im">import</span> sys</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a>sys.path.insert(<span class="dv">0</span>, <span class="st">"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a><span class="im">import</span> helpers</span></code></pre>
 </div>
 <p><code>sys.path.insert</code> tells Python where to find the lesson’s
 <code>scripts/</code> folder; after it, <code>import helpers</code>
@@ -936,9 +929,10 @@ processing.</li>
 budgets.</li>
 <li>Use SageMaker to upload analysis results and maintain an organized
 workflow.</li>
-<li>Clone the lesson repository once, into
+<li>The lesson repository lives at
 <code>/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/</code>; every
-later episode starts with the same guarded clone-and-import cell.</li>
+later episode adds its <code>scripts/</code> folder to
+<code>sys.path</code> and imports <code>helpers</code>.</li>
 </ul></div>
 </div>
 </div>
