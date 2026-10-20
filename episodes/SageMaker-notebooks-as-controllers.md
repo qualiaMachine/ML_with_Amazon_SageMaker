@@ -29,7 +29,7 @@ The SageMaker SDK runs anywhere Python does, so the lesson could be run from a l
 
 - **Identity comes from the instance, not from a file on your machine.** The IAM role attached to the notebook is what authorizes every call it makes. Nobody installs the AWS CLI, configures credentials, or has an access key that can end up in a notebook, a shell history or a GitHub commit.
 - **Everyone has the same environment.** The kernels, the SDK version and the paths are identical for every learner, so a cell that works for the instructor works for you.
-- **It is inside AWS.** Reading your S3 bucket from the instance is in-region, fast and free of transfer charges; the same reads from a laptop would be slower and billed as data leaving AWS.
+- **It is inside AWS.** Transfer charges apply when data leaves AWS or crosses regions, not when it is read. Reading or even downloading your bucket's files onto the instance is in-region and free. A job launched from anywhere, laptop included, also reads its S3 inputs in-region for free; only data pulled to the laptop itself (a `read_csv` of an S3 path on your own machine) is billed as egress.
 - **It is a billed resource like any other.** It has to be sized, tagged, started and stopped.
 
 ### Using the notebook as a controller
