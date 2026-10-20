@@ -84,8 +84,20 @@ In order to upload our titanic dataset to an S3 bucket on AWS, we'll follow the 
 - Select **S3 - Scalable Storage in the Cloud**
 
 ##### 3. Create a new bucket
-- **AWS Region**: the region your instructor named (the same one your SageMaker notebook will use; in the workshop account it is US East (Ohio), `us-east-2`). SageMaker jobs can only read buckets in their own region, so a bucket created in another region shows up later as "access denied" or "no such bucket" errors from your jobs.
-- Click **Create Bucket** and enter a unique name, and note that bucket name must not contain uppercase characters. To easily find this bucket later in our shared AWS account, please use the following naming convention: `challenge-lastnamefirstname`, all lowercase, e.g. `sinkorswim-doejohn`: the challenge you are working on (`wattbot2026`, `badgerscribe`, `badgercode`, ...), a hyphen, then your last and first name run together. The same lowercase string is what we will use for your notebook instance and your `Project` tag. **This is the only bucket you will create in the workshop.** Every later episode writes its outputs (trained models, embeddings, predictions) into this same bucket under its own prefix, such as `xgboost/`, `wattbot/` or `badger-scribe/`.
+- Click **Create bucket**. The form opens with **General configuration** at the top; set it as follows.
+- **AWS Region**: the region your instructor named (in the workshop account, US East (Ohio), `us-east-2`). This must be the same region your notebook instance and jobs run in.
+
+::::::::::::::::::::::::::::::::::::: callout
+
+### Wrong region costs money and breaks jobs
+
+A SageMaker training or processing job reads only from buckets in its own region; a bucket created elsewhere shows up later as "no such bucket" or "access denied" from the job. Reading data across regions from a notebook does work, but every byte is billed as inter-region transfer (about $0.01-0.02 per GB each way), and a model that reads its training set every epoch pays that on every pass. Check the region before you click Create; it cannot be changed afterwards.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+- **Bucket type**: **General purpose**. Directory buckets are a single-zone, low-latency type for specialised workloads and are not what SageMaker expects.
+- **Bucket namespace**: **Global namespace**. The newer *account Regional namespace* appends your account ID, region and `-an` to every bucket name, which would turn `sinkorswim-doejohn` into `sinkorswim-doejohn-123456789012-us-east-2-an` everywhere in the lesson. Global keeps the name exactly as you type it.
+- **Bucket name**: enter a unique name; bucket names must not contain uppercase characters. To easily find this bucket later in our shared AWS account, please use the following naming convention: `challenge-lastnamefirstname`, all lowercase, e.g. `sinkorswim-doejohn`: the challenge you are working on (`wattbot2026`, `badgerscribe`, `badgercode`, ...), a hyphen, then your last and first name run together. The same lowercase string is what we will use for your notebook instance and your `Project` tag. **This is the only bucket you will create in the workshop.** Every later episode writes its outputs (trained models, embeddings, predictions) into this same bucket under its own prefix, such as `xgboost/`, `wattbot/` or `badger-scribe/`.
 - **Access Control (ACLs)**: Disable ACLs (recommended).  
 	- **What are ACLs?** Access Control Lists (ACLs) define fine-grained permissions at the object level, allowing you to grant specific users or AWS accounts access to individual files in your bucket.  
 	- **Why disable them?** AWS now recommends managing access through bucket policies and IAM roles, which offer better security and are easier to manage at scale. Unless you have a specific need for ACLs, disabling them is the best practice.
