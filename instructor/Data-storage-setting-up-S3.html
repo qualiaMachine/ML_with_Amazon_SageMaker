@@ -731,19 +731,20 @@ when you need to control the keys yourself.</p>
 </div>
 <div class="section level5">
 <h5 id="edit-bucket-policy">4. Edit bucket policy<a class="anchor" aria-label="anchor" href="#edit-bucket-policy"></a></h5>
-<p>Once the bucket is created, you’ll be brought to a page that shows
-all of your current buckets (and those on our shared account). We’ll
-have to edit our bucket’s policy to allow ourselves proper access to any
-files stored there (e.g., read from bucket, write to bucket). To set
-these permissions…</p>
-<ol style="list-style-type: decimal"><li>Click on the name of your bucket to bring up additional options and
-settings.</li>
-<li>Click the Permissions tab</li>
-<li>Scroll down to Bucket policy and click Edit. Paste the following
-policy, <strong>editing the bucket name “sinkorswim-doejohn”</strong> to
-reflect your bucket’s name and replacing <code>&lt;account-id&gt;</code>
-with the 12-digit AWS account ID shown at the top right of the console
-(your instructor will also give it to you)</li>
+<p>Once the bucket is created, the console opens the new bucket’s page
+(a green “Successfully created bucket” banner at the top, an empty
+<strong>Objects</strong> list below). If you land on the bucket list
+instead, click your bucket’s name. We’ll have to edit our bucket’s
+policy to allow ourselves proper access to any files stored there (e.g.,
+read from bucket, write to bucket). To set these permissions:</p>
+<ol style="list-style-type: decimal"><li>Click the <strong>Permissions</strong> tab (next to Objects,
+Metadata, Properties).</li>
+<li>Scroll down to <strong>Bucket policy</strong> and click
+<strong>Edit</strong>. Paste the following policy, <strong>editing the
+bucket name “sinkorswim-doejohn”</strong> to reflect your bucket’s name
+and replacing <code>&lt;account-id&gt;</code> with the 12-digit AWS
+account ID shown at the top right of the console (your instructor will
+also give it to you)</li>
 </ol><div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">JSON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

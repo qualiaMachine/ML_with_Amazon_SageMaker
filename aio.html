@@ -1100,20 +1100,21 @@ when you need to control the keys yourself.</p>
 <div class="section level5">
 <h5 id="edit-bucket-policy">4. Edit bucket policy<a class="anchor" aria-label="anchor" href="#edit-bucket-policy"></a>
 </h5>
-<p>Once the bucket is created, you’ll be brought to a page that shows
-all of your current buckets (and those on our shared account). We’ll
-have to edit our bucket’s policy to allow ourselves proper access to any
-files stored there (e.g., read from bucket, write to bucket). To set
-these permissions…</p>
+<p>Once the bucket is created, the console opens the new bucket’s page
+(a green “Successfully created bucket” banner at the top, an empty
+<strong>Objects</strong> list below). If you land on the bucket list
+instead, click your bucket’s name. We’ll have to edit our bucket’s
+policy to allow ourselves proper access to any files stored there (e.g.,
+read from bucket, write to bucket). To set these permissions:</p>
 <ol style="list-style-type: decimal">
-<li>Click on the name of your bucket to bring up additional options and
-settings.</li>
-<li>Click the Permissions tab</li>
-<li>Scroll down to Bucket policy and click Edit. Paste the following
-policy, <strong>editing the bucket name “sinkorswim-doejohn”</strong> to
-reflect your bucket’s name and replacing <code>&lt;account-id&gt;</code>
-with the 12-digit AWS account ID shown at the top right of the console
-(your instructor will also give it to you)</li>
+<li>Click the <strong>Permissions</strong> tab (next to Objects,
+Metadata, Properties).</li>
+<li>Scroll down to <strong>Bucket policy</strong> and click
+<strong>Edit</strong>. Paste the following policy, <strong>editing the
+bucket name “sinkorswim-doejohn”</strong> to reflect your bucket’s name
+and replacing <code>&lt;account-id&gt;</code> with the 12-digit AWS
+account ID shown at the top right of the console (your instructor will
+also give it to you)</li>
 </ol>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">JSON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1780,7 +1781,7 @@ and say which of them need the three tags.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
@@ -2305,7 +2306,7 @@ prefixes instead of a new bucket per episode?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -4675,7 +4676,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5782,7 +5783,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -5827,7 +5828,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -8901,7 +8902,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -9206,7 +9207,7 @@ whole WattBot pipeline on Bedrock”, and with one hour of the
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10027,7 +10028,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10084,7 +10085,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
