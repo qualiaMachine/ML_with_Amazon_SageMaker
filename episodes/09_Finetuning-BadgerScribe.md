@@ -33,7 +33,7 @@ The training episodes so far built small models from scratch on a few hundred ro
 - It is iterative. Nobody gets the learning rate, the image resolution or the data split right the first time, so the first run is never the last.
 - The cost of a run depends on things that are easy to get wrong by 10x: model size, epochs, image resolution, instance type, and whether the instance is still running after you stopped paying attention.
 
-That combination is why fine-tuning is where research teams see surprise bills. Done carefully, it is also where the largest gains are: the Badger Scribe organizers report that LoRA on ~100 pages takes a small open model from 0.23 to 0.06 CER on survey notebooks in about a GPU-hour. This episode is about getting that kind of gain for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead.
+That combination is why fine-tuning is where research teams see surprise bills. Done carefully, it is also where the largest gains are, and we measure them: the episode ends by scoring the base model and the fine-tuned model on the same held-out pages. It is about getting a gain like that for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead.
 
 ### The task: Badger Scribe
 
