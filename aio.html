@@ -1652,18 +1652,27 @@ and every later episode uses this same instance.</p>
 <h3 id="why-we-work-from-a-notebook-instance-in-this-lesson">Why we work from a notebook instance in this lesson<a class="anchor" aria-label="anchor" href="#why-we-work-from-a-notebook-instance-in-this-lesson"></a>
 </h3>
 <p>The SageMaker SDK runs anywhere Python does, so the lesson could be
-run from a laptop. We use a notebook instance for three reasons:</p>
+run from a laptop. We use a notebook instance for four reasons:</p>
 <ul>
 <li>
-<strong>Identity comes from the instance, not from a file on your
-machine.</strong> The IAM role attached to the notebook is what
-authorizes every call it makes. Nobody installs the AWS CLI, configures
-credentials, or has an access key that can end up in a notebook, a shell
-history or a GitHub commit.</li>
+<strong>No credential setup.</strong> The IAM role attached to the
+instance authorizes every call made from it, so there is nothing to
+install or log in to. Working from a laptop is not hard,
+<code>aws configure sso</code> and <code>aws sso login</code> take a few
+minutes, but in a room of a hundred people that is a hundred setups,
+plus SSO sessions expiring mid-episode and the occasional person pasting
+an access key instead. The role sidesteps all of it.</li>
 <li>
 <strong>Everyone has the same environment.</strong> The kernels, the
 SDK version and the paths are identical for every learner, so a cell
 that works for the instructor works for you.</li>
+<li>
+<strong>Instructors can see what happened.</strong> Every notebook
+instance in the shared account shows up in the console, and an
+instructor can open yours and see the notebook that launched a job, with
+its outputs. Jobs launched from a laptop are just as visible in the job
+list, but the code that launched them is on your machine, so when
+something breaks or a charge looks wrong there is less to go on.</li>
 <li>
 <strong>No egress charges.</strong> AWS bills data transfer when it
 leaves AWS, not when it moves within a region. The notebook instance
@@ -1711,6 +1720,11 @@ for ML</a> page compares them.</p></li>
 <li><p><strong>Platform identifier</strong>: This is an internal AWS
 setting related to the environment version and underlying platform. You
 can leave this as the default.</p></li>
+<li><p><strong>Additional configuration (leave collapsed)</strong>:
+holds the <strong>Volume size in GB</strong> of the instance’s
+persistent disk, default 5 GB. The default is enough for this lesson;
+the disk is the one thing a stopped instance keeps billing for, so do
+not make it larger than you need.</p></li>
 <li>
 <p><strong>Permissions and encryption</strong>:</p>
 <ul>
@@ -1792,25 +1806,30 @@ applies here too.</p>
 JupyterLab</strong> next to it. In JupyterLab, create a new notebook
 with the <code>conda_python3</code> kernel (we aren’t training anything
 yet, so the plain Python environment is enough).</p>
-<p>The instance’s home directory holds AWS’s own setup: the
-<code>anaconda3</code> folder with the conda environments behind the
-kernel list, AWS’s <code>sample-notebooks</code>, and a pile of license
-files. One folder is different: <code>/home/ec2-user/SageMaker</code> is
-a separate disk, the storage volume you saw as a setting when creating
-the instance. Everything else in the home directory lives on the system
-disk and is reset when the instance stops; <code>SageMaker/</code> is
-the only place that survives a stop. JupyterLab’s file browser opens
-there for that reason, and it is where everything in this lesson
-goes.</p>
-<p>In that notebook, run the following cell to clone the lesson
-repository into that persistent folder. The <code>test -d ... ||</code>
-guard makes it a no-op if the folder already exists, and every later
-episode starts with the same cell:</p>
+<p>In the new notebook, run:</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="ex">%cd</span> /home/ec2-user/SageMaker/</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="ex">!test</span> <span class="at">-d</span> ML_with_AWS_SageMaker <span class="kw">||</span> <span class="fu">git</span> clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git</span></code></pre>
+<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="ex">!pwd</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="ex">!ls</span> ..</span></code></pre>
+</div>
+<p>The first line prints <code>/home/ec2-user/SageMaker</code>: new
+notebooks start in that folder. The second lists its parent, the
+instance’s home directory, which holds AWS’s own setup: the
+<code>anaconda3</code> folder with the conda environments behind the
+kernel list, AWS’s <code>sample-notebooks</code>, and a pile of license
+files. <code>SageMaker/</code> is the one folder that is different. It
+is a separate disk, the volume whose size sits under <strong>Additional
+configuration</strong> on the create form (5 GB by default). Everything
+else in the home directory lives on the system disk and is reset when
+the instance stops; <code>SageMaker/</code> is the only place that
+survives a stop. JupyterLab’s file browser opens there for that reason,
+and it is where everything in this lesson goes.</p>
+<p>Now clone the lesson repository into it:</p>
+<div class="codewrapper sourceCode" id="cb2">
+<h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="ex">!git</span> clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git</span></code></pre>
 </div>
 <p>Then open
 <code>ML_with_AWS_SageMaker/notebooks/04_Accessing-S3-via-SageMaker-notebooks.ipynb</code>
@@ -1838,7 +1857,7 @@ it?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -1856,18 +1875,17 @@ memory.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="before-you-leave-stop-the-instance">Before you leave: stop the instance<a class="anchor" aria-label="anchor" href="#before-you-leave-stop-the-instance"></a>
+<h3 id="at-the-end-of-class-stop-the-instance">At the end of class: stop the instance<a class="anchor" aria-label="anchor" href="#at-the-end-of-class-stop-the-instance"></a>
 </h3>
 <p>A notebook instance bills for every second it is
-<strong>InService</strong>. When you step away for the day, go to
-<strong>Notebook instances</strong>, select yours and choose
-<strong>Stop</strong>. Your files under
-<code>/home/ec2-user/SageMaker</code> (including the repos you clone)
-survive a Stop and are there when you start it again; packages you
-<code>pip install</code> are not, so expect to reinstall them. When the
-workshop is over, <strong>Delete</strong> the instance: a stopped
-instance still bills for its storage volume ($0.14 per GB-month), and
-the cleanup episode walks through this.</p>
+<strong>InService</strong>. At the end of class, go to <strong>Notebook
+instances</strong>, select yours and choose <strong>Stop</strong>. Your
+files under <code>/home/ec2-user/SageMaker</code> (including the repos
+you clone) survive a Stop and are there when you start it again;
+packages you <code>pip install</code> are not, so expect to reinstall
+them. When the workshop is over, <strong>Delete</strong> the instance: a
+stopped instance still bills for its storage volume ($0.14 per
+GB-month), and the cleanup episode walks through this.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -1883,7 +1901,7 @@ it to launch training, tuning and processing jobs on separate
 instances.</li>
 <li>Every resource gets the same three tags; they never propagate, so
 each new resource needs its own.</li>
-<li>Stop the notebook instance whenever you leave, and delete it when
+<li>Stop the notebook instance at the end of class, and delete it when
 the workshop is over.</li>
 </ul>
 </div>
@@ -2355,7 +2373,7 @@ prefixes instead of a new bucket per episode?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2862,7 +2880,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -4725,7 +4743,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -8951,7 +8969,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -9256,7 +9274,7 @@ whole WattBot pipeline on Bedrock”, and with one hour of the
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
