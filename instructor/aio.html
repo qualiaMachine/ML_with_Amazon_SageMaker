@@ -2390,7 +2390,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -3150,7 +3150,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3268,7 +3268,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3530,7 +3530,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -5972,7 +5972,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6018,7 +6018,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6182,7 +6182,17 @@ authors report that it exceeds the accuracy of Gemini 2.5 Pro on
 historical text recognition at 15.5x lower cost (<a href="https://arxiv.org/abs/2509.19768" class="external-link">paper</a>). A model that size
 also runs on one GPU you control, which matters when the data cannot
 leave your institution, when results have to be reproducible with fixed
-weights, and when the job is a million pages rather than a demo.</p>
+weights, and when the job is a million pages rather than a demo. CHURRO
+is not a one-off: the same pattern shows up wherever a research task has
+its own data.</p>
+<figure><img src="../fig/specialists-vs-large-models.png" alt="Dot plot of benchmark scores for three task-specific models against a much larger general model on the same benchmark; the specialist is ahead in each row by 6.5, 2.2 and 1.2 points" class="figure mx-auto d-block"><div class="figcaption">Three research tasks where a small specialist
+model scores above a much larger general one: CHURRO (3B) over Gemini
+2.5 Pro on historical handwriting, Goedel-Prover-V2 (8B) over
+DeepSeek-Prover-V2 on formal proofs, MedGemma (27B) over GPT-4o on
+medical questions</div>
+</figure><p>Sources: <a href="https://arxiv.org/abs/2509.19768" class="external-link">CHURRO, EMNLP
+2025</a>; Goedel-Prover-V2 (arXiv 2025); MedGemma (arXiv 2025). Scores
+are as reported by each model’s authors.</p>
 <div class="section level3">
 <h3 id="the-trick">The trick<a class="anchor" aria-label="anchor" href="#the-trick"></a>
 </h3>
@@ -6197,19 +6207,29 @@ stays in the weights; you are adjusting them, not replacing them.</p>
 <div class="section level3">
 <h3 id="full-fine-tuning-is-expensive">Full fine-tuning is expensive<a class="anchor" aria-label="anchor" href="#full-fine-tuning-is-expensive"></a>
 </h3>
-<p>Nudging every weight means keeping, for every parameter, the weight
-itself, its gradient, a full-precision master copy and the optimizer’s
-two running averages. Training cannot run on the compressed 8-bit or
-4-bit weights that inference uses: gradient updates are tiny numbers
-that vanish at that precision, so the master copy has to be 32-bit
-float. That comes to about 16 bytes per parameter against 2 for
-inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune;
-a 7B model needs 112 GB, which is already a multi-GPU instance at
-<strong><code>$25</code> an hour or more</strong>, and the bill scales
-with every epoch and every retry.</p>
-<p><strong>Do not fully fine-tune anything in this workshop, and do not
-fine-tune a model larger than 3B on the class account.</strong> A full
-fine-tune of a 7B model is a few hundred dollars per run; a 70B model is
+<p>Training every weight means storing four numbers per weight instead
+of one. There is the weight itself, and its gradient, which says which
+way to nudge it this step. Then there is what the optimizer remembers:
+Adam, the optimizer everyone uses, keeps for every weight a running
+average of its recent gradients and a running average of their squares,
+so that it can give each weight its own step size. And the weight has to
+be kept in 32-bit as well as 16-bit, because each step’s nudge is far
+smaller than a 16-bit number can hold; applied to a 16-bit weight it
+would round away to nothing. Two bytes for the working weight, two for
+the gradient, four for the 32-bit weight and eight for Adam’s two
+averages: 16 bytes per parameter, against 2 for inference. A 3B model
+that runs in 6 GB needs 48 GB to fully fine-tune; a 7B model needs 112
+GB, which is already a multi-GPU instance at <strong><code>$25</code> an
+hour or more</strong>, and the bill scales with every epoch and every
+retry.</p>
+<p><strong>Do not fully fine-tune anything in this workshop (that is,
+update all the weights), and do not LoRA fine-tune a model larger than
+7B on the class account.</strong> A 7B LoRA fits the 24 GB GPU the class
+uses and costs a few dollars a run, so retries are cheap; a 13B needs
+the 48 GB instance and hours per run, so ten attempts run to a hundred
+dollars. A full fine-tune of a 7B model needs 112 GB, more than any
+instance the class account allows, and would be <strong>a few hundred
+dollars per run</strong> on one that did; a 70B model is
 <strong><code>$6,000</code> to <code>$12,000</code> per run</strong>,
 and a hyperparameter sweep multiplies that by ten. Those runs exist in
 this episode only as estimates, so that you can recognise one before you
@@ -6443,8 +6463,8 @@ add a few GB for activations (more for long sequences and big
 batches).</p>
 <figure><img src="../fig/memory-per-parameter.svg" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption">Bars of GPU memory per parameter: 1 byte for FP8
 inference, 2 for bf16 inference, about 2.5 for a LoRA fine-tune, 16 for
-a full mixed-precision fine-tune made of weights, gradients, fp32 master
-weights and Adam moments</div>
+a full fine-tune made of the weight, its gradient, a 32-bit copy of the
+weight and the two averages Adam keeps</div>
 </figure><table style="width:100%;" class="table">
 <colgroup>
 <col width="14%">
@@ -6505,8 +6525,8 @@ optimizer + activations</td>
 <tr>
 <td>Full fine-tune, mixed precision</td>
 <td>16</td>
-<td>bf16 weights 2 + bf16 gradients 2 + fp32 master weights 4 + Adam’s
-two moments 8</td>
+<td>16-bit weights 2 + gradients 2 + 32-bit copy of the weights 4 +
+Adam’s two running averages 8</td>
 <td>48 GB</td>
 <td>112 GB</td>
 <td>430 GB</td>
@@ -6515,15 +6535,15 @@ two moments 8</td>
 </tbody>
 </table>
 <p>Note the jump from the inference rows to the training rows. Training
-cannot run on quantized weights the way inference can: gradient updates
-are tiny numbers that vanish in 8-bit or 4-bit precision, so every
-trainable parameter keeps a full-precision master copy plus two Adam
-moments, 16 bytes against 2. <strong>That is why a 7B model you can
-<em>run</em> on a 24 GB GPU needs 112 GB plus activations to <em>fully
-fine-tune</em>, which means several GPUs with the model sharded across
-them, at <code>$25</code> to <code>$63</code> an hour.</strong> LoRA
-sidesteps it by freezing the model and training a few million adapter
-parameters, which is why this episode fits on one 24 GB card.</p>
+cannot run on quantized weights the way inference can: each step’s
+update is too small for 8-bit or 4-bit numbers to hold, so every trained
+weight keeps a 32-bit copy plus Adam’s two averages, 16 bytes against 2.
+<strong>That is why a 7B model you can <em>run</em> on a 24 GB GPU needs
+112 GB plus activations to <em>fully fine-tune</em>, which means several
+GPUs with the model sharded across them, at <code>$25</code> to
+<code>$63</code> an hour.</strong> LoRA sidesteps it by freezing the
+model and training a few million adapter parameters, which is why this
+episode fits on one 24 GB card.</p>
 <p><strong>2. Time: how many GPU-hours?</strong> Training compute is
 roughly proportional to parameters × tokens seen:</p>
 <pre class="text"><code>tokens      = examples × tokens per example × epochs
@@ -9877,6 +9897,16 @@ same model is 54 GB and would need a multi-GPU instance for no gain in
 output quality. (The fine-tuning episode has the full memory arithmetic;
 the short version is that inference runs on reduced-precision weights
 and training cannot.)</p>
+<p>Why bother serving a 27B model yourself when Bedrock is a call away?
+Because an open-weight model of this size is now close to the frontier
+on the kinds of tasks research code runs, and it runs on one GPU, on
+data that never leaves your account.</p>
+<figure><img src="../fig/qwen27b-vs-opus.png" alt="Paired horizontal bars comparing a 27B open-weight model on one GPU with a frontier commercial model; within a few points on agent tasks and science questions, ahead on chart reasoning" class="figure mx-auto d-block"><div class="figcaption">Qwen3.8-27B against Claude Opus 4.8 on three
+benchmarks: 73.0 vs 74.6 on Terminal-Bench 2.1, 89.2 vs 93.6 on GPQA
+Diamond, 83.7 vs 80.5 on CharXiv reasoning</div>
+</figure><p>Qwen figures are from the Qwen3.8-27B model card and were not
+reproduced here; Opus 4.8 figures are from its published
+evaluations.</p>
 <div id="what-this-episode-costs" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -10767,7 +10797,11 @@ batch transform) build on the same idea.</p>
 <hr class="half-width">
 <p>In this episode we rerun the <a href="https://www.kaggle.com/competitions/WattBot2025/overview" class="external-link">WattBot
 2025</a> RAG pipeline from the Bedrock episode, this time entirely from
-a single GPU-backed SageMaker notebook with self-hosted models.</p>
+a single GPU-backed SageMaker notebook with self-hosted models. The
+generator is the same Qwen3.8-27B as in the Processing Jobs episode: an
+open-weight model that fits one GPU and sits within a few points of a
+frontier commercial model on agent tasks and science questions (see that
+episode’s chart), which is why it is worth the trouble of hosting.</p>
 <p>In this episode we will:</p>
 <ol style="list-style-type: decimal">
 <li>
