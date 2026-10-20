@@ -35,7 +35,7 @@ Done on the right data, a small fine-tuned model beats a much larger general one
 
 ![Three research tasks where a small specialist model scores above a much larger general one: CHURRO (3B) over Gemini 2.5 Pro on historical handwriting, Goedel-Prover-V2 (8B) over DeepSeek-Prover-V2 on formal proofs, MedGemma (27B) over GPT-4o on medical questions](fig/specialists-vs-large-models.png){alt="Dot plot of benchmark scores for three task-specific models against a much larger general model on the same benchmark; the specialist is ahead in each row by 6.5, 2.2 and 1.2 points"}
 
-Sources: [CHURRO, EMNLP 2025](https://arxiv.org/abs/2509.19768); Goedel-Prover-V2 (arXiv 2025); MedGemma (arXiv 2025). Scores are as reported by each model's authors.
+Sources: [CHURRO, EMNLP 2025](https://arxiv.org/abs/2509.19768); [Goedel-Prover-V2, ICLR 2026](https://arxiv.org/abs/2508.03613); [MedGemma technical report, 2025](https://arxiv.org/abs/2507.05201). Scores are as reported by each model's authors.
 
 ### The trick
 
