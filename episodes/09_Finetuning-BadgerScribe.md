@@ -132,11 +132,11 @@ GPU-seconds = FLOPs ÷ (GPU peak FLOPS × utilization)
 
 Peak FLOPS is on the GPU's data sheet: about 70 trillion per second for an A10G, 312 for an A100, 989 for an H100.
 
-Utilization is the number people forget. A GPU running one page at a time with gradient checkpointing manages 20–30% of its peak; a well-tuned multi-GPU job reaches 40–50%. Use 25% unless you have measured otherwise, and add ~50% to the FLOPs when gradient checkpointing is on, because it recomputes the forward pass during the backward pass. Both corrections sit inside the factor of two the rule promises. Then cost = GPU-hours × hourly rate + the fixed startup overhead per job (~10 minutes here).
+Utilization is how much of that peak you reach. A small job with gradient checkpointing gets 20–30%; a well-tuned multi-GPU job 40–50%. Use 25% until you have measured, and add 50% to the FLOPs if gradient checkpointing is on. Cost is GPU-hours × the hourly rate, plus about 10 minutes of startup per job.
 
-Worked for the class run: 120 pages × ~1,600 tokens (1,300 visual + 300 text) × 3 epochs = 576k tokens. LoRA on a 3.75B model (3B language model plus the vision tower): 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. An A10G peaks at about 70 TFLOPS in bf16; at 25% utilization that is 17 TFLOPS, so about 500 seconds, call it 9 minutes. The "~15 min" in the table below adds the image preprocessing on four vCPUs and the checkpointing overhead. Same arithmetic, same answer within the factor of two.
+The class run: 120 pages × 1,600 tokens × 3 passes = 576k tokens. LoRA on 3.75B parameters: 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. An A10G at 25% of 70 TFLOPS does 17 TFLOPS, so about 500 seconds, call it 9 minutes; the table below says 15 to cover image preprocessing and checkpointing.
 
-The same two rules are in `helpers.estimate_finetune_cost`, so that you can run them on a job you have not launched: your own model size, example count, tokens per example and epochs. It picks the cheapest instance that fits unless you name one, prints the memory check, GPU-hours, wall-clock, cost per run and for the whole project, and the `max_run` to set. Here it is on the class run:
+`helpers.estimate_finetune_cost` does the same arithmetic for any model size, example count, tokens per example and passes. It picks the cheapest instance that fits, or the one you name, and prints memory, GPU-hours, cost per run and per project, and the `max_run` to set:
 
 ```python
 import sys
