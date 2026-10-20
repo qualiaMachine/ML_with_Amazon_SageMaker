@@ -25,7 +25,7 @@ exercises: 15
 ## Initial setup 
 
 #### 1. Open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch_p310`**; we will use the same kernel for the next two episodes.
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch_p310`**; we will use the same kernel for the next two episodes.
 
 #### 2. CD to instance home directory
 So we all can reference the helper functions using the same path, CD to the instance's root directory, clone the lesson repository if it is not already there, and make its `scripts/` importable. The training scripts for this episode (`train_xgboost.py`) and the next (`train_nn.py`) are in that folder.
@@ -203,7 +203,7 @@ To compare our local runtime with future experiments, we'll need to know what in
 ```python
 # Replace with your notebook instance name.
 # This does NOT refer to specific ipynb files, but to the SageMaker notebook instance.
-notebook_instance_name = 'SinkOrSwim-DoeJohn-TrainClassifier'
+notebook_instance_name = 'SinkOrSwim-DoeJohn'
 
 # Describe the notebook instance (sagemaker_client was created from our session above)
 response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
@@ -642,7 +642,7 @@ To view and monitor your SageMaker training job, follow these steps in the AWS M
    - In the left-hand navigation menu, select **Training jobs**. You'll see a list of recent training jobs, which may include jobs from other users in the account.
 
 3. **Verify your training Job**  
-   - Identify your job by looking for the specific name format (e.g., `SinkOrSwim-DoeJohn-TrainClassifier-YYYY-MM-DD-HH-MM-SS-XXX`) generated when you launched the job.  Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
+   - Identify your job by looking for the specific name format (e.g., `SinkOrSwim-DoeJohn-YYYY-MM-DD-HH-MM-SS-XXX`) generated when you launched the job.  Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
 
 4. **Monitor the job status**  
    - Once you've verified the correct job, click on its name to access detailed information:

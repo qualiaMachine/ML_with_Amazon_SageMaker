@@ -22,7 +22,7 @@ exercises: 15
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Initial setup: open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/Hyperparameter-tuning.ipynb`. Select the **`conda_pytorch_p310`** kernel.
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/08_Hyperparameter-tuning.ipynb`. Select the **`conda_pytorch_p310`** kernel.
 
 ## Hyperparameter tuning in SageMaker
 To conduct efficient hyperparameter tuning with neural networks (or any model) in SageMaker, we'll leverage SageMaker's **hyperparameter tuning jobs** while carefully managing parameter ranges and model count. Here's an overview of the process, with a focus on both efficiency and cost-effectiveness.
@@ -72,7 +72,7 @@ We'll use our notebook instance name again to label the training jobs launched i
 ```python
 import boto3
 
-notebook_instance_name = 'SinkOrSwim-DoeJohn-TrainClassifier' # adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.
+notebook_instance_name = 'SinkOrSwim-DoeJohn' # adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.
 
 # the following code just verifies you have the right name for your notebook instance
 region = boto3.Session().region_name  # inherited from the notebook instance; do not hard-code a region
