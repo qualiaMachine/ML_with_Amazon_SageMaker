@@ -10,7 +10,7 @@ ACCOUNT_ID="123456789012"        # the 12-digit account id (top right of the con
 ROLES=("ml-sagemaker-use" "ml-sagemaker-bedrock-use")   # execution roles that may read the bucket
 RELEASE_V=1                      # Badger Scribe data release version
 REPO=https://github.com/carpentries-incubator/ML_with_AWS_SageMaker
-TAGS="TagSet=[{Key=Project,Value=Workshop},{Key=Name,Value=Instructor},{Key=Purpose,Value=Storage}]"
+TAGS="TagSet=[{Key=Project,Value=Workshop},{Key=Name,Value=Everyone},{Key=Purpose,Value=Storage}]"
 
 echo "== 1. bucket"
 if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then

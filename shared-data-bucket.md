@@ -130,7 +130,7 @@ except s3.exceptions.ClientError:
     print("bucket created")
 
 s3.put_bucket_tagging(Bucket=shared_bucket, Tagging={"TagSet": [
-    {"Key": "Project", "Value": "Workshop"}, {"Key": "Name", "Value": "Instructor"}, {"Key": "Purpose", "Value": "Storage"}]})
+    {"Key": "Project", "Value": "Workshop"}, {"Key": "Name", "Value": "Everyone"}, {"Key": "Purpose", "Value": "Storage"}]})
 s3.put_public_access_block(Bucket=shared_bucket, PublicAccessBlockConfiguration={
     "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})
 
