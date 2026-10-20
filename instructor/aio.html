@@ -1430,7 +1430,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2904,7 +2904,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3150,7 +3150,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3268,7 +3268,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3530,7 +3530,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -5972,7 +5972,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6018,7 +6018,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6127,8 +6127,7 @@ any links that you are not going to use.
 <div class="inner">
 <h3 class="card-title">Questions</h3>
 <ul>
-<li>When is fine-tuning worth it, and how is it different from RAG or
-prompting?</li>
+<li>When is fine-tuning worth it?</li>
 <li>Why does fine-tuning cost anywhere from a dollar to tens of
 thousands, and how do I estimate where my run falls <em>before</em> I
 launch it?</li>
@@ -6165,12 +6164,68 @@ to multi-GPU instances for larger models.</li>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb</code>.
 Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances). ## Why a
-fine-tuning episode</p>
-<p>The training episodes so far trained small models from scratch on a
-few hundred rows. Fine-tuning starts from a large pretrained model and
-changes its weights, and that puts it in a different class of
-workload:</p>
+(<code>conda_pytorch_p310</code> on older instances).</p>
+<section><h2 class="section-heading" id="why-fine-tune">Why fine-tune<a class="anchor" aria-label="anchor" href="#why-fine-tune"></a>
+</h2>
+<hr class="half-width">
+<p>General-purpose models are trained on the average of the internet,
+and research problems are rarely average. A 19th-century German hand, a
+lab’s own annotation conventions, species names, a regional dialect, the
+layout of a specific archive: the largest commercial model has seen
+little of it, and no prompt can make up for that.</p>
+<p>Done on the right data, a small fine-tuned model beats a much larger
+general one. The model we fine-tune in this episode is itself the
+example: <a href="https://github.com/stanford-oval/Churro" class="external-link">CHURRO</a>, a
+3-billion-parameter vision-language model, was fine-tuned from
+Qwen2.5-VL-3B on about 100,000 pages of historical documents, and its
+authors report that it exceeds the accuracy of Gemini 2.5 Pro on
+historical text recognition at 15.5x lower cost (<a href="https://arxiv.org/abs/2509.19768" class="external-link">paper</a>). A model that size
+also runs on one GPU you control, which matters when the data cannot
+leave your institution, when results have to be reproducible with fixed
+weights, and when the job is a million pages rather than a demo.</p>
+<div class="section level3">
+<h3 id="the-trick">The trick<a class="anchor" aria-label="anchor" href="#the-trick"></a>
+</h3>
+<p>Fine-tuning is ordinary training that starts from a trained model
+instead of random weights. You show the model your examples, it computes
+how wrong its output was, and gradient descent nudges the weights toward
+your data. Because the model already knows how to read, write and look
+at images, it needs hundreds of examples to learn your task where
+training from scratch would need millions. Everything it learned before
+stays in the weights; you are adjusting them, not replacing them.</p>
+</div>
+<div class="section level3">
+<h3 id="full-fine-tuning-is-expensive">Full fine-tuning is expensive<a class="anchor" aria-label="anchor" href="#full-fine-tuning-is-expensive"></a>
+</h3>
+<p>Nudging every weight means keeping, for every parameter, the weight
+itself, its gradient, a full-precision master copy and the optimizer’s
+two running averages. Training cannot run on the compressed 8-bit or
+4-bit weights that inference uses: gradient updates are tiny numbers
+that vanish at that precision, so the master copy has to be 32-bit
+float. That comes to about 16 bytes per parameter against 2 for
+inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune;
+a 7B model needs 112 GB, which is already a multi-GPU instance at
+<code>$25</code> an hour or more, and the bill scales with every epoch
+and every retry.</p>
+</div>
+<div class="section level3">
+<h3 id="lora">LoRA<a class="anchor" aria-label="anchor" href="#lora"></a>
+</h3>
+<p><strong>LoRA</strong> (low-rank adaptation) freezes the pretrained
+weights and trains a few million extra parameters in small matrices
+bolted onto the attention and MLP layers. The frozen weights can stay in
+16-bit, since nothing updates them, and the gradients and optimizer
+state only exist for the adapter. The adapter is about 100 MB, trains on
+a single 24 GB GPU for a 3B model, and recovers most of the gain of a
+full fine-tune for a task like this: the model still learns your hands
+and your conventions, it just learns them through the adapter. This
+episode uses LoRA.</p>
+</div>
+<div class="section level3">
+<h3 id="what-makes-it-a-different-workload">What makes it a different workload<a class="anchor" aria-label="anchor" href="#what-makes-it-a-different-workload"></a>
+</h3>
+<p>Even with LoRA, fine-tuning is unlike anything we have run so
+far:</p>
 <ul>
 <li>It needs a GPU for the whole run, not just for inference calls.</li>
 <li>It is iterative. Nobody gets the learning rate, the image resolution
@@ -6181,12 +6236,12 @@ last.</li>
 the instance is still running after you stopped paying attention.</li>
 </ul>
 <p>That combination is why fine-tuning is where research teams see
-surprise bills. Done carefully, it is also where the largest gains are:
-the Badger Scribe organizers report that LoRA on ~100 pages takes a
-small open model from 0.23 to 0.06 CER on survey notebooks in about a
-GPU-hour. This episode is about getting that kind of gain for a few
-dollars, and about knowing in advance when a run is going to cost a few
-thousand instead.</p>
+surprise bills. This episode is about getting a gain like CHURRO’s,
+scaled to one archive, for a few dollars, and about knowing in advance
+when a run is going to cost a few thousand instead. We measure the gain
+ourselves: the episode ends by scoring the base model and the fine-tuned
+model on the same held-out pages.</p>
+</div>
 <div class="section level3">
 <h3 id="the-task-badger-scribe">The task: Badger Scribe<a class="anchor" aria-label="anchor" href="#the-task-badger-scribe"></a>
 </h3>
@@ -6235,41 +6290,11 @@ for a library or a lab to have, and it is enough to move a model that
 was pre-trained on the right kind of material. Kurrent is also a
 genuinely different script from modern German cursive, so this is a case
 where the model has to learn something, not just adjust its style.</p>
-<p>We will fine-tune <a href="https://github.com/stanford-oval/Churro" class="external-link">CHURRO-3B</a>, a
-3-billion-parameter open-weight vision-language model from Stanford that
-was itself fine-tuned from Qwen2.5-VL-3B on roughly 100,000 pages of
-historical documents in 46 language clusters. It already reads old
-handwriting better than its base model does; we are teaching it
-<em>these</em> hands and <em>these</em> transcription conventions.</p>
-<div id="fine-tune-rag-or-prompt" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
+<p>We fine-tune CHURRO-3B. It already reads old handwriting across 46
+language clusters; we are teaching it <em>these</em> hands and
+<em>these</em> transcription conventions.</p>
 </div>
-<span class="callout-header">Callout</span>
-<div id="fine-tune-rag-or-prompt" class="callout-inner">
-<h3 class="callout-title">Fine-tune, RAG, or prompt?</h3>
-<div class="callout-content">
-<p>Ask what the model is missing. If it lacks <strong>facts</strong>
-(your documents, your data), retrieval-augmented generation (RAG, the
-subject of the next part of the lesson) looks them up and puts them in
-the prompt at inference time; no training is needed. If it lacks a
-<strong>skill or a style</strong> (reading Kurrent, following your lab’s
-labelling conventions, producing output in a strict format), you need to
-change the weights, and that is fine-tuning. Badger Scribe is squarely
-the second case: no amount of context will teach a model what a Kurrent
-“e” looks like.</p>
-<p>Full fine-tuning updates all 3 billion weights and needs several
-times the model’s size in GPU memory for optimizer state.
-<strong>LoRA</strong> (low-rank adaptation) freezes the model and trains
-a few million extra parameters in small matrices bolted onto the
-attention and MLP layers. The adapter is ~100 MB, trains on a single 24
-GB GPU, and recovers most of the gain of a full fine-tune for a task
-like this. We use LoRA.</p>
-</div>
-</div>
-</div>
-</div>
-<section><h2 class="section-heading" id="step-0-estimate-the-cost-before-you-launch-anything">Step 0: Estimate the cost before you launch anything<a class="anchor" aria-label="anchor" href="#step-0-estimate-the-cost-before-you-launch-anything"></a>
+</section><section><h2 class="section-heading" id="step-0-estimate-the-cost-before-you-launch-anything">Step 0: Estimate the cost before you launch anything<a class="anchor" aria-label="anchor" href="#step-0-estimate-the-cost-before-you-launch-anything"></a>
 </h2>
 <hr class="half-width">
 <p>Before launching a fine-tune, write down what it should cost. If the
@@ -10293,7 +10318,7 @@ total compare with the cost callout, and with the Bedrock run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10354,7 +10379,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -11830,7 +11855,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -12143,7 +12168,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
