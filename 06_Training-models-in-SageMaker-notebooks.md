@@ -158,7 +158,7 @@ After reviewing, discuss any questions or observations with your group.
 
 4. **Handling Local vs. SageMaker Runs**: The script uses `os.environ.get("SM_CHANNEL_TRAIN", ".")` and `os.environ.get("SM_MODEL_DIR", ".")` to detect whether it's running in SageMaker. `SM_CHANNEL_TRAIN` is the directory where SageMaker stores input training data, and `SM_MODEL_DIR` is the directory where trained models should be saved. If these environment variables are *not set* (e.g., running locally), the script defaults to `"."` (current directory).
 
-5. **Training and Saving the Model**: The dataset is converted into **XGBoost's `DMatrix` format**, which is optimized for memory and computation efficiency. The trained model is saved using `joblib.dump()` to `xgboost-model`, stored either in the SageMaker `SM_MODEL_DIR` (if running in SageMaker) or in the local directory.
+5. **Training and Saving the Model**: The dataset is converted into **XGBoost's `DMatrix` format**, which is optimized for memory and computation efficiency. The trained model is saved with XGBoost's own `save_model()` as `xgboost-model.json`, stored either in the SageMaker `SM_MODEL_DIR` (if running in SageMaker) or in the local directory. The JSON format can be loaded by any later XGBoost version, which matters here because the SageMaker container and the notebook kernel do not run the same version.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -263,7 +263,6 @@ import xgboost as xgb
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-import joblib
 from train_xgboost import preprocess_data  # importable because scripts/ is on sys.path
 
 # Load the test data
@@ -276,7 +275,8 @@ X_test, y_test = preprocess_data(test_data)
 dtest = xgb.DMatrix(X_test)
 
 # Load the trained model from the saved file
-model = joblib.load('./xgboost-model')  # the file the local %run wrote to the current directory
+model = xgb.Booster()
+model.load_model('./xgboost-model.json')  # the file the local %run wrote to the current directory
 
 # Make predictions on the test set
 preds = model.predict(dtest)
@@ -479,21 +479,21 @@ Additionally, we define a TrainingInput object containing the training data's S3
 
 #### What did that cost?
 
-![Timeline of one training job: instance requested, container pulled, data downloaded, script runs, outputs uploaded, instance released; TrainingTimeInSeconds spans the script, BillableTimeInSeconds spans everything after the instance is ready](fig/job-billable-time.svg){alt="Timeline of a SageMaker training job showing which phases count as training time and which as billable time"}
-`describe_training_job` returns two durations: `TrainingTimeInSeconds` (your script running) and `BillableTimeInSeconds` (the time the instance was reserved for you, which also includes pulling the container and downloading data). SageMaker bills per second, with no rounding, so cost is billable seconds x instance count x hourly rate. We'll wrap this in a small helper and call it after every job in this lesson.
+![Timeline of one training job: instance requested (not billed), then container pulled, data downloaded, script runs, outputs uploaded (all billed), instance released](fig/job-billable-time.svg){alt="Timeline of a SageMaker training job showing the unbilled wait for an instance and the billed phases from container pull to model upload"}
+`describe_training_job` returns `BillableTimeInSeconds`: the seconds the instance was yours, from container pull to model upload, per instance. It also returns `TrainingTimeInSeconds`, which on on-demand instances is the same number (it only differs on spot instances), so do not expect it to isolate your script. The minute or so before that, while SageMaker finds an instance, is not billed. SageMaker bills per second, with no rounding, so cost is billable seconds x instance count x hourly rate. We'll wrap this in a small helper and call it after every job in this lesson.
 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
     desc = session.sagemaker_client.describe_training_job(TrainingJobName=job_name)  # the job's full record: status, timings, resources, output
-    # TrainingTimeInSeconds: your script running; BillableTimeInSeconds: from instance ready to released, per instance
-    billable = desc["BillableTimeInSeconds"] * desc["ResourceConfig"]["InstanceCount"]
-    print(f"{job_name}: status {desc['TrainingJobStatus']}, training {desc.get('TrainingTimeInSeconds', 0)/60:.1f} min, billable {billable/60:.1f} min, cost ${billable/3600*price_per_hour:.2f} at ${price_per_hour}/h")
+    n = desc["ResourceConfig"]["InstanceCount"]
+    billable = desc["BillableTimeInSeconds"] * n   # BillableTimeInSeconds: container pull to model upload, charged per instance
+    print(f"{job_name}: status {desc['TrainingJobStatus']}, billable {billable/60:.1f} min on {n} instance(s), cost ${billable/3600*price_per_hour:.3f} at ${price_per_hour}/h")
     return desc
 
 desc = job_cost_report(xgboost_estimator.latest_training_job.name, price_per_hour)  # latest_training_job: the job fit() just ran
 ```
 
-Compare this with the estimate you made above. The gap between training time and billable time is the startup overhead of every job; it is the same whether you train for one minute or one hour.
+Compare this with the estimate you made above. The job's log (scroll up in the `fit()` output) shows the script itself trained in a fraction of a second, yet the bill is about two minutes. The rest is container pull, data download and model upload: the fixed overhead of every job, the same whether you train for one minute or one hour. The extra minute between calling `fit()` and the first billed second is SageMaker finding an instance, which is free.
 
 #### Model results
 With this code, the training results and model artifacts are saved in a subfolder called `xgboost` in your specified S3 bucket. This folder (`s3://{bucket_name}/xgboost/`) will be automatically created if it doesn't already exist, and will contain:
@@ -539,7 +539,6 @@ import xgboost as xgb
 import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
-import joblib
 from train_xgboost import preprocess_data
 
 # Load the test data
@@ -551,8 +550,9 @@ X_test, y_test = preprocess_data(test_data)
 # Convert the test features to DMatrix for XGBoost
 dtest = xgb.DMatrix(X_test)
 
-# Load the trained model from the saved file
-model = joblib.load('./xgboost-model')
+# Load the trained model from the saved file (the container's XGBoost 1.7 wrote it; the kernel's newer XGBoost reads it)
+model = xgb.Booster()
+model.load_model('./xgboost-model.json')
 
 # Make predictions on the test set
 preds = model.predict(dtest)

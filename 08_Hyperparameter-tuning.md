@@ -253,8 +253,9 @@ The money is spent by the training jobs the tuner launches, and that is where Sa
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
     desc = session.sagemaker_client.describe_training_job(TrainingJobName=job_name)
-    billable = desc["BillableTimeInSeconds"] * desc["ResourceConfig"]["InstanceCount"]
-    print(f"{job_name}: status {desc['TrainingJobStatus']}, training {desc.get('TrainingTimeInSeconds', 0)/60:.1f} min, billable {billable/60:.1f} min, cost ${billable/3600*price_per_hour:.2f} at ${price_per_hour}/h")
+    n = desc["ResourceConfig"]["InstanceCount"]
+    billable = desc["BillableTimeInSeconds"] * n
+    print(f"{job_name}: status {desc['TrainingJobStatus']}, billable {billable/60:.1f} min on {n} instance(s), cost ${billable/3600*price_per_hour:.3f} at ${price_per_hour}/h")
     return desc
 
 def tuning_cost_report(tuner, price_per_hour):
@@ -453,14 +454,13 @@ with torch.no_grad():
 ### Conclusions
 In about 20 minutes, we produced a model that is about 80% accurate on the test set. However, this performance does come at a cost (albeit manageable if you've stuck with our advice thus far). This next section will help you assess the total compute time that was used by your tuning job.
 
-In SageMaker, training time and billing time (extracted in our code above) are expected to differ for training jobs, including the child jobs of a tuning job; the tuning job itself costs nothing. Here's a breakdown of what's happening:
+Each child job is billed like any training job; the tuning job itself costs nothing. Here's a breakdown of what's happening:
 
-* Training Time (`TrainingTimeInSeconds`): This is the time that each training job's script takes to run, from start to end. This metric represents the pure time spent on training without considering the compute resources.
+* Billable Time (`BillableTimeInSeconds`): the seconds each child job's instance was yours, from container pull through the script to model upload. The wait for an instance before that is not billed. (`TrainingTimeInSeconds` is the same number on on-demand instances; it only differs on spot.)
 
-* Billing Time (`BillableTimeInSeconds`): This includes the training time plus the startup overhead of pulling the container and downloading the data, and is adjusted for the resources used. Billing time considers:
+* Instance Count: billable seconds are multiplied by the number of instances the job used.
 
-Instance Count: The number of instances used for training affects billing time.
-Per-Second Billing: SageMaker bills per second, with no rounding to minutes or hours, and multiplies the billable seconds by the instance count used. For short jobs, the startup overhead makes the difference between training and billing time more pronounced.
+* Per-Second Billing: SageMaker bills per second, with no rounding to minutes or hours. For short jobs like ours, container pull and data download are most of the bill, which is why ten short jobs cost more than one job that trained ten times as long.
 
 For convenience, we have added this as a function in helpers.py
 
@@ -550,7 +550,7 @@ Two side effects worth anticipating: an epoch now takes several optimizer steps 
 - **Start with one job**: `max_jobs=1, max_parallel_jobs=1` first, to catch script and configuration errors before paying for a search.
 - **Parallelism buys time, not quality**: Cost is per child training job; `max_parallel_jobs` changes wall-clock time and, with the Bayesian strategy, how much each job can learn from the ones before it. 2-4 parallel jobs is a good default.
 - **Tags propagate from the tuner**: Tags on the tuner are copied to every child training job, the one case in SageMaker where tags are inherited.
-- **Read the bill from the child jobs**: SageMaker bills per second of `BillableTimeInSeconds` x instance count on each training job; the gap to `TrainingTimeInSeconds` is startup overhead, and it dominates short jobs.
+- **Read the bill from the child jobs**: SageMaker bills per second of `BillableTimeInSeconds` x instance count on each training job; container pull and data download are inside that number and dominate short jobs.
 - **Transform the test set with the training scaler**: Load the saved scaler and pass it to `preprocess_data(test_df, scaler=scaler)`; never refit on test data.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::

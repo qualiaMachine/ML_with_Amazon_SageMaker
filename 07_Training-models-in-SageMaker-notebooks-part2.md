@@ -190,9 +190,9 @@ We'll also bring back the `job_cost_report()` helper from the previous episode, 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
     desc = session.sagemaker_client.describe_training_job(TrainingJobName=job_name)  # the job record the console shows
-    # BillableTimeInSeconds = startup + training, charged per instance; TrainingTimeInSeconds is the script alone
-    billable = desc["BillableTimeInSeconds"] * desc["ResourceConfig"]["InstanceCount"]
-    print(f"{job_name}: status {desc['TrainingJobStatus']}, training {desc.get('TrainingTimeInSeconds', 0)/60:.1f} min, billable {billable/60:.1f} min, cost ${billable/3600*price_per_hour:.2f} at ${price_per_hour}/h")
+    n = desc["ResourceConfig"]["InstanceCount"]
+    billable = desc["BillableTimeInSeconds"] * n   # container pull to model upload, charged per instance
+    print(f"{job_name}: status {desc['TrainingJobStatus']}, billable {billable/60:.1f} min on {n} instance(s), cost ${billable/3600*price_per_hour:.3f} at ${price_per_hour}/h")
     return desc
 
 # us-east-1 on-demand rates (2026-10-16); check the instances page for your region
@@ -415,7 +415,7 @@ Either way, the rule of thumb stands: a bigger single instance first, and multip
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - **Efficient data handling**: The `.npz` format is optimized for efficient loading, reducing I/O overhead and enabling batch compatibility for PyTorch's `DataLoader`.
-- **Startup dominates small jobs**: Every SageMaker training job pays a few minutes of provisioning, container pull and data download; `job_cost_report()` shows how much of the bill that is.
+- **Startup dominates small jobs**: Every SageMaker training job waits a minute or so for an instance (not billed), then spends one to three minutes on container pull and data download (billed) before the script runs; for a job whose script finishes in seconds, that overhead is the whole bill.
 - **GPU training**: While beneficial for larger models or datasets, GPUs may introduce overhead for smaller tasks; selecting the right instance type is critical for cost-efficiency.
 - **Data parallelism vs. model parallelism**: Data parallelism splits data across instances and synchronizes model weights, suitable for typical neural network tasks. Model parallelism, which divides model layers, is ideal for very large models that exceed memory capacity.
 - **`instance_count` alone is not distributed training**: Without `distribution=` on the estimator and distributed code in the script, `instance_count=2` runs the full script on the full data on each instance and bills twice.
