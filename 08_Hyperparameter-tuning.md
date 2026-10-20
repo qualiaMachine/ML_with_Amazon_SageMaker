@@ -97,6 +97,7 @@ job_tags = [
     {"Key": "Project", "Value": project},
     {"Key": "Purpose", "Value": purpose},
 ]
+print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 ```
 
 Next, we'll configure the baseline estimator that we plan to do hyperparameter search on.

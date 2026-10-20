@@ -182,6 +182,7 @@ job_tags = [
     {"Key": "Project", "Value": project},
     {"Key": "Purpose", "Value": purpose},
 ]
+print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 ```
 
 We'll also bring back the `job_cost_report()` helper from the previous episode, plus the hourly rates of the instances we're about to use. Estimate first: 1000 full-batch epochs took a few seconds locally, so expect roughly 1 minute of training plus ~3 minutes of startup, i.e. about $0.01 on `ml.m5.large`.
