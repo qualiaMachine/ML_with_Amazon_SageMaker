@@ -4,6 +4,8 @@ title: 'Shared data bucket: staging before each term'
 
 Learners create exactly one bucket of their own (S3 episode) and write every output there. Everything larger than the Titanic CSVs lives in **one shared, read-only bucket** that instructors stage before class, so the class holds one copy of each dataset instead of fifty. This page is the whole staging procedure; the episodes assume the layout below.
 
+The whole procedure below is also a script, `instructors/stage-shared-bucket.sh`: set the bucket name, region and account id at its top and run it from a notebook instance terminal. The sections below explain what it does.
+
 ## Layout
 
 ```
