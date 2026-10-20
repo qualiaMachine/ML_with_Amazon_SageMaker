@@ -2,6 +2,9 @@
 # Stage the shared read-only bucket for the workshop. Run once per term from a
 # SageMaker notebook instance terminal (AWS CLI, Python and ~10 GB of scratch
 # disk under /tmp). Idempotent: every step is a sync or a create-if-missing.
+# Run it as an identity that can administer the bucket (your SSO role in CloudShell
+# or on a laptop); a notebook instance's learner role can create the bucket but
+# is refused on tagging and bucket policy. Set those in the console if so.
 set -euo pipefail
 
 BUCKET="ml-marathon-shared"      # the shared bucket's name
