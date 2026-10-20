@@ -249,6 +249,8 @@ For this lesson, requests round to nothing: two CSVs read a few dozen times. Ove
  
 **2. Repeat the above calculation using the following dataset sizes: 10 GB, 100 GB, 1 TB (1024 GB)**
 
+**3. Wrong region.** Suppose the 100 GB bucket had been created in us-east-1 but the SageMaker jobs run in us-east-2. The 100 training reads are now cross-region transfers at $0.02 per GB each. What does that add, and how does it compare to the download charge?
+
 :::::::::::::::::::::::::::::::::::: solution
 
 ### Solution
@@ -284,6 +286,10 @@ Using the S3 Standard rate in us-east-1:
    - **Total Cost**: **$115.71004**
 
 These costs assume no additional request charges beyond those for storage, the download, and `GET` requests for training.
+
+Two things to notice. The `GET` line is the same four-thousandths of a cent at every size: request costs depend on how many objects you touch, not how big they are. And the download line grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a dataset of any size, moving it out of AWS costs several times more than keeping it there for a month, so plan to keep large data in the region and bring code to it, not the other way round.
+
+3. **Wrong region, 100 GB**: 100 reads x 100 GB x $0.02 = **$200** of inter-region transfer, on top of the $11.30 above. The one-time download to a laptop was $9; the misplaced bucket costs twenty times that, silently, and keeps costing with every job. This is why the region is the first setting on the create-bucket form and why the warning above tells you to check it before clicking Create.
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
