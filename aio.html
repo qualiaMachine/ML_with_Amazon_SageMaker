@@ -2377,7 +2377,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -3912,23 +3912,38 @@ extra minute between calling <code>fit()</code> and the first billed
 second is SageMaker finding an instance, which is free.</p>
 </div>
 <div class="section level4">
-<h4 id="model-results">Model results<a class="anchor" aria-label="anchor" href="#model-results"></a>
+<h4 id="what-landed-in-s3">What landed in S3<a class="anchor" aria-label="anchor" href="#what-landed-in-s3"></a>
 </h4>
-<p>With this code, the training results and model artifacts are saved in
-a subfolder called <code>xgboost</code> in your specified S3 bucket.
-This folder (<code>s3://{bucket_name}/xgboost/</code>) will be
-automatically created if it doesn’t already exist, and will contain:</p>
+<p>Open the <a href="https://us-east-2.console.aws.amazon.com/s3/home?region=us-east-2" class="external-link">S3
+console</a> and look at what the job wrote.</p>
+<p>In <strong>your bucket</strong>, under
+<code>xgboost/&lt;job-name&gt;/</code> (the prefix from
+<code>output_path</code> plus the job name):</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Model “artifacts”</strong>: The trained model file (often a
-<code>.tar.gz</code> file) that SageMaker saves in the
-<code>output_path</code>.</li>
+<code>output/model.tar.gz</code>: the model artifacts, a tarball of
+whatever the script saved to <code>SM_MODEL_DIR</code> (here
+<code>xgboost-model.json</code>). This is the file we download
+below.</li>
 <li>
-<strong>Logs and metrics</strong>: Any metrics and logs related to
-the training job, stored in the same <code>xgboost</code> folder.</li>
+<code>profiler-output/</code> and <code>debug-output/</code>: small
+files from SageMaker’s built-in profiler, written for every training
+job. Ignore them; they can be turned off with
+<code>disable_profiler=True</code> on the estimator.</li>
 </ol>
-<p>This setup allows for convenient access to both the trained model and
-related output for later evaluation or deployment.</p>
+<p>The job’s log is not in S3; it is in CloudWatch, reachable from the
+job’s page in the SageMaker console.</p>
+<p>A <strong>second bucket</strong> also appeared,
+<code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code>. The SageMaker
+SDK creates this <em>default bucket</em> the first time it needs
+somewhere to stage files: before the job started, <code>fit()</code>
+zipped <code>source_dir</code> and uploaded it there as
+<code>&lt;job-name&gt;/source/sourcedir.tar.gz</code> for the training
+instance to download. It holds kilobytes per job and nothing you need,
+but it is shared by everyone in the account and carries no tags, so it
+is one more thing on the cleanup list. If you want everything in your
+own bucket, create the session as
+<code>sagemaker.Session(default_bucket=bucket_name)</code>.</p>
 </div>
 </div>
 <div class="section level3">
@@ -4818,7 +4833,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5939,7 +5954,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -5985,7 +6000,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6475,7 +6490,7 @@ realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -7143,7 +7158,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect startup to be close to 10 minutes and the two evaluations to
@@ -7261,7 +7276,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -7301,7 +7316,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Startup (~10 min, <code>$0.44</code> at <code>$2.61</code>/h) does
 not speed up: the container pull and the S3 downloads are the same on
@@ -7350,7 +7365,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p>Checkpointing. If the instance is reclaimed, the job restarts and, as
 written, starts training from scratch. For a 25-minute job that costs 25
@@ -9054,7 +9069,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -9368,7 +9383,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10198,7 +10213,7 @@ total compare with the cost callout, and with the Bedrock run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10259,7 +10274,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -11959,6 +11974,12 @@ Empty, then Delete). Download anything you want to keep first, once:
 egress is <code>$0.09</code>/GB. Leave the shared data bucket alone; it
 is the instructors’.</li>
 <li>
+<strong>Default SDK bucket</strong>
+<code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code>: created
+automatically the first time a job staged its code. In the shared
+account the instructors delete it; on your own account, empty and delete
+it with the rest.</li>
+<li>
 <strong>Training, tuning and Processing jobs</strong>: confirm none
 are still running (SageMaker → each job list, filter by status
 <em>InProgress</em>). Completed jobs hold no billable resource; their
@@ -12058,6 +12079,16 @@ it (the Titanic files and <code>.npz</code> arrays at the root, and the
 <td>S3 episode</td>
 <td>Yes: storage per GB-month</td>
 <td>S3 console → Empty bucket → Delete bucket</td>
+</tr>
+<tr>
+<td>The SDK’s default bucket
+<code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code> (code tarballs
+staged by every <code>fit()</code> and <code>run()</code>)</td>
+<td>Training episode, automatically</td>
+<td>Yes, a little: storage per GB-month, shared by the whole
+account</td>
+<td>Instructors delete it at the end of term; on your own account, empty
+and delete it like any other bucket</td>
 </tr>
 <tr>
 <td>Controller notebook instance (<code>ml.t3.medium</code>)</td>

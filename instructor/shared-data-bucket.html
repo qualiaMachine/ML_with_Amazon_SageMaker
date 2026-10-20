@@ -424,10 +424,8 @@ in <strong>one shared, read-only bucket</strong> that instructors stage
 before class, so the class holds one copy of each dataset instead of
 fifty. This page is the whole staging procedure; the episodes assume the
 layout below.</p>
-<p>The whole procedure below is also a script,
-<code>instructors/stage-shared-bucket.sh</code>: set the bucket name,
-region and account id at its top and run it from a notebook instance
-terminal. The sections below explain what it does.</p>
+<p>The ready-to-paste version is the <em>From CloudShell</em> section at
+the end of this page; the sections before it explain each step.</p>
 <section><h2 class="section-heading" id="layout">Layout<a class="anchor" aria-label="anchor" href="#layout"></a></h2>
 <hr class="half-width"><pre><code>s3://&lt;shared-bucket&gt;/
     wattbot/
@@ -537,115 +535,82 @@ notebook instance with at least 10 GB free (not CloudShell):</p>
 </div>
 <p>About 7.5 GB; it only needs redoing if the Hub repository changes or
 the bucket is rebuilt.</p>
-</section><section><h2 class="section-heading" id="from-a-sagemaker-notebook">From a SageMaker notebook<a class="anchor" aria-label="anchor" href="#from-a-sagemaker-notebook"></a></h2>
-<hr class="half-width"><p>The same procedure as the script, as cells for a notebook on a
-<code>ml.t3.medium</code> instance with the <code>conda_python3</code>
-kernel. The notebook’s role must be allowed to create buckets and set
-bucket policies; if cell 2 fails with <code>AccessDenied</code>, create
-the bucket and paste the policy through the console (as in the S3
-episode) and continue from cell 3. <strong>Cell 1: names.</strong> The
-shared bucket follows the lesson’s example name; the account id and
-region come from the session.</p>
+</section><section><h2 class="section-heading" id="the-whole-procedure-from-cloudshell">The whole procedure, from CloudShell<a class="anchor" aria-label="anchor" href="#the-whole-procedure-from-cloudshell"></a></h2>
+<hr class="half-width"><p>The learner execution role on a notebook instance can create the
+bucket but is refused on tagging, bucket policy and uploads (the bucket
+policy deliberately grants it read only). So the staging is done as your
+own SSO identity in <strong>CloudShell</strong> (console toolbar, same
+region). Three blocks, pasted in order. CloudShell’s home is 1 GB, which
+is why the work happens one asset at a time under <code>/tmp</code> and
+the model is streamed rather than downloaded.</p>
+<p><strong>Block 1: bucket, tags, public access, policy.</strong> Fill
+in the account id.</p>
 <div class="codewrapper sourceCode" id="cb6">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="im">import</span> json, boto3, sagemaker</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>session <span class="op">=</span> sagemaker.Session()</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>region <span class="op">=</span> session.boto_region_name</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>account_id <span class="op">=</span> boto3.client(<span class="st">"sts"</span>).get_caller_identity()[<span class="st">"Account"</span>]</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>s3 <span class="op">=</span> boto3.client(<span class="st">"s3"</span>, region_name<span class="op">=</span>region)</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1" aria-label="code-block-6-9"></a>roles <span class="op">=</span> [<span class="st">"ml-sagemaker-use"</span>, <span class="st">"ml-sagemaker-bedrock-use"</span>]   <span class="co"># execution roles that may read the bucket</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1" aria-label="code-block-6-10"></a>release_v <span class="op">=</span> <span class="dv">1</span>                                               <span class="co"># Badger Scribe data release version</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1" aria-label="code-block-6-11"></a>repo <span class="op">=</span> <span class="st">"https://github.com/carpentries-incubator/ML_with_AWS_SageMaker"</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1" aria-label="code-block-6-12"></a><span class="bu">print</span>(region, account_id, shared_bucket)</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="va">BUCKET</span><span class="op">=</span>ml-marathon-shared</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a><span class="va">REGION</span><span class="op">=</span>us-east-2</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a><span class="va">ACCOUNT_ID</span><span class="op">=</span>123456789012</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a><span class="ex">aws</span> s3api head-bucket <span class="at">--bucket</span> <span class="va">$BUCKET</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="ex">aws</span> s3api create-bucket <span class="at">--bucket</span> <span class="va">$BUCKET</span> <span class="at">--region</span> <span class="va">$REGION</span> <span class="at">--create-bucket-configuration</span> LocationConstraint=<span class="va">$REGION</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a><span class="ex">aws</span> s3api put-bucket-tagging <span class="at">--bucket</span> <span class="va">$BUCKET</span> <span class="at">--tagging</span> <span class="st">'TagSet=[{Key=Project,Value=Workshop},{Key=Name,Value=Everyone},{Key=Purpose,Value=Storage}]'</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a><span class="ex">aws</span> s3api put-public-access-block <span class="at">--bucket</span> <span class="va">$BUCKET</span> <span class="at">--public-access-block-configuration</span> BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a><span class="fu">cat</span> <span class="op">&gt;</span> /tmp/policy.json <span class="op">&lt;&lt;JSON</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a><span class="st">{"Version": "2012-10-17", "Statement": [{"Effect": "Allow",</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1" aria-label="code-block-6-9"></a><span class="st">  "Principal": {"AWS": ["arn:aws:iam::</span><span class="va">$ACCOUNT_ID</span><span class="st">:role/ml-sagemaker-use", "arn:aws:iam::</span><span class="va">$ACCOUNT_ID</span><span class="st">:role/ml-sagemaker-bedrock-use"]},</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1" aria-label="code-block-6-10"></a><span class="st">  "Action": ["s3:GetObject", "s3:ListBucket"],</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1" aria-label="code-block-6-11"></a><span class="st">  "Resource": ["arn:aws:s3:::</span><span class="va">$BUCKET</span><span class="st">", "arn:aws:s3:::</span><span class="va">$BUCKET</span><span class="st">/*"]}]}</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1" aria-label="code-block-6-12"></a><span class="op">JSON</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1" aria-label="code-block-6-13"></a><span class="ex">aws</span> s3api put-bucket-policy <span class="at">--bucket</span> <span class="va">$BUCKET</span> <span class="at">--policy</span> file:///tmp/policy.json</span></code></pre>
 </div>
-<p><strong>Cell 2: create the bucket, tag it, block public access,
-attach the read-only policy.</strong></p>
+<p><strong>Block 2: WattBot and Badger Scribe.</strong></p>
 <div class="codewrapper sourceCode" id="cb7">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="cf">try</span>:</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a>    s3.head_bucket(Bucket<span class="op">=</span>shared_bucket)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a>    <span class="bu">print</span>(<span class="st">"bucket exists"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a><span class="cf">except</span> s3.exceptions.ClientError:</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1" aria-label="code-block-7-5"></a>    s3.create_bucket(Bucket<span class="op">=</span>shared_bucket, CreateBucketConfiguration<span class="op">=</span>{<span class="st">"LocationConstraint"</span>: region})</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1" aria-label="code-block-7-6"></a>    <span class="bu">print</span>(<span class="st">"bucket created"</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1" aria-label="code-block-7-7"></a></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1" aria-label="code-block-7-8"></a>s3.put_bucket_tagging(Bucket<span class="op">=</span>shared_bucket, Tagging<span class="op">=</span>{<span class="st">"TagSet"</span>: [</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1" aria-label="code-block-7-9"></a>    {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: <span class="st">"Workshop"</span>}, {<span class="st">"Key"</span>: <span class="st">"Name"</span>, <span class="st">"Value"</span>: <span class="st">"Everyone"</span>}, {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: <span class="st">"Storage"</span>}]})</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1" aria-label="code-block-7-10"></a>s3.put_public_access_block(Bucket<span class="op">=</span>shared_bucket, PublicAccessBlockConfiguration<span class="op">=</span>{</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1" aria-label="code-block-7-11"></a>    <span class="st">"BlockPublicAcls"</span>: <span class="va">True</span>, <span class="st">"IgnorePublicAcls"</span>: <span class="va">True</span>, <span class="st">"BlockPublicPolicy"</span>: <span class="va">True</span>, <span class="st">"RestrictPublicBuckets"</span>: <span class="va">True</span>})</span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1" aria-label="code-block-7-12"></a></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1" aria-label="code-block-7-13"></a>policy <span class="op">=</span> {<span class="st">"Version"</span>: <span class="st">"2012-10-17"</span>, <span class="st">"Statement"</span>: [{</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1" aria-label="code-block-7-14"></a>    <span class="st">"Effect"</span>: <span class="st">"Allow"</span>,</span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1" aria-label="code-block-7-15"></a>    <span class="st">"Principal"</span>: {<span class="st">"AWS"</span>: [<span class="ss">f"arn:aws:iam::</span><span class="sc">{</span>account_id<span class="sc">}</span><span class="ss">:role/</span><span class="sc">{</span>r<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> r <span class="kw">in</span> roles]},</span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1" aria-label="code-block-7-16"></a>    <span class="st">"Action"</span>: [<span class="st">"s3:GetObject"</span>, <span class="st">"s3:ListBucket"</span>],</span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1" aria-label="code-block-7-17"></a>    <span class="st">"Resource"</span>: [<span class="ss">f"arn:aws:s3:::</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">"</span>, <span class="ss">f"arn:aws:s3:::</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">/*"</span>]}]}</span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1" aria-label="code-block-7-18"></a>s3.put_bucket_policy(Bucket<span class="op">=</span>shared_bucket, Policy<span class="op">=</span>json.dumps(policy))</span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1" aria-label="code-block-7-19"></a><span class="bu">print</span>(<span class="st">"read-only policy attached for"</span>, roles)</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="va">REPO</span><span class="op">=</span>https://github.com/carpentries-incubator/ML_with_AWS_SageMaker</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="va">V</span><span class="op">=</span>1   <span class="co"># Badger Scribe data release version</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a><span class="fu">rm</span> <span class="at">-rf</span> /tmp/stage <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> /tmp/stage <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> /tmp/stage</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a><span class="fu">git</span> clone <span class="at">-q</span> <span class="at">--depth</span> 1 <span class="va">$REPO</span> lesson</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1" aria-label="code-block-7-5"></a><span class="ex">pip</span> install <span class="at">-q</span> <span class="at">--user</span> pandas requests huggingface_hub</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1" aria-label="code-block-7-6"></a><span class="fu">unzip</span> <span class="at">-q</span> <span class="at">-o</span> lesson/data/data.zip <span class="at">-d</span> data</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1" aria-label="code-block-7-7"></a><span class="fu">mkdir</span> <span class="at">-p</span> wattbot <span class="kw">&amp;&amp;</span> <span class="fu">cp</span> data/data/wattbot/metadata.csv data/data/wattbot/train_QA.csv wattbot/</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1" aria-label="code-block-7-8"></a><span class="ex">python3</span> lesson/scripts/build_wattbot_corpus.py <span class="at">--metadata</span> wattbot/metadata.csv <span class="at">--out</span> wattbot/corpus.zip</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1" aria-label="code-block-7-9"></a><span class="ex">aws</span> s3 sync wattbot/ s3://<span class="va">$BUCKET</span>/wattbot/</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1" aria-label="code-block-7-10"></a><span class="va">R</span><span class="op">=</span><span class="va">$REPO</span>/releases/download/badger-scribe-data-v<span class="va">$V</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1" aria-label="code-block-7-11"></a><span class="cf">for</span> a <span class="kw">in</span> labels images-train images-test<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1" aria-label="code-block-7-12"></a>  <span class="fu">rm</span> <span class="at">-rf</span> bs <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> bs</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1" aria-label="code-block-7-13"></a>  <span class="ex">curl</span> <span class="at">-sSL</span> <span class="at">-o</span> bs/<span class="va">$a</span>.zip <span class="va">$R</span>/badger-scribe-v<span class="va">$V</span>-<span class="va">$a</span>.zip</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1" aria-label="code-block-7-14"></a>  <span class="fu">unzip</span> <span class="at">-q</span> <span class="at">-o</span> bs/<span class="va">$a</span>.zip <span class="at">-d</span> bs/badger-scribe <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> bs/<span class="va">$a</span>.zip</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1" aria-label="code-block-7-15"></a>  <span class="ex">aws</span> s3 sync bs/badger-scribe/ s3://<span class="va">$BUCKET</span>/badger-scribe/</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1" aria-label="code-block-7-16"></a>  <span class="fu">rm</span> <span class="at">-rf</span> bs</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1" aria-label="code-block-7-17"></a><span class="cf">done</span></span></code></pre>
 </div>
-<p><strong>Cell 3: WattBot inputs</strong> (metadata, questions, and the
-PDF corpus built from the metadata). <code>/tmp</code> on a notebook
-instance is a small RAM disk, so the work directory goes on the
-persistent volume; these files are a few hundred MB.</p>
+<p><strong>Block 3: CHURRO-3B weights</strong>, streamed from Hugging
+Face into S3 file by file (about 7.5 GB, ten minutes or so, nothing
+written to disk).</p>
 <div class="codewrapper sourceCode" id="cb8">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" tabindex="-1" aria-label="code-block-8-1"></a>work <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/stage"</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1" aria-label="code-block-8-2"></a><span class="op">!</span>rm <span class="op">-</span>rf {work} <span class="op">&amp;&amp;</span> mkdir <span class="op">-</span>p {work}</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1" aria-label="code-block-8-3"></a><span class="op">%</span>cd {work}</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1" aria-label="code-block-8-4"></a><span class="op">!</span>git clone <span class="op">-</span>q <span class="op">--</span>depth <span class="dv">1</span> {repo} lesson</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1" aria-label="code-block-8-5"></a><span class="op">!</span>pip install <span class="op">-</span>q pandas requests huggingface_hub</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1" aria-label="code-block-8-6"></a><span class="op">!</span>unzip <span class="op">-</span>q <span class="op">-</span>o lesson<span class="op">/</span>data<span class="op">/</span>data.<span class="bu">zip</span> <span class="op">-</span>d data</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1" aria-label="code-block-8-7"></a><span class="op">!</span>mkdir <span class="op">-</span>p wattbot <span class="op">&amp;&amp;</span> cp data<span class="op">/</span>data<span class="op">/</span>wattbot<span class="op">/</span>metadata.csv data<span class="op">/</span>data<span class="op">/</span>wattbot<span class="op">/</span>train_QA.csv wattbot<span class="op">/</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1" aria-label="code-block-8-8"></a><span class="op">!</span>python lesson<span class="op">/</span>scripts<span class="op">/</span>build_wattbot_corpus.py <span class="op">--</span>metadata wattbot<span class="op">/</span>metadata.csv <span class="op">--</span>out wattbot<span class="op">/</span>corpus.<span class="bu">zip</span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1" aria-label="code-block-8-9"></a><span class="op">!</span>aws s3 sync wattbot<span class="op">/</span> s3:<span class="op">//</span>{shared_bucket}<span class="op">/</span>wattbot<span class="op">/</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1" aria-label="code-block-8-1"></a><span class="ex">python3</span> <span class="at">-</span> <span class="op">&lt;&lt;'EOF'</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1" aria-label="code-block-8-2"></a><span class="st">import boto3, requests</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1" aria-label="code-block-8-3"></a><span class="st">from huggingface_hub import HfApi, hf_hub_url</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1" aria-label="code-block-8-4"></a><span class="st">s3 = boto3.client("s3")</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1" aria-label="code-block-8-5"></a><span class="st">bucket, model_id, prefix = "ml-marathon-shared", "stanford-oval/churro-3B", "badger-scribe/model/churro-3B"</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1" aria-label="code-block-8-6"></a><span class="st">for f in [f for f in HfApi().list_repo_files(model_id) if not f.startswith(".")]:</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1" aria-label="code-block-8-7"></a><span class="st">    with requests.get(hf_hub_url(model_id, f), stream=True, timeout=60) as r:</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1" aria-label="code-block-8-8"></a><span class="st">        r.raise_for_status(); r.raw.decode_content = True</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1" aria-label="code-block-8-9"></a><span class="st">        s3.upload_fileobj(r.raw, bucket, f"{prefix}/{f}")</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1" aria-label="code-block-8-10"></a><span class="st">    print("uploaded", f)</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1" aria-label="code-block-8-11"></a><span class="op">EOF</span></span></code></pre>
 </div>
-<p><strong>Cell 4: Badger Scribe data release</strong>, one asset at a
-time.</p>
+<p><strong>Check, then clean up.</strong></p>
 <div class="codewrapper sourceCode" id="cb9">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a>R <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>repo<span class="sc">}</span><span class="ss">/releases/download/badger-scribe-data-v</span><span class="sc">{</span>release_v<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a><span class="cf">for</span> a <span class="kw">in</span> [<span class="st">"labels"</span>, <span class="st">"images-train"</span>, <span class="st">"images-test"</span>]:</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>    <span class="op">!</span>rm <span class="op">-</span>rf bs <span class="op">&amp;&amp;</span> mkdir <span class="op">-</span>p bs</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a>    <span class="op">!</span>curl <span class="op">-</span>sSL <span class="op">-</span>o bs<span class="op">/</span>{a}.<span class="bu">zip</span> {R}<span class="op">/</span>badger<span class="op">-</span>scribe<span class="op">-</span>v{release_v}<span class="op">-</span>{a}.<span class="bu">zip</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a>    <span class="op">!</span>unzip <span class="op">-</span>q <span class="op">-</span>o bs<span class="op">/</span>{a}.<span class="bu">zip</span> <span class="op">-</span>d bs<span class="op">/</span>badger<span class="op">-</span>scribe <span class="op">&amp;&amp;</span> rm bs<span class="op">/</span>{a}.<span class="bu">zip</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a>    <span class="op">!</span>aws s3 sync bs<span class="op">/</span>badger<span class="op">-</span>scribe<span class="op">/</span> s3:<span class="op">//</span>{shared_bucket}<span class="op">/</span>badger<span class="op">-</span>scribe<span class="op">/</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a><span class="op">!</span>rm <span class="op">-</span>rf bs</span></code></pre>
-</div>
-<p><strong>Cell 5: CHURRO-3B weights</strong>, streamed from Hugging
-Face into S3 file by file (about 7.5 GB in total; nothing is written to
-the instance’s disk, so the volume size does not matter).</p>
-<div class="codewrapper sourceCode" id="cb10">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="im">import</span> requests</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="im">from</span> huggingface_hub <span class="im">import</span> HfApi, hf_hub_url</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1" aria-label="code-block-10-3"></a></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1" aria-label="code-block-10-4"></a>model_id <span class="op">=</span> <span class="st">"stanford-oval/churro-3B"</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1" aria-label="code-block-10-5"></a>prefix <span class="op">=</span> <span class="st">"badger-scribe/model/churro-3B"</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1" aria-label="code-block-10-6"></a>files <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> HfApi().list_repo_files(model_id) <span class="cf">if</span> <span class="kw">not</span> f.startswith(<span class="st">"."</span>)]</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1" aria-label="code-block-10-7"></a><span class="cf">for</span> f <span class="kw">in</span> files:</span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1" aria-label="code-block-10-8"></a>    <span class="cf">with</span> requests.get(hf_hub_url(model_id, f), stream<span class="op">=</span><span class="va">True</span>, timeout<span class="op">=</span><span class="dv">60</span>) <span class="im">as</span> r:</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1" aria-label="code-block-10-9"></a>        r.raise_for_status()</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1" aria-label="code-block-10-10"></a>        r.raw.decode_content <span class="op">=</span> <span class="va">True</span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1" aria-label="code-block-10-11"></a>        s3.upload_fileobj(r.raw, shared_bucket, <span class="ss">f"</span><span class="sc">{</span>prefix<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>f<span class="sc">}</span><span class="ss">"</span>)   <span class="co"># multipart upload straight from the stream</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1" aria-label="code-block-10-12"></a>    <span class="bu">print</span>(<span class="st">"uploaded"</span>, f)</span></code></pre>
-</div>
-<p><strong>Cell 6: check</strong>, then clean up.</p>
-<div class="codewrapper sourceCode" id="cb11">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="op">!</span>aws s3 ls s3:<span class="op">//</span>{shared_bucket}<span class="op">/</span> <span class="op">--</span>recursive <span class="op">--</span>summarize <span class="op">|</span> tail <span class="op">-</span><span class="dv">2</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a><span class="op">!</span>aws s3 ls s3:<span class="op">//</span>{shared_bucket}<span class="op">/</span>badger<span class="op">-</span>scribe<span class="op">/</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a><span class="op">!</span>aws s3 ls s3:<span class="op">//</span>{shared_bucket}<span class="op">/</span>badger<span class="op">-</span>scribe<span class="op">/</span>model<span class="op">/</span>churro<span class="op">-</span><span class="dv">3</span><span class="er">B</span><span class="op">/</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a><span class="op">!</span>aws s3 ls s3:<span class="op">//</span>{shared_bucket}<span class="op">/</span>wattbot<span class="op">/</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker</span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a><span class="op">!</span>rm <span class="op">-</span>rf {work}</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="ex">aws</span> s3 ls s3://<span class="va">$BUCKET</span>/ <span class="at">--recursive</span> <span class="at">--summarize</span> <span class="kw">|</span> <span class="fu">tail</span> <span class="at">-2</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a><span class="ex">aws</span> s3 ls s3://<span class="va">$BUCKET</span>/wattbot/</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a><span class="ex">aws</span> s3 ls s3://<span class="va">$BUCKET</span>/badger-scribe/</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a><span class="ex">aws</span> s3 ls s3://<span class="va">$BUCKET</span>/badger-scribe/model/churro-3B/</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a><span class="bu">cd</span> / <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/stage</span></code></pre>
 </div>
 <p>Still by hand: run the fine-tuning episode’s homework estimator once
 and copy <code>train_summary.json</code>, <code>eval_before.csv</code>

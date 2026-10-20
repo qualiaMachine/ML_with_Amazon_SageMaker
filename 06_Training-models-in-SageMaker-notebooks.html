@@ -1321,20 +1321,35 @@ extra minute between calling <code>fit()</code> and the first billed
 second is SageMaker finding an instance, which is free.</p>
 </div>
 <div class="section level4">
-<h4 id="model-results">Model results<a class="anchor" aria-label="anchor" href="#model-results"></a></h4>
-<p>With this code, the training results and model artifacts are saved in
-a subfolder called <code>xgboost</code> in your specified S3 bucket.
-This folder (<code>s3://{bucket_name}/xgboost/</code>) will be
-automatically created if it doesn’t already exist, and will contain:</p>
+<h4 id="what-landed-in-s3">What landed in S3<a class="anchor" aria-label="anchor" href="#what-landed-in-s3"></a></h4>
+<p>Open the <a href="https://us-east-2.console.aws.amazon.com/s3/home?region=us-east-2" class="external-link">S3
+console</a> and look at what the job wrote.</p>
+<p>In <strong>your bucket</strong>, under
+<code>xgboost/&lt;job-name&gt;/</code> (the prefix from
+<code>output_path</code> plus the job name):</p>
 <ol style="list-style-type: decimal"><li>
-<strong>Model “artifacts”</strong>: The trained model file (often a
-<code>.tar.gz</code> file) that SageMaker saves in the
-<code>output_path</code>.</li>
+<code>output/model.tar.gz</code>: the model artifacts, a tarball of
+whatever the script saved to <code>SM_MODEL_DIR</code> (here
+<code>xgboost-model.json</code>). This is the file we download
+below.</li>
 <li>
-<strong>Logs and metrics</strong>: Any metrics and logs related to
-the training job, stored in the same <code>xgboost</code> folder.</li>
-</ol><p>This setup allows for convenient access to both the trained model and
-related output for later evaluation or deployment.</p>
+<code>profiler-output/</code> and <code>debug-output/</code>: small
+files from SageMaker’s built-in profiler, written for every training
+job. Ignore them; they can be turned off with
+<code>disable_profiler=True</code> on the estimator.</li>
+</ol><p>The job’s log is not in S3; it is in CloudWatch, reachable from the
+job’s page in the SageMaker console.</p>
+<p>A <strong>second bucket</strong> also appeared,
+<code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code>. The SageMaker
+SDK creates this <em>default bucket</em> the first time it needs
+somewhere to stage files: before the job started, <code>fit()</code>
+zipped <code>source_dir</code> and uploaded it there as
+<code>&lt;job-name&gt;/source/sourcedir.tar.gz</code> for the training
+instance to download. It holds kilobytes per job and nothing you need,
+but it is shared by everyone in the account and carries no tags, so it
+is one more thing on the cleanup list. If you want everything in your
+own bucket, create the session as
+<code>sagemaker.Session(default_bucket=bucket_name)</code>.</p>
 </div>
 </div>
 <div class="section level3">

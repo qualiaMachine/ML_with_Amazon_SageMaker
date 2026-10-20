@@ -578,6 +578,12 @@ Empty, then Delete). Download anything you want to keep first, once:
 egress is <code>$0.09</code>/GB. Leave the shared data bucket alone; it
 is the instructors’.</li>
 <li>
+<strong>Default SDK bucket</strong>
+<code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code>: created
+automatically the first time a job staged its code. In the shared
+account the instructors delete it; on your own account, empty and delete
+it with the rest.</li>
+<li>
 <strong>Training, tuning and Processing jobs</strong>: confirm none
 are still running (SageMaker → each job list, filter by status
 <em>InProgress</em>). Completed jobs hold no billable resource; their
@@ -661,6 +667,14 @@ it (the Titanic files and <code>.npz</code> arrays at the root, and the
 <td>S3 episode</td>
 <td>Yes: storage per GB-month</td>
 <td>S3 console → Empty bucket → Delete bucket</td>
+</tr><tr><td>The SDK’s default bucket
+<code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code> (code tarballs
+staged by every <code>fit()</code> and <code>run()</code>)</td>
+<td>Training episode, automatically</td>
+<td>Yes, a little: storage per GB-month, shared by the whole
+account</td>
+<td>Instructors delete it at the end of term; on your own account, empty
+and delete it like any other bucket</td>
 </tr><tr><td>Controller notebook instance (<code>ml.t3.medium</code>)</td>
 <td>Notebooks as controllers</td>
 <td>Yes while InService; its volume bills while Stopped</td>
