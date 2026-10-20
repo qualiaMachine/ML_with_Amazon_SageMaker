@@ -537,33 +537,37 @@ and training cannot.)</p>
 <div class="callout-content">
 <table class="table"><colgroup><col width="20%"><col width="20%"><col width="20%"><col width="20%"><col width="20%"></colgroup><thead><tr><th>Job</th>
 <th>Instance</th>
-<th>$/h</th>
+<th>
+<code>$</code>/h</th>
 <th>Expected duration</th>
 <th>Cost</th>
 </tr></thead><tbody><tr><td>Embed ~3,000 chunks</td>
 <td>
 <code>ml.g5.xlarge</code> (A10G, 24 GB)</td>
-<td>$1.41</td>
+<td><code>$1.41</code></td>
 <td>~8 min incl. startup</td>
-<td>~$0.20</td>
+<td>~<code>$0.20</code>
+</td>
 </tr><tr><td>RAG over the training questions with Qwen3.8-27B</td>
 <td>
 <code>ml.g6e.xlarge</code> (L40S, 48 GB)</td>
-<td>$2.61</td>
+<td><code>$2.61</code></td>
 <td>~30 min: 5 startup, ~5 installing vLLM, ~5 downloading 27 GB of
 weights, the rest generating</td>
-<td>~$1.30</td>
+<td>~<code>$1.30</code>
+</td>
 </tr><tr><td>Controller notebook</td>
 <td><code>ml.t3.medium</code></td>
-<td>$0.05</td>
+<td><code>$0.05</code></td>
 <td>2 h</td>
-<td>$0.10</td>
-</tr></tbody></table><p>About $1.60 for the episode, and the GPUs are off the moment each
-script ends. Both jobs carry <code>max_runtime_in_seconds</code>, so a
-hung job costs at most the cap. Compare the same pipeline on a GPU
-notebook instance (the optional GPU-notebook episode at the end of the
-lesson): the hardware is the same, but the meter runs until someone
-stops it, and a forgotten <code>ml.g6e.xlarge</code> is $63 a day.</p>
+<td><code>$0.10</code></td>
+</tr></tbody></table><p>About <code>$1.60</code> for the episode, and the GPUs are off the
+moment each script ends. Both jobs carry
+<code>max_runtime_in_seconds</code>, so a hung job costs at most the
+cap. Compare the same pipeline on a GPU notebook instance (the optional
+GPU-notebook episode at the end of the lesson): the hardware is the
+same, but the meter runs until someone stops it, and a forgotten
+<code>ml.g6e.xlarge</code> is <code>$63</code> a day.</p>
 <p>The trade-off is latency. A job takes minutes to start, so this
 pattern is for batch questions, not a chatbot. For interactive use,
 Bedrock answers in seconds; for interactive use of a model Bedrock does
@@ -1025,12 +1029,12 @@ returns <code>CreationTime</code>, <code>ProcessingStartTime</code> and
 <code>rag_processor.latest_job.job_name</code>. For each job, compute
 the minutes between creation and start (provisioning, before the
 instance is billed) and between start and end (the billed window), and
-price the billed window at $1.41/h for the <code>ml.g5.xlarge</code> and
-$2.61/h for the <code>ml.g6e.xlarge</code>. Then, from the RAG job’s
-CloudWatch log timestamps, estimate how much of its billed window was
-setup (pip install and weight download) and how much was generation. How
-does the total compare with the cost callout, and with the Bedrock
-run?</p>
+price the billed window at <code>$1.41</code>/h for the
+<code>ml.g5.xlarge</code> and <code>$2.61</code>/h for the
+<code>ml.g6e.xlarge</code>. Then, from the RAG job’s CloudWatch log
+timestamps, estimate how much of its billed window was setup (pip
+install and weight download) and how much was generation. How does the
+total compare with the cost callout, and with the Bedrock run?</p>
 </div>
 </div>
 </div>
@@ -1060,17 +1064,19 @@ run?</p>
 <span id="cb12-14"><a href="#cb12-14" tabindex="-1" aria-label="code-block-12-14"></a>total <span class="op">+=</span> job_cost(rag_processor.latest_job.job_name, <span class="fl">2.61</span>)</span>
 <span id="cb12-15"><a href="#cb12-15" tabindex="-1" aria-label="code-block-12-15"></a><span class="bu">print</span>(<span class="ss">f"GPU total for the episode: $</span><span class="sc">{</span>total<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>Typical numbers: the embedding job bills 5-6 minutes (about $0.13),
-the RAG job 22-28 minutes (about $1.00-$1.20), so roughly $1.20-$1.40 of
-GPU time against the callout’s $1.50. In the RAG job’s log, the first
-10-12 minutes of the billed window are pip and the download; the model
-loads for another minute or two; the remaining ~10 minutes are the
-questions, about 15 seconds each for two generation calls. So well over
-half of what you paid for was setup, which is the argument for a custom
-container (skip the pip) and for keeping an <code>HF_HOME</code> cache
-on S3 (skip the download) once a job is run routinely. The Bedrock run
-of the same questions cost cents, and the self-hosted route is only
-justified here because the model is not in the catalog.</p>
+<p>Typical numbers: the embedding job bills 5-6 minutes (about
+<code>$0.13</code>), the RAG job 22-28 minutes (about
+<code>$1.00</code>-<code>$1.20</code>), so roughly
+<code>$1.20</code>-<code>$1.40</code> of GPU time against the callout’s
+<code>$1.50</code>. In the RAG job’s log, the first 10-12 minutes of the
+billed window are pip and the download; the model loads for another
+minute or two; the remaining ~10 minutes are the questions, about 15
+seconds each for two generation calls. So well over half of what you
+paid for was setup, which is the argument for a custom container (skip
+the pip) and for keeping an <code>HF_HOME</code> cache on S3 (skip the
+download) once a job is run routinely. The Bedrock run of the same
+questions cost cents, and the self-hosted route is only justified here
+because the model is not in the catalog.</p>
 </div>
 </div>
 </div>
@@ -1106,17 +1112,19 @@ vLLM or downloading the weights. The status becomes <code>Stopped</code>
 (the failure reason reads <code>MaxRuntimeExceeded</code>), the output
 prefix is empty because the script never reached the point of writing
 <code>wattbot_solutions.csv</code>, and the bill is the full 600
-seconds: 600 / 3600 × $2.61 ≈ $0.44 for nothing. A cap has to leave room
-for the setup that precedes the work, which is why ours is four times
-the 30-minute estimate rather than ten percent over it.</p>
+seconds: 600 / 3600 × <code>$2.61</code> ≈ <code>$0.44</code> for
+nothing. A cap has to leave room for the setup that precedes the work,
+which is why ours is four times the 30-minute estimate rather than ten
+percent over it.</p>
 <p>Under the caps we set, the worst case for a job that hangs (a stuck
-download, a model that never finishes loading) is 2 h × $1.41 =
-<strong>$2.82</strong> for the embedding job and 2 h × $2.61 =
-<strong>$5.22</strong> for the RAG job. A <code>ml.g6e.xlarge</code>
-notebook instance forgotten over a weekend is 64 h × $2.61 =
-<strong>$167</strong>, and nothing caps it. That is the difference
-between a job and an instance: the job’s worst case is a number you
-chose before you launched it.</p>
+download, a model that never finishes loading) is 2 h ×
+<code>$1.41</code> = <strong><code>$2.82</code></strong> for the
+embedding job and 2 h × <code>$2.61</code> =
+<strong><code>$5.22</code></strong> for the RAG job. A
+<code>ml.g6e.xlarge</code> notebook instance forgotten over a weekend is
+64 h × <code>$2.61</code> = <strong><code>$167</code></strong>, and
+nothing caps it. That is the difference between a job and an instance:
+the job’s worst case is a number you chose before you launched it.</p>
 </div>
 </div>
 </div>

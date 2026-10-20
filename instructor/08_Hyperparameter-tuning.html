@@ -854,7 +854,7 @@ keeping track of the best model parameters based on validation
 accuracy.</p>
 <p>Estimate first: one child job is the same ~1 minute of training plus
 ~3 minutes of startup we saw in the previous episode, so about
-$0.01.</p>
+<code>$0.01</code>.</p>
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -926,9 +926,10 @@ simultaneously.</strong></p>
 without overloading resources or risking inefficient exploration, making
 <code>max_parallel_jobs=2</code> a solid default for most use cases.</p>
 <p>Estimate first: 10 child jobs at roughly 3-4 billable minutes each is
-30-40 billable minutes on <code>ml.m5.large</code>, so about $0.06 in
-total (the 10,000-epoch configurations run a little longer). Wall-clock
-is five rounds of two jobs, so expect 15-20 minutes.</p>
+30-40 billable minutes on <code>ml.m5.large</code>, so about
+<code>$0.06</code> in total (the 10,000-epoch configurations run a
+little longer). Wall-clock is five rounds of two jobs, so expect 15-20
+minutes.</p>
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1256,11 +1257,12 @@ and the runtime print.</p>
 <div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul><li>
-<strong>Cost</strong>: about the same (~$0.06). You pay per child
-training job, and each job’s billable time does not depend on how many
-other jobs are running. (If your account has a quota on concurrent
-<code>ml.m5.large</code> training instances, the request may be rejected
-or throttled, which is the practical limit on this approach.)</li>
+<strong>Cost</strong>: about the same (~<code>$0.06</code>). You pay
+per child training job, and each job’s billable time does not depend on
+how many other jobs are running. (If your account has a quota on
+concurrent <code>ml.m5.large</code> training instances, the request may
+be rejected or throttled, which is the practical limit on this
+approach.)</li>
 <li>
 <strong>Wall-clock</strong>: roughly one job’s duration (4-5
 minutes) instead of five rounds of two, so about 4-5x faster.</li>

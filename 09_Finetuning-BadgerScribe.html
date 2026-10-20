@@ -467,8 +467,8 @@ meter stops the moment it finishes?</li>
 <h3 class="card-title">Objectives</h3>
 <ul><li>Explain what drives the cost of a fine-tuning run (model size ×
 tokens × epochs × number of attempts) and why the same three habits
-apply at $1 and at $10,000: a time cap, a small first run, and an
-estimate written down before launch.</li>
+apply at <code>$1</code> and at <code>$10,000</code>: a time cap, a
+small first run, and an estimate written down before launch.</li>
 <li>Launch a LoRA fine-tune of a 3B vision-language model (CHURRO-3B) as
 a <code>HuggingFace</code> training job on a single 24 GB GPU, with
 tags, a unique job name and a <code>max_run</code> cap.</li>
@@ -585,30 +585,38 @@ October 2026):</p>
 </tr></thead><tbody><tr><td>
 <strong>This episode:</strong> 3B, LoRA, 120 Kurrent pages × 2
 epochs</td>
-<td>1 × A10G (<code>ml.g5.xlarge</code>, $1.41/h), ~25 min</td>
+<td>1 × A10G (<code>ml.g5.xlarge</code>, <code>$1.41</code>/h), ~25
+min</td>
 <td>0.4</td>
-<td><strong>~$0.60</strong></td>
+<td><strong>~<code>$0.60</code></strong></td>
 </tr><tr><td>Homework: 3B, LoRA, all 251 training pages × 2 epochs</td>
 <td>1 × A10G, ~45 min</td>
 <td>0.75</td>
-<td>~$1.05</td>
+<td>~<code>$1.05</code>
+</td>
 </tr><tr><td>7B full fine-tune, 50k documents × 3 epochs (the challenge
 below)</td>
-<td>8 × A100 (<code>ml.p4d.24xlarge</code>, $25.25/h), ~6 h</td>
+<td>8 × A100 (<code>ml.p4d.24xlarge</code>, <code>$25.25</code>/h), ~6
+h</td>
 <td>45</td>
-<td>~$140</td>
+<td>~<code>$140</code>
+</td>
 </tr><tr><td>70B LoRA, one day</td>
 <td>8 × A100, 24 h</td>
 <td>192</td>
-<td>~$600</td>
+<td>~<code>$600</code>
+</td>
 </tr><tr><td>CHURRO-3B itself: full fine-tune, 100k pages, 5 epochs</td>
-<td>32 × H100 for ~25 h (4 × <code>ml.p5.48xlarge</code>, $63.30/h)</td>
+<td>32 × H100 for ~25 h (4 × <code>ml.p5.48xlarge</code>,
+<code>$63.30</code>/h)</td>
 <td>800</td>
-<td>~$6,300</td>
+<td>~<code>$6,300</code>
+</td>
 </tr><tr><td>70B full fine-tune, two days</td>
 <td>4 × <code>ml.p5.48xlarge</code>, 48 h</td>
 <td>1,536</td>
-<td>~$12,000</td>
+<td>~<code>$12,000</code>
+</td>
 </tr><tr><td>Any row above × a 10-run hyperparameter sweep</td>
 <td></td>
 <td></td>
@@ -619,19 +627,20 @@ you get the benefit for sixty cents because you are <em>adapting</em>
 it, not retraining it. Starting from a model that already knows most of
 the task is the largest cost saving available, and it is decided before
 any GPU is involved. The sweep row: a first run is rarely the last, so a
-“$140 fine-tune” is usually a $700 to $1,400 project. That is the number
-that surprises research groups. (The 7B row is worked out in the
-challenge below; the 70B rows are rule-of-thumb magnitudes; the CHURRO
-figures come from a published review of the paper.)</p>
+“<code>$140</code> fine-tune” is usually a <code>$700</code> to
+<code>$1,400</code> project. That is the number that surprises research
+groups. (The 7B row is worked out in the challenge below; the 70B rows
+are rule-of-thumb magnitudes; the CHURRO figures come from a published
+review of the paper.)</p>
 <p>The habits in this episode are cheap practice at sixty cents a run.
-At $140 a run they are the difference between a project and a budget
-incident.</p>
+At <code>$140</code> a run they are the difference between a project and
+a budget incident.</p>
 </div>
 <div class="section level3">
 <h3 id="back-of-the-envelope-will-it-fit-and-how-long-will-it-take">Back of the envelope: will it fit, and how long will it take?<a class="anchor" aria-label="anchor" href="#back-of-the-envelope-will-it-fit-and-how-long-will-it-take"></a></h3>
 <p>Two rules of thumb answer most of the question before you touch a
 console. They are good to within a factor of two, which is what you need
-to tell a $5 run from a $500 one.</p>
+to tell a <code>$5</code> run from a <code>$500</code> one.</p>
 <p><strong>1. Memory: will it fit on the GPU?</strong> Count bytes per
 parameter for what you are doing, multiply by the parameter count, then
 add a few GB for activations (more for long sequences and big
@@ -731,10 +740,11 @@ the job, not to save money.</p>
 <div class="callout-content">
 <p>A lab wants to <strong>fully fine-tune a 7B model</strong> on 50,000
 documents of ~2,000 tokens for 3 epochs. They are choosing between
-<code>ml.p4d.24xlarge</code> (8 × A100 40 GB, $25.25/h, ~312 TFLOPS bf16
-per GPU) and renting a single <code>ml.g5.xlarge</code>. Using the two
-rules: does it fit on the g5? How many GPU-hours on the p4d, and what
-does one run cost? What does a realistic project cost?</p>
+<code>ml.p4d.24xlarge</code> (8 × A100 40 GB, <code>$25.25</code>/h,
+~312 TFLOPS bf16 per GPU) and renting a single
+<code>ml.g5.xlarge</code>. Using the two rules: does it fit on the g5?
+How many GPU-hours on the p4d, and what does one run cost? What does a
+realistic project cost?</p>
 </div>
 </div>
 </div>
@@ -743,7 +753,7 @@ does one run cost? What does a realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -751,16 +761,16 @@ GB holds it with the model sharded.</p>
 <p>Tokens: 50,000 × 2,000 × 3 = 3 × 10^8. FLOPs: 6 × 7 × 10^9 × 3 × 10^8
 ≈ 1.26 × 10^19. Per GPU at 312 TFLOPS × 25% utilization = 78 TFLOPS:
 1.26 × 10^19 / 7.8 × 10^13 ≈ 1.6 × 10^5 GPU-seconds ≈ 45 GPU-hours,
-which is about 6 hours of wall-clock on 8 GPUs, about $140 for one run
-(the “7B full fine-tune” row in the table above). A team that has
-measured 40% utilization on its own jobs would get 28 GPU-hours and
-~$90; the rule is for before you have measured.</p>
+which is about 6 hours of wall-clock on 8 GPUs, about <code>$140</code>
+for one run (the “7B full fine-tune” row in the table above). A team
+that has measured 40% utilization on its own jobs would get 28 GPU-hours
+and ~<code>$90</code>; the rule is for before you have measured.</p>
 <p>A realistic project is not one run. The first run finds a data bug,
 the second a bad learning rate, then two or three are compared, then the
-one that worked is rerun on the final data: five to ten runs, so $700 to
-$1,400, before anyone touches a hyperparameter sweep. That is the number
-to put in the proposal, and it is why the three habits matter more as
-the model gets bigger.</p>
+one that worked is rerun on the final data: five to ten runs, so
+<code>$700</code> to <code>$1,400,</code> before anyone touches a
+hyperparameter sweep. That is the number to put in the proposal, and it
+is why the three habits matter more as the model gets bigger.</p>
 </div>
 </div>
 </div>
@@ -773,35 +783,36 @@ multi-GPU SageMaker training instances, same price list:</p>
 <table class="table"><thead><tr><th>Instance</th>
 <th>GPU</th>
 <th>GPU memory</th>
-<th>$/hour</th>
+<th>
+<code>$</code>/hour</th>
 </tr></thead><tbody><tr><td><code>ml.g4dn.xlarge</code></td>
 <td>1 × T4</td>
 <td>16 GB</td>
-<td>$0.74</td>
+<td><code>$0.74</code></td>
 </tr><tr><td><code>ml.g6.xlarge</code></td>
 <td>1 × L4</td>
 <td>24 GB</td>
-<td>$1.13</td>
+<td><code>$1.13</code></td>
 </tr><tr><td><code>ml.g5.xlarge</code></td>
 <td>1 × A10G</td>
 <td>24 GB</td>
-<td>$1.41</td>
+<td><code>$1.41</code></td>
 </tr><tr><td><code>ml.g6e.xlarge</code></td>
 <td>1 × L40S</td>
 <td>48 GB</td>
-<td>$2.61</td>
+<td><code>$2.61</code></td>
 </tr><tr><td><code>ml.g5.12xlarge</code></td>
 <td>4 × A10G</td>
 <td>96 GB</td>
-<td>$7.09</td>
+<td><code>$7.09</code></td>
 </tr><tr><td><code>ml.p4d.24xlarge</code></td>
 <td>8 × A100</td>
 <td>320 GB</td>
-<td>$25.25</td>
+<td><code>$25.25</code></td>
 </tr><tr><td><code>ml.p5.48xlarge</code></td>
 <td>8 × H100</td>
 <td>640 GB</td>
-<td>$63.30</td>
+<td><code>$63.30</code></td>
 </tr></tbody></table><p>Multi-GPU instances are the right tool when the model, its optimizer
 state and a batch do not fit on one GPU: a full fine-tune of a 7B model,
 or anything at 70B. They are the wrong tool when the job <em>does</em>
@@ -853,20 +864,20 @@ after, all inside one job:</p>
 </tr></thead><tbody><tr><td>Startup: container pull, ~130 MB of images, 7.5 GB of model weights
 (from the shared bucket)</td>
 <td>~10 min</td>
-<td>$0.24</td>
+<td><code>$0.24</code></td>
 </tr><tr><td>Score 15 holdout pages with the base model, ~10 s each</td>
 <td>~3 min</td>
-<td>$0.07</td>
+<td><code>$0.07</code></td>
 </tr><tr><td>Training: 120 pages × 2 epochs, ~2.5 s per page with gradient
 checkpointing</td>
 <td>~10 min</td>
-<td>$0.24</td>
+<td><code>$0.24</code></td>
 </tr><tr><td>Score the same 15 pages with the fine-tuned model</td>
 <td>~3 min</td>
-<td>$0.07</td>
+<td><code>$0.07</code></td>
 </tr><tr><td><strong>One run</strong></td>
 <td><strong>~25 min</strong></td>
-<td><strong>~$0.60</strong></td>
+<td><strong>~<code>$0.60</code></strong></td>
 </tr></tbody></table><p>Training time scales linearly with pages × epochs, and roughly
 linearly with image resolution (every 28 × 28 pixel block of the page
 becomes one token in the model’s sequence). Doubling
@@ -887,24 +898,25 @@ weekend.</p>
 </tr></thead><tbody><tr><td>Controller notebook (no GPU needed)</td>
 <td><code>ml.t3.medium</code></td>
 <td>3 h</td>
-<td>$0.15</td>
+<td><code>$0.15</code></td>
 </tr><tr><td>Mini fine-tune with before/after scoring</td>
 <td><code>ml.g5.xlarge</code></td>
 <td>~25 min</td>
-<td>$0.60</td>
+<td><code>$0.60</code></td>
 </tr><tr><td>Exercise 1: same job at 2 megapixels</td>
 <td><code>ml.g5.xlarge</code></td>
 <td>~35 min</td>
-<td>$0.80</td>
+<td><code>$0.80</code></td>
 </tr><tr><td><strong>Total</strong></td>
 <td></td>
 <td></td>
-<td><strong>~$1.55</strong></td>
+<td><strong>~<code>$1.55</code></strong></td>
 </tr></tbody></table><p>Compare the classic mistake: doing all of this interactively on a
 <code>ml.g5.xlarge</code> <em>notebook</em> instance. The class itself
 costs about the same, but a notebook instance keeps billing after you
-close the tab. Forgotten over a weekend: $90. Forgotten for a month:
-$1,029. A training job cannot be forgotten, because it ends.</p>
+close the tab. Forgotten over a weekend: <code>$90</code>. Forgotten for
+a month: <code>$1,029</code>. A training job cannot be forgotten,
+because it ends.</p>
 <div id="the-three-habits" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1362,7 +1374,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Expect startup to be close to 10 minutes and the two evaluations to
 be 2–4 minutes each. Training is the line most likely to differ: if you
@@ -1370,7 +1382,7 @@ measured 2.5 s/page, 240 page-passes is 10 minutes; at 4 s/page it is
 16.</li>
 <li>At 2.5 s/page: 502 passes is 21 minutes, plus ~13 minutes of
 evaluation at 10 s/page, plus 10 minutes startup, so about 45 minutes
-and $1.05. Scale every line by the ratio you measured.</li>
+and <code>$1.05</code>. Scale every line by the ratio you measured.</li>
 </ol></div>
 </div>
 </div>
@@ -1411,9 +1423,9 @@ have in common:</p>
 <p>Three numbers: the base model, 10 minutes of training on 120 pages,
 and 20 minutes on 251. The second gap is what more data and more time
 buy, and it cost about fifty cents. Whether that dollar is worth it
-depends on the gap; whether the next $140 is worth it is the same
-question at a different scale, and the only way to answer it is to
-measure, as you just did.</p>
+depends on the gap; whether the next <code>$140</code> is worth it is
+the same question at a different scale, and the only way to answer it is
+to measure, as you just did.</p>
 <div id="why-the-holdout-number-flatters-you" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1474,7 +1486,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -1496,11 +1508,11 @@ misreading small characters such as the <code>½</code> fractions.</p>
 <h3 class="callout-title">Exercise 2: Cheaper per run, or just
 faster?</h3>
 <div class="callout-content">
-<p><code>ml.g6e.xlarge</code> (one L40S, 48 GB) costs $2.61/h, 1.85x the
-price of <code>ml.g5.xlarge</code>, and runs this workload roughly
-2.5–3x faster. It also has twice the GPU memory, so
-<code>batch_size</code> can be 2 or 4 instead of 1, which uses the GPU
-more efficiently.</p>
+<p><code>ml.g6e.xlarge</code> (one L40S, 48 GB) costs
+<code>$2.61</code>/h, 1.85x the price of <code>ml.g5.xlarge</code>, and
+runs this workload roughly 2.5–3x faster. It also has twice the GPU
+memory, so <code>batch_size</code> can be 2 or 4 instead of 1, which
+uses the GPU more efficiently.</p>
 <p>Using the Step 0 “The run” table, estimate the cost of the class job
 on <code>ml.g6e.xlarge</code>. Then do the same for the homework run (21
 min of training, 13 min of evaluation, 10 min of startup on the g5).
@@ -1514,21 +1526,22 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
-<p>Startup (~10 min, $0.44 at $2.61/h) does not speed up: the container
-pull and the S3 downloads are the same on any instance. For the class
-job, training drops from ~10 to ~4 minutes and each evaluation from ~3
-to ~1 minute, so the job is about 16 minutes and ~$0.70: a little
-<em>more</em> than the $0.60 g5 run, because on a job this short the
-fixed overhead dominates.</p>
-<p>The homework run on the g5 is 21 + 13 + 10 = 44 minutes, about $1.03.
-On the g6e at 2.5–3x: ~8 minutes of training, ~5 of evaluation, the same
-10 of startup, about 23 minutes and ~$1.00. Break-even, at this size.
-The g6e only wins once training dominates startup: at four epochs, or at
-2 megapixels, or on a thousand pages, the g5 bill grows linearly while
-the g6e bill grows at a third of the slope, and then the faster card is
-cheaper per run.</p>
+<p>Startup (~10 min, <code>$0.44</code> at <code>$2.61</code>/h) does
+not speed up: the container pull and the S3 downloads are the same on
+any instance. For the class job, training drops from ~10 to ~4 minutes
+and each evaluation from ~3 to ~1 minute, so the job is about 16 minutes
+and ~<code>$0.70</code>: a little <em>more</em> than the
+<code>$0.60</code> g5 run, because on a job this short the fixed
+overhead dominates.</p>
+<p>The homework run on the g5 is 21 + 13 + 10 = 44 minutes, about
+<code>$1.03</code>. On the g6e at 2.5–3x: ~8 minutes of training, ~5 of
+evaluation, the same 10 of startup, about 23 minutes and
+~<code>$1.00</code>. Break-even, at this size. The g6e only wins once
+training dominates startup: at four epochs, or at 2 megapixels, or on a
+thousand pages, the g5 bill grows linearly while the g6e bill grows at a
+third of the slope, and then the faster card is cheaper per run.</p>
 <p>The hourly rate is the wrong thing to compare; the cost per run is
 what matters, and the fixed overhead is a larger share of it on faster
 hardware. The catch is quotas: the account needs a service quota for
@@ -1562,7 +1575,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Checkpointing. If the instance is reclaimed, the job restarts and, as
 written, starts training from scratch. For a 25-minute job that costs 25
@@ -1578,10 +1591,10 @@ interruptions and capacity waits are not worth it.</p>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="homework-the-full-run-and-optionally-a-kaggle-submission">Homework: the full run and (optionally) a Kaggle submission<a class="anchor" aria-label="anchor" href="#homework-the-full-run-and-optionally-a-kaggle-submission"></a></h2>
-<hr class="half-width"><p>Everything below is the same pattern at a larger scale: about $1.05
-for the fine-tune and $0.80 for inference, roughly an hour and a half of
-wall-clock time that you do not need to sit through. Launch, go do
-something else, come back.</p>
+<hr class="half-width"><p>Everything below is the same pattern at a larger scale: about
+<code>$1.05</code> for the fine-tune and <code>$0.80</code> for
+inference, roughly an hour and a half of wall-clock time that you do not
+need to sit through. Launch, go do something else, come back.</p>
 <div class="section level3">
 <h3 id="the-full-fine-tune">The full fine-tune<a class="anchor" aria-label="anchor" href="#the-full-fine-tune"></a></h3>
 <p>Same estimator with the page slice removed, all 251 training pages,

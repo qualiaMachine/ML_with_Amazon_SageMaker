@@ -642,10 +642,10 @@ fitted <code>StandardScaler</code>, and we save it with
 <span id="cb7-17"><a href="#cb7-17" tabindex="-1" aria-label="code-block-7-17"></a><span class="bu">print</span>(X_train.shape, X_val.shape)</span></code></pre>
 </div>
 <p>Next, we will upload our compressed files (and the scaler) to our S3
-bucket. Storage is fairly cheap on AWS (around $0.023 per GB per month),
-but be mindful of uploading too much data. It may be convenient to store
-a preprocessed version of the data at times, but try not to store too
-many versions that aren’t being actively used.</p>
+bucket. Storage is fairly cheap on AWS (around <code>$0.023</code> per
+GB per month), but be mindful of uploading too much data. It may be
+convenient to store a preprocessed version of the data at times, but try
+not to store too many versions that aren’t being actively used.</p>
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -714,7 +714,7 @@ is anonymous on the bill. Define them once here and pass
 the previous episode, plus the hourly rates of the instances we’re about
 to use. Estimate first: 1000 full-batch epochs took a few seconds
 locally, so expect roughly 1 minute of training plus ~3 minutes of
-startup, i.e. about $0.01 on <code>ml.m5.large</code>.</p>
+startup, i.e. about <code>$0.01</code> on <code>ml.m5.large</code>.</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -824,9 +824,9 @@ X_train, y_train = X_train.to(device), y_train.to(device)</code></pre>
 <h3 class="callout-title">CPU or GPU: predict, then measure</h3>
 <div class="callout-content">
 <p>We’re about to run the identical job on an
-<code>ml.g4dn.xlarge</code> (one NVIDIA T4 GPU, about $0.74/hour)
-instead of the <code>ml.m5.large</code> ($0.115/hour). Before you run
-the cell:</p>
+<code>ml.g4dn.xlarge</code> (one NVIDIA T4 GPU, about
+<code>$0.74</code>/hour) instead of the <code>ml.m5.large</code>
+(<code>$0.115</code>/hour). Before you run the cell:</p>
 <ol style="list-style-type: decimal"><li>Predict which instance finishes first (total wall-clock, as
 <code>fit()</code> reports it).</li>
 <li>Predict which costs less for this job.</li>
@@ -878,7 +878,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -893,8 +893,8 @@ dominates both bills, and the GPU bill is about 6x higher per minute
 <p>A GPU pays off when the per-step work is large enough to keep it
 busy: bigger models, bigger batches, or datasets of hundreds of MB and
 up. If you ever do need more GPU than a <code>g4dn.xlarge</code>, the
-next sensible step is an <code>ml.g5.xlarge</code> (~$1.41/hour), not a
-multi-GPU box.</p>
+next sensible step is an <code>ml.g5.xlarge</code>
+(~<code>$1.41</code>/hour), not a multi-GPU box.</p>
 </div>
 </div>
 </div>
@@ -967,7 +967,7 @@ trains its own independent copy of the model on all of the data for all
 </ul><p>So without a distribution strategy, two instances means the same job
 twice, in parallel, at double the cost. Estimate first: about the same 4
 minutes of wall-clock as the single-instance run, but billed for two
-instances, so about $0.02 on <code>ml.m5.large</code>.</p>
+instances, so about <code>$0.02</code> on <code>ml.m5.large</code>.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
