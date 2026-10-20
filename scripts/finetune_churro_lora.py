@@ -82,6 +82,9 @@ def parse_args():
     p.add_argument("--train_dir", type=str, default=os.environ.get("SM_CHANNEL_TRAIN", "/opt/ml/input/data/train"))
     p.add_argument("--model_dir", type=str, default=os.environ.get("SM_MODEL_DIR", "/opt/ml/model"))
     p.add_argument("--output_data_dir", type=str, default=os.environ.get("SM_OUTPUT_DATA_DIR", "/opt/ml/output/data"))
+    # SageMaker creates /opt/ml/checkpoints when the estimator sets checkpoint_s3_uri, and syncs it
+    # to S3 while the job runs. Anything saved there survives the job being killed or interrupted.
+    p.add_argument("--checkpoint_dir", type=str, default="/opt/ml/checkpoints")
     return p.parse_args()
 
 
@@ -254,16 +257,30 @@ def main():
     model.enable_input_require_grads()  # needed for gradient checkpointing with frozen embeddings
     model.print_trainable_parameters()
 
+    # --- checkpoints: where they go, and whether we are resuming ---
+    ckpt_dir = args.checkpoint_dir if os.path.isdir(args.checkpoint_dir) \
+        else os.path.join(args.output_data_dir, "checkpoints")
+    os.makedirs(ckpt_dir, exist_ok=True)
+    from transformers.trainer_utils import get_last_checkpoint
+    last_ckpt = get_last_checkpoint(ckpt_dir)
+    print(f"checkpoints -> {ckpt_dir}; resuming from {last_ckpt or 'nothing (fresh run)'}")
+
     # --- score the base model on the holdout sample BEFORE training ---
     # (the adapter is freshly initialised to zero, so this is the base model)
     eval_before = None
-    if args.eval_before:
+    before_json = os.path.join(ckpt_dir, "eval_before.json")
+    if last_ckpt and os.path.exists(before_json):
+        with open(before_json) as f:          # resumed run: the base-model score was already computed
+            eval_before = json.load(f)
+    elif args.eval_before:
         eval_before = evaluate(model, processor, hold_df, images_dir, doc_ctx, args.max_pixels,
                                args.eval_pages, args.max_new_tokens, args.seed, "before", args.model_dir)
+        with open(before_json, "w") as f:
+            json.dump(eval_before, f)
 
     # --- train ---
     targs = TrainingArguments(
-        output_dir=os.path.join(args.output_data_dir, "checkpoints"),
+        output_dir=ckpt_dir,
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
@@ -275,7 +292,8 @@ def main():
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
         logging_steps=5,
-        save_strategy="no",
+        save_strategy="epoch",            # adapter + optimizer state at the end of every epoch
+        save_total_limit=1,               # keep only the latest; the adapter is ~100 MB
         report_to="none",
         remove_unused_columns=False,
         dataloader_num_workers=2,
@@ -288,7 +306,7 @@ def main():
         data_collator=Collator(processor),
     )
     t0 = time.time()
-    result = trainer.train()
+    result = trainer.train(resume_from_checkpoint=last_ckpt)   # None on a fresh run
     train_secs = time.time() - t0
     print(f"training finished in {train_secs / 60:.1f} min; final loss {result.training_loss:.4f}")
 
