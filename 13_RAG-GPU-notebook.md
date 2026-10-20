@@ -193,11 +193,10 @@ print("Local data dir:", local_data_dir)
 
 ### Get the shared WattBot helpers
 
-The retrieval, prompts, answer parsing, per-question orchestration and the scorer are the same code the Bedrock and Processing Jobs episodes used: `scripts/wattbot_rag.py` in the lesson repository. Clone it and copy the module next to this notebook. What this episode adds is the two model callables, `embed_query` and `generate`, running on the notebook's own GPU.
+The retrieval, prompts, answer parsing, per-question orchestration and the scorer are the same code the Bedrock and Processing Jobs episodes used: `scripts/wattbot_rag.py` in the lesson repository. Copy the module next to this notebook. What this episode adds is the two model callables, `embed_query` and `generate`, running on the notebook's own GPU.
 
 ```python
-!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
-!cp ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
+!cp /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
 ```
 
 ```python
