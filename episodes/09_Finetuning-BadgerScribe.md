@@ -168,7 +168,7 @@ helpers.estimate_finetune_cost(
 
 ### Estimate a run you have not launched
 
-A lab wants to **fully fine-tune a 7B model** on 50,000 documents of ~2,000 tokens for 3 epochs. They are choosing between `ml.p4d.24xlarge` (8 × A100 40 GB, `$25.25`/h, ~312 TFLOPS bf16 per GPU) and renting a single `ml.g5.xlarge`. Using the two rules: does it fit on the g5? How many GPU-hours on the p4d, and what does one run cost? What does a realistic project cost?
+A lab wants to **fully fine-tune a 7B model** on 50,000 documents of ~2,000 tokens for 3 epochs. They are choosing between `ml.p4d.24xlarge` (8 × A100 40 GB, `$25.25`/h, ~312 TFLOPS bf16 per GPU) and renting a single `ml.g5.xlarge`; the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has both, with what each box holds and how its price covers all its GPUs. Using the two rules: does it fit on the g5? How many GPU-hours on the p4d, and what does one run cost? What does a realistic project cost?
 
 :::::::::::::::::::::::: solution
 
@@ -190,7 +190,7 @@ A realistic project is not one run. The first run finds a data bug, the second a
 
 ### The instance
 
-The model we fine-tune fits on one 24 GB GPU. Single-GPU and multi-GPU SageMaker training instances, same price list:
+The model we fine-tune fits on one 24 GB GPU. Single-GPU and multi-GPU SageMaker training instances, same price list (the full table, with CPU instances and the GPU-by-GPU notes, is on the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page):
 
 | Instance | GPU | GPU memory | `$`/hour |
 |---|---|---|---|
