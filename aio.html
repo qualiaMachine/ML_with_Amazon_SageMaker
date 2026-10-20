@@ -2889,7 +2889,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -4833,7 +4833,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5954,7 +5954,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6000,7 +6000,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6186,8 +6186,15 @@ that vanish at that precision, so the master copy has to be 32-bit
 float. That comes to about 16 bytes per parameter against 2 for
 inference. A 3B model that runs in 6 GB needs 48 GB to fully fine-tune;
 a 7B model needs 112 GB, which is already a multi-GPU instance at
-<code>$25</code> an hour or more, and the bill scales with every epoch
-and every retry.</p>
+<strong><code>$25</code> an hour or more</strong>, and the bill scales
+with every epoch and every retry.</p>
+<p><strong>Do not fully fine-tune anything in this workshop, and do not
+fine-tune a model larger than 3B on the class account.</strong> A full
+fine-tune of a 7B model is a few hundred dollars per run; a 70B model is
+<strong><code>$6,000</code> to <code>$12,000</code> per run</strong>,
+and a hyperparameter sweep multiplies that by ten. Those runs exist in
+this episode only as estimates, so that you can recognise one before you
+launch it.</p>
 </div>
 <div class="section level3">
 <h3 id="lora">LoRA<a class="anchor" aria-label="anchor" href="#lora"></a>
@@ -6333,40 +6340,39 @@ below)</td>
 <td>8 × A100 (<code>ml.p4d.24xlarge</code>, <code>$25.25</code>/h), ~6
 h</td>
 <td>45</td>
-<td>~<code>$140</code>
-</td>
+<td><strong>~<code>$140</code></strong></td>
 </tr>
 <tr>
 <td>70B LoRA, one day</td>
 <td>8 × A100, 24 h</td>
 <td>192</td>
-<td>~<code>$600</code>
-</td>
+<td><strong>~<code>$600</code></strong></td>
 </tr>
 <tr>
 <td>CHURRO-3B itself: full fine-tune, 100k pages, 5 epochs</td>
 <td>32 × H100 for ~25 h (4 × <code>ml.p5.48xlarge</code>,
 <code>$63.30</code>/h)</td>
 <td>800</td>
-<td>~<code>$6,300</code>
-</td>
+<td><strong>~<code>$6,300</code></strong></td>
 </tr>
 <tr>
 <td>70B full fine-tune, two days</td>
 <td>4 × <code>ml.p5.48xlarge</code>, 48 h</td>
 <td>1,536</td>
-<td>~<code>$12,000</code>
-</td>
+<td><strong>~<code>$12,000</code></strong></td>
 </tr>
 <tr>
 <td>Any row above × a 10-run hyperparameter sweep</td>
 <td></td>
 <td></td>
-<td>× 10</td>
+<td><strong>× 10</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Two rows to note. The CHURRO row is the model you are about to
+<figure><img src="fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.60, homework 1.05, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from sixty cents
+for this episode’s LoRA run to twelve thousand dollars for a 70B full
+fine-tune; a ten-run sweep shifts every bar up by one decade</div>
+</figure><p>Two rows to note. The CHURRO row is the model you are about to
 fine-tune: Stanford spent on the order of 800 H100-hours making it, and
 you get the benefit for sixty cents because you are <em>adapting</em>
 it, not retraining it. Starting from a model that already knows most of
@@ -6378,8 +6384,10 @@ groups. (The 7B row is worked out in the challenge below; the 70B rows
 are rule-of-thumb magnitudes; the CHURRO figures come from a published
 review of the paper.)</p>
 <p>The habits in this episode are cheap practice at sixty cents a run.
-At <code>$140</code> a run they are the difference between a project and
-a budget incident.</p>
+<strong>At <code>$140</code> a run they are the difference between a
+project and a budget incident; at <code>$6,000</code> a run, one
+forgotten <code>max_run</code> or one wrong instance type is a grant
+line.</strong></p>
 </div>
 <div class="section level3">
 <h3 id="back-of-the-envelope-will-it-fit-and-how-long-will-it-take">Back of the envelope: will it fit, and how long will it take?<a class="anchor" aria-label="anchor" href="#back-of-the-envelope-will-it-fit-and-how-long-will-it-take"></a>
@@ -6468,12 +6476,12 @@ two moments 8</td>
 cannot run on quantized weights the way inference can: gradient updates
 are tiny numbers that vanish in 8-bit or 4-bit precision, so every
 trainable parameter keeps a full-precision master copy plus two Adam
-moments, 16 bytes against 2. That is why a 7B model you can <em>run</em>
-on a 24 GB GPU needs 112 GB plus activations to <em>fully
+moments, 16 bytes against 2. <strong>That is why a 7B model you can
+<em>run</em> on a 24 GB GPU needs 112 GB plus activations to <em>fully
 fine-tune</em>, which means several GPUs with the model sharded across
-them. LoRA sidesteps it by freezing the model and training a few million
-adapter parameters, which is why this episode fits on one 24 GB
-card.</p>
+them, at <code>$25</code> to <code>$63</code> an hour.</strong> LoRA
+sidesteps it by freezing the model and training a few million adapter
+parameters, which is why this episode fits on one 24 GB card.</p>
 <p><strong>2. Time: how many GPU-hours?</strong> Training compute is
 roughly proportional to parameters × tokens seen:</p>
 <pre class="text"><code>tokens      = examples × tokens per example × epochs
@@ -6639,10 +6647,17 @@ parallelism is not enough: pass <code>fsdp="full_shard"</code> in
 <code>TrainingArguments</code> (or a DeepSpeed ZeRO config) so the model
 is sharded across the GPUs, and use <code>instance_count=2</code> or
 more for multi-node runs.</p>
-<p>The cost controls do not change with size: estimate GPU-hours from
-the Step 0 rules, set <code>max_run</code> to about twice that estimate,
-tag the job, and run a slice of the data on one GPU first so that a bug
-costs a dollar rather than a few hundred.</p>
+<p><strong>The cost controls do not change with size, but the stakes
+do.</strong> An <code>ml.p4d.24xlarge</code> bills
+<strong><code>$25.25</code> an hour</strong> and an
+<code>ml.p5.48xlarge</code> <strong><code>$63.30</code> an hour</strong>
+from the moment the job starts, and a <code>max_run</code> of six hours
+is a <strong><code>$150</code> to <code>$380</code></strong> ceiling on
+a single launch. Estimate GPU-hours from the Step 0 rules, set
+<code>max_run</code> to about twice that estimate, tag the job, and run
+a slice of the data on one GPU first so that a bug costs a dollar rather
+than a few hundred. <strong>Do not launch a multi-GPU job on the class
+account.</strong></p>
 </div>
 <div class="section level3">
 <h3 id="the-run">The run<a class="anchor" aria-label="anchor" href="#the-run"></a>
