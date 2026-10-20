@@ -76,6 +76,7 @@ def parse_args():
     p.add_argument("--max_train_pages", type=int, default=0, help="0 = all; set small (e.g. 20) for a smoke test")
     p.add_argument("--eval_pages", type=int, default=20, help="holdout pages transcribed to report CER (0 = skip)")
     p.add_argument("--eval_before", type=int, default=1, help="1 = also score the base model on the same pages before training")
+    p.add_argument("--curve_pages", type=int, default=8, help="holdout pages scored at the end of every epoch for the CER curve (0 = skip)")
     p.add_argument("--max_new_tokens", type=int, default=1024)
     p.add_argument("--seed", type=int, default=42)
     # --- SageMaker paths ---
@@ -212,6 +213,7 @@ def main():
         AutoProcessor,
         Qwen2_5_VLForConditionalGeneration,
         Trainer,
+        TrainerCallback,
         TrainingArguments,
     )
 
@@ -278,6 +280,27 @@ def main():
         with open(before_json, "w") as f:
             json.dump(eval_before, f)
 
+    # --- the curve: score a few holdout pages at the end of every epoch ---
+    # The first curve_pages of the same seeded shuffle evaluate() uses, so they are a
+    # subset of the before/after sample and every point is on the same pages.
+    curve = []
+    if eval_before is not None and args.curve_pages > 0:
+        ids = sorted(hold_df["page_id"]); random.Random(args.seed).shuffle(ids)
+        sub = pd.read_csv(os.path.join(args.model_dir, "eval_before.csv"), keep_default_na=False)
+        sub = sub[sub.page_id.isin(ids[:args.curve_pages])]
+        if len(sub):
+            curve.append({"epoch": 0, "macro_cer": round(macro_cer(sub)[0], 4)})
+
+    class CurveCallback(TrainerCallback):
+        def on_epoch_end(self, targs_, state, control, model=None, **kw):
+            if args.curve_pages <= 0:
+                return
+            ep = int(round(state.epoch))
+            r = evaluate(model, processor, hold_df, images_dir, doc_ctx, args.max_pixels,
+                         args.curve_pages, args.max_new_tokens, args.seed, f"epoch{ep}", args.model_dir)
+            if r:
+                curve.append({"epoch": ep, "macro_cer": r["macro_cer"]})
+
     # --- train ---
     targs = TrainingArguments(
         output_dir=ckpt_dir,
@@ -304,15 +327,21 @@ def main():
         args=targs,
         train_dataset=PageDataset(train_df, images_dir, doc_ctx, args.max_pixels),
         data_collator=Collator(processor),
+        callbacks=[CurveCallback()],
     )
     t0 = time.time()
     result = trainer.train(resume_from_checkpoint=last_ckpt)   # None on a fresh run
     train_secs = time.time() - t0
     print(f"training finished in {train_secs / 60:.1f} min; final loss {result.training_loss:.4f}")
 
-    # --- save adapter + processor ---
+    # --- save adapter + processor, and the curves ---
     model.save_pretrained(args.model_dir)
     processor.save_pretrained(args.model_dir)
+    loss_curve = [{"step": h["step"], "epoch": round(h["epoch"], 3), "loss": h["loss"]}
+                  for h in trainer.state.log_history if "loss" in h]
+    with open(os.path.join(args.model_dir, "train_log.json"), "w") as f:
+        json.dump({"loss": loss_curve, "holdout_cer_by_epoch": curve,
+                   "curve_pages": args.curve_pages, "note": "epoch 0 is the base model; the curve covers the epochs this job ran"}, f, indent=2)
 
     # --- score the fine-tuned model on the SAME holdout pages ---
     eval_after = evaluate(model, processor, hold_df, images_dir, doc_ctx, args.max_pixels,
@@ -327,6 +356,7 @@ def main():
         "effective_batch": args.batch_size * args.grad_accum,
         "max_pixels": args.max_pixels,
         "lora_r": args.lora_r,
+        "curve_pages": args.curve_pages,
         "train_minutes": round(train_secs / 60, 1),
         "final_loss": round(float(result.training_loss), 4),
         "holdout_eval_before": eval_before,
