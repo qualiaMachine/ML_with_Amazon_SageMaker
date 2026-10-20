@@ -14,13 +14,13 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::: objectives
 
 - Compare cloud compute with campus HPC and lab hardware on hardware generation, cost and control.
-- Introduce SageMaker and Bedrock.
+- Introduce S3, SageMaker and Bedrock.
 - Preview the three parts of the lesson.
   
 ::::::::::::::::::::::::::::::::::::::::::::::
 
 
-This episode compares cloud compute with the compute researchers usually already have, then introduces the two AWS services the lesson uses, SageMaker and Bedrock.
+This episode compares cloud compute with the compute researchers usually already have, then introduces the three AWS services the lesson uses: S3, SageMaker and Bedrock.
 
 ### Cloud vs. the cluster down the hall
 
@@ -58,6 +58,8 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 - **Cheap at research scale**: embedding a few thousand document chunks and answering a few dozen questions costs cents, which is why the RAG part of the lesson starts here.
 - **Only the catalog**: if the model you need is not on it, Bedrock cannot serve it. That is the one case where the lesson moves RAG onto SageMaker.
 - **Cost tracking by inference profile**: Bedrock calls carry no tags by default; the lesson routes them through tagged application inference profiles so they show up on the bill like everything else.
+
+**Amazon S3** is where data lives. Buckets hold files of any size, every SageMaker job reads its inputs from a bucket and writes its outputs back to one, and storage costs about two cents per GB per month. In this lesson you create one bucket of your own in the next episode and use it for the rest of the workshop; the larger datasets are in a shared bucket the instructors staged.
 
 ### How the pieces fit together
 
