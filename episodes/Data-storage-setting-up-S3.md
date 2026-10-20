@@ -185,7 +185,7 @@ Everything above transfers; only the role name changes.
 2. **Put that ARN in the policy** as the only entry under `Principal`, and your bucket name under `Resource`.
 3. **Or skip the bucket policy** by putting `sagemaker` in the bucket name: the console-created role carries the `AmazonSageMakerFullAccess` policy, which already grants read and write on any bucket whose name contains `sagemaker`. A bucket named `sinkorswim-doejohn` is not covered, which is why the bucket policy is needed at all.
 
-Either way, access comes from one of two places: the role's own IAM policy (what the role may do anywhere) or the bucket's policy (what this bucket allows). In the same account, allowing in either one is enough. The [SageMaker execution role documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html) covers the role side.
+Either way, access comes from one of two places: the role's own IAM policy (what the role may do anywhere) or the bucket's policy (what this bucket allows). In the same account, allowing in either one is enough. The [SageMaker execution role documentation](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-roles.html) covers the role side. UW-Madison researchers can bring questions about roles, policies and accounts to the Public Cloud team's weekly [office hours](https://kb.wisc.edu/page.php?id=101516) (Thursdays at 2 pm on Zoom) or email cloud-services@cio.wisc.edu.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
