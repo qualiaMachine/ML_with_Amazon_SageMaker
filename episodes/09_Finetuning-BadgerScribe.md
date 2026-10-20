@@ -122,16 +122,15 @@ Two rules of thumb answer most of the question before you touch a console. They 
 
 Note the jump from the inference rows to the training rows. Training cannot run on quantized weights the way inference can: each step's update is too small for 8-bit or 4-bit numbers to hold, so every trained weight keeps a 32-bit copy plus Adam's two averages, 16 bytes against 2. **That is why a 7B model you can *run* on a 24 GB GPU needs 112 GB plus activations to *fully fine-tune*, which means several GPUs with the model sharded across them, at `$25` to `$63` an hour.** LoRA sidesteps it by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
 
-**2. Time: how many GPU-hours?** Count the arithmetic. Every token that passes through the model touches every weight once on the way forward: one multiply and one add per weight, 2 floating-point operations (FLOPs). Training then runs backward through the same weights, and that costs twice as much again: about 2 FLOPs per weight to work out how the error flows back to the previous layer, and 2 more to work out how each weight itself should change. So a full fine-tune spends about 6 FLOPs per parameter per token. With LoRA the base weights are frozen, so the last 2 are skipped for them: the error still has to flow back through every layer to reach the adapters, but no weight update is computed for the base, which leaves about 4.
+**2. Time: how many GPU-hours?** Each token costs about 6 floating-point operations per weight to train on (2 forward, 4 backward), or 4 with LoRA, since the frozen base skips its weight updates. Multiply by the weights and the tokens, divide by the GPU's speed:
 
 ```text
 tokens      = examples × tokens per example × passes over the data
-FLOPs       ≈ 6 × parameters × tokens      full fine-tune: 2 forward + 2 backward to activations + 2 for weight updates
-            ≈ 4 × parameters × tokens      LoRA: the same minus the weight updates for the frozen base
-GPU-seconds = FLOPs ÷ (the GPU's peak bf16 FLOPS × the fraction of that peak you reach)
+FLOPs       = 6 × parameters × tokens      (4 × for LoRA)
+GPU-seconds = FLOPs ÷ (GPU peak FLOPS × utilization)
 ```
 
-A GPU's peak rate is on its data sheet (an A10G is about 70 trillion FLOPs per second in bf16, an A100 312, an H100 989), so dividing total FLOPs by the peak gives the time a perfectly busy GPU would take. No training job keeps a GPU perfectly busy, which is where utilization comes in.
+Peak FLOPS is on the GPU's data sheet: about 70 trillion per second for an A10G, 312 for an A100, 989 for an H100.
 
 Utilization is the number people forget. A GPU running one page at a time with gradient checkpointing manages 20–30% of its peak; a well-tuned multi-GPU job reaches 40–50%. Use 25% unless you have measured otherwise, and add ~50% to the FLOPs when gradient checkpointing is on, because it recomputes the forward pass during the backward pass. Both corrections sit inside the factor of two the rule promises. Then cost = GPU-hours × hourly rate + the fixed startup overhead per job (~10 minutes here).
 
