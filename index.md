@@ -4,17 +4,23 @@ site: sandpaper::sandpaper_site
 
 ## Workshop Overview
 
-This workshop introduces you to foundational workflows in **Amazon SageMaker**, covering data setup, code repo setup, model training, and hyperparameter tuning within AWS's managed environment. You’ll learn how to use SageMaker notebooks to control data pipelines, manage training and tuning jobs, and evaluate model performance effectively. We’ll also cover strategies to help you scale training and tuning efficiently, with guidance on choosing between CPUs and GPUs, as well as when to consider parallelized workflows (i.e., using multiple instances). 
- 
-**Retreival Augmented Generation (Bonus Content)**: This workshop was recently expanded to cover Retrieval Augmented Generation (RAG) using both SageMaker and **Amazon Bedrock**. We may break this part into its own RAG workhop in the future. For now, it is convenient to have everything in one place. 
+This workshop introduces machine learning workflows on AWS using **Amazon SageMaker**. It has two parts:
 
-To keep costs manageable, this workshop provides tips for tracking and monitoring AWS expenses, so your experiments remain affordable. While AWS isn’t entirely free, it can be very cost-effective for common machine learning (ML) workflows in used in research. For example, training roughly 100 small to medium-sized models (e.g., logistic regression, random forests, or lightweight deep learning models with a few million parameters) on a small dataset (under 10GB) can cost under $20, making it accessible for many research projects. 
+1. **SageMaker: training, tuning and fine-tuning.** Storing data in S3, using a small notebook instance as a *controller*, running training jobs (XGBoost and PyTorch) and hyperparameter tuning, with guidance on choosing CPU vs. GPU instances and when parallel instances help; then fine-tuning a 3B open-weight vision-language model with LoRA as a training job, for handwriting transcription, with before/after evaluation on held-out pages.
+2. **Retrieval-Augmented Generation (RAG).** Building a RAG pipeline over a corpus of research papers two ways: with Amazon Bedrock (pay per token, nothing left running) and with SageMaker Processing jobs serving an open-weight model that Bedrock does not offer.
 
-### What This Workshop Does Not Cover (Yet)
+### Who this workshop is for
 
-Currently, this workshop does not include:
+Researchers and students who use ML or AI in their work and want to run it on AWS. The lesson assumes a basic machine learning background: you know what training, hyperparameter tuning, fine-tuning, embeddings and retrieval-augmented generation are. It does not teach these concepts; instructors may briefly review some of them depending on the audience, but the default schedule does not include that time. Python and Jupyter are used throughout; no prior AWS experience is needed.
 
-- **AWS Lambda**: Lambda lets you run small pieces of code without setting up or managing a server. You write a function, tell AWS when to run it (for example, when a file is uploaded or a request comes in), and it automatically runs and scales as needed. This is useful for simple tasks like cleaning data as it arrives, kicking off a training job, or running a quick analysis without having to keep a server running all the time.
-- **Additional AWS services** beyond the core SageMaker ML workflows.
+### Cost controls
+
+Run as written, the full workshop costs a few dollars per learner. Every episode tags its resources, caps job runtime, estimates cost before launching and checks the bill after, and cleans up. The final episode covers monitoring and cleanup.
+
+### What This Workshop Does Not Cover
+
+- **General ML/AI concepts**: the focus is on moving existing ML and AI work to the cloud, not on teaching training, fine-tuning or RAG themselves.
+- **Deploying models as endpoints**: serving a trained or fine-tuned model behind an always-on API.
+- **Agents and tool use**: LLM applications that call tools or chain multiple model calls (e.g., Bedrock Agents).
 
 If there's a specific ML or AI workflow or AWS service you'd like to see included in this curriculum, please let us know! We're happy to develop additional content to meet the needs of researchers, students, and ML/AI practitioners. Please [post an issue on the lesson GitHub](https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/issues) or contact [endemann@wisc.edu](mailto:endemann@wisc.edu) with suggestions or requests.

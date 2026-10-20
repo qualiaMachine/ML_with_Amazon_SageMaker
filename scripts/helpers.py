@@ -1,6 +1,14 @@
+"""Helper functions used throughout the lesson.
+
+Learners clone the lesson repository once, in the Accessing S3 episode, into
+``/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/`` and import this module with::
+
+    import sys
+    sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
+    import helpers
+"""
 import boto3
 from datetime import datetime, timedelta
-import getpass
 import os
 
 def get_s3_bucket_size(bucket_name):
@@ -127,13 +135,82 @@ def get_sagemaker_notebook_status(notebook_instance_name):
     response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
     return response['NotebookInstanceStatus']
 
-def get_notebook_instance_info(notebook_instance_name):
+def get_notebook_instance_info(notebook_instance_name, region=None):
     """
     Fetches the status and instance type of a specific SageMaker notebook instance.
+
+    Parameters:
+        notebook_instance_name (str): Name of the SageMaker notebook instance (not an .ipynb file).
+        region (str or None): AWS region of the instance. Defaults to the session's region
+            (e.g. ``boto3.Session().region_name``); never hard-code a region in lesson code.
+
+    Returns:
+        dict: {'Status': ..., 'InstanceType': ...}
     """
-    sagemaker_client = boto3.client('sagemaker')
+    if region is None:
+        region = boto3.Session().region_name
+    sagemaker_client = boto3.client('sagemaker', region_name=region)
     response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
     return {'Status': response['NotebookInstanceStatus'], 'InstanceType': response['InstanceType']}
+
+def calculate_tuning_job_time(tuner, region=None):
+    """
+    Sums training and billable time across every training job launched by a SageMaker
+    hyperparameter tuning job. Matches the call in the Hyperparameter-tuning episode:
+    ``helpers.calculate_tuning_job_time(tuner, region)``.
+
+    SageMaker bills per second: each training job's ``BillableTimeInSeconds`` (instance
+    reserved for you, including container pull and data download) multiplied by its
+    instance count. The tuning job itself is not billed.
+
+    Parameters:
+        tuner (sagemaker.tuner.HyperparameterTuner): A tuner whose ``.fit()`` has been called.
+        region (str or None): AWS region. Defaults to the session's region.
+
+    Returns:
+        dict: instance type, max_jobs, max_parallel_jobs, number of completed jobs, and total
+              training / billable seconds (billable already multiplied by instance count).
+    """
+    if region is None:
+        region = boto3.Session().region_name
+    sagemaker_client = boto3.client('sagemaker', region_name=region)
+
+    tuning_job_name = tuner.latest_tuning_job.name
+    tuning_job_desc = sagemaker_client.describe_hyper_parameter_tuning_job(
+        HyperParameterTuningJobName=tuning_job_name)
+    instance_type = tuning_job_desc['TrainingJobDefinition']['ResourceConfig']['InstanceType']
+    limits = tuning_job_desc['HyperParameterTuningJobConfig']['ResourceLimits']
+
+    # Page through all child training jobs of the tuning job
+    paginator = sagemaker_client.get_paginator('list_training_jobs_for_hyper_parameter_tuning_job')
+    job_names = []
+    for page in paginator.paginate(HyperParameterTuningJobName=tuning_job_name, StatusEquals='Completed'):
+        job_names.extend(j['TrainingJobName'] for j in page['TrainingJobSummaries'])
+
+    total_training_seconds = 0
+    total_billable_seconds = 0
+    for job_name in job_names:
+        job_desc = sagemaker_client.describe_training_job(TrainingJobName=job_name)
+        total_training_seconds += job_desc.get('TrainingTimeInSeconds', 0)
+        total_billable_seconds += job_desc.get('BillableTimeInSeconds', 0) * job_desc['ResourceConfig']['InstanceCount']
+
+    print(f"Tuning job: {tuning_job_name}")
+    print(f"Instance Type: {instance_type}")
+    print(f"Max Jobs: {limits['MaxNumberOfTrainingJobs']}")
+    print(f"Max Parallel Jobs: {limits['MaxParallelTrainingJobs']}")
+    print(f"Completed training jobs: {len(job_names)}")
+    print(f"Total training time across all jobs: {total_training_seconds / 60:.1f} minutes")
+    print(f"Total billable time across all jobs: {total_billable_seconds / 60:.1f} minutes (x instance count)")
+
+    return {
+        'TuningJobName': tuning_job_name,
+        'InstanceType': instance_type,
+        'MaxJobs': limits['MaxNumberOfTrainingJobs'],
+        'MaxParallelJobs': limits['MaxParallelTrainingJobs'],
+        'CompletedJobs': len(job_names),
+        'TotalTrainingSeconds': total_training_seconds,
+        'TotalBillableSeconds': total_billable_seconds,
+    }
 
 def get_current_costs(days=1):
     """
@@ -151,71 +228,31 @@ def get_current_costs(days=1):
     return total_cost
 
 import os
-import getpass
 
-def update_repo(
-    repo_url="github.com/UW-Madison-DataScience/test_AWS.git",
-    name="Chris Endemann", 
-    email="endemann@wisc.edu",
-    commit_message="Updates from Jupyter notebooks"
-):
+def convert_files(direction="notebook_to_python", directory="."):
+    """Convert every notebook in ``directory`` to a .py script, or every .py script
+    to a notebook, with jupytext (``pip install jupytext``).
+
+    direction: "notebook_to_python" (default) or "python_to_notebook".
+    Converts *every* matching file in the directory, so run it inside a folder that
+    holds only the files you mean to convert.
     """
-    Updates a GitHub repository by adding, committing, and pushing changes from the current directory.
-    
-    Parameters:
-    repo_url (str): The GitHub repository URL (HTTPS format without 'https://').
-    name (str): GitHub username for commit configuration.
-    email (str): GitHub email for commit configuration.
-    commit_message (str): The commit message to use. Default is "Updates from Jupyter notebooks".
-    """
-    # Record the starting directory
-    starting_dir = os.getcwd()
-    repo_name = os.path.basename(repo_url).replace('.git', '')  # Extract repository name from URL
-    repo_dir = os.path.join(starting_dir, repo_name)
-
-    # Check if the repository directory exists and change to it if necessary
-    changed_dir = False
-    if os.path.isdir(repo_dir):
-        os.chdir(repo_dir)
-        changed_dir = True
-
-    try:
-        # Prompt for GitHub username and personal access token (PAT)
-        username = input("GitHub Username: ") or "default_username"
-        token = getpass.getpass("GitHub Personal Access Token (PAT): ")
-
-        # Configure Git user details
-        os.system(f'git config --global user.name "{name}"')
-        os.system(f'git config --global user.email "{email}"')
-        
-        # Ensure we are in a git repository
-        if not os.path.exists(".git"):
-            print("Not a Git repository. Please initialize with `git init` and add remote origin before running this.")
-            return
-
-        # Add and commit changes
-        os.system("git add .")
-        os.system(f'git commit -m "{commit_message}"')
-
-        # Pull any remote changes
-        os.system("git config pull.rebase false")
-        os.system("git pull origin main")
-
-        # Push changes to GitHub
-        github_url = f"https://{username}:{token}@{repo_url}"
-        os.system(f"git push {github_url} main")
-        print("Repository updated successfully.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-    finally:
-        # Change back to the original directory if it was changed
-        if changed_dir:
-            os.chdir(starting_dir)
+    import subprocess
+    if direction == "notebook_to_python":
+        src_ext, dst_ext, fmt = ".ipynb", ".py", "py"
+    elif direction == "python_to_notebook":
+        src_ext, dst_ext, fmt = ".py", ".ipynb", "notebook"
+    else:
+        raise ValueError("direction must be 'notebook_to_python' or 'python_to_notebook'")
+    for name in sorted(os.listdir(directory)):
+        if not name.endswith(src_ext):
+            continue
+        src = os.path.join(directory, name)
+        dst = os.path.join(directory, name[: -len(src_ext)] + dst_ext)
+        subprocess.run(["jupytext", "--to", fmt, src, "--output", dst], check=True)
+        print(f"Converted {name} to {os.path.basename(dst)}")
 
 
-# Example usage of the functions in this script
 if __name__ == "__main__":
     # Example: Get the cost of a specific EC2 instance type over the last day
     instance_type = 'g4dn.xlarge'  # Replace with your desired instance type
@@ -234,14 +271,10 @@ if __name__ == "__main__":
     print(f"SageMaker Notebook '{notebook_instance_name}' Status: {status}")
 
     # Example: Fetch status and instance type of a specific notebook instance
-    notebook_info = get_notebook_instance_info(notebook_instance_name)
+    notebook_info = get_notebook_instance_info(notebook_instance_name, boto3.Session().region_name)
     print(f"Notebook Instance Info for '{notebook_instance_name}':")
     print(f"Status: {notebook_info['Status']}, Instance Type: {notebook_info['InstanceType']}")
 
     # Example: Get the total AWS cost across all services over the last 7 days
     total_cost = get_current_costs(days=7)
     print(f"Total AWS costs over the last 7 days: ${total_cost:.2f}")
-
-    # Example: Update the GitHub repository with changes
-    repo_url = 'github.com/UW-Madison-DataScience/test_AWS.git'  # Update with your repository URL
-    update_repo(repo_url, commit_message="Automated commit from Jupyter notebook")
