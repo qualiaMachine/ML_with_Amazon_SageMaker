@@ -55,15 +55,9 @@ Training every weight means storing four numbers per weight instead of one. Ther
 
  The frozen weights can stay in 16-bit, since nothing updates them, and the gradients and optimizer state only exist for the adapter. The adapter is about 100 MB, trains on a single 24 GB GPU for a 3B model, and recovers most of the gain of a full fine-tune for a task like this: the model still learns your hands and your conventions, it just learns them through the adapter. This episode uses LoRA.
 
-### What makes it a different workload
+### Scale, and how easy it is to get wrong
 
-Even with LoRA, fine-tuning is unlike anything we have run so far:
-
-- It needs a GPU for the whole run, not just for inference calls.
-- It is iterative. Nobody gets the learning rate, the image resolution or the data split right the first time, so the first run is never the last.
-- The cost of a run depends on things that are easy to get wrong by 10x: model size, epochs, image resolution, instance type, and whether the instance is still running after you stopped paying attention.
-
-That combination is why fine-tuning is where research teams see surprise bills. This episode is about getting a gain like CHURRO's, scaled to one archive, for a few dollars, and about knowing in advance when a run is going to cost a few thousand instead. We measure the gain ourselves: the episode ends by scoring the base model and the fine-tuned model on the same held-out pages.
+What makes fine-tuning an LLM different is scale. The training episodes ran for minutes on a `$0.12`-an-hour CPU; a fine-tune runs for hours on a GPU, and every knob multiplies the bill: model size, epochs, image resolution, instance type, and whether anyone is watching when the job should have ended. Any one of them off by 10x is a 10x bill, and the first run is never the last. **Fine-tuning is one of the most common surprise costs we see hurt people**, and it is the reason this episode spends as long on estimating and capping a run as on running it. We measure the gain ourselves: the episode ends by scoring the base model and the fine-tuned model on the same held-out pages.
 
 ### The task: Badger Scribe
 
