@@ -1,7 +1,7 @@
 ---
 title: "Training Models in SageMaker: Intro"
 teaching: 45
-exercises: 15
+exercises: 20
 ---
 
 :::::::::::::::::::::::::::::::::::::: questions 
@@ -293,6 +293,20 @@ Unlike "local" training (using this notebook), this next approach leverages Sage
 
 ### Which instance to start with?
 In this example, we start with one ml.m5.large instance, which is suitable for small- to medium-sized datasets and simpler models. Using a single instance is often cost-effective and sufficient for initial testing, allowing for straightforward scaling up to more powerful instance types or multiple instances if training takes too long. See here for further guidance on selecting an appropriate instance for your data/model: [Instances for ML page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)
+
+::::::::::::::::::::::::::::::::::::: challenge
+
+### Challenge: pick an instance for a bigger job
+
+Open the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page. A colleague has a **20 GB tabular dataset** (a CSV of sensor readings) and wants to train gradient-boosted trees on it, like we are about to do with the Titanic data. Which instance would you pick for the training job, and why?
+
+:::::::::::::::::::::::::::::::::::: solution
+
+The table's rule of thumb is RAM of at least 1.5× the dataset, so 20 GB of data wants about 32 GB of memory: `ml.m5.2xlarge` (8 vCPU, 32 GiB, about $0.46/h) is the natural fit for a tree-ensemble training job, or `ml.m5.4xlarge` (64 GiB) if feature engineering will add many columns. No GPU: gradient-boosted trees on tabular data are CPU work, so a `g4dn` or `g5` would cost more and run no faster.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 ### Overview of Estimator classes in SageMaker
 To launch this training "job", we'll use the XGBoost Estimator. In SageMaker, Estimator classes streamline the configuration and training of models on managed instances. Each Estimator can work with custom scripts and be enhanced with additional dependencies by specifying a `requirements.txt` file, which is automatically installed at the start of training. Here's a breakdown of some commonly used Estimator classes in SageMaker:
