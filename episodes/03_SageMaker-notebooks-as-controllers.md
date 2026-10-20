@@ -82,11 +82,10 @@ In the new notebook, run:
 
 The first line prints `/home/ec2-user/SageMaker`: new notebooks start in that folder. The second lists its parent, the instance's home directory, which holds AWS's own setup: the `anaconda3` folder with the conda environments behind the kernel list, AWS's `sample-notebooks`, and a pile of license files. `SageMaker/` is the one folder that is different. It is a separate disk, the volume whose size sits under **Additional configuration** on the create form (5 GB by default). Everything else in the home directory lives on the system disk and is reset when the instance stops; `SageMaker/` is the only place that survives a stop. JupyterLab's file browser opens there for that reason, and it is where everything in this lesson goes.
 
-Now clone the lesson repository into it. The `test -d ... ||` guard makes the cell a no-op if the folder already exists, and every later episode starts with the same cell:
+Now clone the lesson repository into it:
 
 ```sh
-%cd /home/ec2-user/SageMaker/
-!test -d ML_with_AWS_SageMaker || git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
+!git clone https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git
 ```
 
 Then open `ML_with_AWS_SageMaker/notebooks/04_Accessing-S3-via-SageMaker-notebooks.ipynb` from the file browser to begin the first notebook.
