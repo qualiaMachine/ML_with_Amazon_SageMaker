@@ -63,14 +63,14 @@ What makes fine-tuning an LLM different is scale. The training episodes ran for 
 
 [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) is a Kaggle challenge built from UW Digital Collections material: 19th-century surveyors' field notebooks, craftsmen's account books, and German immigrant letters in Kurrent script. Given a page image, produce a verbatim transcription. The score is character error rate (CER): edits per reference character, lower is better.
 
-This lesson uses the German letters, the Anna Seifert correspondence held by the Max Kade Institute: 191 letters and postcards written in Kurrent between 1932 and 1942 by one woman to her son, transcribed by the Institute's Kurrent Transcription Group. It is the part of the competition data where every label was produced by a person, and it is most of the hidden test set.
+This lesson uses the German letters, the Anna Seifert correspondence held by the Max Kade Institute: 191 letters and postcards written between 1932 and 1942 by one woman to her son in Kurrent (the old German handwriting taught in schools until the 1940s, whose letterforms look nothing like today's cursive: an `e` is two short strokes, an `s` can take three shapes, and most Germans alive today cannot read it), transcribed by the Institute's Kurrent Transcription Group. It is the part of the competition data where every label was produced by a person, and it is most of the hidden test set.
 
 | split | pages | documents | label source |
 |---|---|---|---|
 | train | 295 | 4 letter bundles | all human-transcribed, ~620 characters per page |
 | test | 141 | 5 other letter bundles | labels held by Kaggle |
 
-Small is the point. 295 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material. Kurrent is also a genuinely different script from modern German cursive, so this is a case where the model has to learn something, not just adjust its style.
+Small is the point. 295 labelled pages is a realistic amount of data for a library or a lab to have, and it is enough to move a model that was pre-trained on the right kind of material. Kurrent is also a genuinely different script, not a style of the one the model already reads, so this is a case where the model has to learn something new.
 
 We fine-tune CHURRO-3B. It already reads old handwriting across 46 language clusters; we are teaching it *these* hands and *these* transcription conventions.
 
