@@ -82,15 +82,17 @@ Before launching a fine-tune, write down what it should cost. If the bill is 3x 
 
 The cost of a run is GPU-hours × the hourly rate, and GPU-hours scale with **model size × tokens seen × epochs**, multiplied by **how many runs you do before one works**. Our class run sits at the very bottom of that curve. The rows below use current SageMaker on-demand prices in `us-east-1` (AWS price list, October 2026):
 
-| Run | Hardware | GPU-hours | Cost |
-|---|---|---|---|
-| **This episode:** 3B, LoRA, 120 Kurrent pages × 2 epochs | 1 × A10G (`ml.g5.xlarge`, `$1.41`/h), ~25 min | 0.4 | **~`$0.60`** |
-| Homework: 3B, LoRA, all 251 training pages × 2 epochs | 1 × A10G, ~45 min | 0.75 | ~`$1.05` |
-| 7B full fine-tune, 50k documents × 3 epochs (the challenge below) | 8 × A100 (`ml.p4d.24xlarge`, `$25.25`/h), ~6 h | 45 | **~`$140`** |
-| 70B LoRA, one day | 8 × A100, 24 h | 192 | **~`$600`** |
-| CHURRO-3B itself: full fine-tune, 100k pages, 5 epochs | 32 × H100 for ~25 h (4 × `ml.p5.48xlarge`, `$63.30`/h) | 800 | **~`$6,300`** |
-| 70B full fine-tune, two days | 4 × `ml.p5.48xlarge`, 48 h | 1,536 | **~`$12,000`** |
-| Any row above × a 10-run hyperparameter sweep | | | **× 10** |
+| Run | GPUs | Instances rented (price per instance-hour) | Hours | GPU-hours | Cost = instance-hours × price |
+|---|---|---|---|---|---|
+| **This episode:** 3B, LoRA, 120 Kurrent pages × 2 epochs | 1 × A10G | 1 × `ml.g5.xlarge` (`$1.41`) | 0.4 | 0.4 | **~`$0.60`** |
+| Homework: 3B, LoRA, all 251 training pages × 2 epochs | 1 × A10G | 1 × `ml.g5.xlarge` (`$1.41`) | 0.75 | 0.75 | ~`$1.05` |
+| 7B full fine-tune, 50k documents × 3 epochs (the challenge below) | 8 × A100 | 1 × `ml.p4d.24xlarge` (`$25.25`) | 5.5 | 44 | **~`$140`** |
+| 70B LoRA, one day | 8 × A100 | 1 × `ml.p4d.24xlarge` (`$25.25`) | 24 | 192 | **~`$600`** |
+| CHURRO-3B's own training: full fine-tune, 100k pages, 5 epochs | 32 × H100 | 4 × `ml.p5.48xlarge` (`$63.30`) | 25 | 800 | **~`$6,300`** |
+| 70B full fine-tune, two days | 32 × H100 | 4 × `ml.p5.48xlarge` (`$63.30`) | 48 | 1,536 | **~`$12,000`** |
+| Any row above × a 10-run hyperparameter sweep | | | | | **× 10** |
+
+GPUs come in fixed boxes: an `ml.g5.xlarge` is one A10G, an `ml.p4d.24xlarge` is eight A100s, an `ml.p5.48xlarge` is eight H100s, and you rent whole boxes. So "32 H100s for 25 hours" is four `ml.p5.48xlarge` for 25 hours: 100 instance-hours at `$63.30` is `$6,330`. GPU-hours (GPUs × hours) is what the time estimate below produces; divide by the GPUs per box to get instance-hours, and multiply by the box's price to get the bill.
 
 ![Cost per run on a log scale, from sixty cents for this episode's LoRA run to twelve thousand dollars for a 70B full fine-tune; a ten-run sweep shifts every bar up by one decade](fig/finetune-cost-ladder.svg){alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.60, homework 1.05, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar"}
 
@@ -143,7 +145,7 @@ It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB plus activa
 
 Tokens: 50,000 × 2,000 × 3 = 3 × 10^8. FLOPs: 6 × 7 × 10^9 × 3 × 10^8 ≈ 1.26 × 10^19. Per GPU at 312 TFLOPS × 25% utilization = 78 TFLOPS: 1.26 × 10^19 / 7.8 × 10^13 ≈ 1.6 × 10^5 GPU-seconds ≈ 45 GPU-hours, which is about 6 hours of wall-clock on 8 GPUs, about `$140` for one run (the "7B full fine-tune" row in the table above). A team that has measured 40% utilization on its own jobs would get 28 GPU-hours and ~`$90`; the rule is for before you have measured.
 
-A realistic project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data: five to ten runs, so `$700` to `$1,400,` before anyone touches a hyperparameter sweep. That is the number to put in the proposal, and it is why the three habits matter more as the model gets bigger.
+A realistic project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data: five to ten runs, so `$700` to `$1,400,` before anyone touches a hyperparameter sweep. That is the number to put in the proposal, and it is why the four habits matter more as the model gets bigger.
 
 :::::::::::::::::::::::::::::::::
 
