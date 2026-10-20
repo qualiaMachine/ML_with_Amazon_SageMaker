@@ -190,9 +190,9 @@ We'll also bring back the `job_cost_report()` helper from the previous episode, 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
     desc = session.sagemaker_client.describe_training_job(TrainingJobName=job_name)  # the job record the console shows
-    # BillableTimeInSeconds = startup + training, charged per instance; TrainingTimeInSeconds is the script alone
-    billable = desc["BillableTimeInSeconds"] * desc["ResourceConfig"]["InstanceCount"]
-    print(f"{job_name}: status {desc['TrainingJobStatus']}, training {desc.get('TrainingTimeInSeconds', 0)/60:.1f} min, billable {billable/60:.1f} min, cost ${billable/3600*price_per_hour:.2f} at ${price_per_hour}/h")
+    n = desc["ResourceConfig"]["InstanceCount"]
+    billable = desc["BillableTimeInSeconds"] * n   # container pull to model upload, charged per instance
+    print(f"{job_name}: status {desc['TrainingJobStatus']}, billable {billable/60:.1f} min on {n} instance(s), cost ${billable/3600*price_per_hour:.3f} at ${price_per_hour}/h")
     return desc
 
 # us-east-1 on-demand rates (2026-10-16); check the instances page for your region

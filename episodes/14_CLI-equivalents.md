@@ -71,12 +71,12 @@ aws sagemaker list-notebook-instances --query 'NotebookInstances[].[NotebookInst
 aws sagemaker list-endpoints       # must print an empty list on the workshop account
 ```
 
-`describe-training-job` is the call behind `job_cost_report()` in the training episodes. The same two numbers are there: training time, and billable time, which includes the startup you paid for.
+`describe-training-job` is the call behind `job_cost_report()` in the training episodes. The same number is there: billable time, which includes the container pull and data download you paid for.
 
 ```bash
 JOB=<a training job name from the list above>
 aws sagemaker describe-training-job --training-job-name $JOB \
-  --query '{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, training_s:TrainingTimeInSeconds, billable_s:BillableTimeInSeconds, tags:Tags}'
+  --query '{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, tags:Tags}'
 ```
 
 Cost is billable seconds × instance count × the hourly rate, exactly as in the notebooks. Tags are returned by a separate call, which is also how you find the untagged job that will show up as "unallocated" on the bill:

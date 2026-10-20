@@ -469,13 +469,11 @@ When the cell returns, ask SageMaker what it charged for. This is the number to 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
     desc = session.sagemaker_client.describe_training_job(TrainingJobName=job_name)
-    billable = desc["BillableTimeInSeconds"]           # the bill: container pull, 7.5 GB model copy, then the script
-    training = desc.get("TrainingTimeInSeconds", 0)    # the script alone; the gap is the fixed startup overhead
+    billable = desc["BillableTimeInSeconds"]           # the bill: container pull, 7.5 GB model copy, the script, model upload
     print(f"job:            {job_name}")
     print(f"status:         {desc['TrainingJobStatus']}")
-    print(f"training time:  {training / 60:.1f} min  (script running)")
-    print(f"billable time:  {billable / 60:.1f} min  (what you pay for, incl. download)")
-    print(f"cost:           ${billable / 3600 * price_per_hour:.2f} at ${price_per_hour}/h")
+    print(f"billable time:  {billable / 60:.1f} min  (what you pay for; the script's own timing is in train_summary.json)")
+    print(f"cost:           ${billable / 3600 * price_per_hour:.3f} at ${price_per_hour}/h")
     return desc
 
 g5_price = 1.41   # ml.g5.xlarge, us-east-1 on-demand, $/hour
@@ -484,7 +482,7 @@ adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]   # the model.tar.gz
 print("adapter:", adapter_s3_uri)
 ```
 
-The gap between *training time* and *billable time* is the fixed overhead of every job: container pull, data download, the 7.5 GB model copy from S3. It is the same whether you train for one minute or one hour, which is why a small first run is cheap and why batching work into fewer, longer jobs is cheaper than many tiny ones.
+Compare the billable minutes with `train_minutes` in the summary you download next: the difference is the fixed overhead of every job, container pull, data download and the 7.5 GB model copy from S3. It is the same whether you train for one minute or one hour, which is why a small first run is cheap and why batching work into fewer, longer jobs is cheaper than many tiny ones.
 
 The whole output of the job is a `model.tar.gz` of about 100 MB: the LoRA adapter, the processor configuration, the holdout list, the two evaluation files and a summary. The 3B base model is never copied anywhere.
 
