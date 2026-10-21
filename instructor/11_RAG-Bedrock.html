@@ -942,8 +942,8 @@ the publishers’ sites is slow and unreliable when fifty notebooks do it
 at once, so the instructors did it once with
 <code>scripts/build_wattbot_corpus.py</code> and staged the result as
 <code>corpus.zip</code> in the shared bucket. We download that one file,
-unpack it, and delete the zip: the instance’s disk is 20 GB at most and
-the PDFs alone are 400 MB.</p>
+unpack it, and delete the zip: the instance’s disk is 20 GB at most, and
+the zip plus the unpacked PDFs are close to 700 MB.</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -953,7 +953,7 @@ the PDFs alone are 400 MB.</p>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a>corpus_path <span class="op">=</span> download_from_s3(corpus_key, <span class="st">"corpus.zip"</span>)</span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a><span class="cf">with</span> zipfile.ZipFile(corpus_path, <span class="st">"r"</span>) <span class="im">as</span> zf:</span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a>    zf.extractall(PDF_DIR)</span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a>os.remove(corpus_path)   <span class="co"># the zip is 400 MB and the PDFs are now unpacked; the notebook disk is small</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a>os.remove(corpus_path)   <span class="co"># the zip is 270 MB and the unpacked PDFs are 400 MB; the notebook disk is small</span></span>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a></span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a>pdf_files <span class="op">=</span> <span class="bu">sorted</span>(f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(PDF_DIR) <span class="cf">if</span> f.lower().endswith(<span class="st">".pdf"</span>))</span>
 <span id="cb11-10"><a href="#cb11-10" tabindex="-1" aria-label="code-block-11-10"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(pdf_files)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>PDF_DIR<span class="sc">}</span><span class="ss">; metadata lists </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> papers"</span>)</span></code></pre>
