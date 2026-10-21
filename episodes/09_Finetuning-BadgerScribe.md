@@ -556,6 +556,7 @@ The second input channel, `model`, is the copy of CHURRO-3B your instructor stag
 
 ```python
 # two channels: "train" is mounted at /opt/ml/input/data/train, "model" at /opt/ml/input/data/model inside the container
+# the job is created with the tags given to the estimator (tags=make_job_tags("Training")); job_cost_report reads them back below
 # wait=True blocks this cell and streams the log here; the job keeps running (and billing) even if you interrupt the cell
 start = time.time()
 estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=training_job_name, wait=True)
@@ -589,7 +590,7 @@ Things to find in the log while you wait:
 
 ## Step 2: Read the results and the bill
 
-When the cell returns, ask SageMaker what it charged for. This is the number to compare against the estimate every time.
+When the cell returns, ask SageMaker what it charged for, and check that the job carries your tags; a job without them is spend nobody can attribute. The billable time is the number to compare against the estimate every time.
 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
@@ -599,6 +600,8 @@ def job_cost_report(job_name: str, price_per_hour: float):
     print(f"status:         {desc['TrainingJobStatus']}")
     print(f"billable time:  {billable / 60:.1f} min  (what you pay for; the script's own timing is in train_summary.json)")
     print(f"cost:           ${billable / 3600 * price_per_hour:.3f} at ${price_per_hour}/h")
+    tags = session.sagemaker_client.list_tags(ResourceArn=desc["TrainingJobArn"])["Tags"]   # tags live on the job, not in describe_training_job
+    print(f"tags:           {', '.join(t['Key'] + '=' + t['Value'] for t in tags) or 'NONE: this spend is unattributed'}")
     return desc
 
 desc = job_cost_report(training_job_name, g5_price)
