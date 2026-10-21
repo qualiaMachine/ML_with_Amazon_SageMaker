@@ -210,7 +210,7 @@ print("code_rag:  ", os.listdir("code_rag"))
 
 ### The RAG job's pip install is part of its bill
 
-vLLM ships its own CUDA kernels and pins its own PyTorch, so `pip install vllm` in the RAG job pulls several gigabytes and replaces the container's `torch` and `transformers` with the versions it wants. That is normal (the container is thrown away when the job ends) but it takes about 5 of the job's ~30 minutes, on a GPU instance that is billing the whole time: roughly 20 cents per run. For a job you launch often, bake the install into a custom container image instead; for a job you launch twice in a workshop, paying for the install is cheaper than building the image.
+vLLM ships its own CUDA kernels and pins its own PyTorch, so `pip install vllm` in the RAG job pulls several gigabytes and replaces the container's `torch`, `transformers` and `peft` with the versions it wants. In the log this looks alarming: a wall of `Downloading` lines, then `Uninstalling torch-2.8.0`, `Uninstalling transformers-4.56.2` and a dozen more, then an `Installing collected packages` line after which nothing prints for several minutes while the wheels unpack. It is not stuck. The step ends with `Successfully installed`, and only then does the script start. All of that is normal (the container is thrown away when the job ends) but it takes 5 to 8 of the job's ~20 minutes, on a GPU instance that is billing the whole time: roughly 15 cents per run. For a job you launch often, bake the install into a custom container image instead; for a job you launch twice in a workshop, paying for the install is cheaper than building the image.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
