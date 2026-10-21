@@ -792,6 +792,8 @@ Then compare that number to the estimate in Step 0. If you are within 50%, your 
 
 Everything below is the same pattern at a larger scale: about `$1.50` for the LoRA fine-tune and `$0.80` for inference, roughly two hours of wall-clock time that you do not need to sit through. Launch, go do something else, come back.
 
+The cells that launch jobs or read their output are commented out, so that **Run All** in class does not start two hours of GPU work. When you do the homework, uncomment them one at a time.
+
 ### The four-pass LoRA run
 
 Same estimator and the same 251 pages, four passes instead of two, 40 evaluation pages instead of 15, and a 130-minute cap. Write your estimate down first (Step 2's challenge). Launch with `wait=False` here only because you will not be watching: it returns immediately and you poll later. The explicit job name still protects you from a double launch.
@@ -847,19 +849,19 @@ homework_estimator = HuggingFace(
 Launch and come back later; the next cell polls for it.
 
 ```python
-# wait=False: returns at once; poll the job with describe_training_job in the next cell
-homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)
-print("launched:", homework_job_name)
+# # wait=False: returns at once; poll the job with describe_training_job in the next cell
+# homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)
+# print("launched:", homework_job_name)
 ```
 
 ```python
-# Come back later and run this until it says Completed. Everything below needs the adapter this run produces.
-desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)
-print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))
-homework_adapter_s3_uri = None
-if desc["TrainingJobStatus"] == "Completed":
-    desc = job_cost_report(homework_job_name, g5_price)
-    homework_adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]
+# # Come back later and run this until it says Completed. Everything below needs the adapter this run produces.
+# desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)
+# print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))
+# homework_adapter_s3_uri = None
+# if desc["TrainingJobStatus"] == "Completed":
+#     desc = job_cost_report(homework_job_name, g5_price)
+#     homework_adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]
 ```
 
 ### Base vs. LoRA fine-tuned over the holdout and the test set
@@ -945,39 +947,39 @@ def run_transcription_job(label: str, adapter_uri: str = None):
 Launch it twice: once with the base model alone, once with the homework adapter merged in. Not before the four-pass run has finished: the first line checks.
 
 ```python
-assert homework_adapter_s3_uri, "the four-pass run has not finished; rerun the poll cell above until it says Completed"
-base_output_uri = run_transcription_job("base")
-lora_output_uri = run_transcription_job("lora", adapter_uri=homework_adapter_s3_uri)
+# assert homework_adapter_s3_uri, "the four-pass run has not finished; rerun the poll cell above until it says Completed"
+# base_output_uri = run_transcription_job("base")
+# lora_output_uri = run_transcription_job("lora", adapter_uri=homework_adapter_s3_uri)
 ```
 
 Both jobs run in parallel on their own GPU, which doubles the instantaneous spend but halves the wall-clock time; the total cost is the same. Watch them under **SageMaker AI → Data preparation → Processing jobs**, and when both are `Completed`, score the holdout rows with `metric.py`, the exact file that scores the leaderboard.
 
 ```python
-import subprocess
-
-def fetch_predictions(output_uri: str, label: str) -> pd.DataFrame:
-    bucket, key = output_uri.replace("s3://", "").split("/", 1)
-    local = os.path.join(local_data_dir, f"predictions_{label}.csv")
-    s3_client.download_file(bucket, key + "predictions.csv", local)
-    return pd.read_csv(local, keep_default_na=False)
-
-preds = {label: fetch_predictions(uri, label) for label, uri in [("base", base_output_uri), ("lora", lora_output_uri)]}
+# import subprocess
+#
+# def fetch_predictions(output_uri: str, label: str) -> pd.DataFrame:
+#     bucket, key = output_uri.replace("s3://", "").split("/", 1)
+#     local = os.path.join(local_data_dir, f"predictions_{label}.csv")
+#     s3_client.download_file(bucket, key + "predictions.csv", local)
+#     return pd.read_csv(local, keep_default_na=False)
+#
+# preds = {label: fetch_predictions(uri, label) for label, uri in [("base", base_output_uri), ("lora", lora_output_uri)]}
 ```
 
 Write the holdout answers to a file, keep only the holdout rows of each prediction file, and run `metric.py` on each pair the way Kaggle runs it on a submission.
 
 ```python
-holdout_solution = train_df[train_df.page_id.isin(holdout_df.page_id)][["page_id", "text", "category"]]
-holdout_solution.to_csv(os.path.join(local_data_dir, "holdout_solution.csv"), index=False)
-
-for label, df in preds.items():
-    df[df.page_id.isin(holdout_solution.page_id)].to_csv(os.path.join(local_data_dir, f"holdout_pred_{label}.csv"), index=False)
-    print(f"\n=== {label} ===")
-    print(subprocess.run(
-        ["python", os.path.join(local_data_dir, "metric.py"),
-         "--solution", os.path.join(local_data_dir, "holdout_solution.csv"),
-         "--submission", os.path.join(local_data_dir, f"holdout_pred_{label}.csv")],
-        capture_output=True, text=True).stdout)
+# holdout_solution = train_df[train_df.page_id.isin(holdout_df.page_id)][["page_id", "text", "category"]]
+# holdout_solution.to_csv(os.path.join(local_data_dir, "holdout_solution.csv"), index=False)
+#
+# for label, df in preds.items():
+#     df[df.page_id.isin(holdout_solution.page_id)].to_csv(os.path.join(local_data_dir, f"holdout_pred_{label}.csv"), index=False)
+#     print(f"\n=== {label} ===")
+#     print(subprocess.run(
+#         ["python", os.path.join(local_data_dir, "metric.py"),
+#          "--solution", os.path.join(local_data_dir, "holdout_solution.csv"),
+#          "--submission", os.path.join(local_data_dir, f"holdout_pred_{label}.csv")],
+#         capture_output=True, text=True).stdout)
 ```
 
 ### Submit
@@ -985,13 +987,13 @@ for label, df in preds.items():
 The `lora` prediction file already contains every test page. Keep only those rows, in the order `test.csv` lists them. If you want a leaderboard score, this file is what you upload on the competition's **Submit Prediction** page (two submissions per day; this is the only step that needs a Kaggle account, and it is optional).
 
 ```python
-submission = test_df[["page_id"]].merge(preds["lora"], on="page_id", how="left").fillna({"text": ""})
-assert len(submission) == len(test_df) and submission.text.str.len().gt(0).all(), "every test page needs a prediction"
-
-submission_path = os.path.join(local_data_dir, "submission_churro_lora.csv")
-submission.to_csv(submission_path, index=False)
-s3_client.upload_file(submission_path, bucket_name, f"{data_prefix}/submissions/submission_churro_lora.csv")
-print("wrote", submission_path, len(submission), "rows")
+# submission = test_df[["page_id"]].merge(preds["lora"], on="page_id", how="left").fillna({"text": ""})
+# assert len(submission) == len(test_df) and submission.text.str.len().gt(0).all(), "every test page needs a prediction"
+#
+# submission_path = os.path.join(local_data_dir, "submission_churro_lora.csv")
+# submission.to_csv(submission_path, index=False)
+# s3_client.upload_file(submission_path, bucket_name, f"{data_prefix}/submissions/submission_churro_lora.csv")
+# print("wrote", submission_path, len(submission), "rows")
 ```
 
 Finally, rerun Step 3 and compare the total with the estimate you wrote down before the four-pass run.
