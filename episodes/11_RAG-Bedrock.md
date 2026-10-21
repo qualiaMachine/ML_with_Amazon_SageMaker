@@ -155,6 +155,9 @@ base_embedding_model_id = "amazon.titan-embed-text-v2:0"  # turns text into vect
 **The files.** The inputs live in the shared bucket: the paper list, the questions with their answers, and the zipped corpus of PDFs. Everything this episode derives from them goes to your own bucket, under the same `wattbot/` prefix: the chunked text, the chunk embeddings, and the answers the pipeline produces.
 
 ```python
+!mkdir -p /home/ec2-user/SageMaker/wattbot   # a project folder beside the lesson clone, so data and outputs stay out of the repository
+%cd /home/ec2-user/SageMaker/wattbot
+
 shared_bucket = "ml-marathon-shared"   # the instructor-staged, read-only bucket with the data and model weights; change only on your own account
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode
 

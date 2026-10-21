@@ -82,6 +82,9 @@ Jobs run in containers, so the code they execute has to be shipped with the job:
 Each job gets its own source directory, because SageMaker uploads the whole directory and installs whatever `requirements.txt` it finds next to the script, and only the RAG job needs extra packages. `code_embed/` holds the embedding job, `code_rag/` the RAG job, and a copy of `wattbot_rag.py` sits next to the notebook for the scoring step at the end.
 
 ```python
+!mkdir -p /home/ec2-user/SageMaker/wattbot   # the same project folder the Bedrock episode used, beside the lesson clone
+%cd /home/ec2-user/SageMaker/wattbot
+
 # One source directory per job: SageMaker uploads the whole directory into the container
 !mkdir -p code_embed code_rag
 # The embedding job's script

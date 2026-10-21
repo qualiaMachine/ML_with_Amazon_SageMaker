@@ -186,6 +186,9 @@ def download_s3_object(bucket: str, key: str, local_path: str) -> None:
 
 
 ```python
+!mkdir -p /home/ec2-user/SageMaker/wattbot   # a project folder beside the lesson clone (this is a new instance, so it starts empty)
+%cd /home/ec2-user/SageMaker/wattbot
+
 shared_bucket = "ml-marathon-shared"   # the instructor-staged, read-only bucket with the data and model weights; change only on your own account
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks live here)
 
