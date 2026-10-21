@@ -891,6 +891,79 @@ With 53 questions, two calls each and ~1,500-token prompts, the run was 140K inp
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+::::::::::::::::::::::::::::::::::::: challenge
+
+### Swap the models
+
+Everything above is two model IDs and two callables. The [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) has dozens of chat models and several embedding models, and "Choosing the two models" at the top of the episode said the leaderboards cannot tell you which one wins on your questions. Find out.
+
+1. **A different generator.** Pick another chat model from the catalog (for example `us.amazon.nova-2-lite-v1:0`, `us.meta.llama4-maverick-17b-instruct-v1:0`, or a Mistral or Claude model if your account has access), wrap it in a tagged profile as in Step 7, and rerun the Step 11 loop on the same 55-question sample with `call_bedrock_chat` pointed at it. Score it with `compute_wattbot_score` and price it from its `usage` blocks. Which evidence types moved, and what did a point of score cost?
+2. **A different embedder.** Retrieval is the other half. Either shrink Titan to 256 dimensions (`"dimensions": 256` in its request body) and see whether the hit rate and the score survive a four-times smaller index, or switch provider to Cohere Embed (`cohere.embed-english-v3`), whose request body is different from Titan's: a list of `texts` and an `input_type` that is `search_document` for the corpus and `search_query` for the question. Either way the matrix must be recomputed (ten minutes at the quota, so not in class), under a new file name so the Titan one is kept.
+
+Keep the rest fixed. One change per experiment, or you will not know what moved the score.
+
+:::::::::::::::::::::::: solution
+
+**Generator.** `call_bedrock_chat` already takes a `model_id`, so the swap is a profile and a lambda:
+
+```python
+alt_generation_model_id = "us.amazon.nova-2-lite-v1:0"   # any chat model in the catalog with a converse API
+alt_model_arn = tagged_profile_arn(bedrock, alt_generation_model_id, "wattbot-gen-alt", name, project)
+
+usage_before = len(bedrock_usage)
+alt_results = []
+for _, row in eval_df.iterrows():
+    alt_results.append(run_single_qa(
+        row=row, embed_query=embed_query,
+        generate=lambda s, u, max_new_tokens=512: call_bedrock_chat(s, u, max_new_tokens, model_id=alt_model_arn),
+        chunk_embeddings=chunk_embeddings, chunked_docs=chunked_docs, docid_to_url=docid_to_url,
+        top_k=8, retrieval_threshold=0.25,
+    ))
+alt_path = os.path.join(output_dir, "wattbot_solutions_bedrock_alt.csv")
+pd.DataFrame(alt_results).to_csv(alt_path, index=False)
+
+alt_usage = bedrock_usage[usage_before:]   # only this run's calls
+print(f"{sum(u['inputTokens'] for u in alt_usage):,} input + {sum(u['outputTokens'] for u in alt_usage):,} output tokens; price them from the pricing page")
+compute_wattbot_score(train_qa_path=train_qa_path, preds_path=alt_path, n_examples=5)
+```
+
+Read the per-type lines against the DeepSeek run. A cheaper model that holds its own on Quote questions and loses on Math and CrossPaper is the usual pattern; whether that trade is worth it depends on which questions you have.
+
+**Embedder.** Titan at 256 dimensions is the same call with one more key; Cohere needs its own request and response shape. Both go through a tagged profile for the new model, and both need `embed_query` to use the same model as the matrix, with Cohere's `input_type` switched for the question side.
+
+```python
+alt_embedding_model_id = "cohere.embed-english-v3"        # or keep base_embedding_model_id and add "dimensions": 256 to the Titan body
+alt_embed_arn = tagged_profile_arn(bedrock, alt_embedding_model_id, "wattbot-embed-alt", name, project)
+
+def alt_embed(text: str, for_query: bool = False) -> np.ndarray:
+    if "cohere" in alt_embedding_model_id:
+        body = {"texts": [text[:2000]], "input_type": "search_query" if for_query else "search_document", "truncate": "END"}
+    else:
+        body = {"inputText": text, "dimensions": 256, "normalize": True}   # Titan Text Embeddings V2 at a quarter of the size
+    out = json.loads(bedrock_runtime.invoke_model(modelId=alt_embed_arn, contentType="application/json",
+                                                  accept="application/json", body=json.dumps(body))["body"].read())
+    vec = out["embeddings"][0] if "embeddings" in out else out["embedding"]   # Cohere returns a list of vectors, Titan one vector
+    vec = vec["float"][0] if isinstance(vec, dict) else vec                   # newer Cohere versions nest by type
+    return np.asarray(vec, dtype="float32")
+
+alt_emb_path = data_dir / "embeddings_alt.npy"   # a new file: the Titan matrix stays
+if alt_emb_path.exists():
+    alt_embeddings = np.load(alt_emb_path)
+else:
+    t0 = time.time()
+    alt_embeddings = np.vstack([alt_embed(ch["text"]) for ch in chunked_docs])
+    np.save(alt_emb_path, alt_embeddings)
+    print(f"Embedded {len(chunked_docs)} chunks in {(time.time() - t0) / 60:.1f} min")
+
+alt_embed_query = lambda q: alt_embed(q, for_query=True)
+```
+
+Then the Step 11 loop with `embed_query=alt_embed_query` and `chunk_embeddings=alt_embeddings`, DeepSeek unchanged, and the scorer. The hit-rate cell from Step 13 is the sharper instrument here: compute it for the new matrix before scoring, because an embedder that finds the paper less often cannot be rescued by any generator.
+
+:::::::::::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 ## Step 13 – Multimodal embeddings for the table and figure questions
 
 Look back at the evidence-type table in Step 12. The Table and Figure rows are usually the worst, and the reason is upstream of the model. `pypdf` gives us a page's *text*: a table comes out as a run of numbers with its column headers somewhere else on the page, and a figure comes out as its caption and nothing more. A question whose answer is a bar in a plot has nothing in the chunks to find, and a question whose answer is a cell in a table is being read from a flattened copy.
