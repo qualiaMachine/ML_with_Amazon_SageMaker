@@ -1340,7 +1340,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1672,9 +1672,13 @@ generator will help. “Yes” with <code>is_blank</code> is the model
 declining on evidence it had, which the system prompt and the retrieval
 threshold control. “Yes” with a wrong value is a reading error, and the
 cited passage usually shows what it latched onto: a nearby number, a
-different unit, a different model in the same table. Each of those is a
-different lever, and the score alone would have you pulling the wrong
-one.</p>
+different unit, a different model in the same table. And sometimes the
+explanation shows the model read correctly and the label is the narrower
+reading: a question asking what inference “can account for” labelled 90
+where three papers in the corpus give 60, 70 and 80 to 90 percent, or a
+fact that appears in several papers with the label naming one of them,
+so any other citation scores zero. Each of those is a different lever,
+and the score alone would have you pulling the wrong one.</p>
 <div id="what-did-that-run-cost" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -1701,7 +1705,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
