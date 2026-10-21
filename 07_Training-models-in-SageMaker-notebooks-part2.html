@@ -1013,17 +1013,17 @@ Explain the result.</p>
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
-startup (provisioning, pulling the container, downloading data), and the
-GPU container is larger, so it often takes a little <em>longer</em> to
-start. The actual training is a few seconds on either instance: the
-network has about 2,600 parameters and the whole training set is 713
-rows, so each full-batch step is tiny and the T4 sits almost idle, and
-the one-time CUDA initialization adds a few seconds of its own. Startup
-dominates both bills, and the GPU bill is about 6x higher per minute
-(0.74 / 0.115), so the GPU costs several times more for no speedup. In
-our run the CPU job billed 2.8 minutes (<code>$0.005</code>) and the GPU
-job 3.6 minutes (<code>$0.045</code>): slower, and nine times the
-price.</p>
+startup (pulling the container, downloading data; the unbilled wait for
+an instance comes before that), and the GPU container is larger, so it
+often takes a little <em>longer</em> to start. The actual training is a
+few seconds on either instance: the network has about 2,600 parameters
+and the whole training set is 713 rows, so each full-batch step is tiny
+and the T4 sits almost idle, and the one-time CUDA initialization adds a
+few seconds of its own. Startup dominates both bills, and the GPU bill
+is about 6x higher per minute (0.74 / 0.115), so the GPU costs several
+times more for no speedup. In our run the CPU job billed 2.8 minutes
+(<code>$0.005</code>) and the GPU job 3.6 minutes (<code>$0.045</code>):
+slower, and nine times the price.</p>
 <p>A GPU pays off when the per-step work is large enough to keep it
 busy: bigger models, bigger batches, or datasets of hundreds of MB and
 up. If you ever do need more GPU than a <code>g4dn.xlarge</code>, the
