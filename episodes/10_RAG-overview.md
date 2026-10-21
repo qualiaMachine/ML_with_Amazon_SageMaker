@@ -85,7 +85,7 @@ Compare that to running the **entire WattBot pipeline** from this lesson on Bedr
 | Explanation pass over 100 answers with DeepSeek V3 | 300K in / 30K out | cents |
 | **Total** | | **well under `$1`** |
 
-A single forgotten weekend on the *cheapest* GPU instance costs more than fifty full runs of the pipeline on Bedrock; a forgotten weekend on the `ml.g6e.xlarge` the later episodes use costs more than a hundred. That asymmetry is why Bedrock is the default, not just an alternative.
+A single forgotten weekend on the *cheapest* GPU instance costs more than fifty full runs of the pipeline on Bedrock; a forgotten weekend on the `ml.g6e.xlarge` the optional GPU-notebook episode uses costs more than a hundred. That asymmetry is why Bedrock is the default, not just an alternative.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
