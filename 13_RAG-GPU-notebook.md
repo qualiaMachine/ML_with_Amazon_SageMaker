@@ -30,7 +30,7 @@ exercises: 15
 
 ### Optional, self-study episode
 
-This episode is not taught in the workshop. **The Bedrock and Processing Jobs episodes are the default ways to run RAG; this one is for the case where you need to poke at a self-hosted model interactively, and only if you will remember to stop the instance.** It runs the same pipeline as the Processing Jobs episode on a GPU notebook instance, which is the right tool for prototyping alone at a keyboard and the wrong one for a room of a hundred people with meters running. Work through it on your own when you want to see model loading, GPU memory and generation as plain Python. Read the cost callout first.
+This episode is not taught in the workshop. **The Bedrock and Processing Jobs episodes are the default ways to run RAG; this one is for the case where you need to poke at a self-hosted model interactively, and only if you will remember to stop the instance.** **Do not run this notebook on the controller instance from the other episodes. Create a new GPU notebook instance for it (Setup below). On a CPU instance the vLLM install and the 27 GB model load will exhaust memory and freeze your JupyterLab.** It runs the same pipeline as the Processing Jobs episode on a GPU notebook instance, which is the right tool for prototyping alone at a keyboard and the wrong one for a room of a hundred people with meters running. Work through it on your own when you want to see model loading, GPU memory and generation as plain Python. Read the cost callout first.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
