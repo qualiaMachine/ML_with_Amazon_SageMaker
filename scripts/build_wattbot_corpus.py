@@ -66,6 +66,7 @@ def main():
     ap.add_argument("--from-zip", help="an existing corpus.zip: skip the downloads and only write pages.jsonl")
     ap.add_argument("--pages", help="where to write the page records (default: pages.jsonl next to the zip)")
     ap.add_argument("--timeout", type=int, default=30)
+    ap.add_argument("--retry-missing", action="store_true", help="keep the PDFs already in --out and download only the ids it lacks")
     args = ap.parse_args()
 
     md = pd.read_csv(args.metadata, encoding="utf-8", encoding_errors="replace")
@@ -76,16 +77,21 @@ def main():
         return
     failures = []
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-    with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(args.out, "w", zipfile.ZIP_DEFLATED) as zf:
+    mode = "a" if args.retry_missing and os.path.exists(args.out) else "w"
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"}   # some publishers refuse the default python-requests agent
+    with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(args.out, mode, zipfile.ZIP_DEFLATED) as zf:
+        have = {n[:-4] for n in zf.namelist() if n.endswith(".pdf")}
         for _, row in md.iterrows():
             doc_id = str(row["id"]).strip()
+            if doc_id in have:
+                continue
             url = row.get("url")
             if not isinstance(url, str) or not url.strip().startswith("http"):
                 failures.append((doc_id, f"bad url: {url!r}"))
                 continue
             url = url.strip().replace("arxiv.org/abs/", "arxiv.org/pdf/")   # the abstract page is HTML; the pdf link is the paper
             try:
-                resp = requests.get(url, timeout=args.timeout, allow_redirects=True)
+                resp = requests.get(url, timeout=args.timeout, allow_redirects=True, headers=headers)
                 resp.raise_for_status()
                 path = os.path.join(tmp, f"{doc_id}.pdf")
                 with open(path, "wb") as f:
