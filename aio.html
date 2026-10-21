@@ -1420,7 +1420,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -4897,7 +4897,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5086,7 +5086,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6436,19 +6436,20 @@ Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 </h2>
 <hr class="half-width">
 <p>The training episodes so far trained small models from scratch. This
-episode fine-tunes a large language model: a vision-language model with
-billions of parameters, pretrained on more data and compute than any lab
-could repeat. That is what makes it a different kind of job, in what it
-can do and in what it costs.</p>
+episode fine-tunes a large language model with LoRA, the cheap form of
+fine-tuning explained below: a vision-language model with billions of
+parameters, pretrained on more data and compute than any lab could
+repeat. That is what makes it a different kind of job, in what it can do
+and in what it costs.</p>
 <p>General-purpose models are trained on the average of the internet,
 and research problems are rarely average. A 19th-century German hand, a
 lab’s own annotation conventions, species names, a regional dialect, the
 layout of a specific archive: the largest commercial model has seen
 little of it, and no prompt can make up for that.</p>
 <p>Done on the right data, a small fine-tuned model beats a much larger
-general one. The model we fine-tune in this episode is itself the
+general one. The model we LoRA fine-tune in this episode is itself the
 example: <a href="https://github.com/stanford-oval/Churro" class="external-link">CHURRO</a>, a
-3-billion-parameter vision-language model, was fine-tuned from
+3-billion-parameter vision-language model, was fully fine-tuned from
 Qwen2.5-VL-3B on about 100,000 pages of historical documents, and its
 authors report that it exceeds the accuracy of Gemini 2.5 Pro on
 historical text recognition at 15.5x lower cost (<a href="https://arxiv.org/abs/2509.19768" class="external-link">paper</a>). A model that size
@@ -6534,16 +6535,17 @@ them through the adapter. This episode uses LoRA.</p>
 <h3 id="scale-and-how-easy-it-is-to-get-wrong">Scale, and how easy it is to get wrong<a class="anchor" aria-label="anchor" href="#scale-and-how-easy-it-is-to-get-wrong"></a>
 </h3>
 <p>What makes fine-tuning an LLM different is scale. The training
-episodes ran for minutes on a <code>$0.12</code>-an-hour CPU; a
-fine-tune runs for hours on a GPU, and every setting multiplies the
-bill: model size, epochs, image resolution, instance type, and whether
-anyone is watching when the job should have ended. Any one of them off
-by 10x is a 10x bill, and the first run is never the last.
-<strong>Fine-tuning is one of the most common surprise costs we see hurt
-people</strong>, and it is the reason this episode spends as long on
-estimating and capping a run as on running it. We measure the gain
-ourselves: the episode ends by scoring the base model and the fine-tuned
-model on the same held-out pages.</p>
+episodes ran for minutes on a <code>$0.12</code>-an-hour CPU; a full
+fine-tune runs for hours or days on a GPU, a LoRA fine-tune for minutes
+to hours, and every setting multiplies the bill: model size, epochs,
+image resolution, instance type, and whether anyone is watching when the
+job should have ended. Any one of them off by 10x is a 10x bill, and the
+first run is never the last. <strong>Fine-tuning is one of the most
+common surprise costs we see hurt people</strong>, and it is the reason
+this episode spends as long on estimating and capping a run as on
+running it. We measure the gain ourselves: the episode ends by scoring
+the base model and the LoRA fine-tuned model on the same held-out
+pages.</p>
 </div>
 <div class="section level3">
 <h3 id="the-task-badger-scribe">The task: Badger Scribe<a class="anchor" aria-label="anchor" href="#the-task-badger-scribe"></a>
@@ -6596,8 +6598,8 @@ for a library or a lab to have, and it is enough to move a model that
 was pre-trained on the right kind of material. Kurrent is also a
 genuinely different script, not a style of the one the model already
 reads, so this is a case where the model has to learn something new.</p>
-<p>We fine-tune CHURRO-3B. It already reads old handwriting across 46
-language clusters; we are teaching it <em>these</em> hands and
+<p>We LoRA fine-tune CHURRO-3B. It already reads old handwriting across
+46 language clusters; we are teaching it <em>these</em> hands and
 <em>these</em> transcription conventions.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-0-estimate-the-cost-before-you-launch-anything">Step 0: Estimate the cost before you launch anything<a class="anchor" aria-label="anchor" href="#step-0-estimate-the-cost-before-you-launch-anything"></a>
@@ -6732,13 +6734,13 @@ box’s price to get the bill.</p>
 <figure><img src="fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.95, homework 1.90, the full Badger Scribe train set 2.25, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from about a dollar
 for this episode’s LoRA run to twelve thousand dollars for a 70B full
 fine-tune; a ten-run sweep shifts every bar up by one decade</div>
-</figure><p>Two rows to note. The CHURRO row is the model you are about to
+</figure><p>Two rows to note. The CHURRO row is the model you are about to LoRA
 fine-tune: Stanford spent on the order of 800 H100-hours making it, and
 you get the benefit for a dollar because you are <em>adapting</em> it,
 not retraining it. Starting from a model that already knows most of the
 task is the largest cost saving available, and it is decided before any
 GPU is involved. The sweep row: a first run is rarely the last, so a
-“<code>$140</code> fine-tune” is usually a <code>$700</code> to
+“<code>$140</code> full fine-tune” is usually a <code>$700</code> to
 <code>$1,400</code> project. That is the number that surprises research
 groups. (The 7B row is worked out in the challenge below; the 70B rows
 are rule-of-thumb magnitudes; the CHURRO figures come from a published
@@ -6963,7 +6965,7 @@ is why the four habits matter more as the model gets bigger.</p>
 <div class="section level3">
 <h3 id="the-instance">The instance<a class="anchor" aria-label="anchor" href="#the-instance"></a>
 </h3>
-<p>The model we fine-tune fits on one 24 GB GPU. Single-GPU and
+<p>The model we LoRA fine-tune fits on one 24 GB GPU. Single-GPU and
 multi-GPU SageMaker training instances, same price list (the full table,
 with CPU instances and the GPU-by-GPU notes, is on the supplemental <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page):</p>
@@ -7115,7 +7117,8 @@ for the curve</td>
 <td><code>$0.11</code></td>
 </tr>
 <tr>
-<td>Score the same 15 pages with the fine-tuned model, ~17 s each</td>
+<td>Score the same 15 pages with the LoRA fine-tuned model, ~17 s
+each</td>
 <td>~4 min</td>
 <td><code>$0.10</code></td>
 </tr>
@@ -7172,8 +7175,8 @@ weekend.</p>
 <td><code>$0.15</code></td>
 </tr>
 <tr>
-<td>Fine-tune on all 251 pages, 2 passes, with before/after scoring and
-a per-pass curve</td>
+<td>LoRA fine-tune on all 251 pages, 2 passes, with before/after scoring
+and a per-pass curve</td>
 <td><code>ml.g5.xlarge</code></td>
 <td>~33 min</td>
 <td><code>$0.75</code></td>
@@ -7552,7 +7555,7 @@ jobs it launches. Pass them to every estimator.</p>
 <span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a>    ]</span></code></pre>
 </div>
 </div>
-</section><section><h2 class="section-heading" id="step-1-launch-the-fine-tune">Step 1: Launch the fine-tune<a class="anchor" aria-label="anchor" href="#step-1-launch-the-fine-tune"></a>
+</section><section><h2 class="section-heading" id="step-1-launch-the-lora-fine-tune">Step 1: Launch the LoRA fine-tune<a class="anchor" aria-label="anchor" href="#step-1-launch-the-lora-fine-tune"></a>
 </h2>
 <hr class="half-width">
 <p>One job does everything: scores 15 held-out German-letter pages with
@@ -7570,7 +7573,7 @@ its progress.</p>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>                           <span class="co"># $/hour, us-east-1 on-demand</span></span>
 <span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>estimated_minutes <span class="op">=</span> <span class="dv">32</span>                    <span class="co"># the Step 0 estimate</span></span>
 <span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a>max_run_minutes <span class="op">=</span> <span class="dv">65</span>                      <span class="co"># about twice the estimate; SageMaker kills the job at this cap, whatever it is doing</span></span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-mini"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-lora-2ep"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
 <span id="cb22-6"><a href="#cb22-6" tabindex="-1" aria-label="code-block-22-6"></a>checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">/"</span>   <span class="co"># the script saves the adapter here at the end of every epoch</span></span>
 <span id="cb22-7"><a href="#cb22-7" tabindex="-1" aria-label="code-block-22-7"></a></span>
 <span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a><span class="bu">print</span>(<span class="ss">f"job name:     </span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -7828,7 +7831,7 @@ copied anywhere.</p>
 <h3 id="before-vs--after">Before vs. after<a class="anchor" aria-label="anchor" href="#before-vs--after"></a>
 </h3>
 <p>Both evaluations ran on the same 15 pages, so the difference is the
-fine-tune and nothing else.</p>
+LoRA fine-tune and nothing else.</p>
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -7836,14 +7839,14 @@ fine-tune and nothing else.</p>
 <span id="cb29-2"><a href="#cb29-2" tabindex="-1" aria-label="code-block-29-2"></a>after <span class="op">=</span> pd.read_csv(os.path.join(run_dir, <span class="st">"eval_after.csv"</span>), keep_default_na<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb29-3"><a href="#cb29-3" tabindex="-1" aria-label="code-block-29-3"></a></span>
 <span id="cb29-4"><a href="#cb29-4" tabindex="-1" aria-label="code-block-29-4"></a><span class="co"># cer = character error rate per page: edits / characters in the reference, lower is better</span></span>
-<span id="cb29-5"><a href="#cb29-5" tabindex="-1" aria-label="code-block-29-5"></a>comparison <span class="op">=</span> before[[<span class="st">"page_id"</span>, <span class="st">"cer"</span>]].merge(after[[<span class="st">"page_id"</span>, <span class="st">"cer"</span>]], on<span class="op">=</span><span class="st">"page_id"</span>, suffixes<span class="op">=</span>(<span class="st">"_base"</span>, <span class="st">"_tuned"</span>))</span>
-<span id="cb29-6"><a href="#cb29-6" tabindex="-1" aria-label="code-block-29-6"></a>comparison[<span class="st">"gain"</span>] <span class="op">=</span> comparison.cer_base <span class="op">-</span> comparison.cer_tuned   <span class="co"># positive = the fine-tune helped on that page</span></span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1" aria-label="code-block-29-5"></a>comparison <span class="op">=</span> before[[<span class="st">"page_id"</span>, <span class="st">"cer"</span>]].merge(after[[<span class="st">"page_id"</span>, <span class="st">"cer"</span>]], on<span class="op">=</span><span class="st">"page_id"</span>, suffixes<span class="op">=</span>(<span class="st">"_base"</span>, <span class="st">"_lora"</span>))</span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1" aria-label="code-block-29-6"></a>comparison[<span class="st">"gain"</span>] <span class="op">=</span> comparison.cer_base <span class="op">-</span> comparison.cer_lora   <span class="co"># positive = the LoRA fine-tune helped on that page</span></span>
 <span id="cb29-7"><a href="#cb29-7" tabindex="-1" aria-label="code-block-29-7"></a><span class="bu">print</span>(comparison.sort_values(<span class="st">"gain"</span>, ascending<span class="op">=</span><span class="va">False</span>).<span class="bu">round</span>(<span class="dv">3</span>).to_string(index<span class="op">=</span><span class="va">False</span>))</span>
-<span id="cb29-8"><a href="#cb29-8" tabindex="-1" aria-label="code-block-29-8"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">mean CER  base: </span><span class="sc">{</span>comparison<span class="sc">.</span>cer_base<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">   tuned: </span><span class="sc">{</span>comparison<span class="sc">.</span>cer_tuned<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1" aria-label="code-block-29-8"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">mean CER  base: </span><span class="sc">{</span>comparison<span class="sc">.</span>cer_base<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">   LoRA: </span><span class="sc">{</span>comparison<span class="sc">.</span>cer_lora<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>Look at the page that improved most. The fine-tuned model should have
-picked up the conventions (umlauts and <code>ß</code> as written, no
-modernised spelling, Kurrent <code>s</code> and <code>e</code> forms
+<p>Look at the page that improved most. The LoRA fine-tuned model should
+have picked up the conventions (umlauts and <code>ß</code> as written,
+no modernised spelling, Kurrent <code>s</code> and <code>e</code> forms
 read correctly) as well as this particular writer’s hand.</p>
 <div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -7858,10 +7861,10 @@ read correctly) as well as this particular writer’s hand.</p>
 <div class="section level3">
 <h3 id="how-many-passes-were-worth-paying-for">How many passes were worth paying for<a class="anchor" aria-label="anchor" href="#how-many-passes-were-worth-paying-for"></a>
 </h3>
-<p>Before and after says whether the fine-tune helped. The curve says
-whether you bought the right amount of it. The job recorded the training
-loss every 5 steps and scored 8 of the holdout pages at the end of every
-epoch, with the base model as epoch 0.</p>
+<p>Before and after says whether the LoRA fine-tune helped. The curve
+says whether you bought the right amount of it. The job recorded the
+training loss every 5 steps and scored 8 of the holdout pages at the end
+of every epoch, with the base model as epoch 0.</p>
 <div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -8052,104 +8055,19 @@ means giving up a quarter of the data.</p>
 50%, your estimating is good enough to be trusted with a bigger run. If
 you are not, find out which line was wrong before launching anything
 else.</p>
-<div id="exercise-1-image-resolution" class="callout challenge">
-<div class="callout-square">
-<i class="callout-icon" data-feather="zap"></i>
-</div>
-<span class="callout-header">Challenge</span>
-<div id="exercise-1-image-resolution" class="callout-inner">
-<h3 class="callout-title">Exercise 1: Image resolution</h3>
-<div class="callout-content">
-<p>Relaunch the same job with <code>"max_pixels": 2560 * 28 * 28</code>
-(~2 megapixels, twice the <code>1280 * 28 * 28</code> of the class run)
-and the job name <code>badger-{username}-churro-mini-2mp</code>. Before
-it starts, write down your prediction for its billable time, and raise
-<code>max_run</code> to match: the 65-minute cap was set for the
-1-megapixel job. Then compare <code>train_minutes</code> and
-<code>seconds_per_page</code> in the two summaries, and the before/after
-CER. Did the extra pixels help?</p>
-</div>
-</div>
-</div>
-<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
-  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
-</button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
-<div class="accordion-body">
-<p>Time per page roughly doubles: the sequence is twice as long and
-attention cost grows faster than linearly. On these scans the strokes
-are legible well below 1 megapixel, so the extra pixels mostly buy
-tokens that carry no information, and CER usually moves very little.
-Resolution is the first thing to lower when a fine-tune is over budget,
-and the first to raise if the model is misreading small characters such
-as the <code>½</code> fractions.</p>
-</div>
-</div>
-</div>
-</div>
-<div id="exercise-2-cheaper-per-run-or-just-faster" class="callout challenge">
-<div class="callout-square">
-<i class="callout-icon" data-feather="zap"></i>
-</div>
-<span class="callout-header">Challenge</span>
-<div id="exercise-2-cheaper-per-run-or-just-faster" class="callout-inner">
-<h3 class="callout-title">Exercise 2: Cheaper per run, or just
-faster?</h3>
-<div class="callout-content">
-<p><code>ml.g6e.xlarge</code> (one L40S, 48 GB) costs
-<code>$2.61</code>/h, 1.85x the price of <code>ml.g5.xlarge</code>, and
-runs this workload roughly 2.5–3x faster. It also has twice the GPU
-memory, so <code>batch_size</code> can be 2 or 4 instead of 1, which
-uses the GPU more efficiently.</p>
-<p>Using the Step 0 “The run” table, estimate the cost of the class job
-on <code>ml.g6e.xlarge</code>. Then do the same for the homework run (25
-min of training, 34 min of scoring, 6 min of startup and upload on the
-g5). Which phase does <em>not</em> get faster, and when does the faster
-instance save money?</p>
-</div>
-</div>
-</div>
-<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
-<div class="accordion-item">
-<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
-  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
-</button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
-<div class="accordion-body">
-<p>Startup and upload (~6 min, <code>$0.26</code> at
-<code>$2.61</code>/h) do not speed up: the container pull and the S3
-copies are the same on any instance. For the class job, training drops
-from ~12 to ~4 minutes and the ~14 minutes of scoring to ~5, so the job
-is about 15 minutes and ~<code>$0.65</code>: a little less than the
-<code>$0.75</code> g5 run. At this size the two are nearly a wash,
-because the fixed overhead is a third of the faster job.</p>
-<p>The homework run on the g5 is 25 + 34 + 6 = 65 minutes, about
-<code>$1.50</code>. On the g6e at 2.5–3x: ~9 minutes of training, ~12 of
-scoring, the same 6 of overhead, about 27 minutes and
-~<code>$1.20</code>. The longer the GPU work, the more the faster card
-saves: the g5 bill grows linearly with pages and passes while the g6e
-bill grows at a third of the slope. The g6e only loses on a job so short
-that the fixed overhead dominates, a 5-minute smoke test, say.</p>
-<p>The hourly rate is the wrong thing to compare; the cost per run is
-what matters, and the fixed overhead is a larger share of it on faster
-hardware. The catch is quotas: the account needs a service quota for
-<code>ml.g6e.xlarge</code> training jobs, and those often default to
-zero.</p>
-</div>
-</div>
-</div>
-</div>
-</section><section><h2 class="section-heading" id="homework-the-full-run-and-optionally-a-kaggle-submission">Homework: the full run and (optionally) a Kaggle submission<a class="anchor" aria-label="anchor" href="#homework-the-full-run-and-optionally-a-kaggle-submission"></a>
+</section><section><h2 class="section-heading" id="homework-a-four-pass-lora-run-and-optionally-a-kaggle-submission">Homework: a four-pass LoRA run and (optionally) a Kaggle
+submission<a class="anchor" aria-label="anchor" href="#homework-a-four-pass-lora-run-and-optionally-a-kaggle-submission"></a>
 </h2>
 <hr class="half-width">
 <p>Everything below is the same pattern at a larger scale: about
-<code>$1.50</code> for the fine-tune and <code>$0.80</code> for
+<code>$1.50</code> for the LoRA fine-tune and <code>$0.80</code> for
 inference, roughly two hours of wall-clock time that you do not need to
 sit through. Launch, go do something else, come back.</p>
+<p>The cells that launch jobs or read their output are commented out, so
+that <strong>Run All</strong> in class does not start two hours of GPU
+work. When you do the homework, uncomment them one at a time.</p>
 <div class="section level3">
-<h3 id="the-full-fine-tune">The full fine-tune<a class="anchor" aria-label="anchor" href="#the-full-fine-tune"></a>
+<h3 id="the-four-pass-lora-run">The four-pass LoRA run<a class="anchor" aria-label="anchor" href="#the-four-pass-lora-run"></a>
 </h3>
 <p>Same estimator and the same 251 pages, four passes instead of two, 40
 evaluation pages instead of 15, and a 130-minute cap. Write your
@@ -8162,9 +8080,9 @@ folder, and the cap written down with its worst case.</p>
 <div class="codewrapper sourceCode" id="cb33">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1" aria-label="code-block-33-1"></a>full_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-full"</span></span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1" aria-label="code-block-33-2"></a>full_checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>full_job_name<span class="sc">}</span><span class="ss">/"</span></span>
-<span id="cb33-3"><a href="#cb33-3" tabindex="-1" aria-label="code-block-33-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 130 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">130</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>full_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" tabindex="-1" aria-label="code-block-33-1"></a>homework_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-lora-4ep"</span></span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1" aria-label="code-block-33-2"></a>homework_checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>homework_job_name<span class="sc">}</span><span class="ss">/"</span></span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1" aria-label="code-block-33-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 130 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">130</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>homework_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Two settings change: four passes, and 40 evaluation pages, so the
 before/after numbers rest on more than 15 pages. <code>grad_accum</code>
@@ -8172,7 +8090,7 @@ before/after numbers rest on more than 15 pages. <code>grad_accum</code>
 <div class="codewrapper sourceCode" id="cb34">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1" aria-label="code-block-34-1"></a>full_hyperparameters <span class="op">=</span> {</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" tabindex="-1" aria-label="code-block-34-1"></a>homework_hyperparameters <span class="op">=</span> {</span>
 <span id="cb34-2"><a href="#cb34-2" tabindex="-1" aria-label="code-block-34-2"></a>    <span class="co"># no model_id: read from the "model" channel, as in class</span></span>
 <span id="cb34-3"><a href="#cb34-3" tabindex="-1" aria-label="code-block-34-3"></a>    <span class="st">"epochs"</span>: <span class="dv">4</span>,</span>
 <span id="cb34-4"><a href="#cb34-4" tabindex="-1" aria-label="code-block-34-4"></a>    <span class="st">"lr"</span>: <span class="fl">2e-4</span>,</span>
@@ -8185,12 +8103,12 @@ before/after numbers rest on more than 15 pages. <code>grad_accum</code>
 <span id="cb34-11"><a href="#cb34-11" tabindex="-1" aria-label="code-block-34-11"></a>    <span class="st">"eval_before"</span>: <span class="dv">1</span>,</span>
 <span id="cb34-12"><a href="#cb34-12" tabindex="-1" aria-label="code-block-34-12"></a>}</span></code></pre>
 </div>
-<p>The estimator is the class one with the 130-minute cap and the new
-checkpoint folder.</p>
+<p>Same estimator as in class, except for the job name, the checkpoint
+folder and the 130-minute cap.</p>
 <div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1" aria-label="code-block-35-1"></a>full_estimator <span class="op">=</span> HuggingFace(</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1" aria-label="code-block-35-1"></a>homework_estimator <span class="op">=</span> HuggingFace(</span>
 <span id="cb35-2"><a href="#cb35-2" tabindex="-1" aria-label="code-block-35-2"></a>    entry_point<span class="op">=</span><span class="st">"finetune_churro_lora.py"</span>,</span>
 <span id="cb35-3"><a href="#cb35-3" tabindex="-1" aria-label="code-block-35-3"></a>    source_dir<span class="op">=</span><span class="st">"code/"</span>,</span>
 <span id="cb35-4"><a href="#cb35-4" tabindex="-1" aria-label="code-block-35-4"></a>    role<span class="op">=</span>role,</span>
@@ -8199,37 +8117,38 @@ checkpoint folder.</p>
 <span id="cb35-7"><a href="#cb35-7" tabindex="-1" aria-label="code-block-35-7"></a>    instance_count<span class="op">=</span><span class="dv">1</span>,</span>
 <span id="cb35-8"><a href="#cb35-8" tabindex="-1" aria-label="code-block-35-8"></a>    volume_size<span class="op">=</span><span class="dv">50</span>,</span>
 <span id="cb35-9"><a href="#cb35-9" tabindex="-1" aria-label="code-block-35-9"></a>    max_run<span class="op">=</span><span class="dv">130</span> <span class="op">*</span> <span class="dv">60</span>,                     <span class="co"># 130 minutes: twice the estimate</span></span>
-<span id="cb35-10"><a href="#cb35-10" tabindex="-1" aria-label="code-block-35-10"></a>    checkpoint_s3_uri<span class="op">=</span>full_checkpoint_s3_uri,</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1" aria-label="code-block-35-10"></a>    checkpoint_s3_uri<span class="op">=</span>homework_checkpoint_s3_uri,</span>
 <span id="cb35-11"><a href="#cb35-11" tabindex="-1" aria-label="code-block-35-11"></a>    checkpoint_local_path<span class="op">=</span><span class="st">"/opt/ml/checkpoints"</span>,</span>
 <span id="cb35-12"><a href="#cb35-12" tabindex="-1" aria-label="code-block-35-12"></a>    transformers_version<span class="op">=</span><span class="st">"4.56"</span>,</span>
 <span id="cb35-13"><a href="#cb35-13" tabindex="-1" aria-label="code-block-35-13"></a>    pytorch_version<span class="op">=</span><span class="st">"2.8"</span>,</span>
 <span id="cb35-14"><a href="#cb35-14" tabindex="-1" aria-label="code-block-35-14"></a>    py_version<span class="op">=</span><span class="st">"py312"</span>,</span>
 <span id="cb35-15"><a href="#cb35-15" tabindex="-1" aria-label="code-block-35-15"></a>    output_path<span class="op">=</span>model_output_path,</span>
 <span id="cb35-16"><a href="#cb35-16" tabindex="-1" aria-label="code-block-35-16"></a>    sagemaker_session<span class="op">=</span>session,</span>
-<span id="cb35-17"><a href="#cb35-17" tabindex="-1" aria-label="code-block-35-17"></a>    hyperparameters<span class="op">=</span>full_hyperparameters,</span>
+<span id="cb35-17"><a href="#cb35-17" tabindex="-1" aria-label="code-block-35-17"></a>    hyperparameters<span class="op">=</span>homework_hyperparameters,</span>
 <span id="cb35-18"><a href="#cb35-18" tabindex="-1" aria-label="code-block-35-18"></a>)</span></code></pre>
 </div>
 <p>Launch and come back later; the next cell polls for it.</p>
 <div class="codewrapper sourceCode" id="cb36">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1" aria-label="code-block-36-1"></a><span class="co"># wait=False: returns at once; poll the job with describe_training_job in the next cell</span></span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1" aria-label="code-block-36-2"></a>full_estimator.fit({<span class="st">"train"</span>: train_s3_uri, <span class="st">"model"</span>: model_s3_uri}, job_name<span class="op">=</span>full_job_name, wait<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb36-3"><a href="#cb36-3" tabindex="-1" aria-label="code-block-36-3"></a><span class="bu">print</span>(<span class="st">"launched:"</span>, full_job_name)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1" aria-label="code-block-36-1"></a><span class="co"># # wait=False: returns at once; poll the job with describe_training_job in the next cell</span></span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1" aria-label="code-block-36-2"></a><span class="co"># homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)</span></span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1" aria-label="code-block-36-3"></a><span class="co"># print("launched:", homework_job_name)</span></span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb37">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a><span class="co"># Come back later and run this until it says Completed.</span></span>
-<span id="cb37-2"><a href="#cb37-2" tabindex="-1" aria-label="code-block-37-2"></a>desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>full_job_name)</span>
-<span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a><span class="bu">print</span>(desc[<span class="st">"TrainingJobStatus"</span>], <span class="st">"-"</span>, desc.get(<span class="st">"SecondaryStatus"</span>))</span>
-<span id="cb37-4"><a href="#cb37-4" tabindex="-1" aria-label="code-block-37-4"></a><span class="cf">if</span> desc[<span class="st">"TrainingJobStatus"</span>] <span class="op">==</span> <span class="st">"Completed"</span>:</span>
-<span id="cb37-5"><a href="#cb37-5" tabindex="-1" aria-label="code-block-37-5"></a>    desc <span class="op">=</span> job_cost_report(full_job_name, g5_price)</span>
-<span id="cb37-6"><a href="#cb37-6" tabindex="-1" aria-label="code-block-37-6"></a>    full_adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a><span class="co"># # Come back later and run this until it says Completed. Everything below needs the adapter this run produces.</span></span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1" aria-label="code-block-37-2"></a><span class="co"># desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)</span></span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a><span class="co"># print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))</span></span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1" aria-label="code-block-37-4"></a><span class="co"># homework_adapter_s3_uri = None</span></span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1" aria-label="code-block-37-5"></a><span class="co"># if desc["TrainingJobStatus"] == "Completed":</span></span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1" aria-label="code-block-37-6"></a><span class="co">#     desc = job_cost_report(homework_job_name, g5_price)</span></span>
+<span id="cb37-7"><a href="#cb37-7" tabindex="-1" aria-label="code-block-37-7"></a><span class="co">#     homework_adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
-<h3 id="base-vs--fine-tuned-over-the-holdout-and-the-test-set">Base vs. fine-tuned over the holdout and the test set<a class="anchor" aria-label="anchor" href="#base-vs--fine-tuned-over-the-holdout-and-the-test-set"></a>
+<h3 id="base-vs--lora-fine-tuned-over-the-holdout-and-the-test-set">Base vs. LoRA fine-tuned over the holdout and the test set<a class="anchor" aria-label="anchor" href="#base-vs--lora-fine-tuned-over-the-holdout-and-the-test-set"></a>
 </h3>
 <p>The evaluation inside the training job covers a sample. To score the
 whole holdout <em>and</em> produce predictions for the 141 test pages,
@@ -8339,12 +8258,14 @@ where the output is copied when the job ends.</li>
 <span id="cb40-40"><a href="#cb40-40" tabindex="-1" aria-label="code-block-40-40"></a>    <span class="cf">return</span> output_uri</span></code></pre>
 </div>
 <p>Launch it twice: once with the base model alone, once with the
-homework adapter merged in.</p>
+homework adapter merged in. Not before the four-pass run has finished:
+the first line checks.</p>
 <div class="codewrapper sourceCode" id="cb41">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" tabindex="-1" aria-label="code-block-41-1"></a>base_output_uri <span class="op">=</span> run_transcription_job(<span class="st">"base"</span>)</span>
-<span id="cb41-2"><a href="#cb41-2" tabindex="-1" aria-label="code-block-41-2"></a>tuned_output_uri <span class="op">=</span> run_transcription_job(<span class="st">"tuned"</span>, adapter_uri<span class="op">=</span>full_adapter_s3_uri)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" tabindex="-1" aria-label="code-block-41-1"></a><span class="co"># assert homework_adapter_s3_uri, "the four-pass run has not finished; rerun the poll cell above until it says Completed"</span></span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1" aria-label="code-block-41-2"></a><span class="co"># base_output_uri = run_transcription_job("base")</span></span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1" aria-label="code-block-41-3"></a><span class="co"># lora_output_uri = run_transcription_job("lora", adapter_uri=homework_adapter_s3_uri)</span></span></code></pre>
 </div>
 <p>Both jobs run in parallel on their own GPU, which doubles the
 instantaneous spend but halves the wall-clock time; the total cost is
@@ -8355,15 +8276,15 @@ scores the leaderboard.</p>
 <div class="codewrapper sourceCode" id="cb42">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" tabindex="-1" aria-label="code-block-42-1"></a><span class="im">import</span> subprocess</span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1" aria-label="code-block-42-2"></a></span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1" aria-label="code-block-42-3"></a><span class="kw">def</span> fetch_predictions(output_uri: <span class="bu">str</span>, label: <span class="bu">str</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb42-4"><a href="#cb42-4" tabindex="-1" aria-label="code-block-42-4"></a>    bucket, key <span class="op">=</span> output_uri.replace(<span class="st">"s3://"</span>, <span class="st">""</span>).split(<span class="st">"/"</span>, <span class="dv">1</span>)</span>
-<span id="cb42-5"><a href="#cb42-5" tabindex="-1" aria-label="code-block-42-5"></a>    local <span class="op">=</span> os.path.join(local_data_dir, <span class="ss">f"predictions_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">.csv"</span>)</span>
-<span id="cb42-6"><a href="#cb42-6" tabindex="-1" aria-label="code-block-42-6"></a>    s3_client.download_file(bucket, key <span class="op">+</span> <span class="st">"predictions.csv"</span>, local)</span>
-<span id="cb42-7"><a href="#cb42-7" tabindex="-1" aria-label="code-block-42-7"></a>    <span class="cf">return</span> pd.read_csv(local, keep_default_na<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb42-8"><a href="#cb42-8" tabindex="-1" aria-label="code-block-42-8"></a></span>
-<span id="cb42-9"><a href="#cb42-9" tabindex="-1" aria-label="code-block-42-9"></a>preds <span class="op">=</span> {label: fetch_predictions(uri, label) <span class="cf">for</span> label, uri <span class="kw">in</span> [(<span class="st">"base"</span>, base_output_uri), (<span class="st">"tuned"</span>, tuned_output_uri)]}</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" tabindex="-1" aria-label="code-block-42-1"></a><span class="co"># import subprocess</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1" aria-label="code-block-42-2"></a><span class="co">#</span></span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1" aria-label="code-block-42-3"></a><span class="co"># def fetch_predictions(output_uri: str, label: str) -&gt; pd.DataFrame:</span></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1" aria-label="code-block-42-4"></a><span class="co">#     bucket, key = output_uri.replace("s3://", "").split("/", 1)</span></span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1" aria-label="code-block-42-5"></a><span class="co">#     local = os.path.join(local_data_dir, f"predictions_{label}.csv")</span></span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1" aria-label="code-block-42-6"></a><span class="co">#     s3_client.download_file(bucket, key + "predictions.csv", local)</span></span>
+<span id="cb42-7"><a href="#cb42-7" tabindex="-1" aria-label="code-block-42-7"></a><span class="co">#     return pd.read_csv(local, keep_default_na=False)</span></span>
+<span id="cb42-8"><a href="#cb42-8" tabindex="-1" aria-label="code-block-42-8"></a><span class="co">#</span></span>
+<span id="cb42-9"><a href="#cb42-9" tabindex="-1" aria-label="code-block-42-9"></a><span class="co"># preds = {label: fetch_predictions(uri, label) for label, uri in [("base", base_output_uri), ("lora", lora_output_uri)]}</span></span></code></pre>
 </div>
 <p>Write the holdout answers to a file, keep only the holdout rows of
 each prediction file, and run <code>metric.py</code> on each pair the
@@ -8371,23 +8292,23 @@ way Kaggle runs it on a submission.</p>
 <div class="codewrapper sourceCode" id="cb43">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" tabindex="-1" aria-label="code-block-43-1"></a>holdout_solution <span class="op">=</span> train_df[train_df.page_id.isin(holdout_df.page_id)][[<span class="st">"page_id"</span>, <span class="st">"text"</span>, <span class="st">"category"</span>]]</span>
-<span id="cb43-2"><a href="#cb43-2" tabindex="-1" aria-label="code-block-43-2"></a>holdout_solution.to_csv(os.path.join(local_data_dir, <span class="st">"holdout_solution.csv"</span>), index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb43-3"><a href="#cb43-3" tabindex="-1" aria-label="code-block-43-3"></a></span>
-<span id="cb43-4"><a href="#cb43-4" tabindex="-1" aria-label="code-block-43-4"></a><span class="cf">for</span> label, df <span class="kw">in</span> preds.items():</span>
-<span id="cb43-5"><a href="#cb43-5" tabindex="-1" aria-label="code-block-43-5"></a>    df[df.page_id.isin(holdout_solution.page_id)].to_csv(os.path.join(local_data_dir, <span class="ss">f"holdout_pred_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">.csv"</span>), index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb43-6"><a href="#cb43-6" tabindex="-1" aria-label="code-block-43-6"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">=== </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss"> ==="</span>)</span>
-<span id="cb43-7"><a href="#cb43-7" tabindex="-1" aria-label="code-block-43-7"></a>    <span class="bu">print</span>(subprocess.run(</span>
-<span id="cb43-8"><a href="#cb43-8" tabindex="-1" aria-label="code-block-43-8"></a>        [<span class="st">"python"</span>, os.path.join(local_data_dir, <span class="st">"metric.py"</span>),</span>
-<span id="cb43-9"><a href="#cb43-9" tabindex="-1" aria-label="code-block-43-9"></a>         <span class="st">"--solution"</span>, os.path.join(local_data_dir, <span class="st">"holdout_solution.csv"</span>),</span>
-<span id="cb43-10"><a href="#cb43-10" tabindex="-1" aria-label="code-block-43-10"></a>         <span class="st">"--submission"</span>, os.path.join(local_data_dir, <span class="ss">f"holdout_pred_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">.csv"</span>)],</span>
-<span id="cb43-11"><a href="#cb43-11" tabindex="-1" aria-label="code-block-43-11"></a>        capture_output<span class="op">=</span><span class="va">True</span>, text<span class="op">=</span><span class="va">True</span>).stdout)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" tabindex="-1" aria-label="code-block-43-1"></a><span class="co"># holdout_solution = train_df[train_df.page_id.isin(holdout_df.page_id)][["page_id", "text", "category"]]</span></span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1" aria-label="code-block-43-2"></a><span class="co"># holdout_solution.to_csv(os.path.join(local_data_dir, "holdout_solution.csv"), index=False)</span></span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1" aria-label="code-block-43-3"></a><span class="co">#</span></span>
+<span id="cb43-4"><a href="#cb43-4" tabindex="-1" aria-label="code-block-43-4"></a><span class="co"># for label, df in preds.items():</span></span>
+<span id="cb43-5"><a href="#cb43-5" tabindex="-1" aria-label="code-block-43-5"></a><span class="co">#     df[df.page_id.isin(holdout_solution.page_id)].to_csv(os.path.join(local_data_dir, f"holdout_pred_{label}.csv"), index=False)</span></span>
+<span id="cb43-6"><a href="#cb43-6" tabindex="-1" aria-label="code-block-43-6"></a><span class="co">#     print(f"\n=== {label} ===")</span></span>
+<span id="cb43-7"><a href="#cb43-7" tabindex="-1" aria-label="code-block-43-7"></a><span class="co">#     print(subprocess.run(</span></span>
+<span id="cb43-8"><a href="#cb43-8" tabindex="-1" aria-label="code-block-43-8"></a><span class="co">#         ["python", os.path.join(local_data_dir, "metric.py"),</span></span>
+<span id="cb43-9"><a href="#cb43-9" tabindex="-1" aria-label="code-block-43-9"></a><span class="co">#          "--solution", os.path.join(local_data_dir, "holdout_solution.csv"),</span></span>
+<span id="cb43-10"><a href="#cb43-10" tabindex="-1" aria-label="code-block-43-10"></a><span class="co">#          "--submission", os.path.join(local_data_dir, f"holdout_pred_{label}.csv")],</span></span>
+<span id="cb43-11"><a href="#cb43-11" tabindex="-1" aria-label="code-block-43-11"></a><span class="co">#         capture_output=True, text=True).stdout)</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
 <h3 id="submit">Submit<a class="anchor" aria-label="anchor" href="#submit"></a>
 </h3>
-<p>The <code>tuned</code> prediction file already contains every test
+<p>The <code>lora</code> prediction file already contains every test
 page. Keep only those rows, in the order <code>test.csv</code> lists
 them. If you want a leaderboard score, this file is what you upload on
 the competition’s <strong>Submit Prediction</strong> page (two
@@ -8396,16 +8317,16 @@ and it is optional).</p>
 <div class="codewrapper sourceCode" id="cb44">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" tabindex="-1" aria-label="code-block-44-1"></a>submission <span class="op">=</span> test_df[[<span class="st">"page_id"</span>]].merge(preds[<span class="st">"tuned"</span>], on<span class="op">=</span><span class="st">"page_id"</span>, how<span class="op">=</span><span class="st">"left"</span>).fillna({<span class="st">"text"</span>: <span class="st">""</span>})</span>
-<span id="cb44-2"><a href="#cb44-2" tabindex="-1" aria-label="code-block-44-2"></a><span class="cf">assert</span> <span class="bu">len</span>(submission) <span class="op">==</span> <span class="bu">len</span>(test_df) <span class="kw">and</span> submission.text.<span class="bu">str</span>.<span class="bu">len</span>().gt(<span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"every test page needs a prediction"</span></span>
-<span id="cb44-3"><a href="#cb44-3" tabindex="-1" aria-label="code-block-44-3"></a></span>
-<span id="cb44-4"><a href="#cb44-4" tabindex="-1" aria-label="code-block-44-4"></a>submission_path <span class="op">=</span> os.path.join(local_data_dir, <span class="st">"submission_churro_lora.csv"</span>)</span>
-<span id="cb44-5"><a href="#cb44-5" tabindex="-1" aria-label="code-block-44-5"></a>submission.to_csv(submission_path, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb44-6"><a href="#cb44-6" tabindex="-1" aria-label="code-block-44-6"></a>s3_client.upload_file(submission_path, bucket_name, <span class="ss">f"</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/submissions/submission_churro_lora.csv"</span>)</span>
-<span id="cb44-7"><a href="#cb44-7" tabindex="-1" aria-label="code-block-44-7"></a><span class="bu">print</span>(<span class="st">"wrote"</span>, submission_path, <span class="bu">len</span>(submission), <span class="st">"rows"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" tabindex="-1" aria-label="code-block-44-1"></a><span class="co"># submission = test_df[["page_id"]].merge(preds["lora"], on="page_id", how="left").fillna({"text": ""})</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1" aria-label="code-block-44-2"></a><span class="co"># assert len(submission) == len(test_df) and submission.text.str.len().gt(0).all(), "every test page needs a prediction"</span></span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1" aria-label="code-block-44-3"></a><span class="co">#</span></span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1" aria-label="code-block-44-4"></a><span class="co"># submission_path = os.path.join(local_data_dir, "submission_churro_lora.csv")</span></span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1" aria-label="code-block-44-5"></a><span class="co"># submission.to_csv(submission_path, index=False)</span></span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1" aria-label="code-block-44-6"></a><span class="co"># s3_client.upload_file(submission_path, bucket_name, f"{data_prefix}/submissions/submission_churro_lora.csv")</span></span>
+<span id="cb44-7"><a href="#cb44-7" tabindex="-1" aria-label="code-block-44-7"></a><span class="co"># print("wrote", submission_path, len(submission), "rows")</span></span></code></pre>
 </div>
 <p>Finally, rerun Step 3 and compare the total with the estimate you
-wrote down before the full run.</p>
+wrote down before the four-pass run.</p>
 </div>
 </section><section><h2 class="section-heading" id="cleanup">Cleanup<a class="anchor" aria-label="anchor" href="#cleanup"></a>
 </h2>
@@ -8423,7 +8344,101 @@ adapter is small, but prediction outputs accumulate across runs.</li>
 <strong>Stop your notebook instance.</strong> It is a CPU instance
 at five cents an hour, which is exactly the kind of charge that goes
 unnoticed for a semester.</li>
-</ul>
+</ul></section><section><h2 class="section-heading" id="bonus-exercises">Bonus exercises<a class="anchor" aria-label="anchor" href="#bonus-exercises"></a>
+</h2>
+<hr class="half-width">
+<p>Not part of the class session. Exercise 1 relaunches the class job
+with one change and takes about an hour of GPU time; Exercise 2 is
+arithmetic only.</p>
+<div id="exercise-1-image-resolution" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<span class="callout-header">Challenge</span>
+<div id="exercise-1-image-resolution" class="callout-inner">
+<h3 class="callout-title">Exercise 1: Image resolution</h3>
+<div class="callout-content">
+<p>Relaunch the same job with <code>"max_pixels": 2560 * 28 * 28</code>
+(~2 megapixels, twice the <code>1280 * 28 * 28</code> of the class run)
+and the job name <code>badger-{username}-churro-lora-2ep-2mp</code>.
+Before it starts, write down your prediction for its billable time, and
+raise <code>max_run</code> to match: the 65-minute cap was set for the
+1-megapixel job. Then compare <code>train_minutes</code> and
+<code>seconds_per_page</code> in the two summaries, and the before/after
+CER. Did the extra pixels help?</p>
+</div>
+</div>
+</div>
+<div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
+  <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
+</button>
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div class="accordion-body">
+<p>Time per page roughly doubles: the sequence is twice as long and
+attention cost grows faster than linearly. On these scans the strokes
+are legible well below 1 megapixel, so the extra pixels mostly buy
+tokens that carry no information, and CER usually moves very little.
+Resolution is the first thing to lower when a fine-tune is over budget,
+and the first to raise if the model is misreading small characters such
+as the <code>½</code> fractions.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="exercise-2-cheaper-per-run-or-just-faster" class="callout challenge">
+<div class="callout-square">
+<i class="callout-icon" data-feather="zap"></i>
+</div>
+<span class="callout-header">Challenge</span>
+<div id="exercise-2-cheaper-per-run-or-just-faster" class="callout-inner">
+<h3 class="callout-title">Exercise 2: Cheaper per run, or just
+faster?</h3>
+<div class="callout-content">
+<p><code>ml.g6e.xlarge</code> (one L40S, 48 GB) costs
+<code>$2.61</code>/h, 1.85x the price of <code>ml.g5.xlarge</code>, and
+runs this workload roughly 2.5–3x faster. It also has twice the GPU
+memory, so <code>batch_size</code> can be 2 or 4 instead of 1, which
+uses the GPU more efficiently.</p>
+<p>Using the Step 0 “The run” table, estimate the cost of the class job
+on <code>ml.g6e.xlarge</code>. Then do the same for the homework run (25
+min of training, 34 min of scoring, 6 min of startup and upload on the
+g5). Which phase does <em>not</em> get faster, and when does the faster
+instance save money?</p>
+</div>
+</div>
+</div>
+<div id="accordionSolution4" class="accordion challenge-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
+  <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
+</button>
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div class="accordion-body">
+<p>Startup and upload (~6 min, <code>$0.26</code> at
+<code>$2.61</code>/h) do not speed up: the container pull and the S3
+copies are the same on any instance. For the class job, training drops
+from ~12 to ~4 minutes and the ~14 minutes of scoring to ~5, so the job
+is about 15 minutes and ~<code>$0.65</code>: a little less than the
+<code>$0.75</code> g5 run. At this size the two are nearly a wash,
+because the fixed overhead is a third of the faster job.</p>
+<p>The homework run on the g5 is 25 + 34 + 6 = 65 minutes, about
+<code>$1.50</code>. On the g6e at 2.5–3x: ~9 minutes of training, ~12 of
+scoring, the same 6 of overhead, about 27 minutes and
+~<code>$1.20</code>. The longer the GPU work, the more the faster card
+saves: the g5 bill grows linearly with pages and passes while the g6e
+bill grows at a third of the slope. The g6e only loses on a job so short
+that the fixed overhead dominates, a 5-minute smoke test, say.</p>
+<p>The hourly rate is the wrong thing to compare; the cost per run is
+what matters, and the fixed overhead is a larger share of it on faster
+hardware. The catch is quotas: the account needs a service quota for
+<code>ml.g6e.xlarge</code> training jobs, and those often default to
+zero.</p>
+</div>
+</div>
+</div>
+</div>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -9977,7 +9992,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10291,7 +10306,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and

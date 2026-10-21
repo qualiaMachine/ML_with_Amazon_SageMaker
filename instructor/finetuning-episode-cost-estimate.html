@@ -420,28 +420,28 @@
 
 <p>Planning notes for running the <em>Fine-tuning a Vision-Language
 Model with Training Jobs</em> episode (Badger Scribe, CHURRO-3B LoRA)
-with a class of about 50 in a 3-hour slot (quotas below are sized for
-100). Prices are on-demand SageMaker rates from the AWS price list
-published 2026-10-16 (<code>us-east-1</code> and the class account’s
-<code>us-east-2</code> are the same for these instance types); re-check
-them before the term, since <code>ml.g5.xlarge</code> has already moved
-from <code>$1.21</code> to <code>$1.41</code> since the RAG episodes
-were written.</p>
+with a class of about 50 in a 2-hour slot (3 with the bonus exercises)
+(quotas below are sized for 100). Prices are on-demand SageMaker rates
+from the AWS price list published 2026-10-16 (<code>us-east-1</code> and
+the class account’s <code>us-east-2</code> are the same for these
+instance types); re-check them before the term, since
+<code>ml.g5.xlarge</code> has already moved from <code>$1.21</code> to
+<code>$1.41</code> since the RAG episodes were written.</p>
 <section><h2 class="section-heading" id="the-in-class-design">The in-class design<a class="anchor" aria-label="anchor" href="#the-in-class-design"></a></h2>
-<hr class="half-width"><p>In class, every student runs one job of about 33 minutes: it scores
-15 held-out German-letter (<code>kade_letters</code>) pages with the
-base model, trains on all 251 training pages (295 minus a 44-page
-holdout) for 2 passes, scores 8 holdout pages after each pass for a
-curve, scores the same 15 pages again, and saves the adapter. The lesson
-ships only the German letters (295 train, 141 test pages) because every
-label is human-transcribed (the competition’s survey and account-book
-labels are mostly machine drafts), because they are most of the hidden
-test set, and because the scans are smaller. Before/after lives inside
-that one job, so there are no separate inference jobs during class. The
-full run, the Processing jobs over the test set and the optional Kaggle
-submission are homework.</p>
+<hr class="half-width"><p>In class, every student runs one LoRA fine-tuning job of about 33
+minutes: it scores 15 held-out German-letter (<code>kade_letters</code>)
+pages with the base model, trains on all 251 training pages (295 minus a
+44-page holdout) for 2 passes, scores 8 holdout pages after each pass
+for a curve, scores the same 15 pages again, and saves the adapter. The
+lesson ships only the German letters (295 train, 141 test pages) because
+every label is human-transcribed (the competition’s survey and
+account-book labels are mostly machine drafts), because they are most of
+the hidden test set, and because the scans are smaller. Before/after
+lives inside that one job, so there are no separate inference jobs
+during class. The full run, the Processing jobs over the test set and
+the optional Kaggle submission are homework.</p>
 <p>Launches use <code>wait=True</code> and an explicit
-<code>job_name=f"badger-{username}-churro-mini"</code>. The explicit
+<code>job_name=f"badger-{username}-churro-lora-2ep"</code>. The explicit
 name is the double-launch guard: SageMaker rejects a second job with the
 same name, so a queued Shift+Enter fails harmlessly. Interrupting the
 cell does not stop the job; the episode says so in a callout, and you
@@ -456,31 +456,32 @@ should say it out loud.</p>
 <code>ml.t3.medium</code> (<code>$0.05</code>/h)</td>
 <td>3 h</td>
 <td><code>$0.15</code></td>
-</tr><tr><td>In-class fine-tune (251 German-letter pages × 2 passes, 15 pages
-scored before and after, 8-page curve)</td>
+</tr><tr><td>In-class LoRA fine-tune (251 German-letter pages × 2 passes, 15
+pages scored before and after, 8-page curve)</td>
 <td>
 <code>ml.g5.xlarge</code> (<code>$1.41</code>/h)</td>
 <td>~32 min</td>
 <td><code>$0.75</code></td>
-</tr><tr><td>Exercise 1: same job at 2 megapixels</td>
+</tr><tr><td><strong>In class</strong></td>
+<td></td>
+<td><strong>~0.5 GPU-hours</strong></td>
+<td><strong>~<code>$0.90</code></strong></td>
+</tr><tr><td>Bonus Exercise 1, if anyone does it: the class job at 2
+megapixels</td>
 <td><code>ml.g5.xlarge</code></td>
 <td>~60 min</td>
 <td><code>$1.40</code></td>
-</tr><tr><td><strong>In class</strong></td>
-<td></td>
-<td><strong>~1.5 GPU-hours</strong></td>
-<td><strong>~<code>$2.30</code></strong></td>
-</tr><tr><td>Homework: full fine-tune (251 pages × 4 passes, 40 pages scored
+</tr><tr><td>Homework: four-pass LoRA run (251 pages × 4 passes, 40 pages scored
 before and after)</td>
 <td><code>ml.g5.xlarge</code></td>
 <td>~65 min</td>
 <td><code>$1.50</code></td>
-</tr><tr><td>Homework: base and fine-tuned over holdout + test (~185 pages, two
-Processing jobs)</td>
+</tr><tr><td>Homework: base and LoRA fine-tuned over holdout + test (~185 pages,
+two Processing jobs)</td>
 <td><code>ml.g5.xlarge</code></td>
 <td>~15 min each</td>
 <td><code>$0.70</code></td>
-</tr><tr><td><strong>In class + homework</strong></td>
+</tr><tr><td><strong>In class + bonus + homework</strong></td>
 <td></td>
 <td><strong>~3.1 GPU-hours</strong></td>
 <td><strong>~<code>$4.50</code></strong></td>
@@ -494,22 +495,22 @@ page for greedy generation on an A10G, about 5 minutes of billed startup
 shared bucket as a <code>model</code> channel) and under a minute of
 unbilled provisioning. The 2-megapixel and homework rows are scaled from
 those rates. Every job is capped (<code>max_run</code> of 65 min on the
-class job, 130 min on the full run, 45 min on each Processing job), so
-the worst case from the scripted steps is about <code>$7</code> per
+class job, 130 min on the homework run, 45 min on each Processing job),
+so the worst case from the scripted steps is about <code>$7</code> per
 student.</p>
 </section><section><h2 class="section-heading" id="what-the-class-spends">What the class spends<a class="anchor" aria-label="anchor" href="#what-the-class-spends"></a></h2>
 <hr class="half-width"><table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Scenario</th>
 <th>Per student</th>
 <th>50 students (double for 100)</th>
-</tr></thead><tbody><tr><td>In class, one clean pass each (class job + Exercise 1)</td>
-<td><code>$2.30</code></td>
-<td><code>$115</code></td>
+</tr></thead><tbody><tr><td>In class, one clean pass each</td>
+<td><code>$0.90</code></td>
+<td><code>$45</code></td>
 </tr><tr><td>In class, realistic (one extra relaunch each)</td>
-<td>~<code>$3.05</code>
+<td>~<code>$1.65</code>
 </td>
-<td>~<code>$150</code>
+<td>~<code>$85</code>
 </td>
-</tr><tr><td>In class, everything hits its <code>max_run</code> cap</td>
+</tr><tr><td>In class, two launches each at the <code>max_run</code> cap</td>
 <td>~<code>$3.20</code>
 </td>
 <td>~<code>$160</code>
@@ -523,7 +524,7 @@ student.</p>
 <strong>Budget to request</strong> (realistic class + homework +
 50%)</td>
 <td></td>
-<td><strong><code>$400</code></strong></td>
+<td><strong><code>$300</code></strong></td>
 </tr></tbody></table><p>For comparison, teaching the same material on
 <code>ml.g5.xlarge</code> <em>notebook</em> instances costs about the
 same during class (<code>$1.41</code> × 3 h × 50 = <code>$212</code>)
@@ -547,12 +548,12 @@ forgotten-instance arithmetic; quotas</td>
 </tr><tr><td>1:15–1:45</td>
 <td>Step 2: bill vs. estimate, before/after CER, the curves, a page side
 by side; the holdout callouts</td>
-</tr><tr><td>1:45–2:45</td>
-<td>Exercise 1 (relaunch at 2 MP; ~60 min, so launch first and discuss
-Exercise 2 while it runs)</td>
-</tr><tr><td>2:45–3:00</td>
+</tr><tr><td>1:45–2:00</td>
 <td>Step 3 totals; walk through the homework section; cleanup</td>
-</tr></tbody></table><p>If the jobs are still queueing at 0:50 (capacity), teach the console
+</tr></tbody></table><p>The bonus exercises are not scheduled. With a third hour, Exercise 1
+(the class job at 2 megapixels) is about an hour of GPU time, so launch
+it first and discuss Exercise 2 while it runs.</p>
+<p>If the jobs are still queueing at 0:50 (capacity), teach the console
 and the cost arithmetic from your own job’s page, run before class.</p>
 </section><section><h2 class="section-heading" id="things-that-will-go-wrong-unless-arranged-ahead-of-time">Things that will go wrong unless arranged ahead of time<a class="anchor" aria-label="anchor" href="#things-that-will-go-wrong-unless-arranged-ahead-of-time"></a></h2>
 <hr class="half-width"><p><strong>Service quotas.</strong> This is the item most likely to sink
@@ -575,7 +576,7 @@ file them <strong>three to four weeks</strong> before class.</p>
 <p><strong>Capacity.</strong> Fifty <code>ml.g5.xlarge</code> launches
 within the same minute in one region can fail with
 <code>InsufficientCapacity</code> even when the quota allows it.
-Mitigations, in order: launch the mini jobs in waves (table by table),
+Mitigations, in order: launch the class jobs in waves (table by table),
 and have <code>ml.g6.xlarge</code> (L4, 24 GB, <code>$1.13</code>/h;
 somewhat slower on this workload, with half the memory bandwidth, but
 still well within <code>max_run</code>) ready as a documented fallback
