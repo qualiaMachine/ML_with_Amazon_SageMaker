@@ -83,8 +83,9 @@ def main():
             if not isinstance(url, str) or not url.strip().startswith("http"):
                 failures.append((doc_id, f"bad url: {url!r}"))
                 continue
+            url = url.strip().replace("arxiv.org/abs/", "arxiv.org/pdf/")   # the abstract page is HTML; the pdf link is the paper
             try:
-                resp = requests.get(url.strip(), timeout=args.timeout, allow_redirects=True)
+                resp = requests.get(url, timeout=args.timeout, allow_redirects=True)
                 resp.raise_for_status()
                 path = os.path.join(tmp, f"{doc_id}.pdf")
                 with open(path, "wb") as f:
