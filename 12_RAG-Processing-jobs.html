@@ -839,7 +839,11 @@ of a Processing job script: inputs in, outputs out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
 of the estimator: the same role, tags, instance type and container
 versions, plus a runtime cap. Its <code>run</code> call names the
-script, mounts the inputs, and says where the output goes.</p>
+script, mounts the inputs, and says where the output goes. Once it is
+launched, the job appears on the <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs" class="external-link">Processing
+jobs page</a> of the SageMaker console (under <strong>Data
+preparation</strong> in the left menu), the Processing counterpart of
+the Training jobs page you used earlier.</p>
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1040,8 +1044,9 @@ go.</p>
 <span id="cb10-59"><a href="#cb10-59" tabindex="-1" aria-label="code-block-10-59"></a></span>
 <span id="cb10-60"><a href="#cb10-60" tabindex="-1" aria-label="code-block-10-60"></a><span class="bu">print</span>(<span class="ss">f"RAG batch job complete: </span><span class="sc">{</span>(time.time() <span class="op">-</span> start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min wall-clock, including instance startup and the pip install"</span>)</span></code></pre>
 </div>
-<p>While it runs, open the job’s CloudWatch log from the console page
-above. You will see, in order: pip installing vLLM, the weight download
+<p>While it runs, open the job on the <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs" class="external-link">Processing
+jobs page</a> and click <strong>View logs</strong> for its CloudWatch
+log. You will see, in order: pip installing vLLM, the weight download
 (16 GB in shards), vLLM loading the model and reporting how much GPU
 memory it reserved, then one line per question. The whole job is the 20
 minutes in the cost callout; the generation is the last third of it.</p>
@@ -1110,7 +1115,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -1176,7 +1181,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
