@@ -778,3 +778,20 @@ def hit_at_k(retrieved_doc_ids: Sequence[Sequence[str]], gt_ref_ids: Sequence[Se
     """Fraction of questions whose top-k retrieved documents include a ground-truth paper."""
     hits = [bool(set(r) & set(g)) for r, g in zip(retrieved_doc_ids, gt_ref_ids)]
     return float(np.mean(hits)) if hits else float("nan")
+
+
+def drop_questions_without_papers(train_df: pd.DataFrame, available_doc_ids) -> pd.DataFrame:
+    """Keep the questions whose cited papers are all in the corpus, plus the unanswerable ones.
+
+    A paper whose PDF could not be downloaded when the corpus was built cannot be
+    retrieved, so a question citing it can only score zero; scoring it would measure the
+    download, not the pipeline. Prints what was dropped.
+    """
+    available = set(available_doc_ids)
+    refs = train_df["ref_id"].apply(split_ref_ids)
+    keep = refs.apply(lambda ids: all(r in available for r in ids))
+    dropped = train_df.loc[~keep, "ref_id"].apply(split_ref_ids)
+    missing = sorted({r for ids in dropped for r in ids if r not in available})
+    if missing:
+        print(f"Dropping {int((~keep).sum())} of {len(train_df)} questions: they cite papers not in the corpus {missing}")
+    return train_df[keep].reset_index(drop=True)
