@@ -295,17 +295,10 @@ def retrieve_top_k(
     results = []
     for idx in top_idx:
         ch = chunked_docs[idx]
-        results.append(
-            {
-                "score": float(sims[idx]),
-                "text": ch["text"],
-                "doc_id": ch.get("doc_id", ""),
-                "title": ch.get("title", ""),
-                "url": ch.get("url", ""),
-                "page_num": ch.get("page_num", None),
-                "page_label": ch.get("page_label", None),
-            }
-        )
+        rec = {"text": "", "doc_id": "", "title": "", "url": "", "page_num": None, "page_label": None}
+        rec.update(ch)   # a text chunk, or a page-image record (doc_id, page_num, captions, png_path) in the multimodal step
+        rec["score"] = float(sims[idx])
+        results.append(rec)
     return results
 
 
