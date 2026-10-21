@@ -590,9 +590,9 @@ def compute_wattbot_score(
     per_type = {k: v for k, v in summary.get("per_type", {}).items() if k != "ALL"}
     if per_type:
         source = "flags derived from the explanation column" if flags_derived else "the competition's own flags"
-        print(f"\nWrong answer_value by evidence type ({source}; a question can carry several):")
+        print(f"\nanswer_value correct by evidence type ({source}; a question can carry several):")
         for label, d in per_type.items():
-            print(f"  {label:<11} {d['wrong']:>3}/{d['n']:<3} {d['pct_wrong']:5.1f}% wrong")
+            print(f"  {label:<11} {d['n'] - d['wrong']:>3}/{d['n']:<3} {100 - d['pct_wrong']:5.1f}% correct")
 
     incorrect = merged[merged["wattbot_score"] < 1.0]
     if not incorrect.empty and n_examples > 0:
