@@ -81,6 +81,20 @@ We’ll work with **Amazon Bedrock–hosted foundation models** for both embeddi
 
 For a full catalog of available models (including Claude variants, Amazon models, and partner models), open the **Model catalog** in the Amazon Bedrock console. Each entry provides a model card with capabilities, typical use cases, and pricing details so learners can explore alternatives for their own RAG systems.
 
+::::::::::::::::::::::::::::::::::::: callout
+
+### Choosing the two models
+
+The catalog tells you what exists and what it costs; it does not tell you what is good. Three places do, and all three are free to read:
+
+- **Embedding models**: the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard) scores embedding models on retrieval benchmarks. Filter to the retrieval task and your language; the top of the table changes every few months, and Titan V2 is a sound middle-of-the-pack choice that Bedrock serves without setup.
+- **Generation models**: [LMArena](https://lmarena.ai/) ranks chat models by blind human preference, and [Artificial Analysis](https://artificialanalysis.ai/) plots quality against price per million tokens, which is the chart that matters for RAG: the answer is written from retrieved text, so a mid-priced model often reads as well as a flagship at a tenth of the cost.
+- **Your own questions**: the benchmarks rank models on other people's data. `train_QA.csv` has labelled questions for this corpus, and the evaluation at the end of this episode scores a model on them and prices the run from its token counts. Changing `base_generation_model_id` and rerunning is the whole experiment. A model that wins on a leaderboard and loses on your questions has told you something the leaderboard cannot.
+
+The habit is the same as for instances: pick the cheapest candidate that scores well enough, measure it on your data, and move up only when the measurement says to.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 ## Notebook + dataset setup
 
