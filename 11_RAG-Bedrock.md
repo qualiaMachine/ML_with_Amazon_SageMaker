@@ -84,7 +84,7 @@ For a full catalog of available models (including Claude variants, Amazon models
 
 ## Notebook + dataset setup
 
-For this episode you need a SageMaker notebook instance, but **not a GPU one**. A small CPU instance such as `ml.t3.medium` is enough, because the models run on Bedrock rather than in the notebook. The notebook's execution role must allow Bedrock access; the exact permissions are listed in the "Permissions and verification" callout below.
+For this episode you need a SageMaker notebook instance, but **not a GPU one**. A small CPU instance such as `ml.t3.medium` is enough, because the models run on Bedrock rather than in the notebook. The notebook's execution role must allow Bedrock access, which the default SageMaker role does not. On the class account the instructor has added those permissions to `ml-sagemaker-use`, the role every notebook in this lesson runs with; on your own account, attach the policy in the "Permissions and verification" callout below to your role before starting. The first Bedrock call in Step 7 tells you plainly if they are missing.
 
 See [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) for further guidance on instance types.
 
@@ -519,20 +519,31 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
     """Return the ARN of a tagged application inference profile for base_model_id."""
     profile_name = f"{_slug(project)}-{_slug(name)}-{label}"
 
-    # Reuse an existing profile with this name, if any
-    paginator = bedrock.get_paginator("list_inference_profiles")
-    for page in paginator.paginate(typeEquals="APPLICATION"):
-        for summary in page["inferenceProfileSummaries"]:
-            if summary["inferenceProfileName"] == profile_name:
-                print(f"Reusing inference profile {profile_name}: {summary['inferenceProfileArn']}")
-                return summary["inferenceProfileArn"]
+    try:
+        # Reuse an existing profile with this name, if any
+        paginator = bedrock.get_paginator("list_inference_profiles")
+        for page in paginator.paginate(typeEquals="APPLICATION"):
+            for summary in page["inferenceProfileSummaries"]:
+                if summary["inferenceProfileName"] == profile_name:
+                    print(f"Reusing inference profile {profile_name}: {summary['inferenceProfileArn']}")
+                    return summary["inferenceProfileArn"]
 
-    resp = bedrock.create_inference_profile(
-        inferenceProfileName=profile_name,
-        description=f"{project} / {name} WattBot RAG ({label}) -> {base_model_id}",
-        modelSource={"copyFrom": _source_arn(base_model_id)},   # the profile is an alias for one base model
-        tags=profile_tags,   # usage billed through the profile carries these tags; raw model-ID calls carry none
-    )
+        resp = bedrock.create_inference_profile(
+            inferenceProfileName=profile_name,
+            description=f"{project} / {name} WattBot RAG ({label}) -> {base_model_id}",
+            modelSource={"copyFrom": _source_arn(base_model_id)},   # the profile is an alias for one base model
+            tags=profile_tags,   # usage billed through the profile carries these tags; raw model-ID calls carry none
+        )
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "AccessDeniedException":
+            role = boto3.client("sts").get_caller_identity()["Arn"]
+            raise PermissionError(
+                f"This notebook's role has no Bedrock permissions ({role}).\n"
+                "The Bedrock episode needs the policy in the 'Permissions and verification' callout attached to the "
+                "notebook's execution role: ask the account administrator (on the class account, the instructor) to add it. "
+                "Nothing to change in this notebook; rerun this cell once it is attached."
+            ) from e
+        raise
     print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
     return resp["inferenceProfileArn"]
 
@@ -546,7 +557,41 @@ embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_mode
 
 ### Permissions and verification
 
-- The notebook's execution role needs `bedrock:CreateInferenceProfile`, `bedrock:GetInferenceProfile`, `bedrock:ListInferenceProfiles`, `bedrock:GetFoundationModel`, and `bedrock:TagResource` in addition to `bedrock:InvokeModel`. The `InvokeModel` permission must cover **both** the profile ARN and the underlying model ARN, or calls through the profile are denied. If `create_inference_profile` raises `AccessDeniedException`, ask the account administrator for these permissions rather than falling back to the raw model ID.
+- The notebook's execution role needs the policy below (fill in `<account-id>`): calling models, managing tagged inference profiles, and reading the catalog. The `InvokeModel` permission must cover **both** the profile ARN and the underlying model ARN, or calls through the profile are denied. If the cell above stops with an `AccessDeniedException`, ask the account administrator to attach this policy to the role rather than falling back to the raw model ID.
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BedrockCallModels",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream"],
+      "Resource": [
+        "arn:aws:bedrock:*::foundation-model/*",
+        "arn:aws:bedrock:*:<account-id>:application-inference-profile/*",
+        "arn:aws:bedrock:*:<account-id>:inference-profile/*"
+      ]
+    },
+    {
+      "Sid": "BedrockTaggedProfiles",
+      "Effect": "Allow",
+      "Action": ["bedrock:CreateInferenceProfile", "bedrock:GetInferenceProfile", "bedrock:ListInferenceProfiles",
+                 "bedrock:DeleteInferenceProfile", "bedrock:TagResource", "bedrock:ListTagsForResource"],
+      "Resource": [
+        "arn:aws:bedrock:*:<account-id>:application-inference-profile/*",
+        "arn:aws:bedrock:*:<account-id>:inference-profile/*"
+      ]
+    },
+    {
+      "Sid": "BedrockCatalog",
+      "Effect": "Allow",
+      "Action": ["bedrock:GetFoundationModel", "bedrock:ListFoundationModels", "bedrock:ListInferenceProfiles"],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 - You can confirm the routing in the Bedrock console under **Inference and Assessment → Cross-region inference → Application inference profiles**, or with `bedrock.list_inference_profiles(typeEquals="APPLICATION")`.
 - Tags only become filters in Cost Explorer once the tag keys have been **activated as cost allocation tags** in the Billing console (an account‑admin, once‑per‑key action; on a shared workshop account the organizers do this). Until then the tags exist on the resource but do not show up on reports.
 - The profile itself has no hourly or storage charge. You only pay per token, exactly as before.
