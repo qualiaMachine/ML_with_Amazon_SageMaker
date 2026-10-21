@@ -378,6 +378,11 @@ def tagged_profile_arn(bedrock, base_model_id: str, label: str, name: str, proje
             tags=tags,
         )
     except ClientError as e:
+        if "On Demand" in e.response["Error"].get("Message", "") and not base_model_id.startswith("us."):
+            # Some models are listed in the region's catalog but served only through the US cross-region
+            # profile (Cohere Embed v4 and Llama 4 in Ohio, for example); the profile ID is the model ID with a us. prefix
+            print(f"{base_model_id} is not served on demand in this region; using the cross-region profile us.{base_model_id}")
+            return tagged_profile_arn(bedrock, f"us.{base_model_id}", label, name, project, purpose)
         if e.response["Error"]["Code"] == "AccessDeniedException":
             role = boto3.client("sts").get_caller_identity()["Arn"]
             raise PermissionError(
