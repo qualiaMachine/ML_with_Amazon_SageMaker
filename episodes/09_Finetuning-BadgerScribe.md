@@ -517,7 +517,7 @@ instance_type = "ml.g5.xlarge"            # one A10G GPU, 24 GB; the GPU lives i
 g5_price = 1.41                           # $/hour, us-east-1 on-demand
 estimated_minutes = 32                    # the Step 0 estimate
 max_run_minutes = 65                      # about twice the estimate; SageMaker kills the job at this cap, whatever it is doing
-training_job_name = f"badger-{username}-churro-mini"   # must be unique in the account: a rerun fails instead of launching a second job
+training_job_name = f"badger-{username}-churro-lora-2ep"   # must be unique in the account: a rerun fails instead of launching a second job
 checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{training_job_name}/"   # the script saves the adapter here at the end of every epoch
 
 print(f"job name:     {training_job_name}")
@@ -677,10 +677,10 @@ before = pd.read_csv(os.path.join(run_dir, "eval_before.csv"), keep_default_na=F
 after = pd.read_csv(os.path.join(run_dir, "eval_after.csv"), keep_default_na=False)
 
 # cer = character error rate per page: edits / characters in the reference, lower is better
-comparison = before[["page_id", "cer"]].merge(after[["page_id", "cer"]], on="page_id", suffixes=("_base", "_tuned"))
-comparison["gain"] = comparison.cer_base - comparison.cer_tuned   # positive = the LoRA fine-tune helped on that page
+comparison = before[["page_id", "cer"]].merge(after[["page_id", "cer"]], on="page_id", suffixes=("_base", "_lora"))
+comparison["gain"] = comparison.cer_base - comparison.cer_lora   # positive = the LoRA fine-tune helped on that page
 print(comparison.sort_values("gain", ascending=False).round(3).to_string(index=False))
-print(f"\nmean CER  base: {comparison.cer_base.mean():.3f}   tuned: {comparison.cer_tuned.mean():.3f}")
+print(f"\nmean CER  base: {comparison.cer_base.mean():.3f}   LoRA: {comparison.cer_lora.mean():.3f}")
 ```
 
 Look at the page that improved most. The LoRA fine-tuned model should have picked up the conventions (umlauts and `ß` as written, no modernised spelling, Kurrent `s` and `e` forms read correctly) as well as this particular writer's hand.
@@ -788,26 +788,26 @@ print(f"\nGPU spend so far: ${total:.2f}  (plus the CPU notebook at $0.05/h)")
 
 Then compare that number to the estimate in Step 0. If you are within 50%, your estimating is good enough to be trusted with a bigger run. If you are not, find out which line was wrong before launching anything else.
 
-## Homework: the longer LoRA run and (optionally) a Kaggle submission
+## Homework: a four-pass LoRA run and (optionally) a Kaggle submission
 
 Everything below is the same pattern at a larger scale: about `$1.50` for the LoRA fine-tune and `$0.80` for inference, roughly two hours of wall-clock time that you do not need to sit through. Launch, go do something else, come back.
 
-### The longer LoRA run
+### The four-pass LoRA run
 
 Same estimator and the same 251 pages, four passes instead of two, 40 evaluation pages instead of 15, and a 130-minute cap. Write your estimate down first (Step 2's challenge). Launch with `wait=False` here only because you will not be watching: it returns immediately and you poll later. The explicit job name still protects you from a double launch.
 
 The same guard rails first: a new job name, its own checkpoint folder, and the cap written down with its worst case.
 
 ```python
-long_job_name = f"badger-{username}-churro-long"
-long_checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{long_job_name}/"
-print(f"max_run cap: 130 min -> worst case ${g5_price * 130 / 60:.2f}; checkpoints -> {long_checkpoint_s3_uri}")
+homework_job_name = f"badger-{username}-churro-lora-4ep"
+homework_checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{homework_job_name}/"
+print(f"max_run cap: 130 min -> worst case ${g5_price * 130 / 60:.2f}; checkpoints -> {homework_checkpoint_s3_uri}")
 ```
 
 Two settings change: four passes, and 40 evaluation pages, so the before/after numbers rest on more than 15 pages. `grad_accum` 8 doubles the effective batch, which suits a longer run.
 
 ```python
-long_hyperparameters = {
+homework_hyperparameters = {
     # no model_id: read from the "model" channel, as in class
     "epochs": 4,
     "lr": 2e-4,
@@ -824,7 +824,7 @@ long_hyperparameters = {
 Same estimator as in class, except for the job name, the checkpoint folder and the 130-minute cap.
 
 ```python
-long_estimator = HuggingFace(
+homework_estimator = HuggingFace(
     entry_point="finetune_churro_lora.py",
     source_dir="code/",
     role=role,
@@ -833,14 +833,14 @@ long_estimator = HuggingFace(
     instance_count=1,
     volume_size=50,
     max_run=130 * 60,                     # 130 minutes: twice the estimate
-    checkpoint_s3_uri=long_checkpoint_s3_uri,
+    checkpoint_s3_uri=homework_checkpoint_s3_uri,
     checkpoint_local_path="/opt/ml/checkpoints",
     transformers_version="4.56",
     pytorch_version="2.8",
     py_version="py312",
     output_path=model_output_path,
     sagemaker_session=session,
-    hyperparameters=long_hyperparameters,
+    hyperparameters=homework_hyperparameters,
 )
 ```
 
@@ -848,18 +848,18 @@ Launch and come back later; the next cell polls for it.
 
 ```python
 # wait=False: returns at once; poll the job with describe_training_job in the next cell
-long_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=long_job_name, wait=False)
-print("launched:", long_job_name)
+homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)
+print("launched:", homework_job_name)
 ```
 
 ```python
 # Come back later and run this until it says Completed. Everything below needs the adapter this run produces.
-desc = session.sagemaker_client.describe_training_job(TrainingJobName=long_job_name)
+desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)
 print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))
-long_adapter_s3_uri = None
+homework_adapter_s3_uri = None
 if desc["TrainingJobStatus"] == "Completed":
-    desc = job_cost_report(long_job_name, g5_price)
-    long_adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]
+    desc = job_cost_report(homework_job_name, g5_price)
+    homework_adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]
 ```
 
 ### Base vs. LoRA fine-tuned over the holdout and the test set
@@ -942,12 +942,12 @@ def run_transcription_job(label: str, adapter_uri: str = None):
     return output_uri
 ```
 
-Launch it twice: once with the base model alone, once with the homework adapter merged in. Not before the longer run has finished: the first line checks.
+Launch it twice: once with the base model alone, once with the homework adapter merged in. Not before the four-pass run has finished: the first line checks.
 
 ```python
-assert long_adapter_s3_uri, "the longer run has not finished; rerun the poll cell above until it says Completed"
+assert homework_adapter_s3_uri, "the four-pass run has not finished; rerun the poll cell above until it says Completed"
 base_output_uri = run_transcription_job("base")
-tuned_output_uri = run_transcription_job("tuned", adapter_uri=long_adapter_s3_uri)
+lora_output_uri = run_transcription_job("lora", adapter_uri=homework_adapter_s3_uri)
 ```
 
 Both jobs run in parallel on their own GPU, which doubles the instantaneous spend but halves the wall-clock time; the total cost is the same. Watch them under **SageMaker AI → Data preparation → Processing jobs**, and when both are `Completed`, score the holdout rows with `metric.py`, the exact file that scores the leaderboard.
@@ -961,7 +961,7 @@ def fetch_predictions(output_uri: str, label: str) -> pd.DataFrame:
     s3_client.download_file(bucket, key + "predictions.csv", local)
     return pd.read_csv(local, keep_default_na=False)
 
-preds = {label: fetch_predictions(uri, label) for label, uri in [("base", base_output_uri), ("tuned", tuned_output_uri)]}
+preds = {label: fetch_predictions(uri, label) for label, uri in [("base", base_output_uri), ("lora", lora_output_uri)]}
 ```
 
 Write the holdout answers to a file, keep only the holdout rows of each prediction file, and run `metric.py` on each pair the way Kaggle runs it on a submission.
@@ -982,10 +982,10 @@ for label, df in preds.items():
 
 ### Submit
 
-The `tuned` prediction file already contains every test page. Keep only those rows, in the order `test.csv` lists them. If you want a leaderboard score, this file is what you upload on the competition's **Submit Prediction** page (two submissions per day; this is the only step that needs a Kaggle account, and it is optional).
+The `lora` prediction file already contains every test page. Keep only those rows, in the order `test.csv` lists them. If you want a leaderboard score, this file is what you upload on the competition's **Submit Prediction** page (two submissions per day; this is the only step that needs a Kaggle account, and it is optional).
 
 ```python
-submission = test_df[["page_id"]].merge(preds["tuned"], on="page_id", how="left").fillna({"text": ""})
+submission = test_df[["page_id"]].merge(preds["lora"], on="page_id", how="left").fillna({"text": ""})
 assert len(submission) == len(test_df) and submission.text.str.len().gt(0).all(), "every test page needs a prediction"
 
 submission_path = os.path.join(local_data_dir, "submission_churro_lora.csv")
@@ -994,7 +994,7 @@ s3_client.upload_file(submission_path, bucket_name, f"{data_prefix}/submissions/
 print("wrote", submission_path, len(submission), "rows")
 ```
 
-Finally, rerun Step 3 and compare the total with the estimate you wrote down before the longer run.
+Finally, rerun Step 3 and compare the total with the estimate you wrote down before the four-pass run.
 
 ## Cleanup
 
@@ -1010,7 +1010,7 @@ Not part of the class session. Exercise 1 relaunches the class job with one chan
 
 ### Exercise 1: Image resolution
 
-Relaunch the same job with `"max_pixels": 2560 * 28 * 28` (~2 megapixels, twice the `1280 * 28 * 28` of the class run) and the job name `badger-{username}-churro-mini-2mp`. Before it starts, write down your prediction for its billable time, and raise `max_run` to match: the 65-minute cap was set for the 1-megapixel job. Then compare `train_minutes` and `seconds_per_page` in the two summaries, and the before/after CER. Did the extra pixels help?
+Relaunch the same job with `"max_pixels": 2560 * 28 * 28` (~2 megapixels, twice the `1280 * 28 * 28` of the class run) and the job name `badger-{username}-churro-lora-2ep-2mp`. Before it starts, write down your prediction for its billable time, and raise `max_run` to match: the 65-minute cap was set for the 1-megapixel job. Then compare `train_minutes` and `seconds_per_page` in the two summaries, and the before/after CER. Did the extra pixels help?
 
 :::::::::::::::::::::::: solution
 

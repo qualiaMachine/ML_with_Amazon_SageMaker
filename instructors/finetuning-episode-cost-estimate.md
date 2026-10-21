@@ -8,7 +8,7 @@ Planning notes for running the *Fine-tuning a Vision-Language Model with Trainin
 
 In class, every student runs one LoRA fine-tuning job of about 33 minutes: it scores 15 held-out German-letter (`kade_letters`) pages with the base model, trains on all 251 training pages (295 minus a 44-page holdout) for 2 passes, scores 8 holdout pages after each pass for a curve, scores the same 15 pages again, and saves the adapter. The lesson ships only the German letters (295 train, 141 test pages) because every label is human-transcribed (the competition's survey and account-book labels are mostly machine drafts), because they are most of the hidden test set, and because the scans are smaller. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the optional Kaggle submission are homework.
 
-Launches use `wait=True` and an explicit `job_name=f"badger-{username}-churro-mini"`. The explicit name is the double-launch guard: SageMaker rejects a second job with the same name, so a queued Shift+Enter fails harmlessly. Interrupting the cell does not stop the job; the episode says so in a callout, and you should say it out loud.
+Launches use `wait=True` and an explicit `job_name=f"badger-{username}-churro-lora-2ep"`. The explicit name is the double-launch guard: SageMaker rejects a second job with the same name, so a queued Shift+Enter fails harmlessly. Interrupting the cell does not stop the job; the episode says so in a callout, and you should say it out loud.
 
 ## What one student spends
 
@@ -18,7 +18,7 @@ Launches use `wait=True` and an explicit `job_name=f"badger-{username}-churro-mi
 | In-class LoRA fine-tune (251 German-letter pages × 2 passes, 15 pages scored before and after, 8-page curve) | `ml.g5.xlarge` (`$1.41`/h) | ~32 min | `$0.75` |
 | **In class** | | **~0.5 GPU-hours** | **~`$0.90`** |
 | Bonus Exercise 1, if anyone does it: the class job at 2 megapixels | `ml.g5.xlarge` | ~60 min | `$1.40` |
-| Homework: longer LoRA run (251 pages × 4 passes, 40 pages scored before and after) | `ml.g5.xlarge` | ~65 min | `$1.50` |
+| Homework: four-pass LoRA run (251 pages × 4 passes, 40 pages scored before and after) | `ml.g5.xlarge` | ~65 min | `$1.50` |
 | Homework: base and LoRA fine-tuned over holdout + test (~185 pages, two Processing jobs) | `ml.g5.xlarge` | ~15 min each | `$0.70` |
 | **In class + bonus + homework** | | **~3.1 GPU-hours** | **~`$4.50`** |
 
@@ -61,7 +61,7 @@ If the jobs are still queueing at 0:50 (capacity), teach the console and the cos
 
 New accounts often have these at 0 to 4. Quota increases for GPU instances can take days and sometimes a back-and-forth with support, so file them **three to four weeks** before class.
 
-**Capacity.** Fifty `ml.g5.xlarge` launches within the same minute in one region can fail with `InsufficientCapacity` even when the quota allows it. Mitigations, in order: launch the mini jobs in waves (table by table), and have `ml.g6.xlarge` (L4, 24 GB, `$1.13`/h; somewhat slower on this workload, with half the memory bandwidth, but still well within `max_run`) ready as a documented fallback instance type.
+**Capacity.** Fifty `ml.g5.xlarge` launches within the same minute in one region can fail with `InsufficientCapacity` even when the quota allows it. Mitigations, in order: launch the class jobs in waves (table by table), and have `ml.g6.xlarge` (L4, 24 GB, `$1.13`/h; somewhat slower on this workload, with half the memory bandwidth, but still well within `max_run`) ready as a documented fallback instance type.
 
 **Model download.** The base weights (`stanford-oval/churro-3B`, ~7.5 GB) are *not* pulled from Hugging Face by the jobs. They are staged once in the shared bucket under `badger-scribe/model/churro-3B/` (step on the *Shared data bucket* page) and every estimator passes that prefix as a `model` channel; the Processing jobs mount the same prefix and pass it as `--model_id`. SageMaker copies it from S3 in ~1–2 minutes per job, and a hundred jobs starting in the same minute hit S3, which is built for that, rather than one Hugging Face repository. The scripts fall back to the Hub only when no `model` channel is given (self-paced learners who skipped the staging step), in which case the instance needs internet access (default outside a VPC). The CHURRO weights carry the Qwen research license (non-commercial), which is fine for a class.
 
