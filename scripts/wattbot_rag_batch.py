@@ -30,6 +30,26 @@ import wattbot_rag as wr
 # ---------------------- generator: Qwen via vLLM ----------------------
 
 
+def _drop_broken_flash_attn():
+    """Remove the container's flash-attn if it no longer imports.
+
+    The SageMaker Hugging Face container ships a flash-attn binary built for
+    its own PyTorch. A newer vLLM replaces PyTorch, the binary fails to link
+    ("undefined symbol"), and vLLM, which imports flash-attn when it is
+    present, dies at model load. vLLM has its own attention kernels, so the
+    package can simply go.
+    """
+    try:
+        import flash_attn  # noqa: F401
+    except ImportError:
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "-q", "flash-attn"], check=False)
+        print("Removed the container's flash-attn build (incompatible with the installed PyTorch); vLLM uses its own kernels.", flush=True)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def load_qwen_pipeline(model_id: str = "Qwen/Qwen3-8B", max_model_len: int = 8192):
     """Load the generator once with vLLM and return the engine.
 
@@ -44,6 +64,7 @@ def load_qwen_pipeline(model_id: str = "Qwen/Qwen3-8B", max_model_len: int = 819
     batches well. Called a single time per processing job and reused for
     every call to `call_qwen_chat`.
     """
+    _drop_broken_flash_attn()
     from vllm import LLM
 
     print(f"Loading model with vLLM: {model_id}", flush=True)
