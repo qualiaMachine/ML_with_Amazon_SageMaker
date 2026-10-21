@@ -861,6 +861,34 @@ scored_df = compute_wattbot_score(
 )
 ```
 
+### Why were the wrong ones wrong?
+
+The score tells you *which* questions failed, not why. Two different failures look the same in that table. Either retrieval never surfaced the right paper, so the model had nothing to work with, or the right passage was in front of it and it still declined or misread it. The cell below separates them for the lowest-scoring rows: it joins the model's own explanation and the passages it cited back onto the score, then reruns retrieval for the question (one embedding call) and reports whether the ground-truth paper was among the top-k chunks and what the best cosine score was.
+
+```python
+from wattbot_rag import retrieve_top_k
+
+worst = scored_df.sort_values("wattbot_score").head(8)
+by_id = results_df.set_index("id")   # the model's answer, explanation and cited passages, keyed by question id
+
+for _, row in worst.iterrows():
+    qid = row["id"]
+    gt_refs = set(eval(row["ref_id_gt"])) if isinstance(row["ref_id_gt"], str) and row["ref_id_gt"].startswith("[") else {row["ref_id_gt"]}
+    retrieved = retrieve_top_k(embed_query(row["question"]), chunk_embeddings, chunked_docs, k=8)
+    retrieved_docs = [r["doc_id"] for r in retrieved]
+    print("=" * 96)
+    print(f"{qid}: {row['question']}")
+    print(f"  expected: {row['answer_value_gt']}  from {sorted(gt_refs)}")
+    print(f"  predicted: {row['answer_value_pred']}  citing {row['ref_id_pred']}")
+    print(f"  retrieval: top cosine {retrieved[0]['score']:.3f}; top-8 papers {retrieved_docs}")
+    print(f"  ground-truth paper retrieved: {'yes' if gt_refs & set(retrieved_docs) else 'NO'}")
+    if by_id.loc[qid, "explanation"] != "is_blank":
+        print(f"  model's explanation: {by_id.loc[qid, 'explanation']}")
+        print(f"  passages it cited: {str(by_id.loc[qid, 'supporting_materials'])[:400]}")
+```
+
+Read the two lines at the bottom of each block together. "Ground-truth paper retrieved: NO" is a retrieval problem: a different chunk size, a reranker, or a better embedding model is the fix, and no generator will help. "Yes" with `is_blank` is the model declining on evidence it had, which the system prompt and the retrieval threshold control. "Yes" with a wrong value is a reading error, and the cited passage usually shows what it latched onto: a nearby number, a different unit, a different model in the same table. Each of those is a different lever, and the score alone would have you pulling the wrong one.
+
 ::::::::::::::::::::::::::::::::::::: challenge
 
 ### What did that run cost?

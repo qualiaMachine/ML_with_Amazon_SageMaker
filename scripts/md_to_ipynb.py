@@ -14,7 +14,6 @@ ignore_list = [
     "01_SageMaker-overview.md",
     "02_Data-storage-setting-up-S3.md",
     "03_SageMaker-notebooks-as-controllers.md",
-    "15_Resource-management-cleanup.md",
     "14_CLI-equivalents.md"
 ]
 
