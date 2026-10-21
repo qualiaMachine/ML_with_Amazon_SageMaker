@@ -3,11 +3,14 @@
 The companion of train_nn.py in the "Training part 2" episode. Same network, same
 data, same full-batch loop, plus the three things data parallelism needs:
 
-1. join the process group the launcher set up (one process per instance);
-2. give each process its own shard of the training rows;
+1. join the process group the launcher set up: one copy of this script per
+   instance, each numbered from zero. A copy's number is its RANK; the number
+   of copies is the WORLD SIZE. The rank is the only thing that differs between
+   the copies, so everything that must differ between instances keys off it;
+2. give each copy its own shard of the training rows, chosen by its rank;
 3. wrap the model in DistributedDataParallel, which averages the gradients
-   across processes after every backward pass, so every copy of the model
-   takes the same step and stays identical.
+   across copies after every backward pass, so every copy of the model takes
+   the same step and stays identical.
 
 Launched by SageMaker with distribution={"mpi": {"enabled": True,
 "processes_per_host": 1}} it runs on CPU or GPU instances; launched with
@@ -43,25 +46,39 @@ class TitanicNet(nn.Module):
 
 
 def setup_distributed():
-    """Join the process group if a launcher started several processes; return (rank, world_size).
+    """Join the process group if a launcher started several copies of this script; return (rank, world_size).
 
-    SageMaker's MPI launcher sets OMPI_COMM_WORLD_RANK / _SIZE and lists the
-    instances in SM_HOSTS; torchrun sets RANK / WORLD_SIZE / MASTER_ADDR itself.
-    With neither, this is an ordinary single-process run.
+    A launcher is whatever started the copies: SageMaker's MPI launcher
+    (distribution={"mpi": ...} on the estimator) or torchrun. Each tells the
+    copies who they are through environment variables, but with different
+    names. PyTorch's own rendezvous (init_method="env://") reads four of them:
+    RANK, WORLD_SIZE, MASTER_ADDR and MASTER_PORT. This function fills those
+    four in from whatever the launcher provided, then joins. With no launcher
+    at all, it reports rank 0 of a world of 1 and nothing distributed happens.
     """
-    if "OMPI_COMM_WORLD_SIZE" in os.environ:   # SageMaker distribution={"mpi": ...}
+    if "OMPI_COMM_WORLD_SIZE" in os.environ:
+        # Started by SageMaker's MPI launcher. MPI names the copies with its own variables:
+        # OMPI_COMM_WORLD_RANK is this copy's number, OMPI_COMM_WORLD_SIZE the number of copies.
         rank = int(os.environ["OMPI_COMM_WORLD_RANK"])
         world_size = int(os.environ["OMPI_COMM_WORLD_SIZE"])
+        # Copy them to the names PyTorch's rendezvous reads.
         os.environ["RANK"], os.environ["WORLD_SIZE"] = str(rank), str(world_size)
-        os.environ.setdefault("MASTER_ADDR", json.loads(os.environ.get("SM_HOSTS", '["localhost"]'))[0])   # the first instance hosts the rendezvous
-        os.environ.setdefault("MASTER_PORT", "7777")
-    elif "WORLD_SIZE" in os.environ:            # torchrun
+        # The copies have to agree on one machine and port to meet at. SageMaker lists the instances'
+        # hostnames in SM_HOSTS (a JSON list such as ["algo-1", "algo-2"]); the first one hosts the meeting.
+        # setdefault keeps a value the launcher already set, and the fallback makes a local test run work.
+        os.environ.setdefault("MASTER_ADDR", json.loads(os.environ.get("SM_HOSTS", '["localhost"]'))[0])
+        os.environ.setdefault("MASTER_PORT", "7777")   # any free port, the same on every instance
+    elif "WORLD_SIZE" in os.environ:
+        # Started by torchrun, which sets RANK, WORLD_SIZE, MASTER_ADDR and MASTER_PORT itself.
         rank, world_size = int(os.environ["RANK"]), int(os.environ["WORLD_SIZE"])
     else:
-        return 0, 1
+        return 0, 1   # no launcher: a plain `python train_nn_ddp.py`, one copy, nothing to join
     if world_size == 1:
-        return 0, 1
-    backend = "nccl" if torch.cuda.is_available() else "gloo"   # gloo talks over TCP between CPU instances
+        return 0, 1   # a launcher started a single copy: joining a group of one is pointless
+    # The backend is the library the copies exchange gradients with: nccl is NVIDIA's, GPU to GPU;
+    # gloo talks over ordinary TCP and is what CPU instances use.
+    backend = "nccl" if torch.cuda.is_available() else "gloo"
+    # Join: every copy calls this and blocks until all world_size copies have arrived at MASTER_ADDR:MASTER_PORT.
     dist.init_process_group(backend=backend, init_method="env://")
     return rank, world_size
 
@@ -80,8 +97,9 @@ def train(train_path, val_path, epochs, learning_rate):
     X_val = torch.tensor(val_data["X_val"], dtype=torch.float32).to(device)
     y_val = torch.tensor(val_data["y_val"], dtype=torch.float32).unsqueeze(1).to(device)
 
-    # 2. The shard: rows rank, rank + world_size, rank + 2 * world_size, ... Each process trains on
-    #    its own slice; together the slices are the whole training set, with no row seen twice.
+    # 2. The shard: every world_size-th row starting at this copy's rank, so with two copies rank 0
+    #    takes rows 0, 2, 4, ... and rank 1 takes rows 1, 3, 5, ... Together the slices are the whole
+    #    training set with no row seen twice, and no copy needed to ask another which rows to take.
     X_shard, y_shard = X_train[rank::world_size].to(device), y_train[rank::world_size].to(device)
     print(f"[rank {rank} of {world_size}] training on {len(X_shard)} of {len(X_train)} rows", flush=True)
 
@@ -110,7 +128,7 @@ def train(train_path, val_path, epochs, learning_rate):
             print(f"Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}, Val Loss: {val_loss.item():.4f}, Val Accuracy: {val_accuracy:.4f}", flush=True)
             print(f"validation:accuracy = {val_accuracy:.4f}", flush=True)
 
-    if rank == 0:   # one copy of the model is enough: every process holds the same weights
+    if rank == 0:   # one saved model is enough: every copy holds the same weights, and rank 0 exists in every world
         weights = model.module.state_dict() if world_size > 1 else model.state_dict()
         model_output_path = "/opt/ml/model/nn_model.pth" if os.path.exists("/opt/ml/model") else "nn_model.pth"
         torch.save(weights, model_output_path)
