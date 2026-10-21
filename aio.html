@@ -4897,7 +4897,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5086,7 +5086,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -9272,6 +9272,45 @@ Amazon models, and partner models), open the <strong>Model
 catalog</strong> in the Amazon Bedrock console. Each entry provides a
 model card with capabilities, typical use cases, and pricing details so
 learners can explore alternatives for their own RAG systems.</p>
+<div id="choosing-the-two-models" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="choosing-the-two-models" class="callout-inner">
+<h3 class="callout-title">Choosing the two models</h3>
+<div class="callout-content">
+<p>The catalog tells you what exists and what it costs; it does not tell
+you what is good. Three places do, and all three are free to read:</p>
+<ul>
+<li>
+<strong>Embedding models</strong>: the <a href="https://huggingface.co/spaces/mteb/leaderboard" class="external-link">MTEB
+leaderboard</a> scores embedding models on retrieval benchmarks. Filter
+to the retrieval task and your language; the top of the table changes
+every few months, and Titan V2 is a sound middle-of-the-pack choice that
+Bedrock serves without setup.</li>
+<li>
+<strong>Generation models</strong>: <a href="https://lmarena.ai/" class="external-link">LMArena</a> ranks chat models by blind human
+preference, and <a href="https://artificialanalysis.ai/" class="external-link">Artificial
+Analysis</a> plots quality against price per million tokens, which is
+the chart that matters for RAG: the answer is written from retrieved
+text, so a mid-priced model often reads as well as a flagship at a tenth
+of the cost.</li>
+<li>
+<strong>Your own questions</strong>: the benchmarks rank models on
+other people’s data. <code>train_QA.csv</code> has labelled questions
+for this corpus, and the evaluation at the end of this episode scores a
+model on them and prices the run from its token counts. Changing
+<code>base_generation_model_id</code> and rerunning is the whole
+experiment. A model that wins on a leaderboard and loses on your
+questions has told you something the leaderboard cannot.</li>
+</ul>
+<p>The habit is the same as for instances: pick the cheapest candidate
+that scores well enough, measure it on your data, and move up only when
+the measurement says to.</p>
+</div>
+</div>
+</div>
 </div>
 </section><section><h2 class="section-heading" id="notebook-dataset-setup">Notebook + dataset setup<a class="anchor" aria-label="anchor" href="#notebook-dataset-setup"></a>
 </h2>
@@ -11199,7 +11238,7 @@ total compare with the cost callout, and with the Bedrock run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -11265,7 +11304,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
