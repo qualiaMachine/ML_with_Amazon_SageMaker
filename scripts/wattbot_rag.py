@@ -792,3 +792,89 @@ def drop_questions_without_papers(train_df: pd.DataFrame, available_doc_ids) -> 
     if missing:
         print(f"Dropping {int((~keep).sum())} of {len(train_df)} questions: they cite papers not in the corpus {missing}")
     return train_df[keep].reset_index(drop=True)
+
+
+def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 150,
+                               min_width: float = 80, min_height: float = 36) -> List[Dict[str, Any]]:
+    """Crop every table and figure out of one PDF with PyMuPDF (`pip install pymupdf`).
+
+    Three detectors, all built into PyMuPDF: `find_tables` for tables (ruled or
+    rule-less), `get_image_info` for raster figures, and `cluster_drawings` for vector
+    figures, which groups the thousands of line and fill commands a plot is made of into
+    one bounding box. Page-sized background fills and the rulings inside detected tables
+    are dropped first, boxes smaller than `min_width` x `min_height` points (rules, logos)
+    are ignored, and a box inside a larger one is ignored. Each box is paired with the
+    nearest caption line starting "Table N" or "Figure N" (above for tables, below for
+    figures) and the crop is widened to include that caption, so the crop carries the
+    identifier a question will use. A caption with no detected box falls back to the
+    whole page, so every table and figure the text mentions gets an image.
+
+    Returns one record per crop: doc_id, page_num, page_label, kind ("table" or
+    "figure"), caption, png_path. Crops are PNGs at `dpi` in `out_dir`.
+    """
+    import pymupdf
+    from pathlib import Path
+
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    records: List[Dict[str, Any]] = []
+    doc = pymupdf.open(pdf_path)
+    for page in doc:
+        page_area = page.rect.get_area()
+        tables = [pymupdf.Rect(t.bbox) for t in page.find_tables().tables]
+        boxes: List[Tuple[str, Any]] = [("table", r) for r in tables]
+        boxes += [("figure", pymupdf.Rect(info["bbox"])) for info in page.get_image_info()]
+        drawings = [
+            d for d in page.get_drawings()
+            if d["rect"].get_area() < 0.5 * page_area and not any(t.contains(d["rect"]) for t in tables)
+        ]
+        if drawings:
+            boxes += [("figure", r) for r in page.cluster_drawings(drawings=drawings)]
+        boxes = [(k, r) for k, r in boxes if r.width >= min_width and r.height >= min_height and r.get_area() < 0.9 * page_area]
+        boxes = [(k, r) for k, r in boxes if not any(o is not r and o.contains(r) for _, o in boxes)]
+
+        captions = []
+        for b in page.get_text("blocks"):
+            m = CAPTION_RE.match(b[4])
+            if m:
+                kind = "figure" if m.group(1).lower().startswith("fig") else "table"
+                captions.append({"rect": pymupdf.Rect(b[:4]), "kind": kind, "text": b[4].strip().split("\n")[0][:120], "used": False})
+
+        def nearest_caption(kind, r):
+            best, best_gap = None, 200.0   # a caption more than 200 points away is not this box's
+            for c in captions:
+                if c["kind"] != kind:
+                    continue
+                gap = (r.y0 - c["rect"].y1) if kind == "table" else (c["rect"].y0 - r.y1)   # table captions sit above, figure captions below
+                if gap < -5:
+                    gap = abs(gap) + 100   # on the wrong side: allowed, but only if nothing better
+                if gap < best_gap:
+                    best, best_gap = c, gap
+            return best
+
+        for i, (kind, r) in enumerate(boxes):
+            cap = nearest_caption(kind, r)
+            clip = r + (-6, -6, 6, 6)
+            if cap is not None:
+                cap["used"] = True
+                clip |= cap["rect"]
+            records.append(_save_crop(page, clip & page.rect, out_dir, doc_id, kind, cap["text"] if cap else "", i))
+        for i, cap in enumerate(c for c in captions if not c["used"]):   # a caption whose box was not found: keep the page
+            records.append(_save_crop(page, page.rect, out_dir, doc_id, cap["kind"], cap["text"], 100 + i))
+    doc.close()
+    return records
+
+
+def _save_crop(page, clip, out_dir, doc_id: str, kind: str, caption: str, index: int) -> Dict[str, Any]:
+    pix = page.get_pixmap(clip=clip, dpi=150)
+    path = out_dir / f"{doc_id}_p{page.number:03d}_{kind}{index}.png"
+    path.write_bytes(pix.tobytes("png"))
+    return {
+        "doc_id": doc_id,
+        "page_num": page.number,
+        "page_label": str(page.number + 1),
+        "kind": kind,
+        "caption": caption,
+        "png_path": str(path),
+        "whole_page": clip == page.rect,   # True for a caption whose table or figure no detector found
+    }
