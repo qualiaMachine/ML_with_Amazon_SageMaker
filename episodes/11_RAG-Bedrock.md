@@ -999,9 +999,9 @@ if not crops_path.exists() and use_instructor_embeddings and _s3_object_exists(s
 if crops_path.exists():
     crops = [json.loads(line) for line in open(crops_path)]
 else:
-    caption_pages: Dict[str, List[int]] = {}   # the pages worth the detectors' time: those whose text carries a caption
+    caption_pages: Dict[str, Dict[int, set]] = {}   # per paper, the pages whose text carries a caption, and which kinds: the detectors run only there
     for p in find_caption_pages(page_docs):
-        caption_pages.setdefault(p["doc_id"], []).append(p["page_num"])
+        caption_pages.setdefault(p["doc_id"], {})[p["page_num"]] = {"table" if c.startswith("Table") else "figure" for c in p["captions"]}
     t0 = time.time()
     crops = []
     for i, (doc_id, page_nums) in enumerate(sorted(caption_pages.items())):
