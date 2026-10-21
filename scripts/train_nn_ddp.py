@@ -46,25 +46,39 @@ class TitanicNet(nn.Module):
 
 
 def setup_distributed():
-    """Join the process group if a launcher started several processes; return (rank, world_size).
+    """Join the process group if a launcher started several copies of this script; return (rank, world_size).
 
-    SageMaker's MPI launcher sets OMPI_COMM_WORLD_RANK / _SIZE and lists the
-    instances in SM_HOSTS; torchrun sets RANK / WORLD_SIZE / MASTER_ADDR itself.
-    With neither, this is an ordinary single-process run.
+    A launcher is whatever started the copies: SageMaker's MPI launcher
+    (distribution={"mpi": ...} on the estimator) or torchrun. Each tells the
+    copies who they are through environment variables, but with different
+    names. PyTorch's own rendezvous (init_method="env://") reads four of them:
+    RANK, WORLD_SIZE, MASTER_ADDR and MASTER_PORT. This function fills those
+    four in from whatever the launcher provided, then joins. With no launcher
+    at all, it reports rank 0 of a world of 1 and nothing distributed happens.
     """
-    if "OMPI_COMM_WORLD_SIZE" in os.environ:   # SageMaker distribution={"mpi": ...}
+    if "OMPI_COMM_WORLD_SIZE" in os.environ:
+        # Started by SageMaker's MPI launcher. MPI names the copies with its own variables:
+        # OMPI_COMM_WORLD_RANK is this copy's number, OMPI_COMM_WORLD_SIZE the number of copies.
         rank = int(os.environ["OMPI_COMM_WORLD_RANK"])
         world_size = int(os.environ["OMPI_COMM_WORLD_SIZE"])
+        # Copy them to the names PyTorch's rendezvous reads.
         os.environ["RANK"], os.environ["WORLD_SIZE"] = str(rank), str(world_size)
-        os.environ.setdefault("MASTER_ADDR", json.loads(os.environ.get("SM_HOSTS", '["localhost"]'))[0])   # the first instance hosts the rendezvous
-        os.environ.setdefault("MASTER_PORT", "7777")
-    elif "WORLD_SIZE" in os.environ:            # torchrun
+        # The copies have to agree on one machine and port to meet at. SageMaker lists the instances'
+        # hostnames in SM_HOSTS (a JSON list such as ["algo-1", "algo-2"]); the first one hosts the meeting.
+        # setdefault keeps a value the launcher already set, and the fallback makes a local test run work.
+        os.environ.setdefault("MASTER_ADDR", json.loads(os.environ.get("SM_HOSTS", '["localhost"]'))[0])
+        os.environ.setdefault("MASTER_PORT", "7777")   # any free port, the same on every instance
+    elif "WORLD_SIZE" in os.environ:
+        # Started by torchrun, which sets RANK, WORLD_SIZE, MASTER_ADDR and MASTER_PORT itself.
         rank, world_size = int(os.environ["RANK"]), int(os.environ["WORLD_SIZE"])
     else:
-        return 0, 1
+        return 0, 1   # no launcher: a plain `python train_nn_ddp.py`, one copy, nothing to join
     if world_size == 1:
-        return 0, 1
-    backend = "nccl" if torch.cuda.is_available() else "gloo"   # gloo talks over TCP between CPU instances
+        return 0, 1   # a launcher started a single copy: joining a group of one is pointless
+    # The backend is the library the copies exchange gradients with: nccl is NVIDIA's, GPU to GPU;
+    # gloo talks over ordinary TCP and is what CPU instances use.
+    backend = "nccl" if torch.cuda.is_available() else "gloo"
+    # Join: every copy calls this and blocks until all world_size copies have arrived at MASTER_ADDR:MASTER_PORT.
     dist.init_process_group(backend=backend, init_method="env://")
     return rank, world_size
 
