@@ -2,7 +2,10 @@
 
 Runs the full retrieval + generation loop over train_QA.csv with self-hosted
 models: a Hugging Face embedding model for query embeddings and an open-weight
-generator (Qwen3-8B in class; Qwen3.8-27B in FP8 on a 48 GB GPU) served by vLLM. All the pipeline logic lives in
+generator (Qwen3-8B in class) run with transformers' generate, which the
+container already has. `--engine vllm` switches the generator to vLLM, the
+inference engine for serving many requests at once or FP8 weights (the 27B
+variant); it needs vllm in requirements.txt. All the pipeline logic lives in
 `wattbot_rag.py`, which must sit next to this file in the job's source_dir;
 this script only loads the inputs, builds the two model callables, and writes
 `wattbot_solutions.csv`.
@@ -27,11 +30,79 @@ from hf_embedder import HFEmbedder   # plain-transformers embedder, shipped next
 import wattbot_rag as wr
 
 
-# ---------------------- generator: Qwen via vLLM ----------------------
+# ---------------------- generator: transformers (default) ----------------------
+
+
+def load_hf_generator(model_id: str):
+    """Load the chat model once with transformers and return (tokenizer, model).
+
+    bf16 weights on the GPU: Qwen3-8B is ~16 GB, which fits an ml.g5.xlarge
+    (24 GB) with room for generation. Nothing to install: the container ships
+    transformers and PyTorch. One prompt at a time is slower than vLLM's
+    batching, but for 82 prompts the difference is minutes, and the install
+    vLLM needs is minutes too.
+    """
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    print(f"Loading model with transformers: {model_id}", flush=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    model = AutoModelForCausalLM.from_pretrained(model_id, dtype=torch.bfloat16, device_map="cuda").eval()
+    return tokenizer, model
+
+
+def call_hf_chat(system_prompt: str, user_prompt: str, generator, max_new_tokens: int = 512) -> str:
+    """Send one system + user turn through transformers' generate and return the text.
+
+    The chat template turns the two messages into the token sequence the
+    model was trained on; `enable_thinking=False` asks Qwen3 to answer directly
+    rather than write a reasoning trace first. Greedy decoding, so the run is
+    repeatable.
+    """
+    import torch
+
+    tokenizer, model = generator
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    inputs = tokenizer.apply_chat_template(
+        messages, add_generation_prompt=True, enable_thinking=False, return_tensors="pt", return_dict=True
+    ).to(model.device)
+    with torch.no_grad():
+        out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+    return tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
+
+
+# ---------------------- generator: vLLM (--engine vllm) ----------------------
+
+
+def _drop_broken_flash_attn():
+    """Remove the container's flash-attn if it no longer imports.
+
+    The SageMaker Hugging Face container ships a flash-attn binary built for
+    its own PyTorch. A newer vLLM replaces PyTorch, the binary fails to link
+    ("undefined symbol"), and vLLM, which imports flash-attn when it is
+    present, dies at model load. vLLM has its own attention kernels, so the
+    package can simply go.
+    """
+    try:
+        import flash_attn  # noqa: F401
+    except ImportError:
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "-q", "flash-attn"], check=False)
+        print("Removed the container's flash-attn build (incompatible with the installed PyTorch); vLLM uses its own kernels.", flush=True)
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def load_qwen_pipeline(model_id: str = "Qwen/Qwen3-8B", max_model_len: int = 8192):
     """Load the generator once with vLLM and return the engine.
+
+    vLLM is an open-source inference engine: given a model name it downloads the
+    weights, loads them onto the GPU and answers chat requests from Python. It is
+    the self-hosted counterpart of Bedrock's runtime.
 
     Qwen3-8B in bf16 is ~16 GB of weights and fits one 24 GB GPU (ml.g5.xlarge);
     Qwen3.8-27B in FP8 is ~27 GB and fits one 48 GB GPU
@@ -40,6 +111,7 @@ def load_qwen_pipeline(model_id: str = "Qwen/Qwen3-8B", max_model_len: int = 819
     batches well. Called a single time per processing job and reused for
     every call to `call_qwen_chat`.
     """
+    _drop_broken_flash_attn()
     from vllm import LLM
 
     print(f"Loading model with vLLM: {model_id}", flush=True)
@@ -88,8 +160,10 @@ def main():
         "--qwen_model_id",
         type=str,
         default="Qwen/Qwen3-8B",
-        help="Open-weight chat model for generation (served with vLLM).",
+        help="Open-weight chat model for generation.",
     )
+    parser.add_argument("--engine", choices=["transformers", "vllm"], default="transformers",
+                        help="transformers: nothing to install, one prompt at a time. vllm: needs vllm in requirements.txt; for FP8 weights or many requests.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -126,11 +200,16 @@ def main():
     embedder = HFEmbedder(args.embedding_model_id)   # the same model and pooling the embedding job used
     embed_query = wr.embed_query_with(embedder)
 
-    qwen_generator = load_qwen_pipeline(args.qwen_model_id)
+    if args.engine == "vllm":
+        qwen_generator = load_qwen_pipeline(args.qwen_model_id)
+        chat = call_qwen_chat
+    else:
+        qwen_generator = load_hf_generator(args.qwen_model_id)
+        chat = call_hf_chat
 
     def generate(system_prompt: str, user_prompt: str, max_new_tokens: int) -> str:
-        """The generate callable run_single_qa expects: same signature whether the model is Bedrock or vLLM."""
-        return call_qwen_chat(system_prompt, user_prompt, qwen_generator, max_new_tokens)
+        """The generate callable run_single_qa expects: same signature whether the model is Bedrock, transformers or vLLM."""
+        return chat(system_prompt, user_prompt, qwen_generator, max_new_tokens)
 
     results = []
     for i, (_, row) in enumerate(train_df.iterrows(), start=1):
