@@ -581,6 +581,12 @@ def compute_wattbot_score(
             print(f"Pred answer_value: {row[f'{pred_answer_col}_pred']}")
             print(f"GT ref_id:         {row[f'{gt_ref_col}_gt']}")
             print(f"Pred ref_id:       {row[f'{pred_ref_col}_pred']}")
+            # The model's own account of its answer, when the predictions carry one (blank rows have none)
+            for label, col in [("Model explanation", "explanation"), ("Cited passage", "supporting_materials")]:
+                col = f"{col}_pred" if f"{col}_pred" in merged.columns else col
+                val = row.get(col)
+                if isinstance(val, str) and val and val != BLANK:
+                    print(f"{label + ':':<19}{val[:400]}")
             print(
                 f"answer_score: {row['answer_score']:.3f}, ref_id_score: {row['ref_id_score']:.3f}, "
                 f"is_NA_score: {row['is_NA_score']:.3f}, wattbot_score: {row['wattbot_score']:.3f}"
