@@ -13,6 +13,7 @@ s3://<shared-bucket>/
         train_QA.csv        from data/data.zip
         corpus.zip          built once with scripts/build_wattbot_corpus.py
         pages.jsonl         page text extracted from corpus.zip by the same script
+        embeddings_bedrock.npy   Titan V2 vectors for the chunks, copied from your own Bedrock run
     badger-scribe/
         train.csv  test.csv  metadata.csv  metric.py
         sample_submission.csv  transcription_conventions.md
@@ -99,6 +100,12 @@ aws s3 cp s3://$BUCKET/wattbot/corpus.zip wattbot/corpus.zip
 aws s3 cp s3://$BUCKET/wattbot/metadata.csv wattbot/metadata.csv
 python3 lesson/scripts/build_wattbot_corpus.py --metadata wattbot/metadata.csv --from-zip wattbot/corpus.zip
 aws s3 cp wattbot/pages.jsonl s3://$BUCKET/wattbot/pages.jsonl
+```
+
+After you have run the Bedrock episode once yourself, copy its embedding matrix into the shared bucket. The episode's cache order is local, own bucket, shared bucket, recompute, so with this file in place learners skip 2,880 Titan calls each and the class does not hit Bedrock's per-minute quota on the embedding model; the chunks are deterministic from `pages.jsonl`, so the vectors match. Redo this whenever `pages.jsonl` or the chunking settings change.
+
+```bash
+aws s3 cp s3://<your-bucket>/wattbot/embeddings/embeddings_bedrock.npy s3://$BUCKET/wattbot/embeddings_bedrock.npy
 ```
 
 ## 4. Stage Badger Scribe (fine-tuning episode)
