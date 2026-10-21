@@ -167,7 +167,6 @@ Three things follow from this:
 | You need to embed and query a document collection and a catalog model (Titan, Claude, Llama, …) is fine | **Bedrock** |
 | You want an interactive chatbot or API over your documents | **Bedrock** |
 | You need a specific open‑weight model and the work is batch (embedding a corpus, bulk generation) | **Processing Jobs** |
-| Your corpus is enormous and per‑token pricing would exceed a few GPU‑hours | **Processing Jobs** (check the math first) |
 | You are learning how RAG works, or debugging a model step by step | **Notebook GPU** — and stop it when you leave |
 | You need interactive serving of a model Bedrock doesn't offer, with steady traffic | **Inference endpoint** |
 
