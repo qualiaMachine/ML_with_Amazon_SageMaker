@@ -474,13 +474,13 @@ class</td>
 <td>account-level ceiling; 250 covers 100 students</td>
 </tr><tr><td><code>ml.g5.xlarge for processing job usage</code></td>
 <td>200</td>
-<td>Processing Jobs episode and fine-tuning homework (two jobs per
-student, possibly at once)</td>
+<td>Processing Jobs episode (both jobs) and fine-tuning homework (two
+jobs per student, possibly at once)</td>
 </tr><tr><td><code>ml.g6e.xlarge for processing job usage</code></td>
-<td>100</td>
-<td>Processing Jobs episode: the RAG job serves Qwen3.8-27B.
-<strong>Default is usually 0</strong>
-</td>
+<td>100 (optional)</td>
+<td>only the Processing Jobs episode’s 27B variant. <strong>Default is
+usually 0</strong> and the increase takes days; the episode runs
+Qwen3-8B on <code>ml.g5.xlarge</code> without it</td>
 </tr><tr><td><code>Number of instances across all processing jobs</code></td>
 <td>250 (already applied)</td>
 <td>account-level ceiling</td>
