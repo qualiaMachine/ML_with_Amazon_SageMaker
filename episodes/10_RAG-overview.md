@@ -58,7 +58,7 @@ The reason this is the default comes down to **how you are billed**:
 |---|---|---|
 | **Billing unit** | Per token processed | Per hour the instance exists |
 | **Cost while idle** | `$0` — nothing is running between calls | Full hourly rate, 24/7, whether or not you use it |
-| **What you must remember to do** | Nothing | Stop or delete the instance every time you finish |
+| **What you must remember to do** | Know the per-token price before a big batch; route calls through a tagged profile | Stop or delete the instance every time you finish |
 | **Model updates** | Managed by AWS / the provider | Your problem (containers, CUDA, VRAM) |
 | **Model choice** | Curated catalog (incl. proprietary models) | Any open‑weight model you can load |
 

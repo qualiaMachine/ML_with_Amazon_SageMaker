@@ -129,13 +129,13 @@ region = session.boto_region_name
 s3 = boto3.client("s3", region_name=region)
 ```
 
-**The models.** RAG needs two: an embedding model, which turns a piece of text into a vector so that similar passages land near each other, and a generation model, the chat model that writes the answer from the passages it is given. Both are catalog models on Bedrock, named by a model ID; the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the console lists everything available in the region with its ID and price, and the [supported models page](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) in the documentation is the same list as a table. We write the IDs down now but will not call them by these IDs directly: the cost-tracking step below wraps each one in a tagged inference profile first, because that is the only way Bedrock spend gets attributed to a project.
+**The models.** RAG needs two: an embedding model, which turns a piece of text into a vector so that similar passages land near each other, and a generation model, the chat model that writes the answer from the passages it is given. Both are catalog models on Bedrock, named by a model ID; the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the console lists everything available in the region with its ID and price, and the [supported models page](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) in the documentation is the same list as a table. Prices are per million tokens on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/): in October 2026, DeepSeek V3 on demand is `$0.62` in and `$1.85` out, and Titan Text Embeddings V2 is `$0.02` in, which is why the whole WattBot run below costs cents. We write the IDs down now but will not call them by these IDs directly: the cost-tracking step below wraps each one in a tagged inference profile first, because that is the only way Bedrock spend gets attributed to a project.
 
 ```python
 # Base model IDs. Any chat model in the Bedrock catalog works as the generator (a Claude or Llama ID, say),
 # because we call it through the provider-neutral `converse` API.
-base_generation_model_id = "deepseek.v3-v1:0"             # writes the answers
-base_embedding_model_id = "amazon.titan-embed-text-v2:0"  # turns text into vectors for retrieval
+base_generation_model_id = "deepseek.v3-v1:0"             # writes the answers; $0.62 in / $1.85 out per million tokens (Oct 2026)
+base_embedding_model_id = "amazon.titan-embed-text-v2:0"  # turns text into vectors for retrieval; $0.02 per million tokens
 ```
 
 **The files.** The inputs live in the shared bucket: the paper list, the questions with their answers, and the zipped corpus of PDFs. Everything this episode derives from them goes to your own bucket, under the same `wattbot/` prefix: the chunked text, the chunk embeddings, and the answers the pipeline produces.
