@@ -535,13 +535,19 @@ loads records in seconds instead of running <code>pypdf</code> for
 minutes on every notebook. Decide whether to drop or fix failed URLs
 before staging. The corpus only needs rebuilding when
 <code>metadata.csv</code> changes. To add <code>pages.jsonl</code> to a
-bucket staged before the script wrote it:</p>
+bucket staged before the script wrote it, without re-downloading the
+PDFs:</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="ex">aws</span> s3 cp s3://<span class="va">$BUCKET</span>/wattbot/corpus.zip wattbot/corpus.zip</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="ex">python3</span> lesson/scripts/build_wattbot_corpus.py <span class="at">--metadata</span> wattbot/metadata.csv <span class="at">--from-zip</span> wattbot/corpus.zip</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a><span class="ex">aws</span> s3 cp wattbot/pages.jsonl s3://<span class="va">$BUCKET</span>/wattbot/pages.jsonl</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">rm</span> <span class="at">-rf</span> /tmp/pages <span class="kw">&amp;&amp;</span> <span class="fu">mkdir</span> <span class="at">-p</span> /tmp/pages <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> /tmp/pages</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="fu">git</span> clone <span class="at">-q</span> <span class="at">--depth</span> 1 https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git lesson</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a><span class="ex">pip</span> install <span class="at">-q</span> pypdf pandas</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a><span class="fu">mkdir</span> <span class="at">-p</span> wattbot</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="ex">aws</span> s3 cp s3://<span class="va">$BUCKET</span>/wattbot/corpus.zip wattbot/corpus.zip</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a><span class="ex">aws</span> s3 cp s3://<span class="va">$BUCKET</span>/wattbot/metadata.csv wattbot/metadata.csv</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a><span class="ex">python3</span> lesson/scripts/build_wattbot_corpus.py <span class="at">--metadata</span> wattbot/metadata.csv <span class="at">--from-zip</span> wattbot/corpus.zip</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a><span class="ex">aws</span> s3 cp wattbot/pages.jsonl s3://<span class="va">$BUCKET</span>/wattbot/pages.jsonl</span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="stage-badger-scribe-fine-tuning-episode">4. Stage Badger Scribe (fine-tuning episode)<a class="anchor" aria-label="anchor" href="#stage-badger-scribe-fine-tuning-episode"></a></h2>
 <hr class="half-width"><p>The data comes from the lesson’s own GitHub release (see <em>Badger
