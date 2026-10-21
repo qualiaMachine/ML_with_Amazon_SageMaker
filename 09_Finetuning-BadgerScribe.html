@@ -431,7 +431,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Fine-tuning a Vision-Language Model with Training Jobs</h1>
-        <p>Last updated on 2026-10-20 |
+        <p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/09_Finetuning-BadgerScribe.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -1342,7 +1342,7 @@ jobs it launches. Pass them to every estimator.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>         <span class="co"># replace with your name</span></span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># replace with your challenge name</span></span>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a>    <span class="cf">return</span> [</span>
 <span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>        {<span class="st">"Key"</span>: <span class="st">"Name"</span>, <span class="st">"Value"</span>: name},</span>
 <span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>        {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
@@ -1492,10 +1492,11 @@ instead of each pulling it from Hugging Face.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="co"># two channels: "train" is mounted at /opt/ml/input/data/train, "model" at /opt/ml/input/data/model inside the container</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="co"># wait=True blocks this cell and streams the log here; the job keeps running (and billing) even if you interrupt the cell</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>start <span class="op">=</span> time.time()</span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a>estimator.fit({<span class="st">"train"</span>: train_s3_uri, <span class="st">"model"</span>: model_s3_uri}, job_name<span class="op">=</span>training_job_name, wait<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a><span class="bu">print</span>(<span class="ss">f"Wall-clock from launch to finish: </span><span class="sc">{</span>(time.time() <span class="op">-</span> start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min (the billed part is reported below)"</span>)</span></code></pre>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="co"># the job is created with the tags given to the estimator (tags=make_job_tags("Training")); job_cost_report reads them back below</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a><span class="co"># wait=True blocks this cell and streams the log here; the job keeps running (and billing) even if you interrupt the cell</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>estimator.fit({<span class="st">"train"</span>: train_s3_uri, <span class="st">"model"</span>: model_s3_uri}, job_name<span class="op">=</span>training_job_name, wait<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a><span class="bu">print</span>(<span class="ss">f"Wall-clock from launch to finish: </span><span class="sc">{</span>(time.time() <span class="op">-</span> start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min (the billed part is reported below)"</span>)</span></code></pre>
 </div>
 <div id="interrupting-the-cell-does-not-stop-the-job" class="callout">
 <div class="callout-square">
@@ -1529,11 +1530,11 @@ AI → Training → Training jobs</strong>. Find your job and watch its
 status move through <code>Starting</code>, <code>Downloading</code>,
 <code>Training</code>, <code>Uploading</code>, <code>Completed</code>.
 The job page shows the instance type, the <code>max_run</code> you set,
-the tags, and a link to the CloudWatch log, which is where every
-<code>print()</code> from the script goes. The log is the same text the
-notebook cell is streaming, but it stays available after the kernel is
-gone, which is what you will use when a job you launched yesterday fails
-overnight.</p>
+the tags, and a link to the job’s log in CloudWatch (the AWS logging
+service, where every <code>print()</code> from the script goes). The log
+is the same text the notebook cell is streaming, but it stays available
+after the kernel is gone, which is what you will use when a job you
+launched yesterday fails overnight.</p>
 <p>Things to find in the log while you wait:</p>
 <ul><li>
 <code>pages: 295 total -&gt; 251 train / 44 holdout</code>: the
@@ -1550,8 +1551,10 @@ inference jobs will cost.</li>
 the curve you plot in Step 2.</li>
 </ul></div>
 </section><section><h2 class="section-heading" id="step-2-read-the-results-and-the-bill">Step 2: Read the results and the bill<a class="anchor" aria-label="anchor" href="#step-2-read-the-results-and-the-bill"></a></h2>
-<hr class="half-width"><p>When the cell returns, ask SageMaker what it charged for. This is the
-number to compare against the estimate every time.</p>
+<hr class="half-width"><p>When the cell returns, ask SageMaker what it charged for, and check
+that the job carries your tags; a job without them is spend nobody can
+attribute. The billable time is the number to compare against the
+estimate every time.</p>
 <div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1562,11 +1565,13 @@ number to compare against the estimate every time.</p>
 <span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a>    <span class="bu">print</span>(<span class="ss">f"status:         </span><span class="sc">{</span>desc[<span class="st">'TrainingJobStatus'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb23-6"><a href="#cb23-6" tabindex="-1" aria-label="code-block-23-6"></a>    <span class="bu">print</span>(<span class="ss">f"billable time:  </span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min  (what you pay for; the script's own timing is in train_summary.json)"</span>)</span>
 <span id="cb23-7"><a href="#cb23-7" tabindex="-1" aria-label="code-block-23-7"></a>    <span class="bu">print</span>(<span class="ss">f"cost:           $</span><span class="sc">{</span>billable <span class="op">/</span> <span class="dv">3600</span> <span class="op">*</span> price_per_hour<span class="sc">:.3f}</span><span class="ss"> at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h"</span>)</span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a>    <span class="cf">return</span> desc</span>
-<span id="cb23-9"><a href="#cb23-9" tabindex="-1" aria-label="code-block-23-9"></a></span>
-<span id="cb23-10"><a href="#cb23-10" tabindex="-1" aria-label="code-block-23-10"></a>desc <span class="op">=</span> job_cost_report(training_job_name, g5_price)</span>
-<span id="cb23-11"><a href="#cb23-11" tabindex="-1" aria-label="code-block-23-11"></a>adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]   <span class="co"># the model.tar.gz this job uploaded to output_path</span></span>
-<span id="cb23-12"><a href="#cb23-12" tabindex="-1" aria-label="code-block-23-12"></a><span class="bu">print</span>(<span class="st">"adapter:"</span>, adapter_s3_uri)</span></code></pre>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a>    tags <span class="op">=</span> session.sagemaker_client.list_tags(ResourceArn<span class="op">=</span>desc[<span class="st">"TrainingJobArn"</span>])[<span class="st">"Tags"</span>]   <span class="co"># tags live on the job, not in describe_training_job</span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1" aria-label="code-block-23-9"></a>    <span class="bu">print</span>(<span class="ss">f"tags:           </span><span class="sc">{</span><span class="st">', '</span><span class="sc">.</span>join(t[<span class="st">'Key'</span>] <span class="op">+</span> <span class="st">'='</span> <span class="op">+</span> t[<span class="st">'Value'</span>] <span class="cf">for</span> t <span class="kw">in</span> tags) <span class="kw">or</span> <span class="st">'NONE: this spend is unattributed'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1" aria-label="code-block-23-10"></a>    <span class="cf">return</span> desc</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1" aria-label="code-block-23-11"></a></span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1" aria-label="code-block-23-12"></a>desc <span class="op">=</span> job_cost_report(training_job_name, g5_price)</span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1" aria-label="code-block-23-13"></a>adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]   <span class="co"># the model.tar.gz this job uploaded to output_path</span></span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1" aria-label="code-block-23-14"></a><span class="bu">print</span>(<span class="st">"adapter:"</span>, adapter_s3_uri)</span></code></pre>
 </div>
 <p>Compare the billable minutes with <code>train_minutes</code> in the
 summary you download next: the difference is the fixed overhead of every
@@ -2221,8 +2226,8 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-20",
-  "datePublished": "2026-10-20"
+  "dateModified": "2026-10-21",
+  "datePublished": "2026-10-21"
 }
 
   </script><script>

@@ -429,7 +429,7 @@ train.py script</a></li>
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Training Models in SageMaker: Intro</h1>
-        <p>Last updated on 2026-10-20 |
+        <p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/06_Training-models-in-SageMaker-notebooks.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -607,7 +607,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul><li>
@@ -712,7 +712,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li><p><strong>Data Preprocessing</strong>: The script fills missing
 values (<code>Age</code> with median, <code>Embarked</code> with mode),
@@ -962,7 +962,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -1188,7 +1188,7 @@ and a human-readable name, even after the job has completed.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span> <span class="co"># replace with your name</span></span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span> <span class="co"># replace with your challenge name</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1" aria-label="code-block-12-3"></a>purpose <span class="op">=</span> <span class="st">"Training"</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1" aria-label="code-block-12-3"></a>purpose <span class="op">=</span> <span class="st">"Training"</span>        <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1" aria-label="code-block-12-4"></a></span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1" aria-label="code-block-12-5"></a><span class="co"># Tags: key/value labels attached to the job's resources, so its cost shows up under your name and project on the bill</span></span>
 <span id="cb12-6"><a href="#cb12-6" tabindex="-1" aria-label="code-block-12-6"></a>job_tags <span class="op">=</span> [</span>
@@ -1337,8 +1337,12 @@ below.</li>
 files from SageMaker’s built-in profiler, written for every training
 job. Ignore them; they can be turned off with
 <code>disable_profiler=True</code> on the estimator.</li>
-</ol><p>The job’s log is not in S3; it is in CloudWatch, reachable from the
-job’s page in the SageMaker console.</p>
+</ol><p>The job’s log is not in S3. It is in <strong>CloudWatch</strong>, the
+AWS service that collects logs and metrics from every other service:
+everything a training job prints goes to a CloudWatch log stream named
+after the job, and it stays there after the instance is gone. The
+quickest way to it is the <strong>View logs</strong> link on the job’s
+page in the SageMaker console.</p>
 <p>A <strong>second bucket</strong> also appeared,
 <code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code>. The SageMaker
 SDK creates this <em>default bucket</em> the first time it needs
@@ -1594,8 +1598,10 @@ detailed information:
 <code>InProgress</code>, <code>Completed</code>, or
 <code>Failed</code>.</li>
 <li>
-<strong>Logs</strong>: Review CloudWatch Logs and Job Metrics for
-real-time updates.</li>
+<strong>Logs</strong>: the <strong>View logs</strong> link opens the
+job’s output in CloudWatch, the AWS logging service, where it is kept
+after the job ends; <strong>Job Metrics</strong> shows CPU, GPU and
+memory use over the run.</li>
 <li>
 <strong>Output Data</strong>: Shows the S3 location with the trained
 model artifacts.</li>
@@ -1775,8 +1781,8 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/06_Training-models-in-SageMaker-notebooks.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/06_Training-models-in-SageMaker-notebooks.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-20",
-  "datePublished": "2026-10-20"
+  "dateModified": "2026-10-21",
+  "datePublished": "2026-10-21"
 }
 
   </script><script>
