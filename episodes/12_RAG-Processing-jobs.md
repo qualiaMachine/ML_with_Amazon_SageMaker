@@ -282,7 +282,7 @@ print(f"Embedding job complete: {(time.time() - start) / 60:.1f} min wall-clock,
 
 To view the job running from the AWS Console, you can visit SageMaker AI, and then find the "Data Preparation" dropdown menu on the left side panel. Click that to find "Processing jobs", or open [this link](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs) in the class region (change `us-east-2` in it for another region).
 
-It takes ~5-8 minutes in total for the job to complete, most of it provisioning the instance and installing the requirements. This is the downside of launching jobs, but the good news is that we only need to launch one embedding job for our RAG pipeline. This strategy also ensures we're only paying for the GPU while the job runs.
+It takes ~5-8 minutes in total for the job to complete, most of it provisioning the instance and downloading the embedding model. This is the downside of launching jobs, but the good news is that we only need to launch one embedding job for our RAG pipeline. This strategy also ensures we're only paying for the GPU while the job runs.
 
 
 ### Sanity-check the embeddings locally
