@@ -583,7 +583,9 @@ def compute_wattbot_score(
     print(f"citation F1          (weight 0.20): {merged['ref_id_score'].mean():.4f}   (precision {summary['ref_precision']:.3f}, recall {summary['ref_recall']:.3f})")
     print(f"clean refusals       (weight 0.05): {merged['is_NA_score'].mean():.4f}")
     if summary.get("n_unanswerable"):
-        print(f"unanswerable questions answered anyway: {summary['false_answer_rate']:.3f} of {summary['n_unanswerable']}")
+        n_na = summary["n_unanswerable"]
+        n_answered = round(summary["false_answer_rate"] * n_na)
+        print(f"unanswerable questions (correct response is is_blank): {n_na}; answered anyway: {n_answered} of {n_na}, each scoring zero on answer_value")
     print(f"WattBot score (Score.py, what the leaderboard reports): {overall:.4f}")
     per_type = {k: v for k, v in summary.get("per_type", {}).items() if k != "ALL"}
     if per_type:
