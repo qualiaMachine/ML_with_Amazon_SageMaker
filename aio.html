@@ -1420,7 +1420,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2395,7 +2395,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -4913,7 +4913,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5102,7 +5102,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -8755,22 +8755,16 @@ for current per‑token prices) and Titan Text Embeddings V2
 </td>
 </tr>
 <tr>
-<td>Answer the 245 training questions (~3K‑token prompt + ~300‑token
-answer each) with DeepSeek V3</td>
-<td>750K in / 75K out</td>
-<td>~<code>$0.60</code>
-</td>
-</tr>
-<tr>
-<td>Explanation pass over 245 answers with DeepSeek V3</td>
-<td>750K in / 75K out</td>
-<td>~<code>$0.60</code>
+<td>Answer and explain the 245 training questions (two calls each,
+~1.5K‑token prompts) with DeepSeek V3</td>
+<td>650K in / 40K out</td>
+<td>~<code>$0.50</code>
 </td>
 </tr>
 <tr>
 <td><strong>Total</strong></td>
 <td></td>
-<td><strong>about <code>$1.30</code></strong></td>
+<td><strong>about <code>$0.55</code></strong></td>
 </tr>
 </tbody>
 </table>
@@ -10343,12 +10337,12 @@ generation, and write a <code>wattbot_solutions_bedrock.csv</code> file
 that is about twenty minutes. For class we score a stratified sample
 instead: <code>sample_questions_by_type</code> draws ten questions from
 each evidence type (Quote, Table, Figure, Math, unanswerable,
-cross-paper, reconcile), 55 questions after overlaps, so every row of
-the breakdown in the next step has something in it. The first 55 rows of
-the file would be nearly all Quote questions. The seed fixes the draw,
-and the Processing Jobs episode uses the same one, so the two runs are
-compared on the same questions. Set <code>per_type=0</code> to run the
-whole file.</p>
+cross-paper, reconcile), about 55 questions after overlaps, so every row
+of the breakdown in the next step has something in it. The first 55 rows
+of the file would be nearly all Quote questions. The seed fixes the
+draw, and the Processing Jobs episode uses the same one, so the two runs
+are compared on the same questions. Set <code>per_type=0</code> to run
+the whole file.</p>
 <p>The Processing Jobs episode reuses this same loop with self-hosted
 models; the only difference there is that the embedding, answer and
 explanation phases call local models instead of Bedrock-hosted ones.</p>
@@ -10532,12 +10526,12 @@ region you used. The rest sums the usage blocks and prints the cost.</p>
 <span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a><span class="bu">print</span>(<span class="ss">f"~</span><span class="sc">{</span>embed_tokens<span class="sc">:,.0f}</span><span class="ss"> embedding tokens -&gt; $</span><span class="sc">{</span>embed_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
 <span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a><span class="bu">print</span>(<span class="ss">f"Total ~$</span><span class="sc">{</span>gen_cost <span class="op">+</span> embed_cost<span class="sc">:.2f}</span><span class="ss">; one hour of ml.g6e.xlarge is $2.61"</span>)</span></code></pre>
 </div>
-<p>With 55 questions, two calls each and ~3,000-token prompts, the run
-is on the order of 350K input and 30K output tokens: about a quarter of
-a dollar at DeepSeek V3’s prices, plus about six cents of embeddings for
-the 3 million tokens of corpus. All 245 questions is about a dollar,
-which is the overview’s estimate for the whole pipeline, and it is a
-small fraction of a single GPU-hour.</p>
+<p>With 53 questions, two calls each and ~1,500-token prompts, the run
+was 140K input and 9K output tokens: ten cents at DeepSeek V3’s prices,
+plus five cents of embeddings for the 2.4 million tokens of corpus. All
+245 questions is about half a dollar, which is the overview’s estimate
+for the whole pipeline, and it is a small fraction of a single
+GPU-hour.</p>
 </div>
 </div>
 </div>
@@ -10601,8 +10595,9 @@ Step 5 for them.</p>
 </div>
 <p>Rendering is <code>pypdfium2</code>, the Python binding of the PDF
 engine Chrome uses; <code>render_page_png</code> renders one page at 100
-dpi, enough to read axis labels, and returns the PNG bytes. Expect a few
-minutes for the corpus.</p>
+dpi, enough to read axis labels, and returns the PNG bytes. The corpus
+has about a thousand pages with a caption, a minute and a half to
+render.</p>
 <div class="codewrapper sourceCode" id="cb32">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10648,8 +10643,14 @@ function handles both.</p>
 <span id="cb34-6"><a href="#cb34-6" tabindex="-1" aria-label="code-block-34-6"></a>bedrock_mm <span class="op">=</span> boto3.client(<span class="st">"bedrock"</span>, region_name<span class="op">=</span>multimodal_region)</span>
 <span id="cb34-7"><a href="#cb34-7" tabindex="-1" aria-label="code-block-34-7"></a>multimodal_model_id <span class="op">=</span> tagged_profile_arn(bedrock_mm, base_multimodal_model_id, <span class="st">"wattbot-embed-mm"</span>, name, project)</span>
 <span id="cb34-8"><a href="#cb34-8" tabindex="-1" aria-label="code-block-34-8"></a></span>
-<span id="cb34-9"><a href="#cb34-9" tabindex="-1" aria-label="code-block-34-9"></a>v <span class="op">=</span> embed_multimodal(bedrock_runtime_mm, multimodal_model_id, image_png<span class="op">=</span>Path(caption_pages[<span class="dv">0</span>][<span class="st">"png_path"</span>]).read_bytes())</span>
-<span id="cb34-10"><a href="#cb34-10" tabindex="-1" aria-label="code-block-34-10"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>caption_pages[<span class="dv">0</span>][<span class="st">'doc_id'</span>]<span class="sc">}</span><span class="ss"> page </span><span class="sc">{</span>caption_pages[<span class="dv">0</span>][<span class="st">'page_label'</span>]<span class="sc">}</span><span class="ss"> -&gt; vector of </span><span class="sc">{</span>v<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> dimensions"</span>)</span></code></pre>
+<span id="cb34-9"><a href="#cb34-9" tabindex="-1" aria-label="code-block-34-9"></a>first_png <span class="op">=</span> Path(caption_pages[<span class="dv">0</span>][<span class="st">"png_path"</span>]).read_bytes()</span>
+<span id="cb34-10"><a href="#cb34-10" tabindex="-1" aria-label="code-block-34-10"></a><span class="cf">try</span>:</span>
+<span id="cb34-11"><a href="#cb34-11" tabindex="-1" aria-label="code-block-34-11"></a>    v <span class="op">=</span> embed_multimodal(bedrock_runtime_mm, multimodal_model_id, image_png<span class="op">=</span>first_png)</span>
+<span id="cb34-12"><a href="#cb34-12" tabindex="-1" aria-label="code-block-34-12"></a><span class="cf">except</span> ClientError <span class="im">as</span> e:</span>
+<span id="cb34-13"><a href="#cb34-13" tabindex="-1" aria-label="code-block-34-13"></a>    <span class="bu">print</span>(<span class="ss">f"Through the tagged profile: </span><span class="sc">{</span>e<span class="sc">.</span>response[<span class="st">'Error'</span>][<span class="st">'Message'</span>]<span class="sc">}</span><span class="ch">\n</span><span class="ss">Calling the model ID directly instead; these calls will not carry the project tags"</span>)</span>
+<span id="cb34-14"><a href="#cb34-14" tabindex="-1" aria-label="code-block-34-14"></a>    multimodal_model_id <span class="op">=</span> base_multimodal_model_id</span>
+<span id="cb34-15"><a href="#cb34-15" tabindex="-1" aria-label="code-block-34-15"></a>    v <span class="op">=</span> embed_multimodal(bedrock_runtime_mm, multimodal_model_id, image_png<span class="op">=</span>first_png)</span>
+<span id="cb34-16"><a href="#cb34-16" tabindex="-1" aria-label="code-block-34-16"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>caption_pages[<span class="dv">0</span>][<span class="st">'doc_id'</span>]<span class="sc">}</span><span class="ss"> page </span><span class="sc">{</span>caption_pages[<span class="dv">0</span>][<span class="st">'page_label'</span>]<span class="sc">}</span><span class="ss"> -&gt; vector of </span><span class="sc">{</span>v<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> dimensions"</span>)</span></code></pre>
 </div>
 <p>One call per page, cached like the text matrix: locally, then in your
 bucket, then computed. The question side uses the same model with
@@ -11684,7 +11685,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -11748,7 +11749,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -12836,7 +12837,7 @@ instance.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a>g6e_price <span class="op">=</span> <span class="fl">2.61</span>   <span class="co"># $/hour, ml.g6e.xlarge on-demand</span></span>
 <span id="cb24-2"><a href="#cb24-2" tabindex="-1" aria-label="code-block-24-2"></a>hours <span class="op">=</span> (time.time() <span class="op">-</span> session_start) <span class="op">/</span> <span class="dv">3600</span></span>
 <span id="cb24-3"><a href="#cb24-3" tabindex="-1" aria-label="code-block-24-3"></a><span class="bu">print</span>(<span class="ss">f"this notebook has been running </span><span class="sc">{</span>hours <span class="op">*</span> <span class="dv">60</span><span class="sc">:.0f}</span><span class="ss"> min since the setup cell: $</span><span class="sc">{</span>hours <span class="op">*</span> g6e_price<span class="sc">:.2f}</span><span class="ss"> so far, and counting"</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline as Processing jobs billed about $1.30 (that episode); on Bedrock, a few cents"</span>)</span></code></pre>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline as Processing jobs billed about $1 (that episode); on Bedrock, about fifteen cents"</span>)</span></code></pre>
 </div>
 <p>The Processing Jobs episode does the same work, with the same
 <code>wattbot_rag.py</code>, as short-lived SageMaker jobs, so the GPU
@@ -13215,7 +13216,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -13592,7 +13593,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
