@@ -111,7 +111,7 @@ session = sagemaker.Session()
 region = session.boto_region_name
 role = get_execution_role()   # the IAM role the jobs run under to read and write S3
 
-shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only inputs, from your instructor
+shared_bucket = "ml-marathon-shared"   # the instructor-staged, read-only bucket with the data and model weights; change only on your own account
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks in, outputs out)
 s3_client = boto3.client("s3", region_name=region)
 

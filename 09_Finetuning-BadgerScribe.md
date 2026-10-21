@@ -303,7 +303,7 @@ region = session.boto_region_name
 role = get_execution_role()
 s3_client = boto3.client("s3", region_name=region)
 
-shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only bucket with the data and model weights; jobs read from it
+shared_bucket = "ml-marathon-shared"   # the instructor-staged, read-only bucket with the data and model weights; change only on your own account
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode; everything the jobs write goes here
 username = "doejohn"                   # <-- EDIT ME: lowercase letters/digits only; used in job names
 

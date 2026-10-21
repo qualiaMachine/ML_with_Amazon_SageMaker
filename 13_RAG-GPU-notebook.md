@@ -185,7 +185,7 @@ def download_s3_object(bucket: str, key: str, local_path: str) -> None:
 
 
 ```python
-shared_bucket = "ml-marathon-shared"   # <-- EDIT ME: read-only inputs, from your instructor
+shared_bucket = "ml-marathon-shared"   # the instructor-staged, read-only bucket with the data and model weights; change only on your own account
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks live here)
 
 # Local working directory in the notebook instance
