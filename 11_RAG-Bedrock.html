@@ -1795,8 +1795,9 @@ DeepSeek V3 on the <a href="https://aws.amazon.com/bedrock/pricing/" class="exte
 (fill the two prices in below). Add the embedding step: ~9,000 chunks of
 1,200 characters at Titan Text Embeddings V2’s <code>$0.02</code> per
 million input tokens. How does the total compare with the overview’s
-estimate for “the whole WattBot pipeline on Bedrock”, and with one hour
-of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
+estimate for “the whole WattBot pipeline on Bedrock”, and with the
+<code>ml.g5.xlarge</code> GPU the Processing Jobs episode rents for the
+same questions, <code>$1.41</code> an hour?</p>
 </div>
 </div>
 </div>
@@ -1826,14 +1827,16 @@ region you used. The rest sums the usage blocks and prints the cost.</p>
 <span id="cb32-11"><a href="#cb32-11" tabindex="-1" aria-label="code-block-32-11"></a></span>
 <span id="cb32-12"><a href="#cb32-12" tabindex="-1" aria-label="code-block-32-12"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(bedrock_usage)<span class="sc">}</span><span class="ss"> generation calls: </span><span class="sc">{</span>in_tokens<span class="sc">:,}</span><span class="ss"> input + </span><span class="sc">{</span>out_tokens<span class="sc">:,}</span><span class="ss"> output tokens -&gt; $</span><span class="sc">{</span>gen_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
 <span id="cb32-13"><a href="#cb32-13" tabindex="-1" aria-label="code-block-32-13"></a><span class="bu">print</span>(<span class="ss">f"~</span><span class="sc">{</span>embed_tokens<span class="sc">:,.0f}</span><span class="ss"> embedding tokens -&gt; $</span><span class="sc">{</span>embed_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb32-14"><a href="#cb32-14" tabindex="-1" aria-label="code-block-32-14"></a><span class="bu">print</span>(<span class="ss">f"Total ~$</span><span class="sc">{</span>gen_cost <span class="op">+</span> embed_cost<span class="sc">:.2f}</span><span class="ss">; one hour of ml.g6e.xlarge is $2.61"</span>)</span></code></pre>
+<span id="cb32-14"><a href="#cb32-14" tabindex="-1" aria-label="code-block-32-14"></a><span class="bu">print</span>(<span class="ss">f"Total ~$</span><span class="sc">{</span>gen_cost <span class="op">+</span> embed_cost<span class="sc">:.2f}</span><span class="ss">; the Processing Jobs episode rents an ml.g5.xlarge at $1.41 an hour for the same questions"</span>)</span></code></pre>
 </div>
 <p>With 53 questions, two calls each and ~1,500-token prompts, the run
 was 140K input and 9K output tokens: ten cents at DeepSeek V3’s prices,
 plus five cents of embeddings for the 2.4 million tokens of corpus. All
 245 questions is about half a dollar, which is the overview’s estimate
-for the whole pipeline, and it is a small fraction of a single
-GPU-hour.</p>
+for the whole pipeline. The Processing Jobs episode answers the same 53
+questions on a rented <code>ml.g5.xlarge</code> and bills about
+<code>$0.60</code> of GPU time for them, four times this run, most of it
+loading a model that Bedrock already has loaded.</p>
 </div>
 </div>
 </div>
