@@ -921,3 +921,75 @@ def crop_matches(crop: Dict[str, Any], doc_id: str, label: str) -> bool:
         return False
     crop_label = ("Figure" if m.group(1).lower().startswith("fig") else "Table") + " " + m.group(2)
     return crop_label == label
+
+
+GenerateBatch = Callable[[Sequence[Tuple[str, str]], int], List[str]]
+
+
+def run_batch_qa(
+    rows: pd.DataFrame,
+    embed_query: Callable[[str], np.ndarray],
+    generate_batch: GenerateBatch,
+    chunk_embeddings: np.ndarray,
+    chunked_docs: List[Dict[str, Any]],
+    docid_to_url: Dict[str, str],
+    top_k: int = 8,
+    retrieval_threshold: float = 0.25,
+    batch_size: int = 8,
+    log: Callable[[str], None] = print,
+) -> List[Dict[str, Any]]:
+    """`run_single_qa` over many rows, with the model calls made in batches.
+
+    Same retrieval, prompts, parsing and unanswerable rule as `run_single_qa`, so the
+    two produce the same submission rows; the difference is that `generate_batch`
+    receives a list of (system_prompt, user_prompt) pairs and returns a list of texts,
+    which lets a self-hosted model decode several prompts at once. One GPU decoding
+    one prompt at a time is idle most of the time; eight at a time is several times
+    faster for the same answers. Three passes: retrieve every question, answer them in
+    batches, then explain the answered ones in batches.
+    """
+    prepared = []
+    for _, row in rows.iterrows():
+        qid, question = row["id"], row["question"]
+        answer_unit = row.get("answer_unit", BLANK) if hasattr(row, "get") else BLANK
+        if not isinstance(answer_unit, str) or not answer_unit.strip():
+            answer_unit = BLANK
+        retrieved = retrieve_top_k(embed_query(question), chunk_embeddings, chunked_docs, k=top_k)
+        top_score = retrieved[0]["score"] if retrieved else 0.0
+        prompt = build_answer_prompt(question, format_context_for_prompt(retrieved), answer_unit)
+        prepared.append({"id": qid, "question": question, "answer_unit": answer_unit, "top_score": top_score, "prompt": prompt})
+    log(f"Retrieved context for {len(prepared)} questions; answering in batches of {batch_size}")
+
+    def in_batches(pairs: List[Tuple[str, str]], max_new_tokens: int, what: str) -> List[str]:
+        out: List[str] = []
+        for start in range(0, len(pairs), batch_size):
+            out.extend(generate_batch(pairs[start:start + batch_size], max_new_tokens))
+            log(f"  {what}: {min(start + batch_size, len(pairs))} / {len(pairs)}")
+        return out
+
+    raw_answers = in_batches([(ANSWER_SYSTEM_PROMPT, p["prompt"]) for p in prepared], 512, "answers")
+    results: List[Dict[str, Any]] = []
+    to_explain: List[Tuple[int, Dict[str, Any]]] = []
+    for p, raw in zip(prepared, raw_answers):
+        parsed = parse_answer_json(raw, qid=p["id"])
+        is_blank = parsed["is_blank"] or (p["top_score"] < retrieval_threshold)
+        if is_blank:
+            results.append({"id": p["id"], "question": p["question"], "answer": UNANSWERABLE_TEXT, "answer_value": BLANK,
+                            "answer_unit": p["answer_unit"], "ref_id": BLANK, "ref_url": BLANK,
+                            "supporting_materials": BLANK, "explanation": BLANK})
+            continue
+        ref_ids = parsed["ref_id"]
+        urls = [docid_to_url[rid] for rid in ref_ids if rid in docid_to_url]
+        results.append({"id": p["id"], "question": p["question"], "answer": parsed["answer"], "answer_value": parsed["answer_value"],
+                        "answer_unit": p["answer_unit"], "ref_id": ";".join(ref_ids) if ref_ids else BLANK,
+                        "ref_url": ";".join(urls) if urls else BLANK, "supporting_materials": parsed["supporting_materials"],
+                        "explanation": ""})
+        to_explain.append((len(results) - 1, parsed))
+
+    pairs = [(explanation_system_prompt(False),
+              build_explanation_prompt(results[i]["question"], parsed["answer"], parsed["supporting_materials"], parsed["ref_id"], False))
+             for i, parsed in to_explain]
+    explanations = in_batches(pairs, 256, "explanations") if pairs else []
+    for (i, _), text in zip(to_explain, explanations):
+        results[i]["explanation"] = text.strip()
+    return results

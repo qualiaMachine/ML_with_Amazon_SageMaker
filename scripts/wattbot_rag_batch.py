@@ -22,6 +22,7 @@ Processing Jobs episode):
 import argparse
 import json
 import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -38,9 +39,8 @@ def load_hf_generator(model_id: str):
 
     bf16 weights on the GPU: Qwen3-8B is ~16 GB, which fits an ml.g5.xlarge
     (24 GB) with room for generation. Nothing to install: the container ships
-    transformers and PyTorch. One prompt at a time is slower than vLLM's
-    batching, but for 82 prompts the difference is minutes, and the install
-    vLLM needs is minutes too.
+    transformers and PyTorch. `call_hf_chat_batch` decodes several prompts at
+    once, which recovers most of what vLLM's batching would give on a job this size.
     """
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -72,6 +72,32 @@ def call_hf_chat(system_prompt: str, user_prompt: str, generator, max_new_tokens
     with torch.no_grad():
         out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
     return tokenizer.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
+
+
+def call_hf_chat_batch(pairs, generator, max_new_tokens: int = 512):
+    """`call_hf_chat` for several (system, user) pairs at once: one `generate` call, one answer per pair.
+
+    The prompts are padded on the left to the same length so that every sequence
+    ends where generation starts; the pad tokens are masked out. Decoding eight
+    prompts together costs little more than decoding one, which is where the
+    speed comes from.
+    """
+    import torch
+
+    tokenizer, model = generator
+    tokenizer.padding_side = "left"
+    texts = [
+        tokenizer.apply_chat_template(
+            [{"role": "system", "content": s}, {"role": "user", "content": u}],
+            tokenize=False, add_generation_prompt=True, enable_thinking=False,
+        )
+        for s, u in pairs
+    ]
+    inputs = tokenizer(texts, return_tensors="pt", padding=True).to(model.device)
+    with torch.no_grad():
+        out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False, pad_token_id=tokenizer.pad_token_id)
+    prompt_len = inputs["input_ids"].shape[1]
+    return [tokenizer.decode(seq[prompt_len:], skip_special_tokens=True).strip() for seq in out]
 
 
 # ---------------------- generator: vLLM (--engine vllm) ----------------------
@@ -164,8 +190,9 @@ def main():
     )
     parser.add_argument("--max_questions", type=int, default=0, help="answer only the first N questions (0 = all); the scorer compares the rows it finds")
     parser.add_argument("--per_type", type=int, default=0, help="answer a stratified sample: up to N questions per evidence type, seed 0 (0 = all). The Bedrock episode uses the same draw, so the two runs are scored on the same questions")
+    parser.add_argument("--batch_size", type=int, default=8, help="prompts decoded together on the GPU (transformers engine); 1 reproduces one-at-a-time")
     parser.add_argument("--engine", choices=["transformers", "vllm"], default="transformers",
-                        help="transformers: nothing to install, one prompt at a time. vllm: needs vllm in requirements.txt; for FP8 weights or many requests.")
+                        help="transformers: nothing to install, prompts decoded in batches. vllm: needs vllm in requirements.txt; for FP8 weights or many requests.")
     args = parser.parse_args()
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -218,20 +245,28 @@ def main():
         """The generate callable run_single_qa expects: same signature whether the model is Bedrock, transformers or vLLM."""
         return chat(system_prompt, user_prompt, qwen_generator, max_new_tokens)
 
-    results = []
-    for i, (_, row) in enumerate(train_df.iterrows(), start=1):
-        out = wr.run_single_qa(
-            row=row,
-            embed_query=embed_query,
-            generate=generate,
-            chunk_embeddings=chunk_embeddings,
-            chunked_docs=chunked_docs,
-            docid_to_url=docid_to_url,
-            top_k=args.top_k,
-            retrieval_threshold=args.retrieval_threshold,
-        )
-        results.append(out)
-        print(f"[{i}/{len(train_df)}] {out['id']}: answer_value={out['answer_value']} ref_id={out['ref_id']}", flush=True)
+    def generate_batch(pairs, max_new_tokens: int):
+        """The batched form run_batch_qa expects: a list of (system, user) pairs in, a list of texts out."""
+        if args.engine == "transformers":
+            return call_hf_chat_batch(pairs, qwen_generator, max_new_tokens)
+        return [generate(s, u, max_new_tokens) for s, u in pairs]
+
+    t_gen = time.time()
+    results = wr.run_batch_qa(
+        rows=train_df,
+        embed_query=embed_query,
+        generate_batch=generate_batch,
+        chunk_embeddings=chunk_embeddings,
+        chunked_docs=chunked_docs,
+        docid_to_url=docid_to_url,
+        top_k=args.top_k,
+        retrieval_threshold=args.retrieval_threshold,
+        batch_size=args.batch_size,
+        log=lambda msg: print(msg, flush=True),
+    )
+    print(f"Answered {len(results)} questions in {(time.time() - t_gen) / 60:.1f} min", flush=True)
+    for out in results:
+        print(f"{out['id']}: answer_value={out['answer_value']} ref_id={out['ref_id']}", flush=True)
 
     results_df = pd.DataFrame(results)
     out_path = os.path.join(args.output_dir, "wattbot_solutions.csv")
