@@ -91,8 +91,8 @@ Each job gets its own source directory, because SageMaker uploads the whole dire
 !cp /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/embedding_inference.py /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/hf_embedder.py code_embed/
 # The RAG job's script plus the shared module it imports (the container cannot see this notebook)
 !cp /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/wattbot_rag_batch.py /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/wattbot_rag.py /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/hf_embedder.py code_rag/
-# The notebook's own copy, for scoring at the end
-!cp /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
+# The notebook's own copies, for scoring at the end: the pipeline module and the competition's metric file
+!cp /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/wattbot_rag.py /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/Score.py .
 !ls code_embed code_rag
 ```
 
@@ -414,7 +414,7 @@ solutions_df = pd.read_csv(local_solutions_path)
 solutions_df.head()
 ```
 
-Score the predictions with the competition's own metric, the same function the Bedrock episode used, so the two runs compare directly.
+Score the predictions with the competition's own `Score.py`, through the same wrapper the Bedrock episode used, so the two runs compare directly.
 
 ```python
 from wattbot_rag import compute_wattbot_score
@@ -422,8 +422,6 @@ from wattbot_rag import compute_wattbot_score
 results_df = compute_wattbot_score(
     train_qa_path=train_qa_path,
     preds_path=local_solutions_path,
-    gt_is_na_col="is_blank",
-    pred_is_na_col="is_blank",
     n_examples=10,
 )
 ```
