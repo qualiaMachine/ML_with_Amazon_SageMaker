@@ -25,7 +25,7 @@ exercises: 20
 ## Initial setup 
 
 #### 1. Open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`** (on older Amazon Linux 2 instances it is called `conda_pytorch_p310`); we will use the same kernel for the next two episodes. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`**; we will use the same kernel for the next two episodes. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
 
 #### 2. CD to instance home directory
 So we all can reference the helper functions using the same path, CD to the instance's root directory and make the lesson repository's `scripts/` importable. The training scripts for this episode (`train_xgboost.py`) and the next (`train_nn.py`) are in that folder.
@@ -372,7 +372,7 @@ For all these Estimators, adding a `requirements.txt` file as a `dependencies` a
 ```text
 from sagemaker.sklearn.estimator import SKLearn
 sklearn_estimator = SKLearn(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-xgboost",   # job name = who + which model; SageMaker appends a timestamp
     entry_point="train_script.py",
     role=role,
     instance_count=1,
@@ -440,7 +440,7 @@ output_path = f's3://{bucket_name}/{output_folder}/'   # S3 prefix (a "folder") 
 
 # Set up the SageMaker XGBoost Estimator with custom script
 xgboost_estimator = XGBoost(
-    base_job_name=notebook_instance_name,  # prefix of the job name; SageMaker appends a timestamp to make it unique
+    base_job_name=f"{notebook_instance_name}-xgboost",   # prefix of the job name: who + which model; SageMaker appends a timestamp to make it unique
     max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point='train_xgboost.py',      # the script SageMaker runs inside the container on the training instance
     source_dir='ML_with_AWS_SageMaker/scripts',  # Directory where your script is located (uploaded to the job with it)
@@ -628,7 +628,7 @@ instance_count=1 # always start with 1
 
 # Use Estimator directly for built-in container without specifying entry_point
 xgboost_estimator_builtin = Estimator(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-xgboost",   # job name = who + which model; SageMaker appends a timestamp
     max_run=max_run, # in seconds; always include (max 48 hours)
     # image_uris.retrieve looks up AWS's prebuilt XGBoost container for this region; its built-in training code replaces entry_point
     image_uri=sagemaker.image_uris.retrieve("xgboost", region, version="1.7-1"),

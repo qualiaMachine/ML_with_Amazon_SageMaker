@@ -22,7 +22,7 @@ exercises: 15
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Initial setup: open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/08_Hyperparameter-tuning.ipynb`. Select the **`conda_pytorch`** kernel (`conda_pytorch_p310` on older instances).
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/08_Hyperparameter-tuning.ipynb`. Select the **`conda_pytorch`** kernel.
 
 ## Hyperparameter tuning in SageMaker
 To conduct efficient hyperparameter tuning with neural networks (or any model) in SageMaker, we'll leverage SageMaker's **hyperparameter tuning jobs** while carefully managing parameter ranges and model count. Here's an overview of the process, with a focus on both efficiency and cost-effectiveness.
@@ -128,7 +128,7 @@ max_run = 2*60*60 # 2 hours
 
 # Define the PyTorch estimator with entry script and environment details
 pytorch_estimator = PyTorch(
-    base_job_name=notebook_instance_name, # adjust to your notebook name,
+    base_job_name=f"{notebook_instance_name}-nn",   # who + which model; the tuner appends its own suffix to each child job
     max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="ML_with_AWS_SageMaker/scripts/train_nn.py",  # Your script for training
     role=role,
@@ -203,7 +203,7 @@ Before running the full search, let's test our setup by setting max_jobs = 1. Th
 ```python
 # Tuner configuration
 tuner = HyperparameterTuner(
-    base_tuning_job_name=notebook_instance_name,
+    base_tuning_job_name=f"{notebook_instance_name}-nn-tune",
     estimator=pytorch_estimator,  # the blueprint: every child training job is this estimator with different hyperparameters
     # same regex as the estimator; the value it captures is what the tuner compares across child jobs
     metric_definitions=[{"Name": "validation:accuracy", "Regex": "validation:accuracy = ([0-9\\.]+)"}],
@@ -291,7 +291,7 @@ max_parallel_jobs = 2
 
 # Define the Tuner configuration
 tuner = HyperparameterTuner(
-    base_tuning_job_name=notebook_instance_name,
+    base_tuning_job_name=f"{notebook_instance_name}-nn-tune",
     estimator=pytorch_estimator,
     metric_definitions=[{"Name": "validation:accuracy", "Regex": "validation:accuracy = ([0-9\\.]+)"}],
     objective_metric_name="validation:accuracy",  # Ensure this matches the metric name exactly
@@ -485,7 +485,7 @@ Rerun the 10-job search with `max_parallel_jobs=10` (equal to `max_jobs`). Befor
 
 ```python
 tuner_parallel = HyperparameterTuner(
-    base_tuning_job_name=notebook_instance_name,
+    base_tuning_job_name=f"{notebook_instance_name}-nn-tune",
     estimator=pytorch_estimator,
     metric_definitions=[{"Name": "validation:accuracy", "Regex": "validation:accuracy = ([0-9\\.]+)"}],
     objective_metric_name="validation:accuracy",

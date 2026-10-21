@@ -22,7 +22,7 @@ exercises: 15
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## Initial setup: open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/07_Training-models-in-SageMaker-notebooks-part2.ipynb`. Select the **`conda_pytorch`** kernel (`conda_pytorch_p310` on older instances).
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/07_Training-models-in-SageMaker-notebooks-part2.ipynb`. Select the **`conda_pytorch`** kernel.
 
 ## Setup notebook as controller
 Once your notebook is open, we can setup our SageMaker controller as usual:
@@ -219,7 +219,7 @@ max_run = 2*60*60 # 2 hours
 
 # Define the PyTorch estimator and pass hyperparameters as arguments
 pytorch_estimator = PyTorch(
-    base_job_name=notebook_instance_name,  # SageMaker appends a timestamp to make each job name unique
+    base_job_name=f"{notebook_instance_name}-nn",   # who + which model; SageMaker appends a timestamp to make each job name unique
     max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="ML_with_AWS_SageMaker/scripts/train_nn.py",  # copied into the container and run there
     role=role,
@@ -296,7 +296,7 @@ instance_type = "ml.g4dn.xlarge"  # one NVIDIA T4 GPU; train_nn.py moves to it o
 instance_count = 1
 
 pytorch_estimator_gpu = PyTorch(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-nn",
     max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="ML_with_AWS_SageMaker/scripts/train_nn.py",
     role=role,
@@ -375,7 +375,7 @@ instance_count = 2   # demonstration: NOT expected to be faster, and expected to
 instance_type = "ml.m5.large"
 
 pytorch_estimator_2x = PyTorch(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-nn",
     max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point="ML_with_AWS_SageMaker/scripts/train_nn.py",
     role=role,
