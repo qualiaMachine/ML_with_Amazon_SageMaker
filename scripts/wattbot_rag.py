@@ -342,6 +342,62 @@ def embed_query_with(embedder) -> Callable[[str], np.ndarray]:
 
 
 # ---------------------------------------------------------------------------
+# Bedrock cost tracking: a tagged application inference profile per base model
+# ---------------------------------------------------------------------------
+
+
+def tagged_profile_arn(bedrock, base_model_id: str, label: str, name: str, project: str, purpose: str = "Inference") -> str:
+    """Return the ARN of a tagged Bedrock application inference profile for `base_model_id`, creating it if needed.
+
+    Bedrock's on-demand calls (`invoke_model`, `converse`) take no tags, so a call made with a raw
+    model ID lands on the bill as anonymous spend. An application inference profile is a free,
+    model-specific alias that carries cost allocation tags; usage routed through its ARN is
+    attributed to them. One profile per base model.
+
+    The profile is named <project>-<name>-<label>, so rerunning finds and reuses it instead of
+    creating a duplicate. `bedrock` is a boto3 client for the "bedrock" service (the control
+    plane, not "bedrock-runtime"). Raises PermissionError with the role's ARN when the role has no
+    Bedrock permissions.
+    """
+    import boto3
+    from botocore.exceptions import ClientError
+
+    def slug(text: str) -> str:   # profile names allow letters, digits and single hyphens, max 64 chars
+        return re.sub(r"[^0-9a-zA-Z]+", "-", text).strip("-")[:30]
+
+    def source_arn(model_id: str) -> str:   # what the profile points at
+        if model_id.split(".")[0] in {"us", "eu", "apac", "global", "jp", "au"}:   # cross-region IDs are system-defined profiles
+            return bedrock.get_inference_profile(inferenceProfileIdentifier=model_id)["inferenceProfileArn"]
+        return bedrock.get_foundation_model(modelIdentifier=model_id)["modelDetails"]["modelArn"]
+
+    profile_name = f"{slug(project)}-{slug(name)}-{label}"
+    tags = [{"key": "Name", "value": name}, {"key": "Project", "value": project}, {"key": "Purpose", "value": purpose}]   # Bedrock wants lowercase key/value
+    try:
+        for page in bedrock.get_paginator("list_inference_profiles").paginate(typeEquals="APPLICATION"):
+            for summary in page["inferenceProfileSummaries"]:
+                if summary["inferenceProfileName"] == profile_name:
+                    print(f"Reusing inference profile {profile_name}: {summary['inferenceProfileArn']}")
+                    return summary["inferenceProfileArn"]
+        resp = bedrock.create_inference_profile(
+            inferenceProfileName=profile_name,
+            description=f"{project} {name} WattBot RAG {label} on {base_model_id}",   # letters, digits, : and . only, single spaces or hyphens between
+            modelSource={"copyFrom": source_arn(base_model_id)},
+            tags=tags,
+        )
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "AccessDeniedException":
+            role = boto3.client("sts").get_caller_identity()["Arn"]
+            raise PermissionError(
+                f"This notebook's role has no Bedrock permissions ({role}). On the class account the notebook instance "
+                "must use the ml-sagemaker-bedrock-use role: stop it, Edit, change the IAM role, start it again. On your own "
+                "account, attach the Bedrock policy from the Account preparation instructor page. Then rerun this cell."
+            ) from e
+        raise
+    print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
+    return resp["inferenceProfileArn"]
+
+
+# ---------------------------------------------------------------------------
 # The two LLM phases and the per-question orchestration
 # ---------------------------------------------------------------------------
 
