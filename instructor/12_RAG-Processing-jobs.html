@@ -638,8 +638,8 @@ notebook for the scoring step at the end.</p>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>embedding_inference.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py code_embed<span class="op">/</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a><span class="co"># The RAG job's script plus the shared module it imports (the container cannot see this notebook)</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag_batch.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py code_rag<span class="op">/</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a><span class="co"># The notebook's own copy, for scoring at the end</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a><span class="co"># The notebook's own copies, for scoring at the end: the pipeline module and the competition's metric file</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>Score.py .</span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a><span class="op">!</span>ls code_embed code_rag</span></code></pre>
 </div>
 <p>Next, set up the AWS SDK, SageMaker session, and bucket names.</p>
@@ -953,6 +953,14 @@ the WattBot submission format.</p>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a><span class="bu">print</span>(<span class="st">"train_QA:  "</span>, train_qa_s3)</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a><span class="bu">print</span>(<span class="st">"metadata:  "</span>, metadata_s3)</span></code></pre>
 </div>
+<p>If the launch below fails at once with
+<code>ResourceLimitExceeded</code> naming
+<code>ml.g6e.xlarge for processing job usage</code>, nothing in the
+notebook is wrong: the account’s quota for that instance type is zero,
+which is the default, and your instructor has to request the increase in
+<a href="https://us-east-2.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas" class="external-link">Service
+Quotas</a> (it takes days to be granted). On your own account, request
+it before you start.</p>
 <p>Two settings on this processor matter more than on the embedding job.
 <code>volume_size_in_gb=60</code> attaches a 60 GB volume to the
 instance, mounted under <code>/opt/ml/processing</code>; the container’s
@@ -1044,8 +1052,9 @@ inspect a few rows, and compute the WattBot score against
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a>solutions_df <span class="op">=</span> pd.read_csv(local_solutions_path)</span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a>solutions_df.head()</span></code></pre>
 </div>
-<p>Score the predictions with the competition’s own metric, the same
-function the Bedrock episode used, so the two runs compare directly.</p>
+<p>Score the predictions with the competition’s own
+<code>Score.py</code>, through the same wrapper the Bedrock episode
+used, so the two runs compare directly.</p>
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1054,10 +1063,8 @@ function the Bedrock episode used, so the two runs compare directly.</p>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1" aria-label="code-block-12-3"></a>results_df <span class="op">=</span> compute_wattbot_score(</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1" aria-label="code-block-12-4"></a>    train_qa_path<span class="op">=</span>train_qa_path,</span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1" aria-label="code-block-12-5"></a>    preds_path<span class="op">=</span>local_solutions_path,</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1" aria-label="code-block-12-6"></a>    gt_is_na_col<span class="op">=</span><span class="st">"is_blank"</span>,</span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1" aria-label="code-block-12-7"></a>    pred_is_na_col<span class="op">=</span><span class="st">"is_blank"</span>,</span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1" aria-label="code-block-12-8"></a>    n_examples<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1" aria-label="code-block-12-9"></a>)</span></code></pre>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1" aria-label="code-block-12-6"></a>    n_examples<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1" aria-label="code-block-12-7"></a>)</span></code></pre>
 </div>
 <p>Compare the overall score with the Bedrock run. The retrieval logic,
 prompts and scoring are identical, so any difference is the two models:

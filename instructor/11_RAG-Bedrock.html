@@ -813,7 +813,7 @@ jobs).</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>Score.py .</span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1613,25 +1613,27 @@ explanation phases call local models instead of Bedrock-hosted ones.</p>
 </section><section><h2 class="section-heading" id="step-12-score-against-the-training-answers">Step 12 – Score against the training answers<a class="anchor" aria-label="anchor" href="#step-12-score-against-the-training-answers"></a></h2>
 <hr class="half-width"><p>WattBot scores each prediction with three components: 0.75 for
 <code>answer_value</code> (numeric within ±0.1% relative tolerance,
-categorical exact match), 0.15 for the Jaccard overlap between predicted
-and ground-truth <code>ref_id</code> sets, and 0.10 for marking
-unanswerable questions correctly. <code>compute_wattbot_score</code>
-from <code>wattbot_rag.py</code> implements that, joins on
-<code>id</code>, and prints the worst-scoring rows so you can see
-<em>why</em> the pipeline lost points. <code>train_QA.csv</code> has no
-separate “unanswerable” column, so <code>gt_is_na_col="is_blank"</code>
-tells the scorer to derive that flag from
-<code>answer_value == "is_blank"</code> on both sides.</p>
+categorical match after normalisation, and zero if you answer a question
+the corpus cannot answer), 0.20 for the F1 between your
+<code>ref_id</code> set and the ground-truth citations, and 0.05 for
+refusing cleanly, with every evidence field blank, when the answer is
+<code>is_blank</code>. The number comes from <code>Score.py</code>, the
+competition’s own metric file, which <code>compute_wattbot_score</code>
+in <code>wattbot_rag.py</code> calls for the headline score so that what
+you see here is what the leaderboard would report. The wrapper adds a
+per-row score, joins on <code>id</code>, and prints the worst-scoring
+rows so you can see <em>why</em> the pipeline lost points.
+<code>train_QA.csv</code> has no separate “unanswerable” column, so
+<code>gt_is_na_col="is_blank"</code> tells the scorer to derive that
+flag from <code>answer_value == "is_blank"</code> on both sides.</p>
 <div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a>scored_df <span class="op">=</span> compute_wattbot_score(</span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1" aria-label="code-block-28-2"></a>    train_qa_path<span class="op">=</span>train_qa_path,    <span class="co"># ground truth</span></span>
 <span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a>    preds_path<span class="op">=</span>output_path,         <span class="co"># our predictions, joined to it on id</span></span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a>    gt_is_na_col<span class="op">=</span><span class="st">"is_blank"</span>,        <span class="co"># no separate column: "unanswerable" means answer_value == "is_blank"</span></span>
-<span id="cb28-5"><a href="#cb28-5" tabindex="-1" aria-label="code-block-28-5"></a>    pred_is_na_col<span class="op">=</span><span class="st">"is_blank"</span>,</span>
-<span id="cb28-6"><a href="#cb28-6" tabindex="-1" aria-label="code-block-28-6"></a>    n_examples<span class="op">=</span><span class="dv">20</span>,</span>
-<span id="cb28-7"><a href="#cb28-7" tabindex="-1" aria-label="code-block-28-7"></a>)</span></code></pre>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a>    n_examples<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1" aria-label="code-block-28-5"></a>)</span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="why-were-the-wrong-ones-wrong">Why were the wrong ones wrong?<a class="anchor" aria-label="anchor" href="#why-were-the-wrong-ones-wrong"></a></h3>
@@ -1675,12 +1677,15 @@ declining on evidence it had, which the system prompt and the retrieval
 threshold control. “Yes” with a wrong value is a reading error, and the
 cited passage usually shows what it latched onto: a nearby number, a
 different unit, a different model in the same table. And sometimes the
-explanation shows the model read correctly and the label is the narrower
-reading: a question asking what inference “can account for” labelled 90
-where three papers in the corpus give 60, 70 and 80 to 90 percent, or a
-fact that appears in several papers with the label naming one of them,
-so any other citation scores zero. Each of those is a different lever,
-and the score alone would have you pulling the wrong one.</p>
+explanation shows the model read correctly and the label is the problem:
+a question asking what inference “can account for” labelled 90 where
+three papers in the corpus give 60, 70 and 80 to 90 percent, so a range
+is arguably the better answer, or a fact that appears in several papers
+with the label naming only one of them. Labels are written by people.
+When the explanation convinces you, the fix is to the label, and the
+competition organisers want to hear about it. Each of those is a
+different lever, and the score alone would have you pulling the wrong
+one.</p>
 <div id="what-did-that-run-cost" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
