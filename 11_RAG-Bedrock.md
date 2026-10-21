@@ -976,30 +976,41 @@ This step cuts the tables and figures out of the PDFs as images, builds a second
 
 Why cut them out at all, rather than hand the embedding model a whole page, or the PDF itself (Nova accepts documents as input)? For the same reason Step 6 cut the text into chunks instead of embedding each paper whole. An embedding is a fixed-length vector, a thousand numbers, whatever goes in; the more that goes in, the less of each thing survives in it. A page holding two tables, a figure and three paragraphs gets one vector that is a blur of all six, and a question about one of the tables has to match that blur. A crop of the table gets a vector that is about the table. The same holds at generation time: the vision model reads a crop at full resolution for a few hundred tokens, where a page costs a thousand tokens and shows the table at a quarter of the size. We tried whole pages first on this corpus; the callout at the end has the numbers, and they are the floor the crops should beat.
 
-A PDF has no table or figure objects to pull out. It stores text runs, raster images, and drawing commands (lines, fills, curves), and a plot is a few thousand of the last. [PyMuPDF](https://pymupdf.readthedocs.io/) ships three detectors that turn those back into boxes: `find_tables` finds tables from their rulings or their text alignment, `get_image_info` lists the embedded raster images, and `cluster_drawings` groups the drawing commands of a vector figure into one bounding box. `extract_figures_and_tables` in `wattbot_rag.py` runs the three on every page, drops page-sized background fills, rules and logos, pairs each box with the nearest caption line starting "Table N" or "Figure N" (tables are captioned above, figures below) and widens the crop to include that caption, so the image carries the identifier a question will use. A caption whose box no detector found falls back to the whole page, so nothing the text mentions is missed. Open the function; it is sixty lines and every rule in it is a line you can change.
+A PDF has no table or figure objects to pull out. It stores text runs, raster images, and drawing commands (lines, fills, curves), and a plot is a few thousand of the last. [PyMuPDF](https://pymupdf.readthedocs.io/) ships three detectors that turn those back into boxes: `find_tables` finds tables from their rulings or their text alignment, `get_image_info` lists the embedded raster images, and `cluster_drawings` groups the drawing commands of a vector figure into one bounding box. `extract_figures_and_tables` in `wattbot_rag.py` runs the three on every page, drops page-sized background fills, rules and logos, pairs each box with the nearest caption line starting "Table N" or "Figure N" (tables are captioned above, figures below) and widens the crop to include that caption, so the image carries the identifier a question will use. A caption whose box no detector found falls back to the whole page, so nothing the text mentions is missed. Open the function; it is sixty lines and every rule in it is a line you can change. The detectors are the slow part, a second or two per page on this instance, so the cell runs them only on the pages whose text carries a caption, under half of the corpus; in class, with `use_instructor_embeddings` set, it downloads the crops your instructor made instead.
 
 ```python
 %pip install -q pymupdf
 ```
 
 ```python
-from wattbot_rag import extract_figures_and_tables, embed_multimodal, image_blocks, hit_at_k
+from wattbot_rag import extract_figures_and_tables, find_caption_pages, embed_multimodal, image_blocks, hit_at_k
 
 crop_dir = data_dir / "crops"
 crops_path = data_dir / "crops.jsonl"
+shared_crops_key = "wattbot/crops.zip"   # the instructor's crops, staged like the embeddings
+
+if not crops_path.exists() and use_instructor_embeddings and _s3_object_exists(shared_bucket, shared_crops_key):
+    s3.download_file(shared_bucket, shared_crops_key, str(data_dir / "crops.zip"))
+    with zipfile.ZipFile(data_dir / "crops.zip") as zf:
+        zf.extractall(data_dir)
+    (data_dir / "crops.zip").unlink()
+    print("Downloaded the instructor's crops")
 
 if crops_path.exists():
     crops = [json.loads(line) for line in open(crops_path)]
 else:
+    caption_pages: Dict[str, List[int]] = {}   # the pages worth the detectors' time: those whose text carries a caption
+    for p in find_caption_pages(page_docs):
+        caption_pages.setdefault(p["doc_id"], []).append(p["page_num"])
     t0 = time.time()
     crops = []
-    for i, doc_id in enumerate(sorted({p["doc_id"] for p in page_docs})):
-        crops += extract_figures_and_tables(os.path.join(PDF_DIR, f"{doc_id}.pdf"), doc_id, crop_dir)
-        if (i + 1) % 20 == 0:
+    for i, (doc_id, page_nums) in enumerate(sorted(caption_pages.items())):
+        crops += extract_figures_and_tables(os.path.join(PDF_DIR, f"{doc_id}.pdf"), doc_id, crop_dir, pages=page_nums)
+        if (i + 1) % 10 == 0:
             print(f"{i + 1} papers, {len(crops)} crops so far ({time.time() - t0:.0f} s)")
     with open(crops_path, "w") as f:
         f.writelines(json.dumps(c) + "\n" for c in crops)
-    print(f"Extracted {len(crops)} crops from {i + 1} papers in {(time.time() - t0) / 60:.1f} min")
+    print(f"Extracted {len(crops)} crops from {len(caption_pages)} papers in {(time.time() - t0) / 60:.1f} min")
 
 n_tables = sum(c["kind"] == "table" for c in crops)
 n_pages = sum(c["whole_page"] for c in crops)
@@ -1040,6 +1051,10 @@ crop_emb_key = "wattbot/embeddings/embeddings_crops_multimodal.npy"
 
 if crop_emb_path.exists():
     crop_embeddings = np.load(crop_emb_path)
+elif use_instructor_embeddings and _s3_object_exists(shared_bucket, "wattbot/embeddings_crops_multimodal.npy"):
+    s3.download_file(shared_bucket, "wattbot/embeddings_crops_multimodal.npy", str(crop_emb_path))
+    crop_embeddings = np.load(crop_emb_path)
+    print("Downloaded the instructor's crop embeddings")
 elif _s3_object_exists(bucket_name, crop_emb_key):
     s3.download_file(bucket_name, crop_emb_key, str(crop_emb_path))
     crop_embeddings = np.load(crop_emb_path)
