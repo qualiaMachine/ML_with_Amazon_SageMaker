@@ -855,7 +855,7 @@ for _, row in worst.iterrows():
         print(f"  passages it cited: {str(by_id.loc[qid, 'supporting_materials'])[:400]}")
 ```
 
-Read the two lines at the bottom of each block together. "Ground-truth paper retrieved: NO" is a retrieval problem: a different chunk size, a reranker, or a better embedding model is the fix, and no generator will help. "Yes" with `is_blank` is the model declining on evidence it had, which the system prompt and the retrieval threshold control. "Yes" with a wrong value is a reading error, and the cited passage usually shows what it latched onto: a nearby number, a different unit, a different model in the same table. Each of those is a different lever, and the score alone would have you pulling the wrong one.
+Read the two lines at the bottom of each block together. "Ground-truth paper retrieved: NO" is a retrieval problem: a different chunk size, a reranker, or a better embedding model is the fix, and no generator will help. "Yes" with `is_blank` is the model declining on evidence it had, which the system prompt and the retrieval threshold control. "Yes" with a wrong value is a reading error, and the cited passage usually shows what it latched onto: a nearby number, a different unit, a different model in the same table. And sometimes the explanation shows the model read correctly and the label is the narrower reading: a question asking what inference "can account for" labelled 90 where three papers in the corpus give 60, 70 and 80 to 90 percent, or a fact that appears in several papers with the label naming one of them, so any other citation scores zero. Each of those is a different lever, and the score alone would have you pulling the wrong one.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
