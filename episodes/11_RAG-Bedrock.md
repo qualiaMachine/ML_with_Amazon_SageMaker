@@ -106,60 +106,67 @@ If there is no instructor-staged bucket, stage the three input files in your own
 
 ### Step 1 – Configure the notebook
 
-Imports, then a SageMaker session, the region and role, an S3 client and a Bedrock client, then the bucket names and the local folder the data is cached in.
+Three things are new here compared with the training episodes, so the setup is split into four cells.
+
+The session, region and S3 client are as before.
 
 ```python
 import os
 import json
+import time
 from typing import Dict, Any, List
 from pathlib import Path
 
 import boto3
-import time
 from botocore.config import Config
 from botocore.exceptions import ClientError
 import pandas as pd
 import numpy as np
-
-# ---- AWS configuration ----
 import sagemaker
 
 session = sagemaker.Session()
 region = session.boto_region_name
+s3 = boto3.client("s3", region_name=region)
+```
 
-# Base model IDs. These are the models we want to call, but we will NOT pass
-# them to the runtime directly -- see "Cost tracking" below for why.
-# Any chat model in the Bedrock catalog works here (e.g. a Claude or Llama model ID)
+**The models.** RAG needs two: an embedding model, which turns a piece of text into a vector so that similar passages land near each other, and a generation model, the chat model that writes the answer from the passages it is given. Both are catalog models on Bedrock, named by a model ID. We write the IDs down now but will not call them by these IDs directly: the cost-tracking step below wraps each one in a tagged inference profile first, because that is the only way Bedrock spend gets attributed to a project.
+
+```python
+# Base model IDs. Any chat model in the Bedrock catalog works as the generator (a Claude or Llama ID, say),
 # because we call it through the provider-neutral `converse` API.
-base_generation_model_id = "deepseek.v3-v1:0"
-base_embedding_model_id = "amazon.titan-embed-text-v2:0"
+base_generation_model_id = "deepseek.v3-v1:0"             # writes the answers
+base_embedding_model_id = "amazon.titan-embed-text-v2:0"  # turns text into vectors for retrieval
+```
 
-# Buckets: the shared one is read-only (inputs); yours receives everything derived.
+**The files.** The inputs live in the shared bucket: the paper list, the questions with their answers, and the zipped corpus of PDFs. Everything this episode derives from them goes to your own bucket, under the same `wattbot/` prefix: the chunked text, the chunk embeddings, and the answers the pipeline produces.
+
+```python
 shared_bucket = "ml-marathon-shared"   # the instructor-staged, read-only bucket with the data and model weights; change only on your own account
 bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S3 episode
 
-# Keys in the shared bucket (inputs) and in your bucket (derived artifacts)
-metadata_key = "wattbot/metadata.csv"
-train_key = "wattbot/train_QA.csv"
-corpus_key = "wattbot/corpus.zip"
-chunks_key = "wattbot/chunks.jsonl"                         # written to YOUR bucket at the end of chunking
-embeddings_key = "wattbot/embeddings/embeddings_bedrock.npy"  # YOUR bucket
-solutions_key = "wattbot/solutions/wattbot_solutions_bedrock.csv"  # YOUR bucket
+# inputs, in the shared bucket
+metadata_key = "wattbot/metadata.csv"      # one row per paper: id, title, url
+train_key = "wattbot/train_QA.csv"         # the questions, with reference answers for scoring
+corpus_key = "wattbot/corpus.zip"          # the PDFs, one per paper
 
-# Local working directory in the notebook instance
-local_data_dir = "./data"
+# derived, written to YOUR bucket
+chunks_key = "wattbot/chunks.jsonl"                                # the corpus cut into passages (end of the chunking step)
+embeddings_key = "wattbot/embeddings/embeddings_bedrock.npy"       # one vector per chunk
+solutions_key = "wattbot/solutions/wattbot_solutions_bedrock.csv"  # the pipeline's answers, in the competition's format
+
+local_data_dir = "./data"              # working copies on this notebook instance
 os.makedirs(local_data_dir, exist_ok=True)
+```
 
-# AWS clients. On-demand Bedrock throughput is rate-limited per model, so a long loop of
-# calls will occasionally be throttled; the adaptive retry mode backs off and retries
-# instead of raising, which is what we want for a few thousand embedding calls.
-s3 = boto3.client("s3", region_name=region)
+**Two Bedrock clients.** Bedrock has two APIs. `bedrock-runtime` is the one that calls models (`converse` for chat, `invoke_model` for embeddings); it is what every answer and every embedding in this episode goes through. `bedrock` is the control plane: listing models, creating the inference profiles that carry our tags. The runtime client gets a retry setting because on-demand Bedrock throughput is rate-limited per model: a loop of a few thousand embedding calls will occasionally be throttled, and the adaptive mode backs off and retries instead of raising.
+
+```python
 bedrock_runtime = boto3.client(
     "bedrock-runtime",
     region_name=region,
-    config=Config(retries={"max_attempts": 10, "mode": "adaptive"}),
-)                                                                      # the client that calls models (invoke_model, converse)
-bedrock = boto3.client("bedrock", region_name=region)                  # the control-plane client (list models, inference profiles)
+    config=Config(retries={"max_attempts": 10, "mode": "adaptive"}),   # back off and retry when throttled
+)
+bedrock = boto3.client("bedrock", region_name=region)                  # control plane: list models, create inference profiles
 ```
 
 ### Step 2 – Get the shared WattBot helpers
