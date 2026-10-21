@@ -52,12 +52,12 @@ Qwen figures are from the Qwen3.8-27B model card and were not reproduced here; O
 | Job | Instance | `$`/h | Expected duration | Cost |
 |---|---|---|---|---|
 | Embed ~3,000 chunks | `ml.g5.xlarge` (A10G, 24 GB) | `$1.41` | ~8 min incl. startup | ~`$0.20` |
-| RAG over the training questions with Qwen3-8B | `ml.g5.xlarge` (A10G, 24 GB) | `$1.41` | ~20 min: 5 startup, ~5 installing vLLM, ~3 downloading 16 GB of weights, the rest generating | ~`$0.50` |
+| RAG over the training questions with Qwen3-8B | `ml.g5.xlarge` (A10G, 24 GB) | `$1.41` | ~15 min: 5 startup, ~2 installing vLLM, ~3 downloading 16 GB of weights, the rest generating | ~`$0.35` |
 | Controller notebook | `ml.t3.medium` | `$0.05` | 2 h | `$0.10` |
 
-About `$0.80` for the episode, and the GPUs are off the moment each script ends. Both jobs carry `max_runtime_in_seconds`, so a hung job costs at most the cap. Compare the same pipeline on a GPU notebook instance (the optional GPU-notebook episode at the end of the lesson): the meter runs until someone stops it, and a forgotten `ml.g5.xlarge` is `$34` a day.
+About `$0.65` for the episode, and the GPUs are off the moment each script ends. Both jobs carry `max_runtime_in_seconds`, so a hung job costs at most the cap. Compare the same pipeline on a GPU notebook instance (the optional GPU-notebook episode at the end of the lesson): the meter runs until someone stops it, and a forgotten `ml.g5.xlarge` is `$34` a day.
 
-**The 27B version.** Swap `generation_model_id` to `Qwen/Qwen3.8-27B-FP8` and `instance_type` to `ml.g6e.xlarge` (one L40S, 48 GB, `$2.61`/h): the FP8 weights are 27 GB, the job takes about 30 minutes and costs about `$1.30`, and nothing else changes. It needs the `ml.g6e.xlarge for processing job usage` quota, whose default is zero and whose increase takes days; the class account did not have it when this was written.
+**The 27B version.** Swap `generation_model_id` to `Qwen/Qwen3.8-27B-FP8` and `instance_type` to `ml.g6e.xlarge` (one L40S, 48 GB, `$2.61`/h): the FP8 weights are 27 GB, the job takes about 30 minutes and costs about `$1.30`. Qwen3.8 also needs a newer vLLM (`vllm>=0.17` in `requirements.txt`, plus `peft>=0.18` because that vLLM brings a newer `transformers`), which replaces the container's PyTorch and adds five minutes of install. It needs the `ml.g6e.xlarge for processing job usage` quota, whose default is zero and whose increase takes days; the class account did not have it when this was written.
 
 The trade-off is latency. A job takes minutes to start, so this pattern is for batch questions, not a chatbot. For interactive use, Bedrock answers in seconds; for interactive use of a model Bedrock does not have, an inference endpoint does, at an hourly rate you have to remember to turn off.
 
@@ -195,12 +195,12 @@ We use the same `embedding_inference.py` script across projects; here it expects
 
 ### Requirements
 
-The embedding job needs nothing the Hugging Face container does not already have, so it has no `requirements.txt` and starts as soon as the instance is up. The RAG job needs vLLM, which the container does not ship. A `requirements.txt` in the job's `source_dir` is installed before the script runs. vLLM pins its own PyTorch and a newer `transformers`, so the container's `peft` has to move with it; the pin on `peft` is there because an older `peft` left behind imports a class the newer `transformers` removed, and the job dies on that import before it reaches the model.
+The embedding job needs nothing the Hugging Face container does not already have, so it has no `requirements.txt` and starts as soon as the instance is up. The RAG job needs vLLM, which the container does not ship. A `requirements.txt` in the job's `source_dir` is installed before the script runs. The version is pinned on purpose: every vLLM release pins a PyTorch, and 0.11.0 is the last one built on the PyTorch 2.8 the container already has, so the install adds a few hundred megabytes and leaves the container's `torch`, `transformers` and `flash-attn` alone. A newer vLLM replaces PyTorch, and the container's `flash-attn` binary, built against the old one, then fails to load (the script removes it in that case, but the install is five times larger).
 
 ```python
 # A requirements.txt next to the script is pip-installed in the container before the script runs; only the RAG job has one
 with open("code_rag/requirements.txt", "w") as f:
-    f.write("\n".join(["vllm>=0.17", "peft>=0.18"]) + "\n")   # vLLM for the generator; peft upgraded to match the transformers vLLM installs
+    f.write("vllm==0.11.0\n")   # the last vLLM built on the container's PyTorch 2.8; see the text above
 
 print("code_embed:", os.listdir("code_embed"))
 print("code_rag:  ", os.listdir("code_rag"))
@@ -210,7 +210,7 @@ print("code_rag:  ", os.listdir("code_rag"))
 
 ### The RAG job's pip install is part of its bill
 
-vLLM ships its own CUDA kernels and pins its own PyTorch, so `pip install vllm` in the RAG job pulls several gigabytes and replaces the container's `torch`, `transformers` and `peft` with the versions it wants. In the log this looks alarming: a wall of `Downloading` lines, then `Uninstalling torch-2.8.0`, `Uninstalling transformers-4.56.2` and a dozen more, then an `Installing collected packages` line after which nothing prints for several minutes while the wheels unpack. It is not stuck. The step ends with `Successfully installed`, and only then does the script start. All of that is normal (the container is thrown away when the job ends) but it takes 5 to 8 of the job's ~20 minutes, on a GPU instance that is billing the whole time: roughly 15 cents per run. For a job you launch often, bake the install into a custom container image instead; for a job you launch twice in a workshop, paying for the install is cheaper than building the image.
+vLLM ships its own CUDA kernels, so even the pinned `pip install vllm==0.11.0` pulls a few hundred megabytes. In the log this is a wall of `Downloading` lines, then `Installing collected packages`, after which nothing prints for a minute or two while the wheels unpack. It is not stuck. The step ends with `Successfully installed`, and only then does the script start. It takes about 2 of the job's ~15 minutes, on a GPU instance that is billing the whole time: a few cents per run. (An unpinned install would pull vLLM's newest release and its own PyTorch, several gigabytes and five minutes more, and the log would also show `Uninstalling torch` and `Uninstalling transformers`.) For a job you launch often, bake the install into a custom container image instead; for a job you launch twice in a workshop, paying for the install is cheaper than building the image.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -402,7 +402,7 @@ rag_processor.run(
 print(f"RAG batch job complete: {(time.time() - start) / 60:.1f} min wall-clock, including instance startup and the pip install")
 ```
 
-While it runs, read what the container is printing. Open the [Processing jobs page](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs), click the job's name, scroll to **Monitor** and click **View logs**. That opens CloudWatch, the AWS service that stores every job's printed output, at a list with one entry named after your job; click it. The text is the container's stdout, kept after the job ends, updated while it runs (refresh). You will see, in order: pip installing vLLM, the weight download (16 GB in shards), vLLM loading the model and reporting how much GPU memory it reserved, then one line per question. The whole job is the 20 minutes in the cost callout; the generation is the last third of it.
+While it runs, read what the container is printing. Open the [Processing jobs page](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs), click the job's name, scroll to **Monitor** and click **View logs**. That opens CloudWatch, the AWS service that stores every job's printed output, at a list with one entry named after your job; click it. The text is the container's stdout, kept after the job ends, updated while it runs (refresh). You will see, in order: pip installing vLLM, the weight download (16 GB in shards), vLLM loading the model and reporting how much GPU memory it reserved, then one line per question. The whole job is the 15 minutes in the cost callout; the generation is the last third of it.
 
 
 ## Step 4 – Download predictions and evaluate
@@ -462,7 +462,7 @@ total += job_cost(rag_processor.latest_job.job_name, 1.41)
 print(f"GPU total for the episode: ${total:.2f}")
 ```
 
-Expect the embedding job to bill 5-6 minutes (about `$0.13`) and the RAG job 15-20 minutes (about `$0.35`-`$0.50`), so roughly `$0.50`-`$0.65` of GPU time against the callout's `$0.70`. In the RAG job's log, the first 8-10 minutes of the billed window are pip and the download; the model loads for another minute; the remaining minutes are the questions, two generation calls each. So well over half of what you paid for was setup, which is the argument for a custom container (skip the pip) and for keeping an `HF_HOME` cache on S3 (skip the download) once a job is run routinely. The Bedrock run of the same questions cost cents, and the self-hosted route is only justified here because the model is not in the catalog.
+Expect the embedding job to bill 5-6 minutes (about `$0.13`) and the RAG job 10-15 minutes (about `$0.25`-`$0.35`), so roughly `$0.40`-`$0.50` of GPU time against the callout's `$0.50`. In the RAG job's log, the first 5-6 minutes of the billed window are pip and the download; the model loads for another minute; the remaining minutes are the questions, two generation calls each. So well over half of what you paid for was setup, which is the argument for a custom container (skip the pip) and for keeping an `HF_HOME` cache on S3 (skip the download) once a job is run routinely. The Bedrock run of the same questions cost cents, and the self-hosted route is only justified here because the model is not in the catalog.
 
 :::::::::::::::::::::::::::::::::
 
@@ -476,7 +476,7 @@ Both processors set `max_runtime_in_seconds=2 * 60 * 60`. Predict what would hap
 
 :::::::::::::::::::::::: solution
 
-With a 600-second cap the RAG job is killed by SageMaker ten minutes after `ProcessingStartTime`, while it is still installing vLLM or downloading the weights. The status becomes `Stopped` (the failure reason reads `MaxRuntimeExceeded`), the output prefix is empty because the script never reached the point of writing `wattbot_solutions.csv`, and the bill is the full 600 seconds: 600 / 3600 × `$1.41` ≈ `$0.24` for nothing. A cap has to leave room for the setup that precedes the work, which is why ours is six times the 20-minute estimate rather than ten percent over it.
+With a 600-second cap the RAG job is killed by SageMaker ten minutes after `ProcessingStartTime`, while it is still installing vLLM or downloading the weights. The status becomes `Stopped` (the failure reason reads `MaxRuntimeExceeded`), the output prefix is empty because the script never reached the point of writing `wattbot_solutions.csv`, and the bill is the full 600 seconds: 600 / 3600 × `$1.41` ≈ `$0.24` for nothing. A cap has to leave room for the setup that precedes the work, which is why ours is eight times the 15-minute estimate rather than ten percent over it.
 
 Under the caps we set, the worst case for a job that hangs (a stuck download, a model that never finishes loading) is 2 h × `$1.41` = **`$2.82`** for either job. An `ml.g5.xlarge` notebook instance forgotten over a weekend is 64 h × `$1.41` = **`$90`**, and nothing caps it. That is the difference between a job and an instance: the job's worst case is a number you chose before you launched it.
 

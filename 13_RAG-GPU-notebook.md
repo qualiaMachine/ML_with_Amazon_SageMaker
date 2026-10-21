@@ -144,7 +144,7 @@ If the install changes PyTorch, restart the kernel (**Kernel → Restart**) befo
 
 ```python
 # Several GB; it may replace torch, so restart the kernel (Kernel -> Restart) if the log says it did
-%pip install -q "vllm>=0.17" "peft>=0.18"   # peft upgraded to match the transformers vLLM installs
+%pip install -q "vllm>=0.17" "peft>=0.18"   # Qwen3.8 needs vLLM 0.17+, which brings its own PyTorch; peft upgraded to match the transformers it installs
 ```
 
 
