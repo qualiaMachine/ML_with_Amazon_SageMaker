@@ -407,3 +407,17 @@ def estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs
         if spec["gpus"] > 1:
             print("warning:    multi-GPU instance; not allowed on the class account, and more GPUs do not make the run cheaper")
     return result
+
+
+def estimate_training_cost(params_billions, examples, tokens_per_example=1, epochs=1, instance_type=None, runs=1, **kw):
+    """estimate_finetune_cost for a model trained from scratch: every weight is trained, so it is
+    the "full" case, 6 FLOPs per parameter per example-token. For a dense network or a transformer
+    tokens_per_example is the sequence length (1 for a plain feature vector). The rule assumes each
+    weight is used once per token; convolutional networks reuse weights across positions and need
+    their own FLOPs-per-image figure instead.
+
+    Only worth running when the FLOPs reach the 1e15 range: below that the bill is startup, not
+    compute, and a timed local smoke test is the better estimate (Training part 2 episode).
+    """
+    return estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs=epochs, method="full",
+                                  instance_type=instance_type, runs=runs, **kw)
