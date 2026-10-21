@@ -32,7 +32,9 @@ import requests
 
 def extract_pages(zip_path, md, pages_path):
     """Write one JSON record per PDF page to pages_path; the same records the episode's pdfs_to_page_docs builds."""
+    import logging
     from pypdf import PdfReader
+    logging.getLogger("pypdf").setLevel(logging.ERROR)   # pypdf warns about every embedded font it cannot fully parse; the text still extracts
     t0 = time.time()
     n = 0
     with tempfile.TemporaryDirectory() as tmp, open(pages_path, "w") as out:
