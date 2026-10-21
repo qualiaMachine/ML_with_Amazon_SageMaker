@@ -23,7 +23,7 @@ exercises: 75
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb`. Select the **`conda_pytorch`** kernel (`conda_pytorch_p310` on older instances).
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb`. Select the **`conda_pytorch`** kernel.
 
 ## Why fine-tune an LLM
 
