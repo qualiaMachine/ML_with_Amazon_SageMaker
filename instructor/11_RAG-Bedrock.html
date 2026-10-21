@@ -609,9 +609,14 @@ account that is the <code>ml-sagemaker-bedrock-use</code> role you
 picked when creating the notebook instance. If your instance was created
 with the older <code>ml-sagemaker-use</code> role, the first Bedrock
 call fails with an access-denied error: stop the instance, choose
-<strong>Edit</strong>, change the IAM role, and start it again. On your
-own account, attach the policy in the “Permissions and verification”
-callout below to your role before starting.</p>
+<strong>Edit</strong>, change the IAM role under <em>Permissions and
+encryption</em>, click <strong>Update notebook instance</strong>, and
+wait for the status to go from <em>Updating</em> back to
+<em>Stopped</em> (one to three minutes) before starting it. Reopening
+Edit during that wait shows the old role; the details page shows the new
+one once the update has landed. On your own account, attach the policy
+in the “Permissions and verification” callout below to your role before
+starting.</p>
 <p>See <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> for further guidance on instance types.</p>
 <div class="section level3">
