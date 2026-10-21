@@ -33,6 +33,10 @@ import wattbot_rag as wr
 def load_qwen_pipeline(model_id: str = "Qwen/Qwen3-8B", max_model_len: int = 8192):
     """Load the generator once with vLLM and return the engine.
 
+    vLLM is an open-source inference engine: given a model name it downloads the
+    weights, loads them onto the GPU and answers chat requests from Python. It is
+    the self-hosted counterpart of Bedrock's runtime.
+
     Qwen3-8B in bf16 is ~16 GB of weights and fits one 24 GB GPU (ml.g5.xlarge);
     Qwen3.8-27B in FP8 is ~27 GB and fits one 48 GB GPU
     (ml.g6e.xlarge). vLLM is used rather than transformers because it has
