@@ -75,6 +75,8 @@ def call_qwen_chat(system_prompt: str, user_prompt: str, generator, max_new_toke
 
 
 def main():
+    """Load the four inputs, build the two model callables, run every question
+    through the shared pipeline, write wattbot_solutions.csv."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_dir", type=str, default="/opt/ml/processing/input")
     parser.add_argument("--output_dir", type=str, default="/opt/ml/processing/output")
@@ -126,6 +128,7 @@ def main():
     qwen_generator = load_qwen_pipeline(args.qwen_model_id)
 
     def generate(system_prompt: str, user_prompt: str, max_new_tokens: int) -> str:
+        """The generate callable run_single_qa expects: same signature whether the model is Bedrock or vLLM."""
         return call_qwen_chat(system_prompt, user_prompt, qwen_generator, max_new_tokens)
 
     results = []

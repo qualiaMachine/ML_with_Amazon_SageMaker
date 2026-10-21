@@ -1,3 +1,14 @@
+"""Train an XGBoost classifier on the Titanic data.
+
+Written to run in two places without changes: in the notebook with %run (for a
+quick local test) and inside a SageMaker training job. The only difference is
+where the data and the model live, and the two SM_* environment variables that
+SageMaker sets tell the script which case it is in.
+
+Hyperparameters arrive as command-line flags (--max_depth 3 --eta 0.1 ...),
+which is how a SageMaker estimator passes them to any script.
+"""
+
 import argparse
 import os
 import pandas as pd
@@ -6,7 +17,9 @@ from sklearn.model_selection import train_test_split
 from time import time
 
 def preprocess_data(df):
-    """Preprocess the Titanic dataset for model training."""
+    """Fill missing values, encode the two text columns as integers, drop the
+    free-text columns, and split features from the Survived label. The notebook
+    imports this so the test set is prepared exactly like the training set."""
     df['Age'] = df['Age'].fillna(df['Age'].median())
     df['Embarked'] = df['Embarked'].fillna(df['Embarked'].mode()[0])
     df.drop(columns=["Name", "Ticket", "Cabin"], inplace=True)
@@ -35,7 +48,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Detect if running on SageMaker or locally
+    # Detect if running on SageMaker or locally. Inside a training job SageMaker sets
+    # SM_CHANNEL_TRAIN (where it downloaded the "train" input channel) and SM_MODEL_DIR
+    # (whatever is saved there is packed into model.tar.gz when the job ends).
+    # Locally neither is set, so the current directory is used for both.
     input_data_path = os.path.join(os.environ.get("SM_CHANNEL_TRAIN", "."), args.train)
     output_data_path = os.path.join(os.environ.get("SM_MODEL_DIR", "."), "xgboost-model.json")
 

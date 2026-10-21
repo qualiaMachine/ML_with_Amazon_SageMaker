@@ -55,10 +55,13 @@ def build_prompt(category: str, doc_context: str = "") -> str:
 
 
 def user_messages(prompt: str):
+    """The user turn in the chat format Qwen-VL expects: an image placeholder
+    (the processor replaces it with the image tokens) followed by the prompt text."""
     return [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": prompt}]}]
 
 
 def full_messages(prompt: str, answer: str):
+    """The user turn plus the assistant's answer: a complete training example."""
     return user_messages(prompt) + [
         {"role": "assistant", "content": [{"type": "text", "text": answer}]}
     ]
@@ -86,6 +89,10 @@ _TAG_RE = re.compile(r"</?(?:u|del|ins)>")
 
 
 def normalize_text(text) -> str:
+    """Make two transcriptions comparable before computing CER: treat missing as
+    empty, unescape newlines, strip the markup tags the labels use, apply Unicode
+    NFC (so 'ü' is one code point however it was typed), and collapse whitespace.
+    The competition's metric does the same, so scores here match the leaderboard."""
     if text is None or (isinstance(text, float) and pd.isna(text)):
         return ""
     text = str(text).replace("\\n", "\n")

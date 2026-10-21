@@ -1,3 +1,14 @@
+"""Train a small feed-forward network on the Titanic data with PyTorch.
+
+Used three ways in the lesson: its preprocess_data() is imported by the
+notebook to prepare train/validation/test arrays; the whole script is the
+entry_point of the training jobs in the "Training part 2" episode; and the
+hyperparameter-tuning episode runs it many times with different --epochs and
+--learning_rate. One line matters for tuning: the "validation:accuracy = ..."
+print at the end of training is what SageMaker's metric regex reads to rank
+the tuning jobs.
+"""
+
 import os
 import argparse
 import torch
@@ -12,6 +23,7 @@ class TitanicNet(nn.Module):
 
     def __init__(self):
         super(TitanicNet, self).__init__()
+        # 7 inputs (the feature columns preprocess_data keeps) -> 64 -> 32 -> 1 probability of survival
         self.fc1 = nn.Linear(7, 64)
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, 1)
@@ -117,7 +129,8 @@ def train(train_path, val_path, epochs, learning_rate):
             print(f"Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}, Val Loss: {val_loss.item():.4f}, Val Accuracy: {val_accuracy:.4f}", flush=True)
             print(f"validation:accuracy = {val_accuracy:.4f}", flush=True)  # Log for SageMaker metric tracking. Needed for hyperparameter tuning later.
 
-    # Save model
+    # Save model. /opt/ml/model only exists inside a SageMaker training job, where
+    # SageMaker packs it into model.tar.gz at the end; locally, save next to the script.
     model_output_path = "/opt/ml/model/nn_model.pth" if os.path.exists("/opt/ml/model") else "nn_model.pth"
     torch.save(model.state_dict(), model_output_path)
     print(f"Model saved to {model_output_path}")

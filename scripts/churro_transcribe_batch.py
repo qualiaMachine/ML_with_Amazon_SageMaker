@@ -41,6 +41,7 @@ from badger_common import (
 
 
 def parse_args():
+    """Flags arrive from the Processing job's arguments= list (a processor has no hyperparameters=)."""
     p = argparse.ArgumentParser()
     # A local directory works as a model id: SageMaker sets SM_CHANNEL_MODEL when a
     # "model" channel is mounted (training jobs); Processing jobs pass the path explicitly.
@@ -60,6 +61,8 @@ def parse_args():
 
 
 def main():
+    """Read the page list, load the model (merging the adapter if given), transcribe
+    in batches, write predictions.csv, and score the rows that have a reference."""
     args = parse_args()
     from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
@@ -114,7 +117,7 @@ def main():
         enc = processor(text=texts, images=images, padding=True, return_tensors="pt").to(model.device)
         with torch.no_grad():
             out = model.generate(**enc, max_new_tokens=args.max_new_tokens, do_sample=False, repetition_penalty=1.05)
-        gen = out[:, enc["input_ids"].shape[1]:]
+        gen = out[:, enc["input_ids"].shape[1]:]   # generate() returns prompt + answer; keep only the answer
         preds.extend(t.strip() for t in processor.batch_decode(gen, skip_special_tokens=True))
         done = start + len(chunk)
         print(f"  {done}/{len(rows)} pages, {(time.time() - t0) / done:.1f} s/page")
