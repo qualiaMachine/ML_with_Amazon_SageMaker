@@ -1859,20 +1859,17 @@ the plain Python environment is enough).</p>
 <h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode sh" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="ex">!pwd</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="ex">!ls</span> ..</span></code></pre>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="ex">!ls</span></span></code></pre>
 </div>
 <p>The first line prints <code>/home/ec2-user/SageMaker</code>: new
-notebooks start in that folder. The second lists its parent, the
-instance’s home directory, which holds AWS’s own setup: the
-<code>anaconda3</code> folder with the conda environments behind the
-kernel list, AWS’s <code>sample-notebooks</code>, and a pile of license
-files. <code>SageMaker/</code> is the one folder that is different. It
-is a separate disk, the volume whose size sits under <strong>Additional
-configuration</strong> on the create form (5 GB by default). Everything
-else in the home directory lives on the system disk and is reset when
-the instance stops; <code>SageMaker/</code> is the only place that
-survives a stop. JupyterLab’s file browser opens there for that reason,
-and it is where everything in this lesson goes.</p>
+notebooks start in that folder. The second lists it, and the notebook
+you just created is the only thing there. <code>SageMaker/</code> is a
+separate disk, the volume whose size sits under <strong>Additional
+configuration</strong> on the create form (5 GB by default). The rest of
+the instance lives on the system disk and is reset when the instance
+stops; <code>SageMaker/</code> is the only place that survives a stop.
+JupyterLab’s file browser opens there for that reason, and it is where
+everything in this lesson goes.</p>
 <p>Now clone the lesson repository into it:</p>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">SH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2913,7 +2910,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -6955,7 +6952,7 @@ realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -7261,7 +7258,7 @@ whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; four things have to be
 in place before the session. Each is written out in the instructor
@@ -8062,7 +8059,7 @@ will compare it to the real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -8439,7 +8436,7 @@ CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8479,7 +8476,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
