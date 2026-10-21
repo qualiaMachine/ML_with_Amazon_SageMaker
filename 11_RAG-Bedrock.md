@@ -1032,46 +1032,56 @@ print(call_vision_chat("You are a concise assistant.", "What is in the attached 
                        images=[(f"{caption_pages[0]['doc_id']}, page {caption_pages[0]['page_label']}", Path(caption_pages[0]["png_path"]).read_bytes())]))
 ```
 
-Two runs over the Table and Figure questions, both through the vision model: one with the text chunks only, one with the top three retrieved page images attached as well. Each run is the same loop as Step 11, so every question costs an answer call and an explanation call. The first run is the control. Without it, a better score with images could just be a different generation model, and the comparison would say nothing about the images.
+Three runs over the Table and Figure questions, all through the vision model, so that the only thing changing between them is what the model is shown. The first is the control: text chunks only. The second attaches the top three pages from the image index. The third attaches the pages the top text chunks came from, rendered as images: the hit-rate table above says the text index finds the right paper more often, so the question is whether finding with text and *reading* with the image is the better split. Each run is the same loop as Step 11, so every question costs an answer call and an explanation call.
 
 ```python
 tf_df = train_df[(train_df["Table"] == 1) | (train_df["Figure"] == 1)]
-print(f"{len(tf_df)} table and figure questions; each run makes an answer call and an explanation call per question, so about {4 * len(tf_df)} calls for both runs")
+page_by_key = {(p["doc_id"], p["page_num"]): p for p in caption_pages}   # look a page record up from a chunk's doc_id and page_num
+print(f"{len(tf_df)} table and figure questions; each run makes an answer call and an explanation call per question, so about {6 * len(tf_df)} calls for three runs")
 
-def run_tf(with_images: bool) -> pd.DataFrame:
+def pages_for(question: str, images_from: str):
+    """The page records to attach: none, the image index's top three, or the pages behind the top text chunks."""
+    if images_from == "image_index":
+        return retrieve_top_k(embed_query_mm(question), page_embeddings, caption_pages, k=3)
+    if images_from == "text_index":
+        pages = []
+        for c in retrieve_top_k(embed_query(question), chunk_embeddings, chunked_docs, k=8):
+            page = page_by_key.get((c["doc_id"], c["page_num"]))   # None when that page carries no caption
+            if page is not None and page not in pages:
+                pages.append(page)
+        return pages[:3]
+    return []
+
+def run_tf(images_from: str) -> pd.DataFrame:
     rows = []
     for _, row in tf_df.iterrows():
-        images = []
-        if with_images:
-            for pg in retrieve_top_k(embed_query_mm(row["question"]), page_embeddings, caption_pages, k=3):
-                images.append((f"{pg['doc_id']}, page {pg['page_label']}", Path(pg["png_path"]).read_bytes()))
+        images = [(f"{pg['doc_id']}, page {pg['page_label']}", Path(pg["png_path"]).read_bytes()) for pg in pages_for(row["question"], images_from)]
         generate = lambda s, u, max_new_tokens=512, images=images: call_vision_chat(s, u, max_new_tokens, images=images)
         rows.append(run_single_qa(row=row, embed_query=embed_query, generate=generate, chunk_embeddings=chunk_embeddings,
                                   chunked_docs=chunked_docs, docid_to_url=docid_to_url, top_k=8, retrieval_threshold=0.25))
     return pd.DataFrame(rows)
 
+vision_runs = {"text chunks only": "none", "chunks + pages from the image index": "image_index", "chunks + pages behind the text chunks": "text_index"}
 t0 = time.time()
-tf_text_only = run_tf(with_images=False)
-tf_text_only.to_csv(os.path.join(output_dir, "wattbot_solutions_vision_text_only.csv"), index=False)
-tf_with_images = run_tf(with_images=True)
-tf_with_images.to_csv(os.path.join(output_dir, "wattbot_solutions_vision_with_images.csv"), index=False)
-print(f"Both runs in {(time.time() - t0) / 60:.1f} min")
+for label, images_from in vision_runs.items():
+    run_tf(images_from).to_csv(os.path.join(output_dir, f"wattbot_solutions_vision_{images_from}.csv"), index=False)
+    print(f"{label}: done at {(time.time() - t0) / 60:.1f} min")
 ```
 
-Score both the same way as Step 12. The scorer compares the rows it finds, so the breakdown is over these questions only; the `Table` and `Figure` lines are the ones to read, against each other and against the DeepSeek run.
+Score all three the same way as Step 12. The scorer compares the rows it finds, so the breakdown is over these questions only; the `Table` and `Figure` lines are the ones to read, across the three runs and against the DeepSeek run.
 
 ```python
-for label, path in [("text chunks only", "wattbot_solutions_vision_text_only.csv"), ("text chunks + page images", "wattbot_solutions_vision_with_images.csv")]:
+for label, images_from in vision_runs.items():
     print("=" * 96)
     print(f"Nova 2 Lite, {label}")
-    compute_wattbot_score(train_qa_path=train_qa_path, preds_path=os.path.join(output_dir, path), n_examples=3)
+    compute_wattbot_score(train_qa_path=train_qa_path, preds_path=os.path.join(output_dir, f"wattbot_solutions_vision_{images_from}.csv"), n_examples=3)
 ```
 
 ::::::::::::::::::::::::::::::::::::: callout
 
 ### What to expect, and what it cost
 
-Figure questions should move the most: the text index had only a caption to match and the text model had nothing to read, and the image gives it both. Table questions move less, because a flattened table is still mostly readable, and some will get worse: three page images is a lot of tokens for a model to search, and a wrong page retrieved with confidence is a new way to misread. The hit-rate table tells you which of those happened. For the bill, every page image is roughly a thousand input tokens at Nova 2 Lite's rate on the [pricing page](https://aws.amazon.com/bedrock/pricing/), so the run with images is about three times the control; `vision_usage` holds both runs' usage blocks, and the embedding of the page images is the per-image rate times `len(caption_pages)`.
+Measured once on this corpus, with 50 table and figure questions. Retrieval first: the text index found a ground-truth paper in its top eight for 94% of the table questions and 94% of the figure questions; the image index managed 91% and 82%. A page image is a weaker key than the caption and surrounding sentences that the text chunks already carry, so on this corpus the image index is not the better way to *find* a page. Then reading: with the image index's top three pages attached, Nova 2 Lite went from 0.64 to 0.67 overall, from 41% to 29% of figure questions wrong, and from 0.85 to 0.93 on citation F1, while the table questions did not move at all (43% to 46% wrong). Seventeen figure questions is two questions of difference, so read the direction, not the decimals. The tables are the stubborn case: at 100 dpi a dense table is at the edge of legible, and a flattened table in the text chunks was already readable. For the bill, every page image is roughly a thousand input tokens at Nova 2 Lite's rate on the [pricing page](https://aws.amazon.com/bedrock/pricing/), so a run with images is about three times the control; `vision_usage` holds all three runs' usage blocks, and the embedding of the page images is the per-image rate times `len(caption_pages)`, a few cents. The three runs together took five minutes.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
