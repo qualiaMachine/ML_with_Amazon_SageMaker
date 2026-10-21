@@ -313,7 +313,7 @@
 <li><a href="#step-3-load-the-metadata-and-training-questions">Step 3 – Load the metadata and training questions</a></li>
 <li><a href="#step-4-get-the-pdf-corpus">Step 4 – Get the PDF corpus</a></li>
 <li><a href="#step-5-turn-pdfs-into-page-level-documents">Step 5 – Turn PDFs into page-level “documents”</a></li>
-<li><a href="#step-6-simple-explicit-text-chunking">Step 6 – Simple, explicit text chunking</a></li>
+<li><a href="#step-6-text-chunking">Step 6 – Text chunking</a></li>
 <li><a href="#step-7-cost-tracking-bedrock-calls-carry-no-tags-unless-you-route-them-through-a-profile">Step 7 – Cost tracking: Bedrock calls carry no tags unless you route
 them through a profile</a></li>
 <li><a href="#step-8-embed-the-chunks-with-titan">Step 8 – Embed the chunks with Titan</a></li>
@@ -993,7 +993,7 @@ records written once when the corpus was staged.</p>
 <span id="cb10-62"><a href="#cb10-62" tabindex="-1" aria-label="code-block-10-62"></a>page_docs[<span class="dv">0</span>] <span class="cf">if</span> page_docs <span class="cf">else</span> <span class="va">None</span></span></code></pre>
 </div>
 </div>
-</section><section><h2 class="section-heading" id="step-6-simple-explicit-text-chunking">Step 6 – Simple, explicit text chunking<a class="anchor" aria-label="anchor" href="#step-6-simple-explicit-text-chunking"></a></h2>
+</section><section><h2 class="section-heading" id="step-6-text-chunking">Step 6 – Text chunking<a class="anchor" aria-label="anchor" href="#step-6-text-chunking"></a></h2>
 <hr class="half-width"><p>RAG systems typically break documents into <strong>chunks</strong> so
 that:</p>
 <ul><li>Each chunk is long enough to carry meaningful context.</li>
