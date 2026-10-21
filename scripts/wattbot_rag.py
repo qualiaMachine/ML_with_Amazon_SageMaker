@@ -795,7 +795,8 @@ def drop_questions_without_papers(train_df: pd.DataFrame, available_doc_ids) -> 
 
 
 def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 150,
-                               min_width: float = 80, min_height: float = 36) -> List[Dict[str, Any]]:
+                               min_width: float = 80, min_height: float = 36,
+                               pages: Optional[Any] = None) -> List[Dict[str, Any]]:
     """Crop every table and figure out of one PDF with PyMuPDF (`pip install pymupdf`).
 
     Three detectors, all built into PyMuPDF: `find_tables` for tables (ruled or
@@ -809,8 +810,13 @@ def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 1
     identifier a question will use. A caption with no detected box falls back to the
     whole page, so every table and figure the text mentions gets an image.
 
+    `pages` limits the work: a list of page numbers (0-based), or a dict mapping a page
+    number to the caption kinds found on it ({"table"}, {"figure"} or both), in which
+    case table detection runs only on pages with a table caption and figure detection
+    only on pages with a figure caption. `find_caption_pages` gives those pages.
+
     Returns one record per crop: doc_id, page_num, page_label, kind ("table" or
-    "figure"), caption, png_path. Crops are PNGs at `dpi` in `out_dir`.
+    "figure"), caption, png_path, whole_page. Crops are PNGs at `dpi` in `out_dir`.
     """
     import pymupdf
     from pathlib import Path
@@ -820,16 +826,20 @@ def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 1
     records: List[Dict[str, Any]] = []
     doc = pymupdf.open(pdf_path)
     for page in doc:
+        if pages is not None and page.number not in pages:
+            continue
+        kinds = set(pages[page.number]) if isinstance(pages, dict) else {"table", "figure"}
         page_area = page.rect.get_area()
-        tables = [pymupdf.Rect(t.bbox) for t in page.find_tables().tables]
+        tables = [pymupdf.Rect(t.bbox) for t in page.find_tables().tables] if "table" in kinds else []
         boxes: List[Tuple[str, Any]] = [("table", r) for r in tables]
-        boxes += [("figure", pymupdf.Rect(info["bbox"])) for info in page.get_image_info()]
-        drawings = [
-            d for d in page.get_drawings()
-            if d["rect"].get_area() < 0.5 * page_area and not any(t.contains(d["rect"]) for t in tables)
-        ]
-        if drawings:
-            boxes += [("figure", r) for r in page.cluster_drawings(drawings=drawings)]
+        if "figure" in kinds:
+            boxes += [("figure", pymupdf.Rect(info["bbox"])) for info in page.get_image_info()]
+            drawings = [
+                d for d in page.get_drawings()
+                if d["rect"].get_area() < 0.5 * page_area and not any(t.contains(d["rect"]) for t in tables)
+            ]
+            if drawings:
+                boxes += [("figure", r) for r in page.cluster_drawings(drawings=drawings)]
         boxes = [(k, r) for k, r in boxes if r.width >= min_width and r.height >= min_height and r.get_area() < 0.9 * page_area]
         boxes = [(k, r) for k, r in boxes if not any(o is not r and o.contains(r) for _, o in boxes)]
 
