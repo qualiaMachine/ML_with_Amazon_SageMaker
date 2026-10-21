@@ -468,105 +468,54 @@ def run_single_qa(
 # ---------------------------------------------------------------------------
 
 
-def _to_bool_flag(x) -> bool:
-    if isinstance(x, str):
-        s = x.strip().lower()
-        if s in {"1", "true", "yes"}:
-            return True
-        if s in {"0", "false", "no", "", BLANK}:
-            return False
-    if isinstance(x, float) and np.isnan(x):
-        return False
-    return bool(x)
-
-
-def _parse_float_or_none(x) -> Optional[float]:
-    return _try_float(str(x).strip())
-
-
-def _answer_value_correct(gt_val, pred_val, rel_tol: float = 1e-3) -> bool:
-    """Numeric within 0.1% relative tolerance; otherwise case-insensitive string match."""
-    gt_str = str(gt_val).strip()
-    pred_str = str(pred_val).strip()
-    if gt_str.lower() == BLANK or pred_str.lower() == BLANK:
-        return gt_str.lower() == pred_str.lower()
-    gt_num = _parse_float_or_none(gt_str)
-    pred_num = _parse_float_or_none(pred_str)
-    if gt_num is not None and pred_num is not None:
-        if gt_num == 0:
-            return abs(pred_num - gt_num) <= rel_tol
-        return abs(pred_num - gt_num) / max(abs(gt_num), 1e-12) <= rel_tol
-    return gt_str.lower() == pred_str.lower()
-
-
-def _ref_id_jaccard(gt_ref, pred_ref) -> float:
-    """Jaccard overlap of the two id sets, case-insensitive.
-
-    Ground truth comes as Python-list strings ("['wu2021b','patterson2021']"),
-    predictions as ';'-joined ids; both parse through `split_ref_ids`.
-    """
-    gt_set = {r.lower() for r in split_ref_ids(gt_ref)}
-    pred_set = {r.lower() for r in split_ref_ids(pred_ref)}
-    if not gt_set and not pred_set:
-        return 1.0
-    union = gt_set | pred_set
-    return len(gt_set & pred_set) / len(union) if union else 0.0
-
-
-def _na_flags(merged: pd.DataFrame, col: Optional[str], answer_col: str, suffix: str) -> pd.Series:
-    """NA flag per row. col="is_blank" (or None) derives it from answer_value; another name reads that column."""
-    if col is not None and col.lower() != BLANK:
-        for candidate in (f"{col}{suffix}", col):
-            if candidate in merged.columns:
-                return merged[candidate].map(_to_bool_flag)
-        print(f"Column {col!r} not found; deriving NA flags from {answer_col}{suffix} == 'is_blank'.")
-    return merged[f"{answer_col}{suffix}"].astype(str).str.strip().str.lower().eq(BLANK)
-
-
 def compute_wattbot_score(
     train_qa_path: str = "train_QA.csv",
     preds_path: str = "wattbot_solutions.csv",
-    id_col: str = "id",
-    gt_answer_col: str = "answer_value",
-    gt_ref_col: str = "ref_id",
-    gt_is_na_col: Optional[str] = BLANK,
-    pred_answer_col: str = "answer_value",
-    pred_ref_col: str = "ref_id",
-    pred_is_na_col: Optional[str] = BLANK,
     n_examples: int = 10,
+    **_legacy_kwargs,
 ) -> pd.DataFrame:
-    """Score a predictions CSV against train_QA.csv with the WattBot metric.
+    """Score a predictions CSV against train_QA.csv with the competition's own metric.
 
-    Rows are joined on `id_col`. The NA component compares an unanswerable flag per
-    side; with the default "is_blank" that flag is derived from answer_value ==
-    "is_blank" (train_QA.csv has no separate column), or pass the name of a real
-    column. Prints the mean of each component and up to `n_examples` of the
-    worst-scoring rows, and returns the merged DataFrame with per-row scores.
+    The headline number comes from `Score.score` in `Score.py`, the file the WattBot
+    leaderboard runs (2026 rules: 0.75 answer_value, 0.20 citation F1, 0.05 clean
+    refusal; answering an unanswerable question scores zero on answer_value). That
+    file has to sit next to this module. This wrapper adds what the leaderboard does
+    not print: a per-row score, the worst rows with the model's own explanation, and
+    the returned DataFrame for further digging.
     """
+    import Score   # the competition's metric, copied beside this module; imported here so the batch job does not need it
+
     gt = pd.read_csv(train_qa_path)
     preds = pd.read_csv(preds_path)
-    merged = gt.merge(preds, on=id_col, suffixes=("_gt", "_pred"))
+    overall = Score.score(gt.copy(), preds.copy(), "id", verbose=False)   # the leaderboard number
+    summary = Score.LAST_BREAKDOWN
+
+    merged = gt.merge(preds, on="id", suffixes=("_gt", "_pred"))
     if merged.empty:
         raise ValueError("No overlapping ids between ground truth and predictions.")
 
-    gt_is_na = _na_flags(merged, gt_is_na_col, gt_answer_col, "_gt")
-    pred_is_na = _na_flags(merged, pred_is_na_col, pred_answer_col, "_pred")
+    # The same per-row rubric Score.score applies, kept per row so the worst rows can be listed
+    def _row(r):
+        sol = {k: str(r[f"{k}_gt"]) for k in ("answer_value", "answer_unit", "ref_id")}
+        sub = {k: str(r[f"{k}_pred"]) for k in ("answer_value", "answer_unit", "ref_id", "ref_url", "supporting_materials") if f"{k}_pred" in merged.columns}
+        bits = Score.row_bits(sol, sub)
+        return float(bits["val"]), Score.ref_prf(sol["ref_id"], sub["ref_id"])[2], float(bits["na"])
 
-    merged["answer_score"] = [
-        1.0 * _answer_value_correct(g, p)
-        for g, p in zip(merged[f"{gt_answer_col}_gt"], merged[f"{pred_answer_col}_pred"])
-    ]
-    merged["ref_id_score"] = [
-        _ref_id_jaccard(g, p) for g, p in zip(merged[f"{gt_ref_col}_gt"], merged[f"{pred_ref_col}_pred"])
-    ]
-    merged["is_NA_score"] = (gt_is_na.values == pred_is_na.values).astype(float)
-    merged["wattbot_score"] = 0.75 * merged["answer_score"] + 0.15 * merged["ref_id_score"] + 0.10 * merged["is_NA_score"]
+    merged["answer_score"], merged["ref_id_score"], merged["is_NA_score"] = zip(*(_row(r) for _, r in merged.iterrows()))
+    merged["wattbot_score"] = 0.75 * merged["answer_score"] + 0.20 * merged["ref_id_score"] + 0.05 * merged["is_NA_score"]
 
     print(f"Rows compared: {len(merged)}")
-    print(f"Mean answer_value score: {merged['answer_score'].mean():.4f}")
-    print(f"Mean ref_id score:       {merged['ref_id_score'].mean():.4f}")
-    print(f"Mean is_NA score:        {merged['is_NA_score'].mean():.4f}")
-    print(f"Overall WattBot score:   {merged['wattbot_score'].mean():.4f}")
+    print(f"answer_value correct (weight 0.75): {merged['answer_score'].mean():.4f}")
+    print(f"citation F1          (weight 0.20): {merged['ref_id_score'].mean():.4f}   (precision {summary['ref_precision']:.3f}, recall {summary['ref_recall']:.3f})")
+    print(f"clean refusals       (weight 0.05): {merged['is_NA_score'].mean():.4f}")
+    if summary.get("n_unanswerable"):
+        print(f"unanswerable questions answered anyway: {summary['false_answer_rate']:.3f} of {summary['n_unanswerable']}")
+    print(f"WattBot score (Score.py, what the leaderboard reports): {overall:.4f}")
+    per_type = {k: v for k, v in summary.get("per_type", {}).items() if k != "ALL"}
+    if per_type:
+        print("\nWrong answer_value by evidence type (a question can carry several flags):")
+        for label, d in per_type.items():
+            print(f"  {label:<11} {d['wrong']:>3}/{d['n']:<3} {d['pct_wrong']:5.1f}% wrong")
 
     incorrect = merged[merged["wattbot_score"] < 1.0]
     if not incorrect.empty and n_examples > 0:
@@ -574,13 +523,13 @@ def compute_wattbot_score(
         q_col = "question_gt" if "question_gt" in merged.columns else ("question" if "question" in merged.columns else None)
         for _, row in incorrect.sort_values("wattbot_score").head(n_examples).iterrows():
             print("-" * 80)
-            print(f"id: {row[id_col]}")
+            print(f"id: {row['id']}")
             if q_col:
                 print(f"Question: {row[q_col]}")
-            print(f"GT answer_value:   {row[f'{gt_answer_col}_gt']}")
-            print(f"Pred answer_value: {row[f'{pred_answer_col}_pred']}")
-            print(f"GT ref_id:         {row[f'{gt_ref_col}_gt']}")
-            print(f"Pred ref_id:       {row[f'{pred_ref_col}_pred']}")
+            print(f"GT answer_value:   {row['answer_value_gt']}")
+            print(f"Pred answer_value: {row['answer_value_pred']}")
+            print(f"GT ref_id:         {row['ref_id_gt']}")
+            print(f"Pred ref_id:       {row['ref_id_pred']}")
             # The model's own account of its answer, when the predictions carry one (blank rows have none)
             for label, col in [("Model explanation", "explanation"), ("Cited passage", "supporting_materials")]:
                 col = f"{col}_pred" if f"{col}_pred" in merged.columns else col

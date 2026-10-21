@@ -2,7 +2,7 @@
 
 Runs the full retrieval + generation loop over train_QA.csv with self-hosted
 models: a Hugging Face embedding model for query embeddings and an open-weight
-generator (Qwen3.8-27B in FP8) served by vLLM. All the pipeline logic lives in
+generator (Qwen3-8B in class; Qwen3.8-27B in FP8 on a 48 GB GPU) served by vLLM. All the pipeline logic lives in
 `wattbot_rag.py`, which must sit next to this file in the job's source_dir;
 this script only loads the inputs, builds the two model callables, and writes
 `wattbot_solutions.csv`.
@@ -30,10 +30,11 @@ import wattbot_rag as wr
 # ---------------------- generator: Qwen via vLLM ----------------------
 
 
-def load_qwen_pipeline(model_id: str = "Qwen/Qwen3.8-27B-FP8", max_model_len: int = 8192):
+def load_qwen_pipeline(model_id: str = "Qwen/Qwen3-8B", max_model_len: int = 8192):
     """Load the generator once with vLLM and return the engine.
 
-    Qwen3.8-27B in FP8 is ~27 GB of weights and fits one 48 GB GPU
+    Qwen3-8B in bf16 is ~16 GB of weights and fits one 24 GB GPU (ml.g5.xlarge);
+    Qwen3.8-27B in FP8 is ~27 GB and fits one 48 GB GPU
     (ml.g6e.xlarge). vLLM is used rather than transformers because it has
     the kernels for FP8 and for this model's hybrid attention, and it
     batches well. Called a single time per processing job and reused for
@@ -86,7 +87,7 @@ def main():
     parser.add_argument(
         "--qwen_model_id",
         type=str,
-        default="Qwen/Qwen3.8-27B-FP8",
+        default="Qwen/Qwen3-8B",
         help="Open-weight chat model for generation (served with vLLM).",
     )
     args = parser.parse_args()
