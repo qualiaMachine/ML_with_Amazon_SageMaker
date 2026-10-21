@@ -1269,7 +1269,9 @@ larger datasets for the fine-tuning and RAG episodes (hundreds of
 scanned letters, a corpus of PDFs) live in a <strong>shared, read-only
 bucket</strong> that the instructors stage before class: one copy for
 everyone, instead of a hundred copies of the same files. You read from
-it and never upload to it; your instructor will give you its name.</p>
+it and never upload to it; in the workshop account it is
+<code>ml-marathon-shared</code>, and the episodes that use it have the
+name in their first cell.</p>
 </div>
 <div class="section level5">
 <h5 id="upload-files-to-the-bucket">5. Upload files to the bucket<a class="anchor" aria-label="anchor" href="#upload-files-to-the-bucket"></a>
@@ -1432,7 +1434,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2923,7 +2925,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -4930,7 +4932,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5119,7 +5121,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6271,7 +6273,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6321,7 +6323,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -9473,9 +9475,9 @@ from Step 1: <code>role</code> printed there must end in
 here:</p>
 <ul>
 <li>
-<strong>The shared bucket</strong> (your instructor gives you its
-name) holds the WattBot inputs under <code>wattbot/</code>:
-<code>metadata.csv</code> (the index of papers),
+<strong>The shared bucket</strong>, <code>ml-marathon-shared</code>,
+already set in the first cell below, holds the WattBot inputs under
+<code>wattbot/</code>: <code>metadata.csv</code> (the index of papers),
 <code>train_QA.csv</code> (labelled questions and answers),
 <code>corpus.zip</code> (the PDFs) and <code>pages.jsonl</code> (the
 text of every PDF page, extracted once). It is read-only and there is
