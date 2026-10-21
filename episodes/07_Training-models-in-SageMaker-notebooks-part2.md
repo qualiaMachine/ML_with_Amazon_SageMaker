@@ -198,6 +198,7 @@ def job_cost_report(job_name: str, price_per_hour: float):
     billable = desc["BillableTimeInSeconds"] * n   # container pull to model upload, charged per instance
     wall = (desc["TrainingEndTime"] - desc["CreationTime"]).total_seconds()   # from the launch request to the end, including unbilled provisioning
     print(f"{job_name}: status {desc['TrainingJobStatus']}, wall-clock {wall/60:.1f} min, billable {billable/60:.1f} min on {n} instance(s), cost ${billable/3600*price_per_hour:.3f} at ${price_per_hour}/h")
+    print(f"    model: {desc['ModelArtifacts']['S3ModelArtifacts']}")   # the model.tar.gz this job uploaded to output_path
     return desc
 
 # us-east-1 on-demand rates (2026-10-16); check the instances page for your region

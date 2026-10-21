@@ -648,13 +648,13 @@ def job_cost_report(job_name: str, price_per_hour: float):
     print(f"wall-clock:     {wall / 60:.1f} min from launch to finish, of which {provisioning / 60:.1f} min provisioning (not billed)")
     print(f"billable time:  {billable / 60:.1f} min  (what you pay for; the script's own timing is in train_summary.json)")
     print(f"cost:           ${billable / 3600 * price_per_hour:.3f} at ${price_per_hour}/h")
+    print(f"model:          {desc['ModelArtifacts']['S3ModelArtifacts']}")   # the model.tar.gz this job uploaded to output_path
     tags = session.sagemaker_client.list_tags(ResourceArn=desc["TrainingJobArn"])["Tags"]   # tags live on the job, not in describe_training_job
     print(f"tags:           {', '.join(t['Key'] + '=' + t['Value'] for t in tags) or 'NONE: this spend is unattributed'}")
     return desc
 
 desc = job_cost_report(training_job_name, g5_price)
-adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]   # the model.tar.gz this job uploaded to output_path
-print("adapter:", adapter_s3_uri)
+adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]   # the model: line above, kept for the download below
 ```
 
 Compare the billable minutes with `train_minutes` in the summary you download next: the difference is the fixed overhead of every job, container pull, data download and the 7.5 GB model copy from S3. It is the same whether you train for one minute or one hour, which is why a small first run is cheap and why batching work into fewer, longer jobs is cheaper than many tiny ones.
