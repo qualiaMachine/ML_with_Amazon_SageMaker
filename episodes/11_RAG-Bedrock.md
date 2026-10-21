@@ -660,7 +660,20 @@ def embed_query(question: str) -> np.ndarray:
     return np.asarray(bedrock_embed_text(question), dtype="float32")
 ```
 
-Embedding 3,000 chunks is a few minutes and a few cents, so do not do it twice. The cell below looks for the finished matrix locally, then in your bucket, and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped. In a room of fifty notebooks doing this at once, Bedrock's per-minute quota on the embedding model will throttle some calls; the client retries with backoff, so the loop slows rather than fails. One small helper asks S3 whether an object exists.
+Embedding 3,000 chunks is a few minutes and a few cents, so do not do it twice. The cell after next looks for the finished matrix locally, then in your bucket, and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped.
+
+::::::::::::::::::::::::::::::::::::: callout
+
+### In a class, use the instructor's copy
+
+Bedrock allows this account 300,000 Titan embedding tokens per minute, and the quota is not adjustable. One notebook embedding this corpus uses almost all of it; a room of them shares it, so everyone's loop slows to a crawl of retries. In class, uncomment and run the cell below first: it downloads the matrix your instructor computed with the same chunks and the same model, and the cell after it finds the file and skips the calls. Working on your own, leave it commented and let the loop run; that is the step to practise.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+```python
+# In class only: the instructor's copy of the embeddings, same chunks, same model. Uncomment the next line, run, then run the cell below.
+# s3.download_file(shared_bucket, "wattbot/embeddings_bedrock.npy", str(emb_save_path))
+``` One small helper asks S3 whether an object exists.
 
 ```python
 def _s3_object_exists(bucket: str, key: str) -> bool:
