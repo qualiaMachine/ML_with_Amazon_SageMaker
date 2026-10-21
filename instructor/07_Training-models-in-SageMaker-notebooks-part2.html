@@ -748,9 +748,12 @@ plan, and add the startup:</p>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>local_seconds_per_epoch <span class="op">*</span> <span class="dv">1000</span><span class="sc">:.1f}</span><span class="ss"> ms per epoch locally -&gt; </span><span class="sc">{</span>train_minutes<span class="sc">:.1f}</span><span class="ss"> min of training for </span><span class="sc">{</span>planned_epochs<span class="sc">}</span><span class="ss"> epochs"</span>)</span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a><span class="bu">print</span>(<span class="ss">f"estimate: </span><span class="sc">{</span>train_minutes <span class="op">+</span> startup_minutes<span class="sc">:.0f}</span><span class="ss"> min billed, about $</span><span class="sc">{</span>estimate<span class="sc">:.3f}</span><span class="ss"> on ml.m5.large"</span>)</span></code></pre>
 </div>
-<p>Expect roughly a minute of training plus three of startup: about a
-cent. If the planned run has ten times the rows, multiply the training
-minutes by ten; the startup does not change.</p>
+<p>Expect a couple of minutes of training plus two or three of startup:
+about a cent. (The <code>ml.t3.medium</code> notebook is slower than the
+<code>ml.m5.large</code> the job runs on, so the training part of the
+estimate is high. Our run billed 2.8 minutes in total,
+<code>$0.005</code>.) If the planned run has ten times the rows,
+multiply the training minutes by ten; the startup does not change.</p>
 <p><strong>Large models: count the arithmetic.</strong> Once a model has
 millions of parameters, compute is the cost, and it can be counted
 before any instance exists. Training one example through a dense network
@@ -826,7 +829,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -1008,7 +1011,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -1019,7 +1022,10 @@ network has about 2,600 parameters and the whole training set is 713
 rows, so each full-batch step is tiny and the T4 sits almost idle, and
 the one-time CUDA initialization adds a few seconds of its own. Startup
 dominates both bills, and the GPU bill is about 6x higher per minute
-(0.74 / 0.115), so the GPU costs roughly 6x more for no speedup.</p>
+(0.74 / 0.115), so the GPU costs several times more for no speedup. In
+our run the CPU job billed 2.8 minutes (<code>$0.005</code>) and the GPU
+job 3.6 minutes (<code>$0.045</code>): slower, and nine times the
+price.</p>
 <p>A GPU pays off when the per-step work is large enough to keep it
 busy: bigger models, bigger batches, or datasets of hundreds of MB and
 up. If you ever do need more GPU than a <code>g4dn.xlarge</code>, the
@@ -1095,9 +1101,11 @@ trains its own independent copy of the model on all of the data for all
 <li>SageMaker bills
 <code>BillableTimeInSeconds x InstanceCount</code>.</li>
 </ul><p>So without a distribution strategy, two instances means the same job
-twice, in parallel, at double the cost. Estimate first: about the same 4
-minutes of wall-clock as the single-instance run, but billed for two
-instances, so about <code>$0.02</code> on <code>ml.m5.large</code>.</p>
+twice, in parallel, at double the cost. Estimate first: about the same
+3-4 minutes of wall-clock as the single-instance run, but billed for two
+instances, so about <code>$0.01</code> on <code>ml.m5.large</code> (our
+run: 3.5 minutes of wall-clock, 5.5 billable minutes across the two
+instances, <code>$0.010</code>).</p>
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

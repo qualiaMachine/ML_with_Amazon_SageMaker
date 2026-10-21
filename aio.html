@@ -1420,7 +1420,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2895,7 +2895,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3139,7 +3139,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3257,7 +3257,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3526,7 +3526,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -4810,9 +4810,12 @@ plan, and add the startup:</p>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>local_seconds_per_epoch <span class="op">*</span> <span class="dv">1000</span><span class="sc">:.1f}</span><span class="ss"> ms per epoch locally -&gt; </span><span class="sc">{</span>train_minutes<span class="sc">:.1f}</span><span class="ss"> min of training for </span><span class="sc">{</span>planned_epochs<span class="sc">}</span><span class="ss"> epochs"</span>)</span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a><span class="bu">print</span>(<span class="ss">f"estimate: </span><span class="sc">{</span>train_minutes <span class="op">+</span> startup_minutes<span class="sc">:.0f}</span><span class="ss"> min billed, about $</span><span class="sc">{</span>estimate<span class="sc">:.3f}</span><span class="ss"> on ml.m5.large"</span>)</span></code></pre>
 </div>
-<p>Expect roughly a minute of training plus three of startup: about a
-cent. If the planned run has ten times the rows, multiply the training
-minutes by ten; the startup does not change.</p>
+<p>Expect a couple of minutes of training plus two or three of startup:
+about a cent. (The <code>ml.t3.medium</code> notebook is slower than the
+<code>ml.m5.large</code> the job runs on, so the training part of the
+estimate is high. Our run billed 2.8 minutes in total,
+<code>$0.005</code>.) If the planned run has ten times the rows,
+multiply the training minutes by ten; the startup does not change.</p>
 <p><strong>Large models: count the arithmetic.</strong> Once a model has
 millions of parameters, compute is the cost, and it can be counted
 before any instance exists. Training one example through a dense network
@@ -4890,7 +4893,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5079,7 +5082,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5090,7 +5093,10 @@ network has about 2,600 parameters and the whole training set is 713
 rows, so each full-batch step is tiny and the T4 sits almost idle, and
 the one-time CUDA initialization adds a few seconds of its own. Startup
 dominates both bills, and the GPU bill is about 6x higher per minute
-(0.74 / 0.115), so the GPU costs roughly 6x more for no speedup.</p>
+(0.74 / 0.115), so the GPU costs several times more for no speedup. In
+our run the CPU job billed 2.8 minutes (<code>$0.005</code>) and the GPU
+job 3.6 minutes (<code>$0.045</code>): slower, and nine times the
+price.</p>
 <p>A GPU pays off when the per-step work is large enough to keep it
 busy: bigger models, bigger batches, or datasets of hundreds of MB and
 up. If you ever do need more GPU than a <code>g4dn.xlarge</code>, the
@@ -5173,9 +5179,11 @@ trains its own independent copy of the model on all of the data for all
 <code>BillableTimeInSeconds x InstanceCount</code>.</li>
 </ul>
 <p>So without a distribution strategy, two instances means the same job
-twice, in parallel, at double the cost. Estimate first: about the same 4
-minutes of wall-clock as the single-instance run, but billed for two
-instances, so about <code>$0.02</code> on <code>ml.m5.large</code>.</p>
+twice, in parallel, at double the cost. Estimate first: about the same
+3-4 minutes of wall-clock as the single-instance run, but billed for two
+instances, so about <code>$0.01</code> on <code>ml.m5.large</code> (our
+run: 3.5 minutes of wall-clock, 5.5 billable minutes across the two
+instances, <code>$0.010</code>).</p>
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -5847,11 +5855,11 @@ simultaneously.</strong></p>
 <p>With this approach, SageMaker is better able to refine configurations
 without overloading resources or risking inefficient exploration, making
 <code>max_parallel_jobs=2</code> a solid default for most use cases.</p>
-<p>Estimate first: 10 child jobs at roughly 3-4 billable minutes each is
-30-40 billable minutes on <code>ml.m5.large</code>, so about
-<code>$0.06</code> in total (the 10,000-epoch configurations run a
-little longer). Wall-clock is five rounds of two jobs, so expect 15-20
-minutes.</p>
+<p>Estimate first: 10 child jobs at roughly 3 billable minutes each is
+about 30 billable minutes on <code>ml.m5.large</code>, so about
+<code>$0.06</code> in total. Wall-clock is five rounds of two jobs, so
+expect 15-20 minutes. Write both numbers down; the bill below comes in
+well under them, for a reason worth knowing.</p>
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -5908,6 +5916,14 @@ more than two at a time.</li>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a>tuning_cost_report(tuner, price_per_hour)</span></code></pre>
 </div>
+<p>Our run finished in 9.3 minutes of wall-clock and billed 14.1 minutes
+in total, <code>$0.03</code>: half the estimate. Read the per-job lines
+and the reason is visible. The first two child jobs billed about 3
+minutes each, like every job so far. The other eight billed about 1
+minute each. A tuning job keeps its instances between child jobs, so
+jobs 3 through 10 ran on the two instances that were already up, with
+the container pulled and the data downloaded. The startup overhead that
+dominates a single small job was paid twice, not ten times.</p>
 </div>
 <div class="section level3">
 <h3 id="canshould-we-run-more-instances-in-parallel">Can/should we run more instances in parallel?<a class="anchor" aria-label="anchor" href="#canshould-we-run-more-instances-in-parallel"></a>
@@ -5986,11 +6002,11 @@ parameters interact in complex ways.</p>
 <div class="section level3">
 <h3 id="extracting-and-evaluating-the-best-model-after-tuning">Extracting and evaluating the best model after tuning<a class="anchor" aria-label="anchor" href="#extracting-and-evaluating-the-best-model-after-tuning"></a>
 </h3>
-<p>Tuning should only take about 15-20 minutes to complete — not bad for
-10 models! After SageMaker completes the hyperparameter tuning job, the
-results, including the trained models for each configuration, are stored
-in an S3 bucket. Here’s a breakdown of the steps to locate and evaluate
-the best model on test data.</p>
+<p>Tuning takes about 10 minutes to complete — not bad for 10 models!
+After SageMaker completes the hyperparameter tuning job, the results,
+including the trained models for each configuration, are stored in an S3
+bucket. Here’s a breakdown of the steps to locate and evaluate the best
+model on test data.</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Understanding the folder structure</strong>:
@@ -6148,8 +6164,8 @@ and measure accuracy on the test set.</p>
 <div class="section level3">
 <h3 id="conclusions">Conclusions<a class="anchor" aria-label="anchor" href="#conclusions"></a>
 </h3>
-<p>In about 20 minutes, we produced a model that is about 80% accurate
-on the test set. However, this performance does come at a cost (albeit
+<p>In about 10 minutes, we produced a model that is 77-80% accurate on
+the test set. However, this performance does come at a cost (albeit
 manageable if you’ve stuck with our advice thus far). This next section
 will help you assess the total compute time that was used by your tuning
 job.</p>
@@ -6217,19 +6233,23 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
-<strong>Cost</strong>: about the same (~<code>$0.06</code>). You pay
-per child training job, and each job’s billable time does not depend on
-how many other jobs are running. (If your account has a quota on
-concurrent <code>ml.m5.large</code> training instances, the request may
-be rejected or throttled, which is the practical limit on this
-approach.)</li>
+<strong>Cost</strong>: higher, not the same. Our all-parallel run
+billed 27.5 minutes (<code>$0.05</code>) against 14.1 minutes
+(<code>$0.03</code>) for the two-at-a-time run. Ten instances each pull
+the container and download the data, so the startup overhead is paid ten
+times; with two at a time it was paid twice and the other eight child
+jobs reused warm instances. (If your account has a quota on concurrent
+<code>ml.m5.large</code> training instances, the request may be rejected
+or throttled, which is the practical limit on this approach.)</li>
 <li>
-<strong>Wall-clock</strong>: roughly one job’s duration (4-5
-minutes) instead of five rounds of two, so about 4-5x faster.</li>
+<strong>Wall-clock</strong>: roughly one job’s duration. Our run
+took 4.3 minutes against 9.3, so about twice as fast, not five times:
+the two-at-a-time run’s later jobs were short because they skipped
+startup.</li>
 <li>
 <strong>Search quality</strong>: with all 10 launched at once, the
 Bayesian strategy has no completed results to learn from, so the 10
@@ -6263,7 +6283,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6907,7 +6927,7 @@ realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -7956,7 +7976,7 @@ will compare it to the real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 40 billed minutes. Scoring is the line most likely to
@@ -8075,7 +8095,7 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8115,7 +8135,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Startup and upload (~4 min, <code>$0.17</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -8164,7 +8184,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Nothing more for this run: the script already checkpoints to
 <code>/opt/ml/checkpoints</code> at the end of every epoch, SageMaker
@@ -10017,7 +10037,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10331,7 +10351,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -13074,7 +13094,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
