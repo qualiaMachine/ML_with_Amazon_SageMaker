@@ -286,7 +286,7 @@ train_df.head(15)
 
 ## Step 4 – Get the PDF corpus
 
-The corpus is the set of PDFs listed in `metadata.csv`, one per paper, named `<id>.pdf`. Downloading them from the publishers' sites is slow and unreliable when fifty notebooks do it at once, so the instructors did it once with `scripts/build_wattbot_corpus.py` and staged the result as `corpus.zip` in the shared bucket. We download that one file, unpack it, and delete the zip: the instance's disk is 20 GB at most and the PDFs alone are 400 MB.
+The corpus is the set of PDFs listed in `metadata.csv`, one per paper, named `<id>.pdf`. Downloading them from the publishers' sites is slow and unreliable when fifty notebooks do it at once, so the instructors did it once with `scripts/build_wattbot_corpus.py` and staged the result as `corpus.zip` in the shared bucket. We download that one file, unpack it, and delete the zip: the instance's disk is 20 GB at most, and the zip plus the unpacked PDFs are close to 700 MB.
 
 ```python
 PDF_DIR = os.path.join(local_data_dir, "pdfs")
@@ -295,7 +295,7 @@ os.makedirs(PDF_DIR, exist_ok=True)
 corpus_path = download_from_s3(corpus_key, "corpus.zip")
 with zipfile.ZipFile(corpus_path, "r") as zf:
     zf.extractall(PDF_DIR)
-os.remove(corpus_path)   # the zip is 400 MB and the PDFs are now unpacked; the notebook disk is small
+os.remove(corpus_path)   # the zip is 270 MB and the unpacked PDFs are 400 MB; the notebook disk is small
 
 pdf_files = sorted(f for f in os.listdir(PDF_DIR) if f.lower().endswith(".pdf"))
 print(f"{len(pdf_files)} PDFs in {PDF_DIR}; metadata lists {len(metadata_df)} papers")
