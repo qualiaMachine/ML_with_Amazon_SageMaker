@@ -784,11 +784,11 @@ Every `converse` response carried a `usage` block, and `call_bedrock_chat` kept 
 
 :::::::::::::::::::::::: solution
 
-Fill in the two prices from the Bedrock pricing page; the rest sums the usage blocks and prints the cost.
+The two prices are from the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) for DeepSeek on-demand in October 2026; update them for the model and region you used. The rest sums the usage blocks and prints the cost.
 
 ```python
-price_in_per_m = 0.0    # <-- EDIT ME: DeepSeek V3 on-demand, $ per million input tokens
-price_out_per_m = 0.0   # <-- EDIT ME: DeepSeek V3 on-demand, $ per million output tokens
+price_in_per_m = 0.62    # $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region
+price_out_per_m = 1.85   # $ per million output tokens, same source
 
 in_tokens = sum(u["inputTokens"] for u in bedrock_usage)
 out_tokens = sum(u["outputTokens"] for u in bedrock_usage)

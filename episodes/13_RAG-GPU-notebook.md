@@ -192,6 +192,8 @@ bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket (chunks li
 # Local working directory in the notebook instance
 local_data_dir = "./data"
 
+session_start = time.time()   # the meter on this GPU instance started when it booted; this marks where the episode's work began
+
 print("Local data dir:", local_data_dir)
 ```
 
@@ -645,6 +647,17 @@ This is just a first pass at a RAG pipeline: it works, but there’s a lot of he
   - Are less likely to hallucinate when reading dense scientific prose.
 
 As you iterate, the goal is to treat this notebook as a baseline RAG “workbench”: you can swap in better models, smarter retrieval strategies, and richer document preprocessing without changing the overall pipeline structure.
+
+### What did this episode cost?
+
+There is no job record to ask here; the bill is simply the instance's hours. This counts from the setup cell, so the boot, the install and every pause since are in it, and it keeps counting until you stop the instance.
+
+```python
+g6e_price = 2.61   # $/hour, ml.g6e.xlarge on-demand
+hours = (time.time() - session_start) / 3600
+print(f"this notebook has been running {hours * 60:.0f} min since the setup cell: ${hours * g6e_price:.2f} so far, and counting")
+print(f"the same pipeline as Processing jobs billed about $1.30 (that episode); on Bedrock, a few cents")
+```
 
 The Processing Jobs episode does the same work, with the same `wattbot_rag.py`, as short-lived SageMaker jobs, so the GPU only bills while it is embedding or generating. Stop this instance now, and delete it if you are done with the episode.
 

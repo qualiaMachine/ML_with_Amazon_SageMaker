@@ -372,7 +372,7 @@ For all these Estimators, adding a `requirements.txt` file as a `dependencies` a
 ```text
 from sagemaker.sklearn.estimator import SKLearn
 sklearn_estimator = SKLearn(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-xgboost",   # job name = who + which model; SageMaker appends a timestamp
     entry_point="train_script.py",
     role=role,
     instance_count=1,
@@ -440,7 +440,7 @@ output_path = f's3://{bucket_name}/{output_folder}/'   # S3 prefix (a "folder") 
 
 # Set up the SageMaker XGBoost Estimator with custom script
 xgboost_estimator = XGBoost(
-    base_job_name=notebook_instance_name,  # prefix of the job name; SageMaker appends a timestamp to make it unique
+    base_job_name=f"{notebook_instance_name}-xgboost",   # prefix of the job name: who + which model; SageMaker appends a timestamp to make it unique
     max_run=max_run, # in seconds; always include (max 48 hours)
     entry_point='train_xgboost.py',      # the script SageMaker runs inside the container on the training instance
     source_dir='ML_with_AWS_SageMaker/scripts',  # Directory where your script is located (uploaded to the job with it)
@@ -628,7 +628,7 @@ instance_count=1 # always start with 1
 
 # Use Estimator directly for built-in container without specifying entry_point
 xgboost_estimator_builtin = Estimator(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-xgboost",   # job name = who + which model; SageMaker appends a timestamp
     max_run=max_run, # in seconds; always include (max 48 hours)
     # image_uris.retrieve looks up AWS's prebuilt XGBoost container for this region; its built-in training code replaces entry_point
     image_uri=sagemaker.image_uris.retrieve("xgboost", region, version="1.7-1"),

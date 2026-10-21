@@ -499,7 +499,7 @@ instance_type = "ml.g5.xlarge"            # one A10G GPU, 24 GB; the GPU lives i
 g5_price = 1.41                           # $/hour, us-east-1 on-demand
 estimated_minutes = 35                    # the Step 0 estimate
 max_run_minutes = 70                      # about twice the estimate; SageMaker kills the job at this cap, whatever it is doing
-training_job_name = f"badger-{username}-mini-v1"   # must be unique in the account: a rerun fails instead of launching a second job
+training_job_name = f"badger-{username}-churro-lora-mini-v1"   # must be unique in the account: a rerun fails instead of launching a second job
 checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{training_job_name}/"   # the script saves the adapter here at the end of every epoch
 
 print(f"job name:     {training_job_name}")
@@ -782,7 +782,7 @@ Then compare that number to the estimate in Step 0. If you are within 50%, your 
 
 ### Exercise 1: The resolution knob
 
-Relaunch the same job with `"max_pixels": 2560 * 28 * 28` (~2 megapixels) and the job name `badger-{username}-mini-v2`. Before it starts, write down your prediction for its billable time. Then compare `train_minutes` and `seconds_per_page` in the two summaries, and the before/after CER. Did the extra pixels help?
+Relaunch the same job with `"max_pixels": 2560 * 28 * 28` (~2 megapixels) and the job name `badger-{username}-churro-lora-mini-v2`. Before it starts, write down your prediction for its billable time. Then compare `train_minutes` and `seconds_per_page` in the two summaries, and the before/after CER. Did the extra pixels help?
 
 :::::::::::::::::::::::: solution
 
@@ -839,7 +839,7 @@ Same estimator with the page slice removed, all 251 training pages, and a 90-min
 The same guard rails first: a new job name, its own checkpoint folder, and the cap written down with its worst case.
 
 ```python
-full_job_name = f"badger-{username}-full-v1"
+full_job_name = f"badger-{username}-churro-lora-full-v1"
 full_checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{full_job_name}/"
 print(f"max_run cap: 90 min -> worst case ${g5_price * 90 / 60:.2f}; checkpoints -> {full_checkpoint_s3_uri}")
 ```
@@ -976,7 +976,7 @@ def run_transcription_job(label: str, adapter_uri: str = None):
         # ProcessingOutput: whatever the script writes under source is copied to destination when the job ends
         outputs=[ProcessingOutput(output_name="predictions", source="/opt/ml/processing/output", destination=output_uri)],
         arguments=arguments,
-        job_name=f"badger-{username}-transcribe-{label}-v1",   # unique, like the training jobs
+        job_name=f"badger-{username}-churro-transcribe-{label}-v1",   # unique, like the training jobs
         wait=False, logs=False,           # launch and return, so the two jobs run at the same time
     )
     return output_uri
