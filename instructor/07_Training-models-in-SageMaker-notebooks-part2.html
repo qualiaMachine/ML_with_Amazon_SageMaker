@@ -620,6 +620,10 @@ fitted <code>StandardScaler</code>, and we save it with
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="op">!</span>pip install scikit<span class="op">-</span>learn   <span class="co"># the notebook kernels do not ship it; train_nn.py imports it</span></span></code></pre>
 </div>
+<p>Load the Titanic CSV, run it through the script’s
+<code>preprocess_data</code>, split off a validation set, and save the
+arrays and the scaler. The training script reads these files; the scaler
+is kept so test data can later be transformed the same way.</p>
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -728,6 +732,8 @@ startup, i.e. about <code>$0.01</code> on <code>ml.m5.large</code>.</p>
 <span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a><span class="co"># us-east-1 on-demand rates (2026-10-16); check the instances page for your region</span></span>
 <span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a>prices <span class="op">=</span> {<span class="st">"ml.m5.large"</span>: <span class="fl">0.115</span>, <span class="st">"ml.m5.xlarge"</span>: <span class="fl">0.23</span>, <span class="st">"ml.g4dn.xlarge"</span>: <span class="fl">0.74</span>}</span></code></pre>
 </div>
+<p>Set up the estimator for a longer run: the epochs, the instance,
+where the output goes, and a two-hour <code>max_run</code> cap.</p>
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

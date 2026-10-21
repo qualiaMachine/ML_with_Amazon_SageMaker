@@ -848,6 +848,10 @@ hyperparameter tuning on multiple instances)</p>
 </div>
 <div class="section level3">
 <h3 id="local-test">Local test<a class="anchor" aria-label="anchor" href="#local-test"></a></h3>
+<p>Run the training script here in the notebook first, on the small
+data, with the hyperparameters passed in as variables. A local run finds
+bugs for free, and the same script then runs unchanged as a SageMaker
+job.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -890,6 +894,9 @@ resources.</p>
 good sanity check to ensure our model is training properly. Here’s how
 you would apply the outputted model to your test set using your local
 notebook instance.</p>
+<p>Score the model you just trained locally on the test set, reusing the
+script’s own <code>preprocess_data</code> so the test rows are
+transformed exactly as the training rows were.</p>
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1393,6 +1400,8 @@ add them in place of or alongside accuracy.</p>
 <span id="cb15-12"><a href="#cb15-12" tabindex="-1" aria-label="code-block-15-12"></a><span class="cf">with</span> tarfile.<span class="bu">open</span>(local_model_path) <span class="im">as</span> tar:</span>
 <span id="cb15-13"><a href="#cb15-13" tabindex="-1" aria-label="code-block-15-13"></a>    tar.extractall()</span></code></pre>
 </div>
+<p>Now the same evaluation on the model the job trained: load it from
+the unpacked archive and score the test set the same way as before.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

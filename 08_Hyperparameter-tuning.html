@@ -1103,6 +1103,9 @@ procedure…</p>
 </div>
 <div class="section level4">
 <h4 id="retrieve-and-load-best-model">Retrieve and load best model<a class="anchor" aria-label="anchor" href="#retrieve-and-load-best-model"></a></h4>
+<p>Download the winning job’s <code>model.tar.gz</code> and unpack it;
+SageMaker packs whatever the script saved to <code>/opt/ml/model</code>
+into that archive.</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1138,6 +1141,8 @@ differently from what the model saw in training.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="op">!</span>pip install scikit<span class="op">-</span>learn   <span class="co"># train_nn.py imports it; not in the notebook kernels</span></span></code></pre>
 </div>
+<p>Fetch the test CSV and the training-set scaler, transform the test
+rows the same way the training rows were, and save the arrays.</p>
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1161,6 +1166,8 @@ differently from what the model saw in training.</p>
 </div>
 <div class="section level4">
 <h4 id="evaluate-the-model-on-test-data">Evaluate the model on test data<a class="anchor" aria-label="anchor" href="#evaluate-the-model-on-test-data"></a></h4>
+<p>Rebuild the network from the script’s class, load the saved weights,
+and measure accuracy on the test set.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

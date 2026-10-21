@@ -430,7 +430,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>(Optional) RAG with a Notebook GPU</h1>
-        <p>Last updated on 2026-10-20 |
+        <p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/13_RAG-GPU-notebook.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -742,7 +742,10 @@ Restart</strong>) before continuing.</p>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="import-data-from-bucket-into-notebook">Import data from bucket into notebook<a class="anchor" aria-label="anchor" href="#import-data-from-bucket-into-notebook"></a></h2>
-<hr class="half-width"><div class="codewrapper sourceCode" id="cb4">
+<hr class="half-width"><p>The same setup as the Bedrock episode: session, region, role, an S3
+client, the two bucket names and a local data folder, plus a small
+download helper.</p>
+<div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="im">import</span> os</span>
@@ -777,7 +780,7 @@ Restart</strong>) before continuing.</p>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># &lt;-- EDIT ME: read-only inputs, from your instructor</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket (chunks live here)</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a><span class="co"># Local working directory in the notebook instance</span></span>
@@ -798,6 +801,8 @@ adds is the two model callables, <code>embed_query</code> and
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span></code></pre>
 </div>
+<p>Import the pieces of the shared RAG module we reuse: the prompts, the
+retrieval and scoring functions, and the per-question runner.</p>
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -811,6 +816,7 @@ adds is the two model callables, <code>embed_query</code> and
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1" aria-label="code-block-8-8"></a>    run_single_qa,</span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1" aria-label="code-block-8-9"></a>)</span></code></pre>
 </div>
+<p>Download the two WattBot input files from the shared bucket.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -834,6 +840,8 @@ adds is the two model callables, <code>embed_query</code> and
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="im">import</span> torch</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer   <span class="co"># embedding-model wrapper: encode(list of strings) -&gt; matrix</span></span></code></pre>
 </div>
+<p>A CSV reader that tries a few encodings, because some metadata files
+are not valid UTF-8.</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -948,6 +956,8 @@ required.</p>
 <span id="cb13-13"><a href="#cb13-13" tabindex="-1" aria-label="code-block-13-13"></a>)</span>
 <span id="cb13-14"><a href="#cb13-14" tabindex="-1" aria-label="code-block-13-14"></a></span></code></pre>
 </div>
+<p>Embed every chunk in batches on the GPU and stack the results into
+one matrix, one row per chunk.</p>
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1149,6 +1159,8 @@ and billed, until you stop the instance.</p>
 <span id="cb19-15"><a href="#cb19-15" tabindex="-1" aria-label="code-block-19-15"></a></span>
 <span id="cb19-16"><a href="#cb19-16" tabindex="-1" aria-label="code-block-19-16"></a><span class="bu">print</span>(<span class="st">"Generator model and helper loaded."</span>)</span></code></pre>
 </div>
+<p>One throwaway question, to confirm the generator answers before
+spending time on the real ones.</p>
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1480,7 +1492,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/13_RAG-GPU-notebook.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/13_RAG-GPU-notebook.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-20",
+  "dateModified": "2026-10-21",
   "datePublished": "2026-10-21"
 }
 
