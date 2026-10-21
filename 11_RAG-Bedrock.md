@@ -928,7 +928,7 @@ With 53 questions, two calls each and ~1,500-token prompts, the run was 140K inp
 Everything above is two model IDs and two callables. The [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) has dozens of chat models and several embedding models, and "Choosing the two models" at the top of the episode said the leaderboards cannot tell you which one wins on your questions. Find out.
 
 1. **A different generator.** Pick another chat model from the catalog (for example `us.amazon.nova-2-lite-v1:0`, `us.meta.llama4-maverick-17b-instruct-v1:0`, or a Mistral or Claude model if your account has access), wrap it in a tagged profile as in Step 7, and rerun the Step 11 loop on the same 55-question sample with `call_bedrock_chat` pointed at it. Score it with `compute_wattbot_score` and price it from its `usage` blocks. Which evidence types moved, and what did a point of score cost?
-2. **A different embedder.** Retrieval is the other half. Either shrink Titan to 256 dimensions (`"dimensions": 256` in its request body) and see whether the hit rate and the score survive a four-times smaller index, or switch provider to Cohere Embed v4 (`cohere.embed-v4:0`, the only other embedding model in the Ohio catalog), whose request body is different from Titan's: a list of `texts` and an `input_type` that is `search_document` for the corpus and `search_query` for the question. Either way the matrix must be recomputed (ten minutes at the quota, so not in class), under a new file name so the Titan one is kept.
+2. **A different embedder.** Retrieval is the other half. The Ohio catalog has one other embedding model, Cohere Embed v4 (`cohere.embed-v4:0`), and its request body is different from Titan's: a list of `texts` and an `input_type` that is `search_document` for the corpus and `search_query` for the question. Embed the chunks with it under a new file name so the Titan matrix is kept (ten minutes at the quota, so not in class), rerun Step 11 with DeepSeek unchanged, and score.
 
 Keep the rest fixed. One change per experiment, or you will not know what moved the score.
 
@@ -966,36 +966,32 @@ for m in bedrock.list_foundation_models(byOutputModality="EMBEDDING")["modelSumm
     print(f"{m['modelId']:<45} {m['providerName']}")
 ```
 
-Titan at 256 dimensions is the same call with one more key; Cohere needs its own request and response shape. Both go through a tagged profile for the new model, and both need `embed_query` to use the same model as the matrix, with Cohere's `input_type` switched for the question side.
+Cohere's request takes a list of texts and says whether they are documents or a query; its response is a list of vectors, nested under the number type asked for. Everything else is Step 8 again: a tagged profile, one call per chunk, a cached matrix, and a query function that uses the same model.
 
 ```python
-alt_embedding_model_id = "cohere.embed-v4:0"   # the other provider in the Ohio catalog; or base_embedding_model_id for Titan at 256 dimensions
-alt_embed_arn = tagged_profile_arn(bedrock, alt_embedding_model_id, "wattbot-embed-alt", name, project)
+cohere_model_id = "cohere.embed-v4:0"
+cohere_arn = tagged_profile_arn(bedrock, cohere_model_id, "wattbot-embed-cohere", name, project)
 
-def alt_embed(text: str, for_query: bool = False) -> np.ndarray:
-    if "cohere" in alt_embedding_model_id:
-        body = {"texts": [text[:2000]], "input_type": "search_query" if for_query else "search_document", "embedding_types": ["float"]}
-    else:
-        body = {"inputText": text, "dimensions": 256, "normalize": True}   # Titan Text Embeddings V2 at a quarter of the size
-    out = json.loads(bedrock_runtime.invoke_model(modelId=alt_embed_arn, contentType="application/json",
-                                                  accept="application/json", body=json.dumps(body))["body"].read())
-    vec = out["embeddings"][0] if "embeddings" in out else out["embedding"]   # Cohere returns a list of vectors, Titan one vector
-    vec = vec["float"][0] if isinstance(vec, dict) else vec                   # newer Cohere versions nest by type
-    return np.asarray(vec, dtype="float32")
+def cohere_embed(text: str, input_type: str = "search_document") -> np.ndarray:
+    """One Cohere Embed v4 vector; input_type is search_document for the corpus, search_query for a question."""
+    body = {"texts": [text[:2000]], "input_type": input_type, "embedding_types": ["float"]}
+    response = bedrock_runtime.invoke_model(modelId=cohere_arn, contentType="application/json", accept="application/json", body=json.dumps(body))
+    return np.asarray(json.loads(response["body"].read())["embeddings"]["float"][0], dtype="float32")
 
-alt_emb_path = data_dir / "embeddings_alt.npy"   # a new file: the Titan matrix stays
-if alt_emb_path.exists():
-    alt_embeddings = np.load(alt_emb_path)
+cohere_emb_path = data_dir / "embeddings_cohere.npy"   # a new file: the Titan matrix stays
+if cohere_emb_path.exists():
+    cohere_embeddings = np.load(cohere_emb_path)
 else:
     t0 = time.time()
-    alt_embeddings = np.vstack([alt_embed(ch["text"]) for ch in chunked_docs])
-    np.save(alt_emb_path, alt_embeddings)
+    cohere_embeddings = np.vstack([cohere_embed(ch["text"]) for ch in chunked_docs])
+    np.save(cohere_emb_path, cohere_embeddings)
     print(f"Embedded {len(chunked_docs)} chunks in {(time.time() - t0) / 60:.1f} min")
 
-alt_embed_query = lambda q: alt_embed(q, for_query=True)
+def embed_query_cohere(question: str) -> np.ndarray:
+    return cohere_embed(question, input_type="search_query")
 ```
 
-Then the Step 11 loop with `embed_query=alt_embed_query` and `chunk_embeddings=alt_embeddings`, DeepSeek unchanged, and the scorer. The hit-rate cell from Step 13 is the sharper instrument here: compute it for the new matrix before scoring, because an embedder that finds the paper less often cannot be rescued by any generator.
+Then the Step 11 loop with `embed_query=embed_query_cohere` and `chunk_embeddings=cohere_embeddings`, DeepSeek unchanged, and the scorer. The hit-rate cell from Step 13 is the sharper instrument here: compute it for the new matrix before scoring, because an embedder that finds the paper less often cannot be rescued by any generator. A cheaper variant of the same experiment keeps Titan and adds `"dimensions": 256` to its request body in Step 8, which asks whether a four-times smaller index retrieves as well.
 
 :::::::::::::::::::::::::::::::::
 
