@@ -332,7 +332,7 @@ def build_docid_to_url(metadata_df: pd.DataFrame) -> Dict[str, str]:
 
 
 def embed_query_with(embedder) -> Callable[[str], np.ndarray]:
-    """Wrap a sentence-transformers model as an `embed_query(question)` callable."""
+    """Wrap an embedder with a sentence-transformers-style `encode` as an `embed_query(question)` callable."""
 
     def embed_query(question: str) -> np.ndarray:
         """One question -> one unit-length vector, with the same model that embedded the chunks."""

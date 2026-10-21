@@ -1,7 +1,7 @@
 """WattBot RAG as a SageMaker Processing job.
 
 Runs the full retrieval + generation loop over train_QA.csv with self-hosted
-models: a sentence-transformer for query embeddings and an open-weight
+models: a Hugging Face embedding model for query embeddings and an open-weight
 generator (Qwen3.8-27B in FP8) served by vLLM. All the pipeline logic lives in
 `wattbot_rag.py`, which must sit next to this file in the job's source_dir;
 this script only loads the inputs, builds the two model callables, and writes
@@ -22,7 +22,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
+from hf_embedder import HFEmbedder   # plain-transformers embedder, shipped next to this script
 
 import wattbot_rag as wr
 
@@ -122,7 +122,7 @@ def main():
     docid_to_url = wr.build_docid_to_url(metadata_df)
 
     # The two model callables the shared pipeline needs
-    embedder = SentenceTransformer(args.embedding_model_id)
+    embedder = HFEmbedder(args.embedding_model_id)   # the same model and pooling the embedding job used
     embed_query = wr.embed_query_with(embedder)
 
     qwen_generator = load_qwen_pipeline(args.qwen_model_id)
