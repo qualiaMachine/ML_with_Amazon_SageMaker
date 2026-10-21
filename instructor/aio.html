@@ -4584,6 +4584,16 @@ training process.</p>
 </div>
 </div>
 </div>
+<p>Open <code>ML_with_AWS_SageMaker/scripts/train_nn.py</code> in the
+file browser and read it before going on; it is short. Three things to
+find: <code>TitanicNet</code>, a three-layer network with 7 inputs and
+one output; the training loop in <code>train()</code>, which prints
+<code>validation:accuracy = ...</code> once per hundred epochs (the
+hyperparameter-tuning episode’s metric regex reads that line); and the
+last lines, which save the model to <code>/opt/ml/model</code> inside a
+job and next to the script otherwise, the same trick as
+<code>train_xgboost.py</code>. Questions now are cheaper than questions
+once it is running on a billed instance.</p>
 <p>We reuse the <code>preprocess_data()</code> function from the
 lesson’s <code>scripts/train_nn.py</code> rather than re-typing the
 preprocessing here: the same function will later be applied to the test
@@ -6001,7 +6011,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6047,7 +6057,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -8046,6 +8056,15 @@ and note the two S3 locations the jobs will read.</p>
 <span id="cb41-6"><a href="#cb41-6" tabindex="-1" aria-label="code-block-41-6"></a>images_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/images/"</span></span>
 <span id="cb41-7"><a href="#cb41-7" tabindex="-1" aria-label="code-block-41-7"></a>infer_data_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>infer_prefix<span class="sc">}</span><span class="ss">/"</span></span></code></pre>
 </div>
+<p>The script this job runs is
+<code>code/churro_transcribe_batch.py</code>, the third file copied in
+Setup. Open it: the docstring at the top lists its inputs and outputs,
+<code>main</code> loads the model, merges the adapter into the base
+weights if one is given
+(<code>PeftModel.from_pretrained(...).merge_and_unload()</code>),
+transcribes the pages in batches, writes <code>predictions.csv</code>,
+and scores only the rows that have a reference text. The same script
+with and without <code>--adapter_tar</code> is the whole comparison.</p>
 <p>Then one function that launches a transcription job, in four
 parts:</p>
 <ul>
@@ -8235,7 +8254,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-10_RAG-overview"><p>Content from <a href="10_RAG-overview.html">Overview of RAG Workflows on AWS</a></p>
 <hr>
-<p>Last updated on 2026-10-20 |
+<p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/10_RAG-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 15 minutes</p>
@@ -8768,12 +8787,6 @@ model (Titan, Claude, Llama, …) is fine</td>
 <td>You need a specific open‑weight model and the work is batch
 (embedding a corpus, bulk generation)</td>
 <td><strong>Processing Jobs</strong></td>
-</tr>
-<tr>
-<td>Your corpus is enormous and per‑token pricing would exceed a few
-GPU‑hours</td>
-<td>
-<strong>Processing Jobs</strong> (check the math first)</td>
 </tr>
 <tr>
 <td>You are learning how RAG works, or debugging a model step by
@@ -9680,7 +9693,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -9994,7 +10007,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Fill in the two prices from the Bedrock pricing page; the rest sums
 the usage blocks and prints the cost.</p>
@@ -10571,6 +10584,13 @@ job from the batch RAG job on the bill.</p>
 <div class="section level3">
 <h3 id="launch-the-embedding-job">Launch the embedding job<a class="anchor" aria-label="anchor" href="#launch-the-embedding-job"></a>
 </h3>
+<p>Open <code>scripts/embedding_inference.py</code> first; it is under
+fifty lines. It reads a JSONL file of chunks from the job’s input
+directory, embeds them with whatever sentence-transformer
+<code>--model_id</code> names, normalises the vectors so a dot product
+is a cosine similarity, and saves one <code>embeddings.npy</code> to the
+output directory. Nothing in it knows about WattBot, which is the point
+of a Processing job script: inputs in, outputs out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
 of the estimator: the same role, tags, instance type and container
 versions, plus a runtime cap. Its <code>run</code> call names the
@@ -10672,9 +10692,10 @@ bucket, written by Job 1)</li>
 <code>metadata.csv</code> – to resolve <code>ref_id</code> → URL
 (shared bucket)</li>
 </ul>
-<p>The script <code>wattbot_rag_batch.py</code> is short, because the
-pipeline lives in <code>scripts/wattbot_rag.py</code>, the same module
-the Bedrock episode imported:</p>
+<p>Open <code>scripts/wattbot_rag_batch.py</code> and read
+<code>main</code> before launching it. It is short, because the pipeline
+lives in <code>scripts/wattbot_rag.py</code>, the same module the
+Bedrock episode imported:</p>
 <ul>
 <li>
 <code>retrieve_top_k</code>: cosine similarity over the embedding
@@ -12402,7 +12423,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>

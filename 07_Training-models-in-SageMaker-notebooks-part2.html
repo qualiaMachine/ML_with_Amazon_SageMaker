@@ -607,6 +607,16 @@ training process.</p>
 </div>
 </div>
 </div>
+<p>Open <code>ML_with_AWS_SageMaker/scripts/train_nn.py</code> in the
+file browser and read it before going on; it is short. Three things to
+find: <code>TitanicNet</code>, a three-layer network with 7 inputs and
+one output; the training loop in <code>train()</code>, which prints
+<code>validation:accuracy = ...</code> once per hundred epochs (the
+hyperparameter-tuning episode’s metric regex reads that line); and the
+last lines, which save the model to <code>/opt/ml/model</code> inside a
+job and next to the script otherwise, the same trick as
+<code>train_xgboost.py</code>. Questions now are cheaper than questions
+once it is running on a billed instance.</p>
 <p>We reuse the <code>preprocess_data()</code> function from the
 lesson’s <code>scripts/train_nn.py</code> rather than re-typing the
 preprocessing here: the same function will later be applied to the test

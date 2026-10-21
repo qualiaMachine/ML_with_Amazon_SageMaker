@@ -798,6 +798,13 @@ job from the batch RAG job on the bill.</p>
 </div>
 <div class="section level3">
 <h3 id="launch-the-embedding-job">Launch the embedding job<a class="anchor" aria-label="anchor" href="#launch-the-embedding-job"></a></h3>
+<p>Open <code>scripts/embedding_inference.py</code> first; it is under
+fifty lines. It reads a JSONL file of chunks from the job’s input
+directory, embeds them with whatever sentence-transformer
+<code>--model_id</code> names, normalises the vectors so a dot product
+is a cosine similarity, and saves one <code>embeddings.npy</code> to the
+output directory. Nothing in it knows about WattBot, which is the point
+of a Processing job script: inputs in, outputs out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
 of the estimator: the same role, tags, instance type and container
 versions, plus a runtime cap. Its <code>run</code> call names the
@@ -893,9 +900,10 @@ bucket, written by Job 1)</li>
 <li>
 <code>metadata.csv</code> – to resolve <code>ref_id</code> → URL
 (shared bucket)</li>
-</ul><p>The script <code>wattbot_rag_batch.py</code> is short, because the
-pipeline lives in <code>scripts/wattbot_rag.py</code>, the same module
-the Bedrock episode imported:</p>
+</ul><p>Open <code>scripts/wattbot_rag_batch.py</code> and read
+<code>main</code> before launching it. It is short, because the pipeline
+lives in <code>scripts/wattbot_rag.py</code>, the same module the
+Bedrock episode imported:</p>
 <ul><li>
 <code>retrieve_top_k</code>: cosine similarity over the embedding
 matrix</li>
