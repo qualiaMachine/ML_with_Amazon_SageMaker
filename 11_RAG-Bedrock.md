@@ -498,7 +498,7 @@ print("Upload complete.")
 
 ## Step 7 – Cost tracking: Bedrock calls carry no tags unless you route them through a profile
 
-In the SageMaker episodes that follow, we tag every job at launch because tags never propagate from the notebook. Bedrock is stricter still: **an on-demand `invoke_model` or `converse` call has no tags parameter at all.** If you call `deepseek.v3-v1:0` or `amazon.titan-embed-text-v2:0` by its model ID, the usage lands in the account's Bedrock bill as anonymous per-token charges. The notebook's tags, the bucket's tags, and the tags you set on anything else are irrelevant to it. On a shared account that means nobody can tell which team spent what.
+Every SageMaker job in this lesson is tagged at launch, because tags never propagate from the notebook. Bedrock is stricter still: **an on-demand `invoke_model` or `converse` call has no tags parameter at all.** If you call `deepseek.v3-v1:0` or `amazon.titan-embed-text-v2:0` by its model ID, the usage lands in the account's Bedrock bill as anonymous per-token charges. The notebook's tags, the bucket's tags, and the tags you set on anything else are irrelevant to it. On a shared account that means nobody can tell which team spent what.
 
 The mechanism Bedrock provides for this is an **application inference profile**: a small, free resource that points at a base model and carries cost allocation tags. You create the profile once, then pass the **profile ARN** instead of the model ID as `modelId` in every call. Usage billed through the profile carries the profile's tags into Cost Explorer. Two details to get right:
 
@@ -587,7 +587,7 @@ embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_mode
 ### Checking the profiles
 
 - You can confirm the routing in the Bedrock console under **Inference and Assessment → Cross-region inference → Application inference profiles**, or with `bedrock.list_inference_profiles(typeEquals="APPLICATION")`.
-- Tags only become filters in Cost Explorer once the tag keys have been **activated as cost allocation tags** in the Billing console (an account‑admin, once‑per‑key action; on a shared workshop account the organizers do this). Until then the tags exist on the resource but do not show up on reports.
+- The keys must be the three approved ones, `Name`, `Project` and `Purpose`, spelled exactly; any other key is ignored by the bill (the S3 episode says why).
 - The profile itself has no hourly or storage charge. You only pay per token, exactly as before.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::
