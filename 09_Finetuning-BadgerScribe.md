@@ -57,7 +57,7 @@ Training every weight means storing four numbers per weight instead of one. Ther
 
 ### Scale, and how easy it is to get wrong
 
-What makes fine-tuning an LLM different is scale. The training episodes ran for minutes on a `$0.12`-an-hour CPU; a fine-tune runs for hours on a GPU, and every knob multiplies the bill: model size, epochs, image resolution, instance type, and whether anyone is watching when the job should have ended. Any one of them off by 10x is a 10x bill, and the first run is never the last. **Fine-tuning is one of the most common surprise costs we see hurt people**, and it is the reason this episode spends as long on estimating and capping a run as on running it. We measure the gain ourselves: the episode ends by scoring the base model and the fine-tuned model on the same held-out pages.
+What makes fine-tuning an LLM different is scale. The training episodes ran for minutes on a `$0.12`-an-hour CPU; a fine-tune runs for hours on a GPU, and every setting multiplies the bill: model size, epochs, image resolution, instance type, and whether anyone is watching when the job should have ended. Any one of them off by 10x is a 10x bill, and the first run is never the last. **Fine-tuning is one of the most common surprise costs we see hurt people**, and it is the reason this episode spends as long on estimating and capping a run as on running it. We measure the gain ourselves: the episode ends by scoring the base model and the fine-tuned model on the same held-out pages.
 
 ### The task: Badger Scribe
 
@@ -93,7 +93,7 @@ The cost of a run is GPU-hours × the hourly rate, and GPU-hours scale with **mo
 | 70B full fine-tune, two days | 32 × H100 | 4 × `ml.p5.48xlarge` (`$63.30`) | 48 | 1,536 | **~`$12,000`** |
 | Any row above × a 10-run hyperparameter sweep | | | | | **× 10** |
 
-Tokens seen is examples × tokens per example × passes over the data, and it is what the time rule below multiplies by model size. The number of passes is a knob you tune, and the class run's two passes are a budget choice for a 40-minute job, not a recommendation: large instruction-tuning corpora are usually passed over one to three times, but a few hundred examples usually take three to five. Each extra pass adds one more unit of the same row, so a ten-pass run over the whole train set is about `$10`, and the sweep row still applies on top. Step 2 shows how the per-epoch curve decides it.
+Tokens seen is examples × tokens per example × passes over the data, and it is what the time rule below multiplies by model size. The number of passes is a choice, and the class run's two passes are a budget choice for a 40-minute job, not a recommendation: large instruction-tuning corpora are usually passed over one to three times, but a few hundred examples usually take three to five. Each extra pass adds one more unit of the same row, so a ten-pass run over the whole train set is about `$10`, and the sweep row still applies on top. Step 2 shows how the per-epoch curve decides it.
 
 The class and homework rows are scaled from a measured run (120 pages, 3 passes, 30.6 billed minutes, `$0.72`) at the same seconds per page. The teams row is the competition's full training set; the shared bucket holds only the German letters, so a team trains on everything from the competition's own data download.
 
@@ -236,7 +236,7 @@ A training job bills from the moment its instance is ready until the job ends, i
 
 The per-page times are measured, from a run on 2026-10-20 (120 pages, 3 passes: 34.5 minutes from launch to finish, 30.6 billed, `$0.72`); the rows are that run's rates applied to 251 pages and 2 passes. Scoring a page takes about 17 to 20 seconds, not the 10 a first guess might assume, so the two 15-page evaluations and the curve points are a third of the bill.
 
-Training time scales linearly with pages × epochs, and roughly linearly with image resolution (every 28 × 28 pixel block of the page becomes one token in the model's sequence). Doubling `max_pixels` doubles the time; doubling epochs doubles it again. Those two knobs, left at careless values, are why the estimate must be written down before the first run and compared to the real `BillableTimeInSeconds` after it.
+Training time scales linearly with pages × epochs, and roughly linearly with image resolution (every 28 × 28 pixel block of the page becomes one token in the model's sequence). Doubling `max_pixels` doubles the time; doubling epochs doubles it again. Those two settings, left at careless values, are why the estimate must be written down before the first run and compared to the real `BillableTimeInSeconds` after it.
 
 We set `max_run` to about twice the estimate. If a run goes past that, SageMaker kills it and we lose at most a dollar, not a weekend.
 
@@ -447,7 +447,7 @@ helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_ex
                                method="lora", instance_type="ml.g5.xlarge")
 ```
 
-Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is the knob Exercise 1 turns.
+Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is what Exercise 1 changes.
 
 ### The scripts
 
@@ -551,7 +551,7 @@ hyperparameters = {
     "lora_r": 16,                     # adapter rank: how many trainable parameters LoRA adds per layer
     "batch_size": 1,
     "grad_accum": 4,                  # effective batch of 4 pages -> ~125 optimizer steps over 2 passes
-    "max_pixels": 1280 * 28 * 28,     # ~1 megapixel per page; the cost knob: tokens per page scale with it
+    "max_pixels": 1280 * 28 * 28,     # ~1 megapixel per page; tokens per page, and so cost, scale with it
     "eval_pages": 15,                 # holdout pages scored before (eval_before=1) and after training
     "eval_before": 1,
     "curve_pages": 8,                 # of those 15, scored again at the end of every epoch: the CER curve
@@ -724,7 +724,7 @@ print(curve.to_string(index=False))
 
 Read the right-hand plot, not the left. Training loss almost always keeps falling; it is measured on pages the model is being fitted to. The holdout CER is the number the competition scores, and it has three shapes:
 
-- **Still falling at the last epoch**: another pass would probably have helped, and the time rule says what it costs (one more unit of the training row). That is the usual result on a few hundred pages, and the reason the table's "passes" column is a knob and not a rule.
+- **Still falling at the last epoch**: another pass would probably have helped, and the time rule says what it costs (one more unit of the training row). That is the usual result on a few hundred pages, and the reason the table's "passes" column is a choice and not a rule.
 - **Flat**: you have what this data can give; more passes buy nothing. Stop here next time and save the money.
 - **Rising while the loss still falls**: the model is memorising the training pages. Fewer passes, or more data.
 
@@ -819,13 +819,13 @@ Then compare that number to the estimate in Step 0. If you are within 50%, your 
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-### Exercise 1: The resolution knob
+### Exercise 1: Image resolution
 
 Relaunch the same job with `"max_pixels": 2560 * 28 * 28` (~2 megapixels) and the job name `badger-{username}-churro-mini-2mp`. Before it starts, write down your prediction for its billable time. Then compare `train_minutes` and `seconds_per_page` in the two summaries, and the before/after CER. Did the extra pixels help?
 
 :::::::::::::::::::::::: solution
 
-Time per page roughly doubles: the sequence is twice as long and attention cost grows faster than linearly. On these scans the strokes are legible well below 1 megapixel, so the extra pixels mostly buy tokens that carry no information, and CER usually moves very little. Resolution is the first knob to turn *down* when a fine-tune is over budget, and the first to turn *up* if the model is misreading small characters such as the `½` fractions.
+Time per page roughly doubles: the sequence is twice as long and attention cost grows faster than linearly. On these scans the strokes are legible well below 1 megapixel, so the extra pixels mostly buy tokens that carry no information, and CER usually moves very little. Resolution is the first thing to lower when a fine-tune is over budget, and the first to raise if the model is misreading small characters such as the `½` fractions.
 
 :::::::::::::::::::::::::::::::::
 
@@ -883,7 +883,7 @@ full_checkpoint_s3_uri = f"s3://{bucket_name}/{data_prefix}/checkpoints/{full_jo
 print(f"max_run cap: 160 min -> worst case ${g5_price * 160 / 60:.2f}; checkpoints -> {full_checkpoint_s3_uri}")
 ```
 
-The knobs change in two places: four passes, and 40 evaluation pages, enough to match the instructor's run. `grad_accum` 8 doubles the effective batch, which suits a longer run.
+Two settings change: four passes, and 40 evaluation pages, enough to match the instructor's run. `grad_accum` 8 doubles the effective batch, which suits a longer run.
 
 ```python
 full_hyperparameters = {
