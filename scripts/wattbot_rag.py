@@ -386,9 +386,9 @@ def tagged_profile_arn(bedrock, base_model_id: str, label: str, name: str, proje
         if e.response["Error"]["Code"] == "AccessDeniedException":
             role = boto3.client("sts").get_caller_identity()["Arn"]
             raise PermissionError(
-                f"This notebook's role has no Bedrock permissions ({role}). On the class account the notebook instance "
-                "must use the ml-sagemaker-bedrock-use role: stop it, Edit, change the IAM role, start it again. On your own "
-                "account, attach the Bedrock policy from the Account preparation instructor page. Then rerun this cell."
+                f"This notebook's role has no Bedrock permissions ({role}). Attach the Bedrock policy from the Account "
+                "preparation instructor page to that role (on the class account, tell your instructor), then rerun this cell; "
+                "a policy change reaches a running instance within a minute."
             ) from e
         raise
     print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
