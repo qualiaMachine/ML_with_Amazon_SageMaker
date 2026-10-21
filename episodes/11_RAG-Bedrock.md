@@ -1032,11 +1032,11 @@ print(call_vision_chat("You are a concise assistant.", "What is in the attached 
                        images=[(f"{caption_pages[0]['doc_id']}, page {caption_pages[0]['page_label']}", Path(caption_pages[0]["png_path"]).read_bytes())]))
 ```
 
-Two runs over the Table and Figure questions, both through the vision model: one with the text chunks only, one with the top three retrieved page images attached as well. The first is the control. Without it, a better score with images could just be a different generation model, and the comparison would say nothing about the images.
+Two runs over the Table and Figure questions, both through the vision model: one with the text chunks only, one with the top three retrieved page images attached as well. Each run is the same loop as Step 11, so every question costs an answer call and an explanation call. The first run is the control. Without it, a better score with images could just be a different generation model, and the comparison would say nothing about the images.
 
 ```python
 tf_df = train_df[(train_df["Table"] == 1) | (train_df["Figure"] == 1)]
-print(f"{len(tf_df)} table and figure questions, two runs, two calls each")
+print(f"{len(tf_df)} table and figure questions; each run makes an answer call and an explanation call per question, so about {4 * len(tf_df)} calls for both runs")
 
 def run_tf(with_images: bool) -> pd.DataFrame:
     rows = []
