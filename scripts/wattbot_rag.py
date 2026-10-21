@@ -524,6 +524,31 @@ def run_single_qa(
 # ---------------------------------------------------------------------------
 
 
+EVIDENCE_FLAGS = ["Quote", "Table", "Figure", "Math", "is_NA"]
+
+
+def evidence_flags(gt: pd.DataFrame):
+    """Return (gt with 0/1 evidence-type columns, whether they were derived).
+
+    The competition's solution file carries Quote/Table/Figure/Math/is_NA flags saying
+    what kind of evidence each answer rests on, and Score.py breaks the error rate down
+    by them. The public train_QA.csv has no such columns; its free-text `explanation`
+    column says the same thing informally ("Quote", "Table 3", "Figure, Quote", or a
+    worked calculation). When the flags are missing, derive them from that column so
+    the breakdown still prints. A question can carry several flags.
+    """
+    if all(c in gt.columns for c in EVIDENCE_FLAGS):
+        return gt, False
+    gt = gt.copy()
+    e = gt.get("explanation", pd.Series([""] * len(gt))).fillna("").astype(str)
+    gt["Quote"] = e.str.contains(r"\bquote", case=False, regex=True).astype(int)
+    gt["Table"] = e.str.contains(r"\btable", case=False, regex=True).astype(int)
+    gt["Figure"] = e.str.contains(r"\bfig", case=False, regex=True).astype(int)
+    gt["Math"] = e.str.contains(r"[=÷×→≈]|\d\s*/\s*\d|\bcalc|\bmath", case=False, regex=True).astype(int)   # a worked calculation
+    gt["is_NA"] = gt["answer_value"].astype(str).str.strip().str.lower().eq(BLANK).astype(int)
+    return gt, True
+
+
 def compute_wattbot_score(
     train_qa_path: str = "train_QA.csv",
     preds_path: str = "wattbot_solutions.csv",
@@ -541,7 +566,7 @@ def compute_wattbot_score(
     """
     import Score   # the competition's metric, copied beside this module; imported here so the batch job does not need it
 
-    gt = pd.read_csv(train_qa_path)
+    gt, flags_derived = evidence_flags(pd.read_csv(train_qa_path))
     preds = pd.read_csv(preds_path)
     overall = Score.score(gt.copy(), preds.copy(), "id", verbose=False)   # the leaderboard number
     summary = Score.LAST_BREAKDOWN
@@ -569,7 +594,8 @@ def compute_wattbot_score(
     print(f"WattBot score (Score.py, what the leaderboard reports): {overall:.4f}")
     per_type = {k: v for k, v in summary.get("per_type", {}).items() if k != "ALL"}
     if per_type:
-        print("\nWrong answer_value by evidence type (a question can carry several flags):")
+        source = "flags derived from the explanation column" if flags_derived else "the competition's own flags"
+        print(f"\nWrong answer_value by evidence type ({source}; a question can carry several):")
         for label, d in per_type.items():
             print(f"  {label:<11} {d['wrong']:>3}/{d['n']:<3} {d['pct_wrong']:5.1f}% wrong")
 
