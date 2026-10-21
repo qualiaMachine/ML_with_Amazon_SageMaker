@@ -579,7 +579,7 @@ Billing stops within a minute or two. If you launched with the wrong instance, t
 
 ### While it runs
 
-Open a second browser tab on the SageMaker console: **SageMaker AI → Training → Training jobs**. Find your job and watch its status move through `Starting`, `Downloading`, `Training`, `Uploading`, `Completed`. The job page shows the instance type, the `max_run` you set, the tags, and a link to the CloudWatch log, which is where every `print()` from the script goes. The log is the same text the notebook cell is streaming, but it stays available after the kernel is gone, which is what you will use when a job you launched yesterday fails overnight.
+Open a second browser tab on the SageMaker console: **SageMaker AI → Training → Training jobs**. Find your job and watch its status move through `Starting`, `Downloading`, `Training`, `Uploading`, `Completed`. The job page shows the instance type, the `max_run` you set, the tags, and a link to the job's log in CloudWatch (the AWS logging service, where every `print()` from the script goes). The log is the same text the notebook cell is streaming, but it stays available after the kernel is gone, which is what you will use when a job you launched yesterday fails overnight.
 
 Things to find in the log while you wait:
 
