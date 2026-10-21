@@ -166,8 +166,6 @@ bucket_name = "sinkorswim-doejohn"     # <-- EDIT ME: your own bucket from the S
 metadata_key = "wattbot/metadata.csv"      # one row per paper: id, title, url
 train_key = "wattbot/train_QA.csv"         # the questions, with reference answers for scoring
 corpus_key = "wattbot/corpus.zip"          # the PDFs, one per paper
-shared_embeddings_key = "wattbot/embeddings_bedrock.npy"   # the instructor's embedding matrix, used when use_instructor_embeddings is True
-use_instructor_embeddings = True   # True in class: download the instructor's matrix instead of embedding 9,000 chunks yourself (ten minutes at the quota). False to do it yourself
 
 # derived, written to YOUR bucket
 chunks_key = "wattbot/chunks.jsonl"                                # the corpus cut into passages (end of the chunking step)
@@ -632,15 +630,20 @@ def embed_query(question: str) -> np.ndarray:
     return np.asarray(bedrock_embed_text(question), dtype="float32")
 ```
 
-Embedding the corpus, about 9,000 chunks, is ten minutes and a few cents, so do not do it twice. The cell after next looks for the finished matrix locally, then in the shared bucket if `use_instructor_embeddings` is set, then in your bucket, and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped.
+Embedding the corpus, about 9,000 chunks, is ten minutes and a few cents, so do not do it twice. The cell after next looks for the finished matrix locally, then in the shared bucket if `use_instructor_embeddings` is `True`, then in your bucket, and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
 ### In a class, use the instructor's copy
 
-Bedrock allows this account 300,000 Titan embedding tokens per minute, and the quota is not adjustable. This corpus is about 3 million tokens, so one notebook alone needs ten minutes at the full quota; a room of them shares it, so everyone's loop slows to a crawl of retries. That is what `use_instructor_embeddings = True` in Step 1 is for: the cell below then downloads the matrix your instructor computed with the same chunks and the same model from the shared bucket and skips the calls. Working on your own, set it to `False` and let the loop run; that is the step to practise.
+Bedrock allows this account 300,000 Titan embedding tokens per minute, and the quota is not adjustable. This corpus is about 3 million tokens, so one notebook alone needs ten minutes at the full quota; a room of them shares it, so everyone's loop slows to a crawl of retries. In class, leave `use_instructor_embeddings` in the next cell at `True`: the cache cell then downloads the matrix your instructor computed with the same chunks and the same model from the shared bucket and skips the calls. Working on your own, set it to `False` and let the loop run; that is the step to practise.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
+
+```python
+use_instructor_embeddings = True                            # True in class: download the instructor's matrix. False: embed the 9,000 chunks yourself, ten minutes at the quota
+shared_embeddings_key = "wattbot/embeddings_bedrock.npy"   # where the instructor staged it in the shared bucket
+```
 
 One small helper asks S3 whether an object exists, and one checks that a cached matrix belongs to these chunks: a matrix from an earlier corpus has a different number of rows, and using it would pair every question with the wrong passages.
 
