@@ -358,7 +358,7 @@ except ClientError:
 page_docs[0] if page_docs else None
 ```
 
-## Step 6 – Simple, explicit text chunking
+## Step 6 – Text chunking
 
 RAG systems typically break documents into **chunks** so that:
 
