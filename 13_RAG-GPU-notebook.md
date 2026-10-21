@@ -421,7 +421,7 @@ similarity" approach is usually enough. You might consider FAISS or a full vecto
   teaching demo (and the Wattbot project in general), but very relevant for production-scale systems.
 
 In this episode we deliberately stick with a simple in-memory index so the retrieval step is easy to inspect and
-debug. In later episodes (or your own projects), you can **swap out the retrieval layer** for FAISS or a vector DB
+debug. In your own projects you can **swap out the retrieval layer** for FAISS or a vector DB
 without changing the overall RAG architecture: the model still sees “top–k retrieved chunks” as context.
 
 
