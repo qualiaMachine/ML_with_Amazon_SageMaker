@@ -1122,25 +1122,46 @@ def embed_query_mm(question: str) -> np.ndarray:
     return embed_multimodal(bedrock_runtime_mm, multimodal_model_id, text=question, purpose="query")
 ```
 
-### Does the image index find the right paper more often?
+### Does the image index find the right table or figure?
 
-Retrieval is the same `retrieve_top_k` as Step 9, over the crop matrix instead of the chunk matrix. `train_QA.csv` names the paper each answer comes from, so the cleanest measure is the **hit rate**: the fraction of questions for which a ground-truth paper is among the top-k results. Higher is better, and 1.00 means every question had the right paper in front of the model. We compute it for the text index and the image index on the Table questions, the Figure questions and, as a control, the Quote questions, where the image index should have no advantage.
+Retrieval is the same `retrieve_top_k` as Step 9, over the crop matrix instead of the chunk matrix. Two measures, both **hit rates**, higher is better, 1.00 meaning every question had it. The first is coarse: is a ground-truth *paper* among the top results? `train_QA.csv` names the paper for every question. The second is the one that matters for this step: is the *table or figure the answer sits in* among the crops the model would be shown? Most table and figure questions name it in `supporting_materials` ("Table 3", "Fig. 5, upper panel"), and `cited_captions` pulls that identifier out; `crop_matches` checks a crop's caption against it. For the text index, the crops it "shows" are those on the pages its top chunks came from, which is what the third vision run below attaches. Quote-only questions are the control for the paper measure, where the image index should have no advantage.
 
 ```python
+from wattbot_rag import cited_captions, crop_matches
+
 k = 8
 groups = {"Table": train_df[train_df["Table"] == 1], "Figure": train_df[train_df["Figure"] == 1],
           "Quote only": train_df[(train_df["Quote"] == 1) & (train_df["Table"] == 0) & (train_df["Figure"] == 0)].head(40)}
+crops_by_page: Dict[tuple, list] = {}
+for c in crops:
+    crops_by_page.setdefault((c["doc_id"], c["page_num"]), []).append(c)
 
-print("Hit rate at k=8 (higher is better): share of questions whose ground-truth paper is in the top 8 results\n")
-print(f"{'questions':<12}{'n':>4}{'text index':>14}{'image index':>14}")
+def crops_behind(chunks):   # the crops on the pages the retrieved chunks came from
+    return [c for ch in chunks for c in crops_by_page.get((ch["doc_id"], ch["page_num"]), [])]
+
+print("Hit rate (higher is better). Paper: a ground-truth paper is in the top 8 results. Table/figure: the one the answer")
+print("sits in is among the crops shown (the image index's top 3; for the text index, the crops on its top chunks' pages)\n")
+print(f"{'questions':<12}{'n':>4}{'paper, text':>14}{'paper, image':>14}{'crop, text':>14}{'crop, image':>14}")
 for label, qs in groups.items():
     gt = [split_ref_ids(r) for r in qs["ref_id"]]
-    text_hits = [[c["doc_id"] for c in retrieve_top_k(embed_query(q), chunk_embeddings, chunked_docs, k=k)] for q in qs["question"]]
-    image_hits = [[c["doc_id"] for c in retrieve_top_k(embed_query_mm(q), crop_embeddings, crops, k=k)] for q in qs["question"]]
-    print(f"{label:<12}{len(qs):>4}{hit_at_k(text_hits, gt):>14.2f}{hit_at_k(image_hits, gt):>14.2f}")
+    text_chunks = [retrieve_top_k(embed_query(q), chunk_embeddings, chunked_docs, k=k) for q in qs["question"]]
+    image_crops = [retrieve_top_k(embed_query_mm(q), crop_embeddings, crops, k=3) for q in qs["question"]]
+    paper_text = hit_at_k([[c["doc_id"] for c in r] for r in text_chunks], gt)
+    paper_image = hit_at_k([[c["doc_id"] for c in r] for r in image_crops], gt)
+    # the crop measure, over the questions that name their table or figure
+    targets = [(refs, cited_captions(sm)) for refs, sm in zip(gt, qs["supporting_materials"])]
+    crop_text, crop_image, n_named = [], [], 0
+    for (refs, labels), chunks_i, crops_i in zip(targets, text_chunks, image_crops):
+        if not labels:
+            continue
+        n_named += 1
+        crop_text.append(any(crop_matches(c, d, l) for c in crops_behind(chunks_i) for d in refs for l in labels))
+        crop_image.append(any(crop_matches(c, d, l) for c in crops_i for d in refs for l in labels))
+    crop_cols = f"{np.mean(crop_text):>14.2f}{np.mean(crop_image):>14.2f}  (of {n_named} that name one)" if n_named else f"{'':>14}{'':>14}"
+    print(f"{label:<12}{len(qs):>4}{paper_text:>14.2f}{paper_image:>14.2f}{crop_cols}")
 ```
 
-Two numbers per row, higher is better, and three readings. If the image index wins on Table and Figure and ties on Quote, the embedding model is doing what it was built for. If it loses everywhere, look at what it was given: a crop of a dense table at 150 dpi is readable, a cropped panel of a nine-panel figure may not be, and a whole-page fallback is a weak key. If both indexes already find the paper for nearly every question, retrieval was never the problem for this corpus and the loss is in the reading, which the next cells test.
+Read the paper columns first: both indexes find the paper for nearly every table and figure question, so at that level there is nothing to win, and the image index is behind. The crop columns are the real comparison. They say whether the text route, chunks and the crops on their pages, or the image route, the crops themselves, more often puts the exact table or figure in front of the model. If the image column is higher there while the paper column is lower, the image index is doing a different job than the text index, finding the object rather than the document, and the next cells show whether the model can use it. If both crop columns are low, the fix is upstream, in the extraction: a table the detector missed became a whole-page fallback, and a page is a weak key.
 
 ### Let the model see the table or figure
 
@@ -1177,9 +1198,6 @@ Three runs over the Table and Figure questions, all through the vision model, so
 
 ```python
 tf_df = train_df[(train_df["Table"] == 1) | (train_df["Figure"] == 1)]
-crops_by_page: Dict[tuple, list] = {}
-for c in crops:
-    crops_by_page.setdefault((c["doc_id"], c["page_num"]), []).append(c)
 print(f"{len(tf_df)} table and figure questions; each run makes an answer call and an explanation call per question, so about {6 * len(tf_df)} calls for three runs")
 
 def crops_for(question: str, images_from: str):
@@ -1188,10 +1206,9 @@ def crops_for(question: str, images_from: str):
         return retrieve_top_k(embed_query_mm(question), crop_embeddings, crops, k=3)
     if images_from == "text_index":
         found = []
-        for ch in retrieve_top_k(embed_query(question), chunk_embeddings, chunked_docs, k=8):
-            for c in crops_by_page.get((ch["doc_id"], ch["page_num"]), []):
-                if c not in found:
-                    found.append(c)
+        for c in crops_behind(retrieve_top_k(embed_query(question), chunk_embeddings, chunked_docs, k=8)):
+            if c not in found:
+                found.append(c)
         return found[:3]
     return []
 

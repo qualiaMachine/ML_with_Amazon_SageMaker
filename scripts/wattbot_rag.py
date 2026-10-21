@@ -895,3 +895,29 @@ def _save_crop(page, clip, out_dir, doc_id: str, kind: str, caption: str, index:
         "png_path": str(path),
         "whole_page": clip == page.rect,   # True for a caption whose table or figure no detector found
     }
+
+
+def cited_captions(supporting_materials: Any) -> List[str]:
+    """The tables and figures a train_QA.csv row names in its supporting_materials, as "Table 3" / "Figure 2".
+
+    "Fig. 5, upper panel" and "Figure 2(d)" both become "Figure 2"; the text column is free-form, so
+    this is the identifier only, matched against the caption on each crop.
+    """
+    text = str(supporting_materials or "")
+    found = []
+    for word, num in re.findall(r"\b(Table|Fig\.?|Figure)\s*([A-Z]?\d+)", text, flags=re.IGNORECASE):
+        label = ("Figure" if word.lower().startswith("fig") else "Table") + " " + num
+        if label not in found:
+            found.append(label)
+    return found
+
+
+def crop_matches(crop: Dict[str, Any], doc_id: str, label: str) -> bool:
+    """Whether a crop record is the named table or figure of the named paper."""
+    if crop.get("doc_id") != doc_id:
+        return False
+    m = re.match(r"\s*(Table|Fig\.?|Figure)\s*([A-Z]?\d+)", crop.get("caption", ""), flags=re.IGNORECASE)
+    if not m:
+        return False
+    crop_label = ("Figure" if m.group(1).lower().startswith("fig") else "Table") + " " + m.group(2)
+    return crop_label == label
