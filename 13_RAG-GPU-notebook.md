@@ -136,7 +136,7 @@ We install the inference server before loading anything else, because the instal
 
 ### Installing vLLM takes a few minutes, and the meter is running
 
-`pip install vllm` downloads several gigabytes (it brings its own CUDA kernels and may replace the kernel's PyTorch build) and takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer. The 27 GB of model weights take another 4–6 minutes to download the first time. At `$2.61` an hour that is about 60 cents of waiting, which is fine; what is not fine is doing it twice because the instance was deleted and recreated. Keep the Hugging Face cache on the 100 GB volume (the `HF_HOME` line in the serving cell below does that) so the weights survive a stop/start.
+vLLM is the open-source inference engine that loads an open-weight model onto the GPU and answers chat requests from Python, the self-hosted counterpart of Bedrock's runtime (the Processing Jobs episode introduces it). `pip install vllm` downloads several gigabytes (it brings its own CUDA kernels and may replace the kernel's PyTorch build) and takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer. The 27 GB of model weights take another 4–6 minutes to download the first time. At `$2.61` an hour that is about 60 cents of waiting, which is fine; what is not fine is doing it twice because the instance was deleted and recreated. Keep the Hugging Face cache on the 100 GB volume (the `HF_HOME` line in the serving cell below does that) so the weights survive a stop/start.
 
 If the install changes PyTorch, restart the kernel (**Kernel → Restart**) before continuing.
 
