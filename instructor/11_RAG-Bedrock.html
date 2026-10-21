@@ -1178,11 +1178,11 @@ every run. We save the chunks locally as <code>data/chunks.jsonl</code>
 </div>
 </section><section><h2 class="section-heading" id="step-7-cost-tracking-bedrock-calls-carry-no-tags-unless-you-route-them-through-a-profile">Step 7 – Cost tracking: Bedrock calls carry no tags unless you route
 them through a profile<a class="anchor" aria-label="anchor" href="#step-7-cost-tracking-bedrock-calls-carry-no-tags-unless-you-route-them-through-a-profile"></a></h2>
-<hr class="half-width"><p>In the SageMaker episodes that follow, we tag every job at launch
-because tags never propagate from the notebook. Bedrock is stricter
-still: <strong>an on-demand <code>invoke_model</code> or
-<code>converse</code> call has no tags parameter at all.</strong> If you
-call <code>deepseek.v3-v1:0</code> or
+<hr class="half-width"><p>Every SageMaker job in this lesson is tagged at launch, because tags
+never propagate from the notebook. Bedrock is stricter still: <strong>an
+on-demand <code>invoke_model</code> or <code>converse</code> call has no
+tags parameter at all.</strong> If you call
+<code>deepseek.v3-v1:0</code> or
 <code>amazon.titan-embed-text-v2:0</code> by its model ID, the usage
 lands in the account’s Bedrock bill as anonymous per-token charges. The
 notebook’s tags, the bucket’s tags, and the tags you set on anything
@@ -1309,11 +1309,9 @@ are never sent to the runtime again.</p>
 <strong>Inference and Assessment → Cross-region inference → Application
 inference profiles</strong>, or with
 <code>bedrock.list_inference_profiles(typeEquals="APPLICATION")</code>.</li>
-<li>Tags only become filters in Cost Explorer once the tag keys have
-been <strong>activated as cost allocation tags</strong> in the Billing
-console (an account‑admin, once‑per‑key action; on a shared workshop
-account the organizers do this). Until then the tags exist on the
-resource but do not show up on reports.</li>
+<li>The keys must be the three approved ones, <code>Name</code>,
+<code>Project</code> and <code>Purpose</code>, spelled exactly; any
+other key is ignored by the bill (the S3 episode says why).</li>
 <li>The profile itself has no hourly or storage charge. You only pay per
 token, exactly as before.</li>
 </ul></div>
@@ -1342,7 +1340,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1735,7 +1733,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and

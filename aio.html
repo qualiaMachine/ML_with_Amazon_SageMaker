@@ -1420,7 +1420,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2382,7 +2382,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2895,7 +2895,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3139,7 +3139,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3257,7 +3257,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3526,7 +3526,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -4899,7 +4899,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5088,7 +5088,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -8759,9 +8759,9 @@ with DeepSeek V3</td>
 </table>
 <p>A single forgotten weekend on the <em>cheapest</em> GPU instance
 costs more than fifty full runs of the pipeline on Bedrock; a forgotten
-weekend on the <code>ml.g6e.xlarge</code> the later episodes use costs
-more than a hundred. That asymmetry is why Bedrock is the default, not
-just an alternative.</p>
+weekend on the <code>ml.g6e.xlarge</code> the optional GPU-notebook
+episode uses costs more than a hundred. That asymmetry is why Bedrock is
+the default, not just an alternative.</p>
 <div id="bedrock-trade-offs-to-know-about" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -8993,15 +8993,10 @@ lowercase <code>key</code>/<code>value</code>, while SageMaker’s is
 <code>Key</code>/<code>Value</code>; the tag <em>names</em> stay the
 same.</li>
 <li>
-<strong>Tags only show up on the bill once the keys are
-activated.</strong> An account administrator has to activate
-<code>Name</code>, <code>Project</code>, and <code>Purpose</code> as
-cost allocation tags in the Billing console, once per account. Until
-then the tags exist on the resources but are not available as filters in
-Cost Explorer. On UW–Madison accounts the keys are activated centrally
-from a fixed approved list (<a href="https://kb.wisc.edu/72454" class="external-link">KB
-72454</a>), which is why the three keys must be spelled exactly; on your
-own account, activate them before you start.</li>
+<strong>Only the three approved keys count.</strong>
+<code>Name</code>, <code>Project</code> and <code>Purpose</code>,
+spelled exactly; any other key is ignored by the bill, for the reason
+the S3 episode gives.</li>
 </ol></section><section><h2 class="section-heading" id="when-do-you-use-which-approach">When Do You Use Which Approach?<a class="anchor" aria-label="anchor" href="#when-do-you-use-which-approach"></a>
 </h2>
 <hr class="half-width">
@@ -9896,11 +9891,11 @@ every run. We save the chunks locally as <code>data/chunks.jsonl</code>
 them through a profile<a class="anchor" aria-label="anchor" href="#step-7-cost-tracking-bedrock-calls-carry-no-tags-unless-you-route-them-through-a-profile"></a>
 </h2>
 <hr class="half-width">
-<p>In the SageMaker episodes that follow, we tag every job at launch
-because tags never propagate from the notebook. Bedrock is stricter
-still: <strong>an on-demand <code>invoke_model</code> or
-<code>converse</code> call has no tags parameter at all.</strong> If you
-call <code>deepseek.v3-v1:0</code> or
+<p>Every SageMaker job in this lesson is tagged at launch, because tags
+never propagate from the notebook. Bedrock is stricter still: <strong>an
+on-demand <code>invoke_model</code> or <code>converse</code> call has no
+tags parameter at all.</strong> If you call
+<code>deepseek.v3-v1:0</code> or
 <code>amazon.titan-embed-text-v2:0</code> by its model ID, the usage
 lands in the account’s Bedrock bill as anonymous per-token charges. The
 notebook’s tags, the bucket’s tags, and the tags you set on anything
@@ -10030,11 +10025,9 @@ are never sent to the runtime again.</p>
 <strong>Inference and Assessment → Cross-region inference → Application
 inference profiles</strong>, or with
 <code>bedrock.list_inference_profiles(typeEquals="APPLICATION")</code>.</li>
-<li>Tags only become filters in Cost Explorer once the tag keys have
-been <strong>activated as cost allocation tags</strong> in the Billing
-console (an account‑admin, once‑per‑key action; on a shared workshop
-account the organizers do this). Until then the tags exist on the
-resource but do not show up on reports.</li>
+<li>The keys must be the three approved ones, <code>Name</code>,
+<code>Project</code> and <code>Purpose</code>, spelled exactly; any
+other key is ignored by the bill (the S3 episode says why).</li>
 <li>The profile itself has no hourly or storage charge. You only pay per
 token, exactly as before.</li>
 </ul>
@@ -10064,7 +10057,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10469,7 +10462,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -11379,7 +11372,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -11443,7 +11436,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -11714,10 +11707,11 @@ batch transform) build on the same idea.</p>
 <p>In this episode we rerun the <a href="https://www.kaggle.com/competitions/WattBot2025/overview" class="external-link">WattBot
 2025</a> RAG pipeline from the Bedrock episode, this time entirely from
 a single GPU-backed SageMaker notebook with self-hosted models. The
-generator is the same Qwen3.8-27B as in the Processing Jobs episode: an
-open-weight model that fits one GPU and sits within a few points of a
-frontier commercial model on agent tasks and science questions (see that
-episode’s chart), which is why it is worth the trouble of hosting.</p>
+generator is Qwen3.8-27B, the newer and larger relative of the Qwen3-8B
+the Processing Jobs episode ran: an open-weight model that fits one 48
+GB GPU in FP8 and sits within a few points of a frontier commercial
+model on agent tasks and science questions (see that episode’s chart),
+which is why it is worth the trouble of hosting.</p>
 <p>In this episode we will:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -13177,16 +13171,10 @@ tags never propagate between resources: your notebook instance, each S3
 bucket, each training/tuning/Processing job, and each Bedrock
 application inference profile carries its own tags, and anything you
 launched without tags is untraceable after the fact.</li>
-<li>Tags only appear as filters in Cost Explorer after the tag
-<em>keys</em> (<code>Name</code>, <code>Project</code>,
-<code>Purpose</code>) have been activated as cost allocation tags in the
-Billing console by an account administrator. On UW–Madison accounts this
-is done centrally for an approved list of keys (<a href="https://kb.wisc.edu/72454" class="external-link">KB 72454</a>); on your own account, do
-it once under <strong>Billing and Cost Management → Cost allocation
-tags</strong>. Activation applies only to usage recorded after that
-point, and new tags can take up to 24 hours to show up. A key that is
-not on the activated list (a typo, a lowercase <code>project</code>, an
-extra <code>ModelSize</code>) is silently ignored by the bill.</li>
+<li>Only the three approved keys count on the bill, <code>Name</code>,
+<code>Project</code> and <code>Purpose</code>, spelled exactly (the S3
+episode says why); a tag you just added can take up to 24 hours to
+appear in Cost Explorer.</li>
 <li>Bedrock application inference profiles cost nothing to keep, but you
 can delete the ones you created from the Bedrock console or with
 <code>bedrock.delete_inference_profile(...)</code> once a project is
@@ -13293,7 +13281,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
