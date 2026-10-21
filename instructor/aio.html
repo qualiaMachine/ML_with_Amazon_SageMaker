@@ -1432,7 +1432,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2396,7 +2396,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2910,7 +2910,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -6952,7 +6952,7 @@ realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -7258,7 +7258,7 @@ whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; four things have to be
 in place before the session. Each is written out in the instructor
@@ -7351,24 +7351,31 @@ input channels.</p>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1" aria-label="code-block-6-16"></a><span class="bu">print</span>(<span class="st">"Region:"</span>, region)</span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1" aria-label="code-block-6-17"></a><span class="bu">print</span>(<span class="st">"Role:"</span>, role)</span></code></pre>
 </div>
-<p>Now the names. Two buckets: the shared one the jobs read from, and
-your own, where everything they write lands. Your username goes into job
-names, which SageMaker requires to be unique in the account. The two S3
-prefixes at the end are what the estimator mounts into the job as its
-<code>train</code> and <code>model</code> input channels.</p>
+<p>Now the names, after moving into a project folder of our own under
+the instance root. Everything this episode downloads or stages
+(<code>data/</code>, <code>code/</code>) goes there, beside the lesson
+clone rather than inside it. Two buckets: the shared one the jobs read
+from, and your own, where everything they write lands. Your username
+goes into job names, which SageMaker requires to be unique in the
+account. The two S3 prefixes at the end are what the estimator mounts
+into the job as its <code>train</code> and <code>model</code> input
+channels.</p>
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket from the S3 episode; everything the jobs write goes here</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a>username <span class="op">=</span> <span class="st">"doejohn"</span>                   <span class="co"># &lt;-- EDIT ME: lowercase letters/digits only; used in job names</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1" aria-label="code-block-7-5"></a>data_prefix <span class="op">=</span> <span class="st">"badger-scribe"</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1" aria-label="code-block-7-6"></a>train_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/"</span>                  <span class="co"># training channel: csvs + images/</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1" aria-label="code-block-7-7"></a>model_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/model/churro-3B/"</span>  <span class="co"># model channel: staged CHURRO-3B weights</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1" aria-label="code-block-7-8"></a></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1" aria-label="code-block-7-9"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1" aria-label="code-block-7-10"></a>os.makedirs(local_data_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>badger<span class="op">-</span>scribe   <span class="co"># a project folder beside the lesson clone, so data and job code stay out of the repository</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>badger<span class="op">-</span>scribe</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1" aria-label="code-block-7-5"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket from the S3 episode; everything the jobs write goes here</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1" aria-label="code-block-7-6"></a>username <span class="op">=</span> <span class="st">"doejohn"</span>                   <span class="co"># &lt;-- EDIT ME: lowercase letters/digits only; used in job names</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1" aria-label="code-block-7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1" aria-label="code-block-7-8"></a>data_prefix <span class="op">=</span> <span class="st">"badger-scribe"</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1" aria-label="code-block-7-9"></a>train_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/"</span>                  <span class="co"># training channel: csvs + images/</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1" aria-label="code-block-7-10"></a>model_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>shared_bucket<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/model/churro-3B/"</span>  <span class="co"># model channel: staged CHURRO-3B weights</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1" aria-label="code-block-7-11"></a></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1" aria-label="code-block-7-12"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1" aria-label="code-block-7-13"></a>os.makedirs(local_data_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code></pre>
 </div>
 <p>Download the four small files (the two page lists, the metadata and
 the competition’s scoring script) and look at how the training pages
@@ -8059,7 +8066,7 @@ will compare it to the real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -8436,7 +8443,7 @@ CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8476,7 +8483,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -9113,10 +9120,12 @@ afterward. The Processing Jobs episode reruns the same pipeline on a
 self-hosted open-weight model that Bedrock does not carry, as jobs that
 end on their own, so you can see what Bedrock abstracts away and what it
 costs to do yourself. An optional self-study episode after them runs the
-same self-hosted pipeline interactively on a GPU notebook instance, for
-prototyping alone at a keyboard. All three RAG episodes share one module
-of pipeline code (<code>scripts/wattbot_rag.py</code> in the lesson
-repository).</p>
+same self-hosted pipeline interactively on a GPU notebook instance.
+<strong>Those first two are the defaults. The GPU-notebook episode is
+for the case where you need to poke at a self-hosted model
+interactively, and only if you will remember to stop the
+instance.</strong> All three RAG episodes share one module of pipeline
+code (<code>scripts/wattbot_rag.py</code> in the lesson repository).</p>
 <p>When you build your own RAG system afterward, start from the Bedrock
 episode.</p>
 </div>
@@ -9505,21 +9514,24 @@ embeddings, and the answers the pipeline produces.</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket from the S3 episode</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot   <span class="co"># a project folder beside the lesson clone, so data and outputs stay out of the repository</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a><span class="co"># inputs, in the shared bucket</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1" aria-label="code-block-3-5"></a>metadata_key <span class="op">=</span> <span class="st">"wattbot/metadata.csv"</span>      <span class="co"># one row per paper: id, title, url</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1" aria-label="code-block-3-6"></a>train_key <span class="op">=</span> <span class="st">"wattbot/train_QA.csv"</span>         <span class="co"># the questions, with reference answers for scoring</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1" aria-label="code-block-3-7"></a>corpus_key <span class="op">=</span> <span class="st">"wattbot/corpus.zip"</span>          <span class="co"># the PDFs, one per paper</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1" aria-label="code-block-3-8"></a></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1" aria-label="code-block-3-9"></a><span class="co"># derived, written to YOUR bucket</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1" aria-label="code-block-3-10"></a>chunks_key <span class="op">=</span> <span class="st">"wattbot/chunks.jsonl"</span>                                <span class="co"># the corpus cut into passages (end of the chunking step)</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1" aria-label="code-block-3-11"></a>embeddings_key <span class="op">=</span> <span class="st">"wattbot/embeddings/embeddings_bedrock.npy"</span>       <span class="co"># one vector per chunk</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1" aria-label="code-block-3-12"></a>solutions_key <span class="op">=</span> <span class="st">"wattbot/solutions/wattbot_solutions_bedrock.csv"</span>  <span class="co"># the pipeline's answers, in the competition's format</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1" aria-label="code-block-3-13"></a></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1" aria-label="code-block-3-14"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span>              <span class="co"># working copies on this notebook instance</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1" aria-label="code-block-3-15"></a>os.makedirs(local_data_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code></pre>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1" aria-label="code-block-3-5"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket from the S3 episode</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1" aria-label="code-block-3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1" aria-label="code-block-3-7"></a><span class="co"># inputs, in the shared bucket</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1" aria-label="code-block-3-8"></a>metadata_key <span class="op">=</span> <span class="st">"wattbot/metadata.csv"</span>      <span class="co"># one row per paper: id, title, url</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1" aria-label="code-block-3-9"></a>train_key <span class="op">=</span> <span class="st">"wattbot/train_QA.csv"</span>         <span class="co"># the questions, with reference answers for scoring</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1" aria-label="code-block-3-10"></a>corpus_key <span class="op">=</span> <span class="st">"wattbot/corpus.zip"</span>          <span class="co"># the PDFs, one per paper</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1" aria-label="code-block-3-11"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1" aria-label="code-block-3-12"></a><span class="co"># derived, written to YOUR bucket</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1" aria-label="code-block-3-13"></a>chunks_key <span class="op">=</span> <span class="st">"wattbot/chunks.jsonl"</span>                                <span class="co"># the corpus cut into passages (end of the chunking step)</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1" aria-label="code-block-3-14"></a>embeddings_key <span class="op">=</span> <span class="st">"wattbot/embeddings/embeddings_bedrock.npy"</span>       <span class="co"># one vector per chunk</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1" aria-label="code-block-3-15"></a>solutions_key <span class="op">=</span> <span class="st">"wattbot/solutions/wattbot_solutions_bedrock.csv"</span>  <span class="co"># the pipeline's answers, in the competition's format</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1" aria-label="code-block-3-16"></a></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1" aria-label="code-block-3-17"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span>              <span class="co"># working copies on this notebook instance</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1" aria-label="code-block-3-18"></a>os.makedirs(local_data_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code></pre>
 </div>
 <p><strong>Two Bedrock clients.</strong> Bedrock has two APIs.
 <code>bedrock-runtime</code> is the one that calls models
@@ -10158,7 +10170,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10531,7 +10543,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -10907,6 +10919,11 @@ standalone scripts. Clone it:</p>
 script (JSONL with a <code>text</code> field in,
 <code>embeddings.npy</code> out).</li>
 <li>
+<code>scripts/hf_embedder.py</code>: the embedding model wrapper
+both jobs use, on plain <code>transformers</code> (mean pooling and
+normalisation, thirty lines), so neither job has to install anything for
+it.</li>
+<li>
 <code>scripts/wattbot_rag_batch.py</code>: the WattBot RAG loop as a
 batch job: loads the inputs, serves Qwen with vLLM, writes
 <code>wattbot_solutions.csv</code>.</li>
@@ -10916,24 +10933,27 @@ batch job: loads the inputs, serves Qwen with vLLM, writes
 scorer) that the Bedrock episode imported too. The batch script imports
 it, so it ships with the job; the notebook imports it for scoring.</li>
 </ul>
-<p>Each job gets its own source directory, because the two jobs need
-different Python packages and SageMaker installs whatever
-<code>requirements.txt</code> it finds next to the script.
+<p>Each job gets its own source directory, because SageMaker uploads the
+whole directory and installs whatever <code>requirements.txt</code> it
+finds next to the script, and only the RAG job needs extra packages.
 <code>code_embed/</code> holds the embedding job, <code>code_rag/</code>
 the RAG job, and a copy of <code>wattbot_rag.py</code> sits next to the
 notebook for the scoring step at the end.</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="co"># One source directory per job: SageMaker uploads the whole directory into the container</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="op">!</span>mkdir <span class="op">-</span>p code_embed code_rag</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a><span class="co"># The embedding job's script</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>embedding_inference.py code_embed<span class="op">/</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a><span class="co"># The RAG job's script plus the shared module it imports (the container cannot see this notebook)</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag_batch.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py code_rag<span class="op">/</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a><span class="co"># The notebook's own copy, for scoring at the end</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a><span class="op">!</span>ls code_embed code_rag</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot   <span class="co"># the same project folder the Bedrock episode used, beside the lesson clone</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a><span class="co"># One source directory per job: SageMaker uploads the whole directory into the container</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a><span class="op">!</span>mkdir <span class="op">-</span>p code_embed code_rag</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="co"># The embedding job's script</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>embedding_inference.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py code_embed<span class="op">/</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a><span class="co"># The RAG job's script plus the shared module it imports (the container cannot see this notebook)</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag_batch.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py code_rag<span class="op">/</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a><span class="co"># The notebook's own copy, for scoring at the end</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a><span class="op">!</span>ls code_embed code_rag</span></code></pre>
 </div>
 <p>Next, set up the AWS SDK, SageMaker session, and bucket names.</p>
 <div class="codewrapper sourceCode" id="cb2">
@@ -11035,7 +11055,8 @@ its output.</p>
 job</strong> that:</p>
 <ol style="list-style-type: decimal">
 <li>Downloads <code>chunks.jsonl</code> from S3.</li>
-<li>Loads <code>thenlper/gte-large</code> from Hugging Face.</li>
+<li>Loads <code>thenlper/gte-large</code> from Hugging Face with the
+container’s own <code>transformers</code>.</li>
 <li>Encodes each chunk into an embedding vector.</li>
 <li>Saves the full matrix as <code>embeddings.npy</code> back to
 S3.</li>
@@ -11046,24 +11067,25 @@ field.</p>
 <div class="section level3">
 <h3 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a>
 </h3>
-<p>The Hugging Face container has <code>transformers</code> and PyTorch
-but not <code>sentence-transformers</code>. A
-<code>requirements.txt</code> in the job’s <code>source_dir</code> is
-installed before the script runs. The RAG job’s requirements are
-different (vLLM, plus <code>sentence-transformers</code> for the query
-embedder), which is why it has its own directory.</p>
+<p>The embedding job needs nothing the Hugging Face container does not
+already have, so it has no <code>requirements.txt</code> and starts as
+soon as the instance is up. The RAG job needs vLLM, which the container
+does not ship. A <code>requirements.txt</code> in the job’s
+<code>source_dir</code> is installed before the script runs. vLLM pins
+its own PyTorch and a newer <code>transformers</code>, so the
+container’s <code>peft</code> has to move with it; the pin on
+<code>peft</code> is there because an older <code>peft</code> left
+behind imports a class the newer <code>transformers</code> removed, and
+the job dies on that import before it reaches the model.</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># A requirements.txt next to the script is pip-installed in the container before the script runs</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_embed/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    f.write(<span class="st">"sentence-transformers</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># A requirements.txt next to the script is pip-installed in the container before the script runs; only the RAG job has one</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_rag/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"vllm&gt;=0.17"</span>, <span class="st">"peft&gt;=0.18"</span>]) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)   <span class="co"># vLLM 0.17+ for Qwen3.8; peft upgraded to match the transformers vLLM installs</span></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_rag/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"vllm&gt;=0.17"</span>, <span class="st">"sentence-transformers"</span>]) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)   <span class="co"># 0.17+ is needed for Qwen3.8</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a><span class="bu">print</span>(<span class="st">"code_embed:"</span>, os.listdir(<span class="st">"code_embed"</span>))</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1" aria-label="code-block-5-9"></a><span class="bu">print</span>(<span class="st">"code_rag:  "</span>, os.listdir(<span class="st">"code_rag"</span>))</span></code></pre>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="bu">print</span>(<span class="st">"code_embed:"</span>, os.listdir(<span class="st">"code_embed"</span>))</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a><span class="bu">print</span>(<span class="st">"code_rag:  "</span>, os.listdir(<span class="st">"code_rag"</span>))</span></code></pre>
 </div>
 <div id="the-rag-jobs-pip-install-is-part-of-its-bill" class="callout">
 <div class="callout-square">
@@ -11120,9 +11142,10 @@ job from the batch RAG job on the bill.</p>
 </h3>
 <p>Open <code>scripts/embedding_inference.py</code> first; it is under
 fifty lines. It reads a JSONL file of chunks from the job’s input
-directory, embeds them with whatever sentence-transformer
-<code>--model_id</code> names, normalises the vectors so a dot product
-is a cosine similarity, and saves one <code>embeddings.npy</code> to the
+directory, embeds them with whatever Hugging Face model
+<code>--model_id</code> names, through the thirty-line wrapper in
+<code>hf_embedder.py</code>, normalises the vectors so a dot product is
+a cosine similarity, and saves one <code>embeddings.npy</code> to the
 output directory. Nothing in it knows about WattBot, which is the point
 of a Processing job script: inputs in, outputs out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
@@ -11154,7 +11177,7 @@ script, mounts the inputs, and says where the output goes.</p>
 <span id="cb7-20"><a href="#cb7-20" tabindex="-1" aria-label="code-block-7-20"></a>start <span class="op">=</span> time.time()</span>
 <span id="cb7-21"><a href="#cb7-21" tabindex="-1" aria-label="code-block-7-21"></a>embedding_processor.run(</span>
 <span id="cb7-22"><a href="#cb7-22" tabindex="-1" aria-label="code-block-7-22"></a>    code<span class="op">=</span><span class="st">"embedding_inference.py"</span>,     <span class="co"># the script the container runs...</span></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1" aria-label="code-block-7-23"></a>    source_dir<span class="op">=</span><span class="st">"code_embed/"</span>,          <span class="co"># ...uploaded with everything beside it, requirements.txt included</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1" aria-label="code-block-7-23"></a>    source_dir<span class="op">=</span><span class="st">"code_embed/"</span>,          <span class="co"># ...uploaded with everything beside it (hf_embedder.py)</span></span>
 <span id="cb7-24"><a href="#cb7-24" tabindex="-1" aria-label="code-block-7-24"></a>    inputs<span class="op">=</span>[</span>
 <span id="cb7-25"><a href="#cb7-25" tabindex="-1" aria-label="code-block-7-25"></a>        ProcessingInput(</span>
 <span id="cb7-26"><a href="#cb7-26" tabindex="-1" aria-label="code-block-7-26"></a>            source<span class="op">=</span>chunks_s3_uri,                       <span class="co"># S3 object (or prefix) copied in before the script starts</span></span>
@@ -11244,12 +11267,12 @@ unanswerable rule (retrieval threshold OR the model’s own
 end</li>
 </ul>
 <p>What the batch script adds is the two model callables:
-<code>embed_query</code> wraps the same <code>gte-large</code>
-sentence-transformer the embedding job used (the question has to be
-embedded with the same model as the chunks), and <code>generate</code>
-wraps a vLLM engine serving Qwen3.8-27B with thinking mode off. The job
-writes <code>wattbot_solutions.csv</code> in the WattBot submission
-format.</p>
+<code>embed_query</code> wraps the same <code>gte-large</code> model and
+pooling the embedding job used (<code>hf_embedder.py</code>) (the
+question has to be embedded with the same model as the chunks), and
+<code>generate</code> wraps a vLLM engine serving Qwen3.8-27B with
+thinking mode off. The job writes <code>wattbot_solutions.csv</code> in
+the WattBot submission format.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -11293,7 +11316,7 @@ go.</p>
 <span id="cb10-21"><a href="#cb10-21" tabindex="-1" aria-label="code-block-10-21"></a>start <span class="op">=</span> time.time()</span>
 <span id="cb10-22"><a href="#cb10-22" tabindex="-1" aria-label="code-block-10-22"></a>rag_processor.run(</span>
 <span id="cb10-23"><a href="#cb10-23" tabindex="-1" aria-label="code-block-10-23"></a>    code<span class="op">=</span><span class="st">"wattbot_rag_batch.py"</span>,</span>
-<span id="cb10-24"><a href="#cb10-24" tabindex="-1" aria-label="code-block-10-24"></a>    source_dir<span class="op">=</span><span class="st">"code_rag/"</span>,            <span class="co"># wattbot_rag_batch.py + wattbot_rag.py + requirements.txt</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1" aria-label="code-block-10-24"></a>    source_dir<span class="op">=</span><span class="st">"code_rag/"</span>,            <span class="co"># wattbot_rag_batch.py + wattbot_rag.py + hf_embedder.py + requirements.txt</span></span>
 <span id="cb10-25"><a href="#cb10-25" tabindex="-1" aria-label="code-block-10-25"></a>    inputs<span class="op">=</span>[</span>
 <span id="cb10-26"><a href="#cb10-26" tabindex="-1" aria-label="code-block-10-26"></a>        ProcessingInput(</span>
 <span id="cb10-27"><a href="#cb10-27" tabindex="-1" aria-label="code-block-10-27"></a>            source<span class="op">=</span>chunks_s3_uri,</span>
@@ -11563,8 +11586,8 @@ compatible Python environment.</li>
 the <code>chunks.jsonl</code> the Bedrock episode cached in your own
 bucket.</li>
 <li>Implement a simple, explicit “from scratch” embedding pipeline with
-a self-hosted sentence-transformer, without relying on FAISS or
-production vector DBs.</li>
+a self-hosted embedding model, without relying on FAISS or production
+vector DBs.</li>
 <li>Build a small retrieval helper that finds the most relevant chunks
 for a question using cosine similarity in embedding space.</li>
 <li>Serve a 27B open-weight generator (Qwen3.8-27B in FP8, via vLLM) on
@@ -11592,13 +11615,16 @@ combination.</li>
 <div id="optional-self-study-episode" class="callout-inner">
 <h3 class="callout-title">Optional, self-study episode</h3>
 <div class="callout-content">
-<p>This episode is not taught in the workshop. It runs the same
-self-hosted pipeline as the Processing Jobs episode, but interactively
-on a GPU notebook instance, which is the right tool for prototyping
-alone at a keyboard and the wrong one for a room of a hundred people
-with meters running. Work through it on your own when you want to see
-model loading, GPU memory and generation as plain Python you can poke
-at. Read the cost callout first.</p>
+<p>This episode is not taught in the workshop. <strong>The Bedrock and
+Processing Jobs episodes are the default ways to run RAG; this one is
+for the case where you need to poke at a self-hosted model
+interactively, and only if you will remember to stop the
+instance.</strong> It runs the same pipeline as the Processing Jobs
+episode on a GPU notebook instance, which is the right tool for
+prototyping alone at a keyboard and the wrong one for a room of a
+hundred people with meters running. Work through it on your own when you
+want to see model loading, GPU memory and generation as plain Python.
+Read the cost callout first.</p>
 </div>
 </div>
 </div>
@@ -11752,7 +11778,7 @@ own.</li>
 <li>
 <strong>Implement the model steps explicitly in code.</strong>
 <ul>
-<li>Embed chunks with a sentence-transformer
+<li>Embed chunks with an open embedding model
 (<code>thenlper/gte-large</code>) running on the notebook’s GPU.</li>
 <li>Implement cosine-similarity search over the embedding matrix.</li>
 </ul>
@@ -11871,7 +11897,7 @@ Restart</strong>) before continuing.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="co"># Several GB; it may replace torch, so restart the kernel (Kernel -&gt; Restart) if the log says it did</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>pip install <span class="op">-</span>q <span class="st">"vllm&gt;=0.17"</span> sentence<span class="op">-</span>transformers</span></code></pre>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>pip install <span class="op">-</span>q <span class="st">"vllm&gt;=0.17"</span> <span class="st">"peft&gt;=0.18"</span>   <span class="co"># peft upgraded to match the transformers vLLM installs</span></span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="import-data-from-bucket-into-notebook">Import data from bucket into notebook<a class="anchor" aria-label="anchor" href="#import-data-from-bucket-into-notebook"></a>
@@ -11915,15 +11941,18 @@ download helper.</p>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket (chunks live here)</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot   <span class="co"># a project folder beside the lesson clone (this is a new instance, so it starts empty)</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a><span class="co"># Local working directory in the notebook instance</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>shared_bucket <span class="op">=</span> <span class="st">"ml-marathon-shared"</span>   <span class="co"># the instructor-staged, read-only bucket with the data and model weights; change only on your own account</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>     <span class="co"># &lt;-- EDIT ME: your own bucket (chunks live here)</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>session_start <span class="op">=</span> time.time()   <span class="co"># the meter on this GPU instance started when it booted; this marks where the episode's work began</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1" aria-label="code-block-6-9"></a><span class="bu">print</span>(<span class="st">"Local data dir:"</span>, local_data_dir)</span></code></pre>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a><span class="co"># Local working directory in the notebook instance</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1" aria-label="code-block-6-9"></a></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1" aria-label="code-block-6-10"></a>session_start <span class="op">=</span> time.time()   <span class="co"># the meter on this GPU instance started when it booted; this marks where the episode's work began</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1" aria-label="code-block-6-11"></a></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1" aria-label="code-block-6-12"></a><span class="bu">print</span>(<span class="st">"Local data dir:"</span>, local_data_dir)</span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="get-the-shared-wattbot-helpers">Get the shared WattBot helpers<a class="anchor" aria-label="anchor" href="#get-the-shared-wattbot-helpers"></a>
@@ -11937,7 +11966,7 @@ adds is the two model callables, <code>embed_query</code> and
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py .</span></code></pre>
 </div>
 <p>Import the pieces of the shared RAG module we reuse: the prompts, the
 retrieval and scoring functions, and the per-question runner.</p>
@@ -11978,7 +12007,7 @@ retrieval and scoring functions, and the per-question runner.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="im">import</span> torch</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer   <span class="co"># embedding-model wrapper: encode(list of strings) -&gt; matrix</span></span></code></pre>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="im">from</span> hf_embedder <span class="im">import</span> HFEmbedder   <span class="co"># thirty lines on plain transformers: encode(list of strings) -&gt; unit-length matrix; the Processing jobs use the same file</span></span></code></pre>
 </div>
 <p>A CSV reader that tries a few encodings, because some metadata files
 are not valid UTF-8.</p>
@@ -12046,9 +12075,9 @@ and load it.</p>
 </section><section><h2 class="section-heading" id="step-3-build-an-embedding-matrix">Step 3 – Build an embedding matrix<a class="anchor" aria-label="anchor" href="#step-3-build-an-embedding-matrix"></a>
 </h2>
 <hr class="half-width">
-<p>Now we embed each chunk into a vector using a
-<strong>sentence-transformer</strong> model. For WattBot, a strong and
-relatively efficient choice is:</p>
+<p>Now we embed each chunk into a vector using an open <strong>embedding
+model</strong>. For WattBot, a strong and relatively efficient choice
+is:</p>
 <div class="section level3">
 <h3 id="thenlpergte-large-recommended-baseline-embedder">
 <code>thenlper/gte-large</code> (Recommended baseline embedder)<a class="anchor" aria-label="anchor" href="#thenlpergte-large-recommended-baseline-embedder"></a>
@@ -12102,15 +12131,11 @@ required.</p>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a><span class="co"># but is still reasonable to run on a single 24 GB GPU.</span></span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a>embedding_model_id <span class="op">=</span> <span class="st">"thenlper/gte-large"</span></span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a></span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a>use_cuda_for_embeddings <span class="op">=</span> torch.cuda.is_available()</span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1" aria-label="code-block-13-7"></a><span class="bu">print</span>(<span class="st">"CUDA available for embeddings:"</span>, use_cuda_for_embeddings)</span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1" aria-label="code-block-13-8"></a></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1" aria-label="code-block-13-9"></a><span class="co"># Single shared embedder object that we can pass around.</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1" aria-label="code-block-13-10"></a>embedder <span class="op">=</span> SentenceTransformer(</span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1" aria-label="code-block-13-11"></a>    embedding_model_id,</span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1" aria-label="code-block-13-12"></a>    device<span class="op">=</span><span class="st">"cuda"</span> <span class="cf">if</span> use_cuda_for_embeddings <span class="cf">else</span> <span class="st">"cpu"</span>   <span class="co"># on the GPU; CPU works too, but much more slowly</span></span>
-<span id="cb13-13"><a href="#cb13-13" tabindex="-1" aria-label="code-block-13-13"></a>)</span>
-<span id="cb13-14"><a href="#cb13-14" tabindex="-1" aria-label="code-block-13-14"></a></span></code></pre>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a><span class="bu">print</span>(<span class="st">"CUDA available for embeddings:"</span>, torch.cuda.is_available())</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1" aria-label="code-block-13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1" aria-label="code-block-13-8"></a><span class="co"># Single shared embedder object that we can pass around; it uses the GPU when one is available</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1" aria-label="code-block-13-9"></a>embedder <span class="op">=</span> HFEmbedder(embedding_model_id)</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1" aria-label="code-block-13-10"></a></span></code></pre>
 </div>
 <p>Embed every chunk in batches on the GPU and stack the results into
 one matrix, one row per chunk.</p>
@@ -12420,7 +12445,7 @@ makes the explanation call.</li>
 <span id="cb22-12"><a href="#cb22-12" tabindex="-1" aria-label="code-block-22-12"></a></span>
 <span id="cb22-13"><a href="#cb22-13" tabindex="-1" aria-label="code-block-22-13"></a>    res <span class="op">=</span> run_single_qa(</span>
 <span id="cb22-14"><a href="#cb22-14" tabindex="-1" aria-label="code-block-22-14"></a>        row<span class="op">=</span>row,</span>
-<span id="cb22-15"><a href="#cb22-15" tabindex="-1" aria-label="code-block-22-15"></a>        embed_query<span class="op">=</span>embed_query,             <span class="co"># the sentence-transformer on this GPU</span></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1" aria-label="code-block-22-15"></a>        embed_query<span class="op">=</span>embed_query,             <span class="co"># the embedding model on this GPU</span></span>
 <span id="cb22-16"><a href="#cb22-16" tabindex="-1" aria-label="code-block-22-16"></a>        generate<span class="op">=</span>call_qwen_chat,             <span class="co"># the vLLM engine on this GPU; the Bedrock episode passed its converse wrapper here</span></span>
 <span id="cb22-17"><a href="#cb22-17" tabindex="-1" aria-label="code-block-22-17"></a>        chunk_embeddings<span class="op">=</span>chunk_embeddings,</span>
 <span id="cb22-18"><a href="#cb22-18" tabindex="-1" aria-label="code-block-22-18"></a>        chunked_docs<span class="op">=</span>chunked_docs,</span>
@@ -12975,7 +13000,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>

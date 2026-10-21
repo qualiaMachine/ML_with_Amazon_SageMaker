@@ -607,6 +607,11 @@ standalone scripts. Clone it:</p>
 script (JSONL with a <code>text</code> field in,
 <code>embeddings.npy</code> out).</li>
 <li>
+<code>scripts/hf_embedder.py</code>: the embedding model wrapper
+both jobs use, on plain <code>transformers</code> (mean pooling and
+normalisation, thirty lines), so neither job has to install anything for
+it.</li>
+<li>
 <code>scripts/wattbot_rag_batch.py</code>: the WattBot RAG loop as a
 batch job: loads the inputs, serves Qwen with vLLM, writes
 <code>wattbot_solutions.csv</code>.</li>
@@ -615,24 +620,27 @@ batch job: loads the inputs, serves Qwen with vLLM, writes
 (retrieval, prompts, answer parsing, <code>run_single_qa</code>, the
 scorer) that the Bedrock episode imported too. The batch script imports
 it, so it ships with the job; the notebook imports it for scoring.</li>
-</ul><p>Each job gets its own source directory, because the two jobs need
-different Python packages and SageMaker installs whatever
-<code>requirements.txt</code> it finds next to the script.
+</ul><p>Each job gets its own source directory, because SageMaker uploads the
+whole directory and installs whatever <code>requirements.txt</code> it
+finds next to the script, and only the RAG job needs extra packages.
 <code>code_embed/</code> holds the embedding job, <code>code_rag/</code>
 the RAG job, and a copy of <code>wattbot_rag.py</code> sits next to the
 notebook for the scoring step at the end.</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="co"># One source directory per job: SageMaker uploads the whole directory into the container</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="op">!</span>mkdir <span class="op">-</span>p code_embed code_rag</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a><span class="co"># The embedding job's script</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>embedding_inference.py code_embed<span class="op">/</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a><span class="co"># The RAG job's script plus the shared module it imports (the container cannot see this notebook)</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag_batch.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py code_rag<span class="op">/</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a><span class="co"># The notebook's own copy, for scoring at the end</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a><span class="op">!</span>ls code_embed code_rag</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot   <span class="co"># the same project folder the Bedrock episode used, beside the lesson clone</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="op">%</span>cd <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>wattbot</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a><span class="co"># One source directory per job: SageMaker uploads the whole directory into the container</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a><span class="op">!</span>mkdir <span class="op">-</span>p code_embed code_rag</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="co"># The embedding job's script</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>embedding_inference.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py code_embed<span class="op">/</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a><span class="co"># The RAG job's script plus the shared module it imports (the container cannot see this notebook)</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag_batch.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>hf_embedder.py code_rag<span class="op">/</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a><span class="co"># The notebook's own copy, for scoring at the end</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a><span class="op">!</span>cp <span class="op">/</span>home<span class="op">/</span>ec2<span class="op">-</span>user<span class="op">/</span>SageMaker<span class="op">/</span>ML_with_AWS_SageMaker<span class="op">/</span>scripts<span class="op">/</span>wattbot_rag.py .</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a><span class="op">!</span>ls code_embed code_rag</span></code></pre>
 </div>
 <p>Next, set up the AWS SDK, SageMaker session, and bucket names.</p>
 <div class="codewrapper sourceCode" id="cb2">
@@ -729,7 +737,8 @@ its output.</p>
 <hr class="half-width"><p>Now we launch a short-lived Hugging Face <strong>Processing
 job</strong> that:</p>
 <ol style="list-style-type: decimal"><li>Downloads <code>chunks.jsonl</code> from S3.</li>
-<li>Loads <code>thenlper/gte-large</code> from Hugging Face.</li>
+<li>Loads <code>thenlper/gte-large</code> from Hugging Face with the
+container’s own <code>transformers</code>.</li>
 <li>Encodes each chunk into an embedding vector.</li>
 <li>Saves the full matrix as <code>embeddings.npy</code> back to
 S3.</li>
@@ -738,24 +747,25 @@ projects; here it expects a JSONL file with a <code>text</code>
 field.</p>
 <div class="section level3">
 <h3 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a></h3>
-<p>The Hugging Face container has <code>transformers</code> and PyTorch
-but not <code>sentence-transformers</code>. A
-<code>requirements.txt</code> in the job’s <code>source_dir</code> is
-installed before the script runs. The RAG job’s requirements are
-different (vLLM, plus <code>sentence-transformers</code> for the query
-embedder), which is why it has its own directory.</p>
+<p>The embedding job needs nothing the Hugging Face container does not
+already have, so it has no <code>requirements.txt</code> and starts as
+soon as the instance is up. The RAG job needs vLLM, which the container
+does not ship. A <code>requirements.txt</code> in the job’s
+<code>source_dir</code> is installed before the script runs. vLLM pins
+its own PyTorch and a newer <code>transformers</code>, so the
+container’s <code>peft</code> has to move with it; the pin on
+<code>peft</code> is there because an older <code>peft</code> left
+behind imports a class the newer <code>transformers</code> removed, and
+the job dies on that import before it reaches the model.</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># A requirements.txt next to the script is pip-installed in the container before the script runs</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_embed/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    f.write(<span class="st">"sentence-transformers</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># A requirements.txt next to the script is pip-installed in the container before the script runs; only the RAG job has one</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_rag/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"vllm&gt;=0.17"</span>, <span class="st">"peft&gt;=0.18"</span>]) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)   <span class="co"># vLLM 0.17+ for Qwen3.8; peft upgraded to match the transformers vLLM installs</span></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_rag/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"vllm&gt;=0.17"</span>, <span class="st">"sentence-transformers"</span>]) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)   <span class="co"># 0.17+ is needed for Qwen3.8</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a><span class="bu">print</span>(<span class="st">"code_embed:"</span>, os.listdir(<span class="st">"code_embed"</span>))</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1" aria-label="code-block-5-9"></a><span class="bu">print</span>(<span class="st">"code_rag:  "</span>, os.listdir(<span class="st">"code_rag"</span>))</span></code></pre>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="bu">print</span>(<span class="st">"code_embed:"</span>, os.listdir(<span class="st">"code_embed"</span>))</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a><span class="bu">print</span>(<span class="st">"code_rag:  "</span>, os.listdir(<span class="st">"code_rag"</span>))</span></code></pre>
 </div>
 <div id="the-rag-jobs-pip-install-is-part-of-its-bill" class="callout">
 <div class="callout-square">
@@ -810,9 +820,10 @@ job from the batch RAG job on the bill.</p>
 <h3 id="launch-the-embedding-job">Launch the embedding job<a class="anchor" aria-label="anchor" href="#launch-the-embedding-job"></a></h3>
 <p>Open <code>scripts/embedding_inference.py</code> first; it is under
 fifty lines. It reads a JSONL file of chunks from the job’s input
-directory, embeds them with whatever sentence-transformer
-<code>--model_id</code> names, normalises the vectors so a dot product
-is a cosine similarity, and saves one <code>embeddings.npy</code> to the
+directory, embeds them with whatever Hugging Face model
+<code>--model_id</code> names, through the thirty-line wrapper in
+<code>hf_embedder.py</code>, normalises the vectors so a dot product is
+a cosine similarity, and saves one <code>embeddings.npy</code> to the
 output directory. Nothing in it knows about WattBot, which is the point
 of a Processing job script: inputs in, outputs out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
@@ -844,7 +855,7 @@ script, mounts the inputs, and says where the output goes.</p>
 <span id="cb7-20"><a href="#cb7-20" tabindex="-1" aria-label="code-block-7-20"></a>start <span class="op">=</span> time.time()</span>
 <span id="cb7-21"><a href="#cb7-21" tabindex="-1" aria-label="code-block-7-21"></a>embedding_processor.run(</span>
 <span id="cb7-22"><a href="#cb7-22" tabindex="-1" aria-label="code-block-7-22"></a>    code<span class="op">=</span><span class="st">"embedding_inference.py"</span>,     <span class="co"># the script the container runs...</span></span>
-<span id="cb7-23"><a href="#cb7-23" tabindex="-1" aria-label="code-block-7-23"></a>    source_dir<span class="op">=</span><span class="st">"code_embed/"</span>,          <span class="co"># ...uploaded with everything beside it, requirements.txt included</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1" aria-label="code-block-7-23"></a>    source_dir<span class="op">=</span><span class="st">"code_embed/"</span>,          <span class="co"># ...uploaded with everything beside it (hf_embedder.py)</span></span>
 <span id="cb7-24"><a href="#cb7-24" tabindex="-1" aria-label="code-block-7-24"></a>    inputs<span class="op">=</span>[</span>
 <span id="cb7-25"><a href="#cb7-25" tabindex="-1" aria-label="code-block-7-25"></a>        ProcessingInput(</span>
 <span id="cb7-26"><a href="#cb7-26" tabindex="-1" aria-label="code-block-7-26"></a>            source<span class="op">=</span>chunks_s3_uri,                       <span class="co"># S3 object (or prefix) copied in before the script starts</span></span>
@@ -926,12 +937,12 @@ unanswerable rule (retrieval threshold OR the model’s own
 <code>compute_wattbot_score</code>: the metric we use at the
 end</li>
 </ul><p>What the batch script adds is the two model callables:
-<code>embed_query</code> wraps the same <code>gte-large</code>
-sentence-transformer the embedding job used (the question has to be
-embedded with the same model as the chunks), and <code>generate</code>
-wraps a vLLM engine serving Qwen3.8-27B with thinking mode off. The job
-writes <code>wattbot_solutions.csv</code> in the WattBot submission
-format.</p>
+<code>embed_query</code> wraps the same <code>gte-large</code> model and
+pooling the embedding job used (<code>hf_embedder.py</code>) (the
+question has to be embedded with the same model as the chunks), and
+<code>generate</code> wraps a vLLM engine serving Qwen3.8-27B with
+thinking mode off. The job writes <code>wattbot_solutions.csv</code> in
+the WattBot submission format.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -975,7 +986,7 @@ go.</p>
 <span id="cb10-21"><a href="#cb10-21" tabindex="-1" aria-label="code-block-10-21"></a>start <span class="op">=</span> time.time()</span>
 <span id="cb10-22"><a href="#cb10-22" tabindex="-1" aria-label="code-block-10-22"></a>rag_processor.run(</span>
 <span id="cb10-23"><a href="#cb10-23" tabindex="-1" aria-label="code-block-10-23"></a>    code<span class="op">=</span><span class="st">"wattbot_rag_batch.py"</span>,</span>
-<span id="cb10-24"><a href="#cb10-24" tabindex="-1" aria-label="code-block-10-24"></a>    source_dir<span class="op">=</span><span class="st">"code_rag/"</span>,            <span class="co"># wattbot_rag_batch.py + wattbot_rag.py + requirements.txt</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1" aria-label="code-block-10-24"></a>    source_dir<span class="op">=</span><span class="st">"code_rag/"</span>,            <span class="co"># wattbot_rag_batch.py + wattbot_rag.py + hf_embedder.py + requirements.txt</span></span>
 <span id="cb10-25"><a href="#cb10-25" tabindex="-1" aria-label="code-block-10-25"></a>    inputs<span class="op">=</span>[</span>
 <span id="cb10-26"><a href="#cb10-26" tabindex="-1" aria-label="code-block-10-26"></a>        ProcessingInput(</span>
 <span id="cb10-27"><a href="#cb10-27" tabindex="-1" aria-label="code-block-10-27"></a>            source<span class="op">=</span>chunks_s3_uri,</span>
