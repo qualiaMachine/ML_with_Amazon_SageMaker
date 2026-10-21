@@ -934,9 +934,13 @@ Keep the rest fixed. One change per experiment, or you will not know what moved 
 
 :::::::::::::::::::::::: solution
 
+Both solution cells start with `%%script false --no-raise-error`, which makes Jupyter skip the cell, so a Run All of the episode does not spend ten minutes here; delete that line to run one.
+
 **Generator.** `call_bedrock_chat` already takes a `model_id`, so the swap is a profile and a lambda:
 
 ```python
+%%script false --no-raise-error
+# Challenge solution: delete the line above to run this cell. It is skipped on Run All so the episode's own cells are not delayed by it.
 alt_generation_model_id = "us.amazon.nova-2-lite-v1:0"   # any chat model in the catalog with a converse API
 alt_model_arn = tagged_profile_arn(bedrock, alt_generation_model_id, "wattbot-gen-alt", name, project)
 
@@ -966,10 +970,12 @@ for m in bedrock.list_foundation_models(byOutputModality="EMBEDDING")["modelSumm
     print(f"{m['modelId']:<45} {m['providerName']}")
 ```
 
-Cohere's request takes a list of texts and says whether they are documents or a query; its response is a list of vectors, nested under the number type asked for. Everything else is Step 8 again: a tagged profile, one call per chunk, a cached matrix, and a query function that uses the same model.
+Cohere's request takes a list of texts and says whether they are documents or a query; its response is a list of vectors, nested under the number type asked for. One wrinkle: the catalog lists `cohere.embed-v4:0` for Ohio, but creating a profile on it fails with "does not support On Demand inference", because in this region the model is served only through the US cross-region profile, `us.cohere.embed-v4:0`. `tagged_profile_arn` catches that error and switches to the `us.` ID itself, which is the same thing that happens for Llama 4 and several other models. Everything else is Step 8 again: a tagged profile, one call per chunk, a cached matrix, and a query function that uses the same model.
 
 ```python
-cohere_model_id = "cohere.embed-v4:0"
+%%script false --no-raise-error
+# Challenge solution: delete the line above to run this cell. Ten minutes of embedding, so not in class.
+cohere_model_id = "cohere.embed-v4:0"   # listed for Ohio but served only through the US cross-region profile; tagged_profile_arn switches to us.cohere.embed-v4:0 on its own
 cohere_arn = tagged_profile_arn(bedrock, cohere_model_id, "wattbot-embed-cohere", name, project)
 
 def cohere_embed(text: str, input_type: str = "search_document") -> np.ndarray:
