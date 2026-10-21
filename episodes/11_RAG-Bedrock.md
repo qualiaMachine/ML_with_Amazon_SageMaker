@@ -103,6 +103,34 @@ For this episode you need a SageMaker notebook instance, but **not a GPU one**. 
 
 See [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) for further guidance on instance types.
 
+::::::::::::::::::::::::::::::::::::: callout
+
+### If the console will not take the role: fix it from CloudShell
+
+The create and edit forms sometimes show the role you picked and save the old one. If the first Bedrock call fails with `AccessDeniedException` naming `ml-sagemaker-use`, do the change from [CloudShell](https://us-east-2.console.aws.amazon.com/cloudshell/home?region=us-east-2) (the terminal icon in the console's top bar) instead, where the API reports what it did. First find your instance and see which role it has:
+
+```bash
+aws sagemaker list-notebook-instances --query 'NotebookInstances[].[NotebookInstanceName,NotebookInstanceStatus,RoleArn]' --output table
+```
+
+Then, with your instance's name, stop it, change the role, wait for the update to land, and start it again. The role change only applies to a stopped instance, and the status goes *Updating* for one to three minutes before it is *Stopped* again and can be started.
+
+```bash
+NB=<your-notebook-instance-name>
+ROLE=arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/ml-sagemaker-bedrock-use
+
+aws sagemaker stop-notebook-instance --notebook-instance-name $NB
+aws sagemaker wait notebook-instance-stopped --notebook-instance-name $NB
+aws sagemaker update-notebook-instance --notebook-instance-name $NB --role-arn $ROLE
+until [ "$(aws sagemaker describe-notebook-instance --notebook-instance-name $NB --query NotebookInstanceStatus --output text)" = "Stopped" ]; do sleep 10; done
+aws sagemaker describe-notebook-instance --notebook-instance-name $NB --query RoleArn --output text   # should now end in ml-sagemaker-bedrock-use
+aws sagemaker start-notebook-instance --notebook-instance-name $NB
+```
+
+Reopen JupyterLab once the status is *InService*, and rerun from Step 1: `role` printed there must end in `ml-sagemaker-bedrock-use`.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 ### Two buckets, no uploads
 
