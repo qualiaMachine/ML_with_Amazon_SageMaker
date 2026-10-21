@@ -1,5 +1,5 @@
-"""Embed a JSONL file of text chunks with a sentence-transformer. Runs as a
-SageMaker Processing job (the Processing Jobs episode's first job).
+"""Embed a JSONL file of text chunks with a Hugging Face embedding model. Runs
+as a SageMaker Processing job (the Processing Jobs episode's first job).
 
 Input:  <input_dir>/<input_filename>, one JSON object per line with a text field
 Output: <output_dir>/embeddings.npy, one row per chunk, in the same order,
@@ -14,7 +14,7 @@ import argparse
 import json
 import os
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from hf_embedder import HFEmbedder   # sits next to this script in the job's source_dir
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
 
     print(f"Loaded {len(texts)} chunks")
 
-    model = SentenceTransformer(args.model_id)   # downloads from Hugging Face the first time; uses the GPU if the job has one
+    model = HFEmbedder(args.model_id)   # downloads from Hugging Face the first time; uses the GPU if the job has one
     embeddings = model.encode(
         texts,
         convert_to_numpy=True,
