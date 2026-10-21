@@ -930,6 +930,8 @@ images_s3_uri = f"s3://{shared_bucket}/{data_prefix}/images/"
 infer_data_s3_uri = f"s3://{bucket_name}/{infer_prefix}/"
 ```
 
+The script this job runs is `code/churro_transcribe_batch.py`, the third file copied in Setup. Open it: the docstring at the top lists its inputs and outputs, `main` loads the model, merges the adapter into the base weights if one is given (`PeftModel.from_pretrained(...).merge_and_unload()`), transcribes the pages in batches, writes `predictions.csv`, and scores only the rows that have a reference text. The same script with and without `--adapter_tar` is the whole comparison.
+
 Then one function that launches a transcription job, in four parts:
 
 - **inputs**: S3 prefixes copied into the container before the script starts: the images and the staged base model (both from the shared bucket; a Processing job has no `model` channel, so the model directory is passed to the script as `--model_id`), your CSVs, and, optionally, the adapter;
