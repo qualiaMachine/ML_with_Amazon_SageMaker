@@ -586,13 +586,6 @@ estimator = HuggingFace(
 )
 ```
 
-Before launching, check that none of *your* jobs is still running from an earlier attempt. The filter is your own name prefix, because on a shared account other people's jobs are running too and are none of your concern. An empty list means go.
-
-```python
-# only jobs whose name starts with yours: on a shared account the full list is everyone's
-[j["TrainingJobName"] for j in session.sagemaker_client.list_training_jobs(StatusEquals="InProgress", NameContains=f"badger-{username}")["TrainingJobSummaries"]]
-```
-
 Now launch. Two details in this one line matter:
 
 - `job_name` is the one defined with the guard rails. SageMaker requires training job names to be unique in the account, so running this cell a second time fails immediately with `ResourceInUse` and nothing is launched. To run again on purpose, add a suffix to `training_job_name` (`-2`, `-2mp`, whatever says what changed); `checkpoint_s3_uri` follows it automatically. To **resume** a job that was killed, keep the `checkpoint_s3_uri` and change only the job name.
