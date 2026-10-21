@@ -15,9 +15,9 @@
     </g>
   <g stroke="#eee"><line x1="520" y1="80" x2="520" y2="460"/><line x1="610" y1="80" x2="610" y2="460"/><line x1="700" y1="80" x2="700" y2="460"/><line x1="790" y1="80" x2="790" y2="460"/><line x1="880" y1="80" x2="880" y2="460"/><line x1="970" y1="80" x2="970" y2="460"/></g>
   <text x="415" y="117" text-anchor="end" font-weight="bold">This episode: 3B LoRA, 120 pages, 3 passes</text>
-  <rect x="430" y="100" width="171" height="24" fill="#fdd0a2"/>
-  <rect x="430" y="100" width="81" height="24" fill="#2b8cbe" stroke="#444"/>
-  <text x="606" y="118" font-weight="bold">$0.80</text>
+  <rect x="430" y="100" width="167" height="24" fill="#fdd0a2"/>
+  <rect x="430" y="100" width="77" height="24" fill="#2b8cbe" stroke="#444"/>
+  <text x="602" y="118" font-weight="bold">$0.72 (measured)</text>
   <text x="415" y="167" text-anchor="end">Homework: 3B LoRA, 619 pages, 2 passes</text>
   <rect x="430" y="150" width="212" height="24" fill="#fdd0a2"/>
   <rect x="430" y="150" width="122" height="24" fill="#2b8cbe" stroke="#444" stroke-dasharray="4 3"/>
@@ -39,5 +39,5 @@
   <rect x="430" y="350" width="457" height="24" fill="#a50f15" stroke="#444"/>
   <text x="982" y="368" font-weight="bold">$12,000</text>
   <text x="550" y="508" text-anchor="middle" font-size="15" fill="#333">Each grid line is 10×; a sweep moves every bar one decade right. Dashed bar: estimated, not run.</text>
-  <text x="550" y="530" text-anchor="middle" font-size="15" fill="#333">Passes are the class budget, not a norm: large corpora usually get 1 to 3, a few hundred examples 5 to 10. Each extra pass adds the same again.</text>
+  <text x="550" y="530" text-anchor="middle" font-size="15" fill="#333">Passes are the class budget, not a norm: large corpora usually get 1 to 3, a few hundred examples 3 to 5. Each extra pass adds the same again.</text>
 </svg>
