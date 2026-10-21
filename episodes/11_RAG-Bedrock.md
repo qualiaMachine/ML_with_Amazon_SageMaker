@@ -151,7 +151,7 @@ If there is no instructor-staged bucket, stage the three input files in your own
 
 Three things are new here compared with the training episodes, so the setup is split into four cells.
 
-The session, region and S3 client are as before.
+The session, region and S3 client are as before, plus the role, printed so you can see which one the instance really has.
 
 ```python
 import os
@@ -170,6 +170,8 @@ import sagemaker
 session = sagemaker.Session()
 region = session.boto_region_name
 s3 = boto3.client("s3", region_name=region)
+role = sagemaker.get_execution_role()
+print("Role:", role)   # must end in ml-sagemaker-bedrock-use on the class account; if not, see the CloudShell callout above
 ```
 
 **The models.** RAG needs two: an embedding model, which turns a piece of text into a vector so that similar passages land near each other, and a generation model, the chat model that writes the answer from the passages it is given. Both are catalog models on Bedrock, named by a model ID; the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the console lists everything available in the region with its ID and price, and the [supported models page](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) in the documentation is the same list as a table. Prices are per million tokens on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/): in October 2026, DeepSeek V3 on demand is `$0.62` in and `$1.85` out, and Titan Text Embeddings V2 is `$0.02` in, which is why the whole WattBot run below costs cents. We write the IDs down now but will not call them by these IDs directly: the cost-tracking step below wraps each one in a tagged inference profile first, because that is the only way Bedrock spend gets attributed to a project.
