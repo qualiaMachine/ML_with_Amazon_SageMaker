@@ -586,10 +586,11 @@ estimator = HuggingFace(
 )
 ```
 
-Before launching, check that you do not already have a job running. An empty list means go.
+Before launching, check that none of *your* jobs is still running from an earlier attempt. The filter is your own name prefix, because on a shared account other people's jobs are running too and are none of your concern. An empty list means go.
 
 ```python
-session.sagemaker_client.list_training_jobs(StatusEquals="InProgress", NameContains="badger")["TrainingJobSummaries"]
+# only jobs whose name starts with yours: on a shared account the full list is everyone's
+[j["TrainingJobName"] for j in session.sagemaker_client.list_training_jobs(StatusEquals="InProgress", NameContains=f"badger-{username}")["TrainingJobSummaries"]]
 ```
 
 Now launch. Two details in this one line matter:
