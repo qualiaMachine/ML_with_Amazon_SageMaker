@@ -98,7 +98,7 @@ The habit is the same as for instances: pick the cheapest candidate that scores 
 
 ## Notebook + dataset setup
 
-For this episode you need a SageMaker notebook instance, but **not a GPU one**. A small CPU instance such as `ml.t3.medium` is enough, because the models run on Bedrock rather than in the notebook. The notebook's execution role must allow Bedrock access, which the default SageMaker role does not. On the class account that is the `ml-sagemaker-bedrock-use` role you picked when creating the notebook instance. If your instance was created with the older `ml-sagemaker-use` role, the first Bedrock call fails with an access-denied error: stop the instance, choose **Edit**, change the IAM role under *Permissions and encryption*, click **Update notebook instance**, and wait for the status to go from *Updating* back to *Stopped* (one to three minutes) before starting it. Reopening Edit during that wait shows the old role; the details page shows the new one once the update has landed. On your own account, attach the policy in the "Permissions and verification" callout below to your role before starting.
+For this episode you need a SageMaker notebook instance, but **not a GPU one**. A small CPU instance such as `ml.t3.medium` is enough, because the models run on Bedrock rather than in the notebook. The notebook's execution role must allow Bedrock access, which the default SageMaker role does not. On the class account that is the `ml-sagemaker-bedrock-use` role you picked when creating the notebook instance. If your instance was created with the older `ml-sagemaker-use` role, the first Bedrock call fails with an access-denied error: stop the instance, choose **Edit**, change the IAM role under *Permissions and encryption*, click **Update notebook instance**, and wait for the status to go from *Updating* back to *Stopped* (one to three minutes) before starting it. Reopening Edit during that wait shows the old role; the details page shows the new one once the update has landed. On your own account, attach the Bedrock policy from the *Account preparation checklist* instructor page to your role before starting.
 
 See [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) for further guidance on instance types.
 
@@ -565,7 +565,7 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
             role = boto3.client("sts").get_caller_identity()["Arn"]
             raise PermissionError(
                 f"This notebook's role has no Bedrock permissions ({role}).\n"
-                "The Bedrock episode needs the policy in the 'Permissions and verification' callout attached to the "
+                "The Bedrock episode needs the Bedrock policy from the Account preparation instructor page attached to the "
                 "notebook's execution role. On the class account, the instance must use the ml-sagemaker-bedrock-use role: "
                 "stop it, Edit, change the IAM role, start it again. On your own account, attach the policy to your role. "
                 "Nothing to change in this notebook; rerun this cell afterwards."
@@ -584,42 +584,7 @@ embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_mode
 
 ::::::::::::::::::::::::::::::::::::: callout
 
-### Permissions and verification
-
-- The notebook's execution role needs the policy below (fill in `<account-id>`): calling models, managing tagged inference profiles, and reading the catalog. The `InvokeModel` permission must cover **both** the profile ARN and the underlying model ARN, or calls through the profile are denied. If the cell above stops with an `AccessDeniedException`, ask the account administrator to attach this policy to the role rather than falling back to the raw model ID.
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "BedrockCallModels",
-      "Effect": "Allow",
-      "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream"],
-      "Resource": [
-        "arn:aws:bedrock:*::foundation-model/*",
-        "arn:aws:bedrock:*:<account-id>:application-inference-profile/*",
-        "arn:aws:bedrock:*:<account-id>:inference-profile/*"
-      ]
-    },
-    {
-      "Sid": "BedrockTaggedProfiles",
-      "Effect": "Allow",
-      "Action": ["bedrock:CreateInferenceProfile", "bedrock:GetInferenceProfile", "bedrock:ListInferenceProfiles",
-                 "bedrock:DeleteInferenceProfile", "bedrock:TagResource", "bedrock:ListTagsForResource"],
-      "Resource": [
-        "arn:aws:bedrock:*:<account-id>:application-inference-profile/*",
-        "arn:aws:bedrock:*:<account-id>:inference-profile/*"
-      ]
-    },
-    {
-      "Sid": "BedrockCatalog",
-      "Effect": "Allow",
-      "Action": ["bedrock:GetFoundationModel", "bedrock:ListFoundationModels", "bedrock:ListInferenceProfiles"],
-      "Resource": "*"
-    }
-  ]
-}
-```
+### Checking the profiles
 
 - You can confirm the routing in the Bedrock console under **Inference and Assessment → Cross-region inference → Application inference profiles**, or with `bedrock.list_inference_profiles(typeEquals="APPLICATION")`.
 - Tags only become filters in Cost Explorer once the tag keys have been **activated as cost allocation tags** in the Billing console (an account‑admin, once‑per‑key action; on a shared workshop account the organizers do this). Until then the tags exist on the resource but do not show up on reports.
