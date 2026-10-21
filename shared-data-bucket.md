@@ -88,10 +88,15 @@ python3 lesson/scripts/build_wattbot_corpus.py --metadata wattbot/metadata.csv -
 aws s3 sync wattbot/ s3://$BUCKET/wattbot/
 ```
 
-The corpus script downloads every PDF listed in `metadata.csv`, reports any URL that failed, then extracts every page's text into `pages.jsonl` so the Bedrock episode loads records in seconds instead of running `pypdf` for minutes on every notebook. Decide whether to drop or fix failed URLs before staging. The corpus only needs rebuilding when `metadata.csv` changes. To add `pages.jsonl` to a bucket staged before the script wrote it:
+The corpus script downloads every PDF listed in `metadata.csv`, reports any URL that failed, then extracts every page's text into `pages.jsonl` so the Bedrock episode loads records in seconds instead of running `pypdf` for minutes on every notebook. Decide whether to drop or fix failed URLs before staging. The corpus only needs rebuilding when `metadata.csv` changes. To add `pages.jsonl` to a bucket staged before the script wrote it, without re-downloading the PDFs:
 
 ```bash
+rm -rf /tmp/pages && mkdir -p /tmp/pages && cd /tmp/pages
+git clone -q --depth 1 https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git lesson
+pip install -q pypdf pandas
+mkdir -p wattbot
 aws s3 cp s3://$BUCKET/wattbot/corpus.zip wattbot/corpus.zip
+aws s3 cp s3://$BUCKET/wattbot/metadata.csv wattbot/metadata.csv
 python3 lesson/scripts/build_wattbot_corpus.py --metadata wattbot/metadata.csv --from-zip wattbot/corpus.zip
 aws s3 cp wattbot/pages.jsonl s3://$BUCKET/wattbot/pages.jsonl
 ```
