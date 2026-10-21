@@ -509,7 +509,7 @@ In **your bucket**, under `xgboost/<job-name>/` (the prefix from `output_path` p
 1. `output/model.tar.gz`: the model artifacts, a tarball of whatever the script saved to `SM_MODEL_DIR` (here `xgboost-model.json`). This is the file we download below.
 2. `profiler-output/` and `debug-output/`: small files from SageMaker's built-in profiler, written for every training job. Ignore them; they can be turned off with `disable_profiler=True` on the estimator.
 
-The job's log is not in S3. It is in **CloudWatch**, the AWS service that collects logs and metrics from every other service: everything a training job prints goes to a CloudWatch log stream named after the job, and it stays there after the instance is gone. The quickest way to it is the **View logs** link on the job's page in the SageMaker console.
+The job's log is not in S3. It is in **CloudWatch**, the AWS service that collects logs and metrics from every other service: everything a training job prints goes to a CloudWatch log stream named after the job, and it stays there after the instance is gone. The quickest way to it is the **View logs** link on the job's page in the SageMaker console: [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training), then your job.
 
 A **second bucket** also appeared, `sagemaker-<region>-<account-id>`. The SageMaker SDK creates this *default bucket* the first time it needs somewhere to stage files: before the job started, `fit()` zipped `source_dir` and uploaded it there as `<job-name>/source/sourcedir.tar.gz` for the training instance to download. It holds kilobytes per job and nothing you need, but it is shared by everyone in the account and carries no tags, so it is one more thing on the cleanup list. If you want everything in your own bucket, create the session as `sagemaker.Session(default_bucket=bucket_name)`.
 
@@ -674,7 +674,7 @@ To view and monitor your SageMaker training job, follow these steps in the AWS M
    - Go to the AWS Management Console and open the **SageMaker** service (can search for it)
 
 2. **View training jobs**  
-   - In the left-hand navigation menu, select **Training jobs**. You'll see a list of recent training jobs, which may include jobs from other users in the account.
+   - In the left-hand navigation menu, select **Training jobs** (or open [this link](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training) in the class region). You'll see a list of recent training jobs, which may include jobs from other users in the account.
 
 3. **Verify your training Job**  
    - Identify your job by looking for the specific name format (e.g., `SinkOrSwim-DoeJohn-YYYY-MM-DD-HH-MM-SS-XXX`) generated when you launched the job.  Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
