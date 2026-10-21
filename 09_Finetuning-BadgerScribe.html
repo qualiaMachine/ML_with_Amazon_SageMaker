@@ -295,7 +295,7 @@
 <li><a href="#setup">Setup</a></li>
 <li><a href="#step-1-launch-the-fine-tune">Step 1: Launch the fine-tune</a></li>
 <li><a href="#step-2-read-the-results-and-the-bill">Step 2: Read the results and the bill</a></li>
-<li><a href="#step-3-what-a-full-run-buys">Step 3: What a full run buys</a></li>
+<li><a href="#step-3-what-two-more-passes-buy">Step 3: What two more passes buy</a></li>
 <li><a href="#step-4-what-did-this-episode-cost">Step 4: What did this episode cost?</a></li>
 <li><a href="#homework-the-full-run-and-optionally-a-kaggle-submission">Homework: the full run and (optionally) a Kaggle submission</a></li>
 <li><a href="#cleanup">Cleanup</a></li>
@@ -648,15 +648,23 @@ October 2026):</p>
 <th>GPU-hours</th>
 <th>Cost = instance-hours × price</th>
 </tr></thead><tbody><tr><td>
-<strong>This episode:</strong> 3B LoRA, 120 Kurrent pages, 0.5M
-tokens seen</td>
+<strong>This episode:</strong> 3B LoRA, all 251 Kurrent training
+pages, 2 passes, 0.7M tokens seen</td>
 <td>1 × A10G</td>
 <td>1 × <code>ml.g5.xlarge</code> (<code>$1.41</code>)</td>
-<td>0.5</td>
-<td>0.5</td>
-<td><strong><code>$0.72</code> measured</strong></td>
-</tr><tr><td>Homework for Badger Scribe teams: 3B LoRA, the whole train set (619
-pages, all three categories), 2M tokens</td>
+<td>0.65</td>
+<td>0.65</td>
+<td><strong>~<code>$0.95</code></strong></td>
+</tr><tr><td>Homework: the same pages, 4 passes, 40 pages scored, 1.4M
+tokens</td>
+<td>1 × A10G</td>
+<td>1 × <code>ml.g5.xlarge</code> (<code>$1.41</code>)</td>
+<td>1.35</td>
+<td>1.35</td>
+<td>~<code>$1.90</code>
+</td>
+</tr><tr><td>Badger Scribe teams: 3B LoRA, the whole train set (619 pages, all
+three categories), 2 passes, 1.8M tokens</td>
 <td>1 × A10G</td>
 <td>1 × <code>ml.g5.xlarge</code> (<code>$1.41</code>)</td>
 <td>1.6</td>
@@ -696,16 +704,17 @@ below)</td>
 <td><strong>× 10</strong></td>
 </tr></tbody></table><p>Tokens seen is examples × tokens per example × passes over the data,
 and it is what the time rule below multiplies by model size. The number
-of passes is a knob you tune, and the class run’s three passes are a
-budget choice for a 35-minute class, not a recommendation: large
+of passes is a knob you tune, and the class run’s two passes are a
+budget choice for a 40-minute job, not a recommendation: large
 instruction-tuning corpora are usually passed over one to three times,
 but a few hundred examples usually take three to five. Each extra pass
 adds one more unit of the same row, so a ten-pass run over the whole
 train set is about <code>$10</code>, and the sweep row still applies on
 top. Step 2 shows how the per-epoch curve decides it.</p>
-<p>The homework row is the competition’s full training set at two
-passes, scaled from the class run at the same seconds per page; the
-shared bucket holds only the German letters, so a team trains on
+<p>The class and homework rows are scaled from a measured run (120
+pages, 3 passes, 30.6 billed minutes, <code>$0.72</code>) at the same
+seconds per page. The teams row is the competition’s full training set;
+the shared bucket holds only the German letters, so a team trains on
 everything from the competition’s own data download.</p>
 <p>GPUs come in fixed boxes: an <code>ml.g5.xlarge</code> is one A10G,
 an <code>ml.p4d.24xlarge</code> is eight A100s, an
@@ -715,21 +724,21 @@ hours: 100 instance-hours at <code>$63.30</code> is <code>$6,330</code>.
 GPU-hours (GPUs × hours) is what the time estimate below produces;
 divide by the GPUs per box to get instance-hours, and multiply by the
 box’s price to get the bill.</p>
-<figure><img src="fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.72, homework on the full Badger Scribe train set 2.25, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from seventy cents
+<figure><img src="fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.95, homework 1.90, the full Badger Scribe train set 2.25, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from about a dollar
 for this episode’s LoRA run to twelve thousand dollars for a 70B full
 fine-tune; a ten-run sweep shifts every bar up by one decade</div>
 </figure><p>Two rows to note. The CHURRO row is the model you are about to
 fine-tune: Stanford spent on the order of 800 H100-hours making it, and
-you get the benefit for seventy cents because you are <em>adapting</em>
-it, not retraining it. Starting from a model that already knows most of
-the task is the largest cost saving available, and it is decided before
-any GPU is involved. The sweep row: a first run is rarely the last, so a
+you get the benefit for a dollar because you are <em>adapting</em> it,
+not retraining it. Starting from a model that already knows most of the
+task is the largest cost saving available, and it is decided before any
+GPU is involved. The sweep row: a first run is rarely the last, so a
 “<code>$140</code> fine-tune” is usually a <code>$700</code> to
 <code>$1,400</code> project. That is the number that surprises research
 groups. (The 7B row is worked out in the challenge below; the 70B rows
 are rule-of-thumb magnitudes; the CHURRO figures come from a published
 review of the paper.)</p>
-<p>The habits in this episode are cheap practice at seventy cents a run.
+<p>The habits in this episode are cheap practice at a dollar a run.
 <strong>At <code>$140</code> a run they are the difference between a
 project and a budget incident; at <code>$6,000</code> a run, one
 forgotten <code>max_run</code> or one wrong instance type is a grant
@@ -816,12 +825,13 @@ GPU-seconds = FLOPs ÷ (GPU peak FLOPS × 0.25)      a real job reaches about a 
 <p>Peak FLOPS is on the GPU’s data sheet: about 70 trillion per second
 for an A10G, 312 for an A100, 989 for an H100. Cost is GPU-hours × the
 hourly rate, plus about 10 minutes of startup per job.</p>
-<p>The class run: 120 pages × 1,600 tokens × 3 passes = 576k tokens.
-LoRA on 3.75B parameters: 4 × 3.75e9 × 5.76e5 ≈ 8.6e15 FLOPs. A quarter
-of an A10G’s 70 TFLOPS is 17 TFLOPS, so about 500 seconds, call it 9
-minutes. The run measured 15.6 minutes of training, inside the factor of
-two; the gap is image preprocessing on four CPU cores and the checkpoint
-writes.</p>
+<p>The class run: 251 pages × 1,600 tokens × 2 passes = 803k tokens.
+LoRA on 3.75B parameters: 4 × 3.75e9 × 8.03e5 ≈ 1.2e16 FLOPs. A quarter
+of an A10G’s 70 TFLOPS is 17 TFLOPS, so about 700 seconds, call it 12
+minutes. Measured, the same instance trains at 2.6 seconds per
+page-pass, so 502 page-passes take about 22 minutes: inside the factor
+of two, the gap being image preprocessing on four CPU cores and the
+checkpoint writes.</p>
 <p><code>helpers.estimate_finetune_cost</code> does the same arithmetic
 for any model size, example count, tokens per example and passes. It
 picks the cheapest instance that fits, or the one you name, and prints
@@ -836,7 +846,7 @@ memory, GPU-hours, cost per run and per project, and the
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a>helpers.estimate_finetune_cost(</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>    params_billions<span class="op">=</span><span class="fl">3.75</span>,        <span class="co"># CHURRO-3B: 3B language model + vision tower</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a>    examples<span class="op">=</span><span class="dv">120</span>, tokens_per_example<span class="op">=</span><span class="dv">1600</span>, epochs<span class="op">=</span><span class="dv">3</span>,   <span class="co"># tokens, not words: ~1,300 for the image + ~300 of text; counted in Setup below</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a>    examples<span class="op">=</span><span class="dv">251</span>, tokens_per_example<span class="op">=</span><span class="dv">1600</span>, epochs<span class="op">=</span><span class="dv">2</span>,   <span class="co"># tokens, not words: ~1,300 for the image + ~300 of text; counted in Setup below</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a>    method<span class="op">=</span><span class="st">"lora"</span>,</span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.xlarge"</span>,</span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>)</span></code></pre>
@@ -1008,9 +1018,9 @@ account.</strong></p>
 <h3 id="the-run">The run<a class="anchor" aria-label="anchor" href="#the-run"></a></h3>
 <p>A training job bills from the moment its instance is ready until the
 job ends, including the minutes spent pulling the container and
-downloading data and model weights. In class we train on 120
-German-letter pages for 3 epochs and score 15 held-out pages before and
-after, all inside one job:</p>
+downloading data and model weights. In class we train on all 251
+German-letter training pages for 2 passes and score 15 held-out pages
+before and after, all inside one job:</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Phase</th>
 <th>Time</th>
 <th>Cost</th>
@@ -1024,14 +1034,14 @@ model load</td>
 </tr><tr><td>Score 15 holdout pages with the base model, ~20 s each</td>
 <td>~5 min</td>
 <td><code>$0.12</code></td>
-</tr><tr><td>Training: 120 pages × 3 passes, ~2.6 s per page with gradient
+</tr><tr><td>Training: 251 pages × 2 passes, ~2.6 s per page-pass with gradient
 checkpointing</td>
-<td>~16 min</td>
-<td><code>$0.37</code></td>
+<td>~22 min</td>
+<td><code>$0.52</code></td>
 </tr><tr><td>Score 8 of the holdout pages at the end of each pass, ~17 s each,
 for the curve</td>
-<td>~7 min</td>
-<td><code>$0.16</code></td>
+<td>~5 min</td>
+<td><code>$0.11</code></td>
 </tr><tr><td>Score the same 15 pages with the fine-tuned model, ~17 s each</td>
 <td>~4 min</td>
 <td><code>$0.10</code></td>
@@ -1039,12 +1049,14 @@ for the curve</td>
 <td>~1 min</td>
 <td><code>$0.02</code></td>
 </tr><tr><td><strong>One run</strong></td>
-<td><strong>35 min wall-clock, 31 min billed</strong></td>
-<td><strong>~<code>$0.72</code></strong></td>
-</tr></tbody></table><p>These are measured, from a run on 2026-10-20: 34.5 minutes from
-launch to finish, 30.6 billed, <code>$0.72</code>. Scoring a page takes
-about 17 to 20 seconds, not the 10 a first guess might assume; the two
-15-page evaluations and the three curve points are half the bill.</p>
+<td><strong>~45 min wall-clock, ~40 min billed</strong></td>
+<td><strong>~<code>$0.95</code></strong></td>
+</tr></tbody></table><p>The per-page times are measured, from a run on 2026-10-20 (120 pages,
+3 passes: 34.5 minutes from launch to finish, 30.6 billed,
+<code>$0.72</code>); the rows are that run’s rates applied to 251 pages
+and 2 passes. Scoring a page takes about 17 to 20 seconds, not the 10 a
+first guess might assume, so the two 15-page evaluations and the curve
+points are a third of the bill.</p>
 <p>Training time scales linearly with pages × epochs, and roughly
 linearly with image resolution (every 28 × 28 pixel block of the page
 becomes one token in the model’s sequence). Doubling
@@ -1066,18 +1078,19 @@ weekend.</p>
 <td><code>ml.t3.medium</code></td>
 <td>3 h</td>
 <td><code>$0.15</code></td>
-</tr><tr><td>Mini fine-tune with before/after scoring and a per-epoch curve</td>
+</tr><tr><td>Fine-tune on all 251 pages, 2 passes, with before/after scoring and
+a per-pass curve</td>
 <td><code>ml.g5.xlarge</code></td>
-<td>~35 min</td>
-<td><code>$0.72</code></td>
+<td>~45 min</td>
+<td><code>$0.95</code></td>
 </tr><tr><td>Exercise 1: same job at 2 megapixels</td>
 <td><code>ml.g5.xlarge</code></td>
-<td>~55 min</td>
-<td><code>$1.20</code></td>
+<td>~70 min</td>
+<td><code>$1.50</code></td>
 </tr><tr><td><strong>Total</strong></td>
 <td></td>
 <td></td>
-<td><strong>~<code>$2.10</code></strong></td>
+<td><strong>~<code>$2.60</code></strong></td>
 </tr></tbody></table><p>Compare the classic mistake: doing all of this interactively on a
 <code>ml.g5.xlarge</code> <em>notebook</em> instance. The class itself
 costs about the same, but a notebook instance keeps billing after you
@@ -1207,23 +1220,23 @@ split by category and by who transcribed them.</p>
 <p>Not all 295 labelled pages are trained on. The script first sets 15%
 of them aside, by category and with a fixed seed, so the same 44 pages
 are held out for every run and every learner; those are the pages every
-CER in this episode is measured on. Of the 251 that remain, the class
-run trains on a 120-page slice to keep the job near half an hour; the
-homework uses all 251. The holdout is scored three ways: 15 pages before
-and after training, and 8 of those 15 at the end of every pass. Here are
-those numbers for this run, from the same settings the training job gets
-in Step 1:</p>
+CER in this episode is measured on. The 251 that remain are what the
+class run trains on, for two passes; the homework trains on the same 251
+for four. The holdout is scored three ways: 15 pages before and after
+training, and 8 of those 15 at the end of every pass. Here are those
+numbers for this run, from the same settings the training job gets in
+Step 1:</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a>holdout_frac, class_pages, eval_pages, curve_pages <span class="op">=</span> <span class="fl">0.15</span>, <span class="dv">120</span>, <span class="dv">15</span>, <span class="dv">8</span>   <span class="co"># the Step 1 hyperparameters that decide the split</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a>holdout_frac, eval_pages, curve_pages <span class="op">=</span> <span class="fl">0.15</span>, <span class="dv">15</span>, <span class="dv">8</span>   <span class="co"># the Step 1 hyperparameters that decide the split</span></span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a></span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>n_holdout <span class="op">=</span> <span class="bu">round</span>(<span class="bu">len</span>(train_df) <span class="op">*</span> holdout_frac)</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a>n_pool <span class="op">=</span> <span class="bu">len</span>(train_df) <span class="op">-</span> n_holdout</span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(train_df)<span class="sc">}</span><span class="ss"> labelled pages"</span>)</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a><span class="bu">print</span>(<span class="ss">f"  held out for scoring:   </span><span class="sc">{</span>n_holdout<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span>holdout_frac<span class="sc">:.0%}</span><span class="ss">, fixed seed, never trained on)"</span>)</span>
 <span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a><span class="bu">print</span>(<span class="ss">f"  available for training: </span><span class="sc">{</span>n_pool<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a><span class="bu">print</span>(<span class="ss">f"  trained on in class:    </span><span class="sc">{</span>class_pages<span class="sc">}</span><span class="ss">  (the homework uses all </span><span class="sc">{</span>n_pool<span class="sc">}</span><span class="ss">)"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a><span class="bu">print</span>(<span class="ss">f"  trained on:             all </span><span class="sc">{</span>n_pool<span class="sc">}</span><span class="ss">, 2 passes in class, 4 in the homework"</span>)</span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a><span class="bu">print</span>(<span class="ss">f"  scored before/after:    </span><span class="sc">{</span>eval_pages<span class="sc">}</span><span class="ss"> of the </span><span class="sc">{</span>n_holdout<span class="sc">}</span><span class="ss"> holdout pages; </span><span class="sc">{</span>curve_pages<span class="sc">}</span><span class="ss"> of those after every pass"</span>)</span>
 <span id="cb9-10"><a href="#cb9-10" tabindex="-1" aria-label="code-block-9-10"></a><span class="bu">print</span>(<span class="ss">f"test pages (no labels, scored only by Kaggle): </span><span class="sc">{</span><span class="bu">len</span>(test_df)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
@@ -1353,7 +1366,7 @@ should have used. Re-run the estimator with it and compare with the
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a>helpers.estimate_finetune_cost(params_billions<span class="op">=</span><span class="fl">3.75</span>, examples<span class="op">=</span><span class="dv">120</span>, tokens_per_example<span class="op">=</span><span class="bu">int</span>(avg_tokens_per_page), epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a>helpers.estimate_finetune_cost(params_billions<span class="op">=</span><span class="fl">3.75</span>, examples<span class="op">=</span><span class="dv">251</span>, tokens_per_example<span class="op">=</span><span class="bu">int</span>(avg_tokens_per_page), epochs<span class="op">=</span><span class="dv">2</span>,</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a>                               method<span class="op">=</span><span class="st">"lora"</span>, instance_type<span class="op">=</span><span class="st">"ml.g5.xlarge"</span>)</span></code></pre>
 </div>
 <p>Multiply by pages and passes and that is the “tokens seen” in the
@@ -1433,10 +1446,10 @@ jobs it launches. Pass them to every estimator.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-1-launch-the-fine-tune">Step 1: Launch the fine-tune<a class="anchor" aria-label="anchor" href="#step-1-launch-the-fine-tune"></a></h2>
 <hr class="half-width"><p>One job does everything: scores 15 held-out German-letter pages with
-the base model, trains on 120 German-letter pages for 3 epochs, scoring
-8 of the holdout pages at the end of each epoch, scores the same 15
-pages again, and saves the adapter. The hyperparameters below are what
-the Step 0 estimate was built from.</p>
+the base model, trains on the 251 German-letter training pages for 2
+passes, scoring 8 of the holdout pages at the end of each pass, scores
+the same 15 pages again, and saves the adapter. The hyperparameters
+below are what the Step 0 estimate was built from.</p>
 <p>First the guard rails, each one a named variable so that the printout
 below shows exactly what the job is allowed to cost and where it saves
 its progress.</p>
@@ -1445,8 +1458,8 @@ its progress.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a>instance_type <span class="op">=</span> <span class="st">"ml.g5.xlarge"</span>            <span class="co"># one A10G GPU, 24 GB; the GPU lives in the job, not in this notebook</span></span>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>                           <span class="co"># $/hour, us-east-1 on-demand</span></span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>estimated_minutes <span class="op">=</span> <span class="dv">35</span>                    <span class="co"># the Step 0 estimate</span></span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a>max_run_minutes <span class="op">=</span> <span class="dv">70</span>                      <span class="co"># about twice the estimate; SageMaker kills the job at this cap, whatever it is doing</span></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>estimated_minutes <span class="op">=</span> <span class="dv">40</span>                    <span class="co"># the Step 0 estimate</span></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a>max_run_minutes <span class="op">=</span> <span class="dv">80</span>                      <span class="co"># about twice the estimate; SageMaker kills the job at this cap, whatever it is doing</span></span>
 <span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-mini"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
 <span id="cb22-6"><a href="#cb22-6" tabindex="-1" aria-label="code-block-22-6"></a>checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">/"</span>   <span class="co"># the script saves the adapter here at the end of every epoch</span></span>
 <span id="cb22-7"><a href="#cb22-7" tabindex="-1" aria-label="code-block-22-7"></a></span>
@@ -1470,7 +1483,7 @@ its progress.</p>
 bug and your whole budget.</strong> A training loop that diverges, hangs
 on a bad batch or waits on a dead data loader bills the same as one that
 works. The cap turns “whatever it takes” into a number you chose: here
-<strong><code>$1.65</code> worst case</strong>. Set it to about twice
+<strong><code>$1.88</code> worst case</strong>. Set it to about twice
 the estimate, never leave it at the default of 24 hours, and on a
 <strong><code>$25</code>-an-hour instance treat it as the price of the
 launch</strong>.</li>
@@ -1513,17 +1526,16 @@ scored when.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" tabindex="-1" aria-label="code-block-23-1"></a>hyperparameters <span class="op">=</span> {</span>
 <span id="cb23-2"><a href="#cb23-2" tabindex="-1" aria-label="code-block-23-2"></a>    <span class="co"># no model_id: the script reads the base weights from the "model" channel mounted at fit()</span></span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1" aria-label="code-block-23-3"></a>    <span class="st">"max_train_pages"</span>: <span class="dv">120</span>,           <span class="co"># a slice in class; the homework uses all 251 training pages</span></span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1" aria-label="code-block-23-4"></a>    <span class="st">"epochs"</span>: <span class="dv">3</span>,                      <span class="co"># three passes over the 120 pages; the per-epoch curve below says whether the third was worth it</span></span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a>    <span class="st">"lr"</span>: <span class="fl">2e-4</span>,                       <span class="co"># LoRA takes a higher learning rate than a full fine-tune (~1e-5)</span></span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1" aria-label="code-block-23-6"></a>    <span class="st">"lora_r"</span>: <span class="dv">16</span>,                     <span class="co"># adapter rank: how many trainable parameters LoRA adds per layer</span></span>
-<span id="cb23-7"><a href="#cb23-7" tabindex="-1" aria-label="code-block-23-7"></a>    <span class="st">"batch_size"</span>: <span class="dv">1</span>,</span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a>    <span class="st">"grad_accum"</span>: <span class="dv">4</span>,                  <span class="co"># effective batch of 4 pages -&gt; ~90 optimizer steps over 3 passes</span></span>
-<span id="cb23-9"><a href="#cb23-9" tabindex="-1" aria-label="code-block-23-9"></a>    <span class="st">"max_pixels"</span>: <span class="dv">1280</span> <span class="op">*</span> <span class="dv">28</span> <span class="op">*</span> <span class="dv">28</span>,     <span class="co"># ~1 megapixel per page; the cost knob: tokens per page scale with it</span></span>
-<span id="cb23-10"><a href="#cb23-10" tabindex="-1" aria-label="code-block-23-10"></a>    <span class="st">"eval_pages"</span>: <span class="dv">15</span>,                 <span class="co"># holdout pages scored before (eval_before=1) and after training</span></span>
-<span id="cb23-11"><a href="#cb23-11" tabindex="-1" aria-label="code-block-23-11"></a>    <span class="st">"eval_before"</span>: <span class="dv">1</span>,</span>
-<span id="cb23-12"><a href="#cb23-12" tabindex="-1" aria-label="code-block-23-12"></a>    <span class="st">"curve_pages"</span>: <span class="dv">8</span>,                 <span class="co"># of those 15, scored again at the end of every epoch: the CER curve</span></span>
-<span id="cb23-13"><a href="#cb23-13" tabindex="-1" aria-label="code-block-23-13"></a>}</span></code></pre>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1" aria-label="code-block-23-3"></a>    <span class="st">"epochs"</span>: <span class="dv">2</span>,                      <span class="co"># two passes over the 251 pages; the per-pass curve below says what each one bought</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1" aria-label="code-block-23-4"></a>    <span class="st">"lr"</span>: <span class="fl">2e-4</span>,                       <span class="co"># LoRA takes a higher learning rate than a full fine-tune (~1e-5)</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a>    <span class="st">"lora_r"</span>: <span class="dv">16</span>,                     <span class="co"># adapter rank: how many trainable parameters LoRA adds per layer</span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1" aria-label="code-block-23-6"></a>    <span class="st">"batch_size"</span>: <span class="dv">1</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1" aria-label="code-block-23-7"></a>    <span class="st">"grad_accum"</span>: <span class="dv">4</span>,                  <span class="co"># effective batch of 4 pages -&gt; ~125 optimizer steps over 2 passes</span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a>    <span class="st">"max_pixels"</span>: <span class="dv">1280</span> <span class="op">*</span> <span class="dv">28</span> <span class="op">*</span> <span class="dv">28</span>,     <span class="co"># ~1 megapixel per page; the cost knob: tokens per page scale with it</span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1" aria-label="code-block-23-9"></a>    <span class="st">"eval_pages"</span>: <span class="dv">15</span>,                 <span class="co"># holdout pages scored before (eval_before=1) and after training</span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1" aria-label="code-block-23-10"></a>    <span class="st">"eval_before"</span>: <span class="dv">1</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1" aria-label="code-block-23-11"></a>    <span class="st">"curve_pages"</span>: <span class="dv">8</span>,                 <span class="co"># of those 15, scored again at the end of every epoch: the CER curve</span></span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1" aria-label="code-block-23-12"></a>}</span></code></pre>
 </div>
 <p>Then the estimator: which script and folder to ship, which prebuilt
 container to run it in (the three version numbers pick a Hugging Face
@@ -1635,7 +1647,7 @@ launched yesterday fails overnight.</p>
 <p>Things to find in the log while you wait:</p>
 <ul><li>
 <code>pages: 295 total -&gt; 251 train / 44 holdout</code>: the
-split, before the 120-page slice.</li>
+split.</li>
 <li>
 <code>trainable params: ...</code>: what fraction of the 3B
 parameters LoRA trains.</li>
@@ -1770,11 +1782,11 @@ buy nothing. Stop here next time and save the money.</li>
 <li>
 <strong>Rising while the loss still falls</strong>: the model is
 memorising the training pages. Fewer passes, or more data.</li>
-</ul><p>Our run on 2026-10-20 gave 0.246 (base), 0.086, 0.069, 0.061: a big
-drop on the first pass, then smaller ones, still falling at the third.
-Two passes would have been a fair stopping point for a class; the third
-bought another 0.008 of CER for five minutes of GPU. That is the trade
-the curve lets you see.</p>
+</ul><p>A test run on 120 pages for 3 passes gave 0.246 (base), 0.086, 0.069,
+0.061: a big drop on the first pass, then smaller ones, still falling at
+the third. The third pass bought 0.008 of CER for five minutes of GPU,
+which is why the class run stops at two and the homework goes to four:
+that is the trade the curve lets you see.</p>
 <p>Eight pages is a noisy estimate (one hard page moves it), so read the
 trend, not the third decimal. For a run you will repeat, set
 <code>curve_pages</code> higher; each point costs about seventeen
@@ -1828,13 +1840,13 @@ makes the cost estimate a number and not a hope.</p>
 <h3 class="callout-title">Was the estimate right?</h3>
 <div class="callout-content">
 <ol style="list-style-type: decimal"><li>Compare the billable time from <code>job_cost_report</code> with the
-~35 minutes estimated in Step 0. Which phase was off, and by how much?
+~40 minutes estimated in Step 0. Which phase was off, and by how much?
 (<code>train_minutes</code> and <code>seconds_per_page</code> in
 <code>train_summary.json</code> tell you.)</li>
-<li>Using your measured seconds per page, estimate the homework run: 251
-pages × 2 epochs, plus 40 evaluation pages before and after, plus the
-same startup overhead. Write the number down; you will compare it to the
-real bill after the homework.</li>
+<li>Using your measured seconds per page, estimate the homework run: the
+same 251 pages × 4 passes, 40 evaluation pages before and after, four
+curve points, and the same startup overhead. Write the number down; you
+will compare it to the real bill after the homework.</li>
 </ol></div>
 </div>
 </div>
@@ -1845,27 +1857,27 @@ real bill after the homework.</li>
 </button>
 <div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<ol style="list-style-type: decimal"><li>The run in the phase table came in at 30.6 billed minutes against
-the 35 estimated. Scoring is the line most likely to surprise: at 17 to
-20 seconds a page, the two 15-page evaluations and the three curve
-points are about 16 minutes, half the bill. Training is close to 2.6 s
-per page-pass; if you measured 4, the 360 page-passes take 24 minutes
-instead of 16.</li>
-<li>At 2.5 s/page: 502 passes is 21 minutes, plus ~13 minutes of
-evaluation at 10 s/page, plus 10 minutes startup, so about 45 minutes
-and <code>$1.05</code>. Scale every line by the ratio you measured.</li>
+<ol style="list-style-type: decimal"><li>Expect about 40 billed minutes. Scoring is the line most likely to
+surprise: at 17 to 20 seconds a page, the two 15-page evaluations and
+the two curve points are about 14 minutes, a third of the bill. Training
+is close to 2.6 s per page-pass; if you measured 4, the 502 page-passes
+take 33 minutes instead of 22.</li>
+<li>At 2.6 s per page-pass: 1,004 page-passes is 44 minutes; two 40-page
+evaluations at ~18 s are 24; four curve points are 9; startup and upload
+4: about 80 minutes and <code>$1.90</code>. Scale every line by the
+ratio you measured.</li>
 </ol></div>
 </div>
 </div>
 </div>
 </div>
-</section><section><h2 class="section-heading" id="step-3-what-a-full-run-buys">Step 3: What a full run buys<a class="anchor" aria-label="anchor" href="#step-3-what-a-full-run-buys"></a></h2>
-<hr class="half-width"><p>Your instructor ran the same script before class on all 251 training
-pages (2 epochs, 40 evaluation pages) from the same data release. Its
-output is in the shared bucket. The holdout split and the evaluation
-sample are both seeded, and the sample is the first <em>n</em> of one
-fixed shuffle, so the instructor’s 40 evaluation pages include your 15
-by construction.</p>
+</section><section><h2 class="section-heading" id="step-3-what-two-more-passes-buy">Step 3: What two more passes buy<a class="anchor" aria-label="anchor" href="#step-3-what-two-more-passes-buy"></a></h2>
+<hr class="half-width"><p>Your instructor ran the same script before class on the same 251
+training pages for 4 passes, scoring 40 evaluation pages, from the same
+data release. Its output is in the shared bucket. The holdout split and
+the evaluation sample are both seeded, and the sample is the first
+<em>n</em> of one fixed shuffle, so the instructor’s 40 evaluation pages
+include your 15 by construction.</p>
 <div class="codewrapper sourceCode" id="cb33">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1875,7 +1887,7 @@ by construction.</p>
 <span id="cb33-4"><a href="#cb33-4" tabindex="-1" aria-label="code-block-33-4"></a>    s3_client.download_file(shared_bucket, <span class="ss">f"</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/instructor/full-run/</span><span class="sc">{</span>fname<span class="sc">}</span><span class="ss">"</span>, os.path.join(full_dir, fname))</span>
 <span id="cb33-5"><a href="#cb33-5" tabindex="-1" aria-label="code-block-33-5"></a></span>
 <span id="cb33-6"><a href="#cb33-6" tabindex="-1" aria-label="code-block-33-6"></a>full_summary <span class="op">=</span> json.load(<span class="bu">open</span>(os.path.join(full_dir, <span class="st">"train_summary.json"</span>)))</span>
-<span id="cb33-7"><a href="#cb33-7" tabindex="-1" aria-label="code-block-33-7"></a><span class="bu">print</span>(<span class="st">"full run:"</span>, full_summary[<span class="st">"train_pages"</span>], <span class="st">"pages,"</span>, full_summary[<span class="st">"train_minutes"</span>], <span class="st">"min of training"</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" tabindex="-1" aria-label="code-block-33-7"></a><span class="bu">print</span>(<span class="st">"homework run:"</span>, full_summary[<span class="st">"train_pages"</span>], <span class="st">"pages,"</span>, full_summary[<span class="st">"epochs"</span>], <span class="st">"passes,"</span>, full_summary[<span class="st">"train_minutes"</span>], <span class="st">"min of training"</span>)</span>
 <span id="cb33-8"><a href="#cb33-8" tabindex="-1" aria-label="code-block-33-8"></a><span class="bu">print</span>(<span class="st">"CER before :"</span>, full_summary[<span class="st">"holdout_eval_before"</span>][<span class="st">"per_category"</span>])</span>
 <span id="cb33-9"><a href="#cb33-9" tabindex="-1" aria-label="code-block-33-9"></a><span class="bu">print</span>(<span class="st">"CER after  :"</span>, full_summary[<span class="st">"holdout_eval_after"</span>][<span class="st">"per_category"</span>])</span></code></pre>
 </div>
@@ -1891,12 +1903,11 @@ have in common:</p>
 <span id="cb34-5"><a href="#cb34-5" tabindex="-1" aria-label="code-block-34-5"></a><span class="bu">print</span>(three.<span class="bu">round</span>(<span class="dv">3</span>).to_string(index<span class="op">=</span><span class="va">False</span>))</span>
 <span id="cb34-6"><a href="#cb34-6" tabindex="-1" aria-label="code-block-34-6"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">mean on"</span>, <span class="bu">len</span>(three), <span class="st">"shared pages:"</span>, three[[<span class="st">"cer_base"</span>, <span class="st">"cer_tuned"</span>, <span class="st">"cer_full"</span>]].mean().<span class="bu">round</span>(<span class="dv">3</span>).to_dict())</span></code></pre>
 </div>
-<p>Three numbers: the base model, 10 minutes of training on 120 pages,
-and 20 minutes on 251. The second gap is what more data and more time
-buy, and it cost about fifty cents. Whether that dollar is worth it
-depends on the gap; whether the next <code>$140</code> is worth it is
-the same question at a different scale, and the only way to answer it is
-to measure, as you just did.</p>
+<p>Three numbers: the base model, two passes over the 251 pages, and
+four. The second gap is what two more passes buy, and it cost about a
+dollar. Whether that dollar is worth it depends on the gap; whether the
+next <code>$140</code> is worth it is the same question at a different
+scale, and the only way to answer it is to measure, as you just did.</p>
 <div id="why-the-holdout-number-flatters-you" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1985,9 +1996,9 @@ runs this workload roughly 2.5–3x faster. It also has twice the GPU
 memory, so <code>batch_size</code> can be 2 or 4 instead of 1, which
 uses the GPU more efficiently.</p>
 <p>Using the Step 0 “The run” table, estimate the cost of the class job
-on <code>ml.g6e.xlarge</code>. Then do the same for the homework run (21
-min of training, 13 min of evaluation, 10 min of startup on the g5).
-Which phase does <em>not</em> get faster, and when does the faster
+on <code>ml.g6e.xlarge</code>. Then do the same for the homework run (44
+min of training, 33 min of scoring, 4 min of startup and upload on the
+g5). Which phase does <em>not</em> get faster, and when does the faster
 instance save money?</p>
 </div>
 </div>
@@ -1999,20 +2010,20 @@ instance save money?</p>
 </button>
 <div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
-<p>Startup (~10 min, <code>$0.44</code> at <code>$2.61</code>/h) does
-not speed up: the container pull and the S3 downloads are the same on
-any instance. For the class job, training drops from ~10 to ~4 minutes
-and each evaluation from ~3 to ~1 minute, so the job is about 16 minutes
-and ~<code>$0.70</code>: a little <em>more</em> than the
-<code>$0.60</code> g5 run, because on a job this short the fixed
-overhead dominates.</p>
-<p>The homework run on the g5 is 21 + 13 + 10 = 44 minutes, about
-<code>$1.03</code>. On the g6e at 2.5–3x: ~8 minutes of training, ~5 of
-evaluation, the same 10 of startup, about 23 minutes and
-~<code>$1.00</code>. Break-even, at this size. The g6e only wins once
-training dominates startup: at four epochs, or at 2 megapixels, or on a
-thousand pages, the g5 bill grows linearly while the g6e bill grows at a
-third of the slope, and then the faster card is cheaper per run.</p>
+<p>Startup and upload (~4 min, <code>$0.17</code> at
+<code>$2.61</code>/h) do not speed up: the container pull and the S3
+copies are the same on any instance. For the class job, training drops
+from ~22 to ~8 minutes and the ~14 minutes of scoring to ~5, so the job
+is about 17 minutes and ~<code>$0.75</code>: <em>less</em> than the
+<code>$0.95</code> g5 run, because the training is long enough for the
+faster card to pay for itself.</p>
+<p>The homework run on the g5 is 44 + 33 + 4 = 81 minutes, about
+<code>$1.90</code>. On the g6e at 2.5–3x: ~16 minutes of training, ~12
+of scoring, the same 4 of overhead, about 32 minutes and
+~<code>$1.40</code>. The longer the GPU work, the more the faster card
+saves: the g5 bill grows linearly with pages and passes while the g6e
+bill grows at a third of the slope. The g6e only loses on a job so short
+that the fixed overhead dominates, a 5-minute smoke test, say.</p>
 <p>The hourly rate is the wrong thing to compare; the cost per run is
 what matters, and the fixed overhead is a larger share of it on faster
 hardware. The catch is quotas: the account needs a service quota for
@@ -2056,7 +2067,7 @@ ten-hour run is the granularity: an epoch may be hours, so switch to
 <code>save_strategy="steps"</code> with a <code>save_steps</code> worth
 about ten minutes of training, so that an interruption costs minutes
 rather than hours. Spot is the right choice for long, restartable jobs
-and the wrong one for a 25-minute class exercise, where waiting for
+and the wrong one for a 40-minute class exercise, where waiting for
 capacity can take longer than the job.</p>
 </div>
 </div>
@@ -2064,16 +2075,17 @@ capacity can take longer than the job.</p>
 </div>
 </section><section><h2 class="section-heading" id="homework-the-full-run-and-optionally-a-kaggle-submission">Homework: the full run and (optionally) a Kaggle submission<a class="anchor" aria-label="anchor" href="#homework-the-full-run-and-optionally-a-kaggle-submission"></a></h2>
 <hr class="half-width"><p>Everything below is the same pattern at a larger scale: about
-<code>$1.05</code> for the fine-tune and <code>$0.80</code> for
-inference, roughly an hour and a half of wall-clock time that you do not
-need to sit through. Launch, go do something else, come back.</p>
+<code>$1.90</code> for the fine-tune and <code>$0.80</code> for
+inference, roughly two and a half hours of wall-clock time that you do
+not need to sit through. Launch, go do something else, come back.</p>
 <div class="section level3">
 <h3 id="the-full-fine-tune">The full fine-tune<a class="anchor" aria-label="anchor" href="#the-full-fine-tune"></a></h3>
-<p>Same estimator with the page slice removed, all 251 training pages,
-and a 90-minute cap. Write your estimate down first (Step 2’s
-challenge). Launch with <code>wait=False</code> here only because you
-will not be watching: it returns immediately and you poll later. The
-explicit job name still protects you from a double launch.</p>
+<p>Same estimator and the same 251 pages, four passes instead of two, 40
+evaluation pages instead of 15, and a 160-minute cap. Write your
+estimate down first (Step 2’s challenge). Launch with
+<code>wait=False</code> here only because you will not be watching: it
+returns immediately and you poll later. The explicit job name still
+protects you from a double launch.</p>
 <p>The same guard rails first: a new job name, its own checkpoint
 folder, and the cap written down with its worst case.</p>
 <div class="codewrapper sourceCode" id="cb36">
@@ -2081,18 +2093,17 @@ folder, and the cap written down with its worst case.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" tabindex="-1" aria-label="code-block-36-1"></a>full_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-full"</span></span>
 <span id="cb36-2"><a href="#cb36-2" tabindex="-1" aria-label="code-block-36-2"></a>full_checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>full_job_name<span class="sc">}</span><span class="ss">/"</span></span>
-<span id="cb36-3"><a href="#cb36-3" tabindex="-1" aria-label="code-block-36-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 90 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">90</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>full_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1" aria-label="code-block-36-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 160 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">160</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>full_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>The knobs change in three places: no page slice, so all 251 training
-pages; <code>grad_accum</code> 8, so the effective batch doubles with
-the data and the number of optimizer steps stays about the same; and 40
-evaluation pages, enough to match the instructor’s run.</p>
+<p>The knobs change in two places: four passes, and 40 evaluation pages,
+enough to match the instructor’s run. <code>grad_accum</code> 8 doubles
+the effective batch, which suits a longer run.</p>
 <div class="codewrapper sourceCode" id="cb37">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a>full_hyperparameters <span class="op">=</span> {</span>
 <span id="cb37-2"><a href="#cb37-2" tabindex="-1" aria-label="code-block-37-2"></a>    <span class="co"># no model_id: read from the "model" channel, as in class</span></span>
-<span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a>    <span class="st">"epochs"</span>: <span class="dv">2</span>,</span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a>    <span class="st">"epochs"</span>: <span class="dv">4</span>,</span>
 <span id="cb37-4"><a href="#cb37-4" tabindex="-1" aria-label="code-block-37-4"></a>    <span class="st">"lr"</span>: <span class="fl">2e-4</span>,</span>
 <span id="cb37-5"><a href="#cb37-5" tabindex="-1" aria-label="code-block-37-5"></a>    <span class="st">"lora_r"</span>: <span class="dv">16</span>,</span>
 <span id="cb37-6"><a href="#cb37-6" tabindex="-1" aria-label="code-block-37-6"></a>    <span class="st">"batch_size"</span>: <span class="dv">1</span>,</span>
@@ -2103,7 +2114,7 @@ evaluation pages, enough to match the instructor’s run.</p>
 <span id="cb37-11"><a href="#cb37-11" tabindex="-1" aria-label="code-block-37-11"></a>    <span class="st">"eval_before"</span>: <span class="dv">1</span>,</span>
 <span id="cb37-12"><a href="#cb37-12" tabindex="-1" aria-label="code-block-37-12"></a>}</span></code></pre>
 </div>
-<p>The estimator is the class one with the 90-minute cap and the new
+<p>The estimator is the class one with the 160-minute cap and the new
 checkpoint folder.</p>
 <div class="codewrapper sourceCode" id="cb38">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -2116,7 +2127,7 @@ checkpoint folder.</p>
 <span id="cb38-6"><a href="#cb38-6" tabindex="-1" aria-label="code-block-38-6"></a>    instance_type<span class="op">=</span>instance_type,</span>
 <span id="cb38-7"><a href="#cb38-7" tabindex="-1" aria-label="code-block-38-7"></a>    instance_count<span class="op">=</span><span class="dv">1</span>,</span>
 <span id="cb38-8"><a href="#cb38-8" tabindex="-1" aria-label="code-block-38-8"></a>    volume_size<span class="op">=</span><span class="dv">50</span>,</span>
-<span id="cb38-9"><a href="#cb38-9" tabindex="-1" aria-label="code-block-38-9"></a>    max_run<span class="op">=</span><span class="dv">90</span> <span class="op">*</span> <span class="dv">60</span>,                      <span class="co"># 90 minutes: twice the estimate</span></span>
+<span id="cb38-9"><a href="#cb38-9" tabindex="-1" aria-label="code-block-38-9"></a>    max_run<span class="op">=</span><span class="dv">160</span> <span class="op">*</span> <span class="dv">60</span>,                     <span class="co"># 160 minutes: twice the estimate</span></span>
 <span id="cb38-10"><a href="#cb38-10" tabindex="-1" aria-label="code-block-38-10"></a>    checkpoint_s3_uri<span class="op">=</span>full_checkpoint_s3_uri,</span>
 <span id="cb38-11"><a href="#cb38-11" tabindex="-1" aria-label="code-block-38-11"></a>    checkpoint_local_path<span class="op">=</span><span class="st">"/opt/ml/checkpoints"</span>,</span>
 <span id="cb38-12"><a href="#cb38-12" tabindex="-1" aria-label="code-block-38-12"></a>    <span class="co"># Exercise 3: adding use_spot_instances=True, max_wait=3 * 60 * 60 runs this on spot capacity; max_wait (run + waiting) must be &gt;= max_run</span></span>
