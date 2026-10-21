@@ -1362,7 +1362,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1699,7 +1699,7 @@ refusing cleanly, with every evidence field blank, when the answer is
 competition’s own metric file, which <code>compute_wattbot_score</code>
 in <code>wattbot_rag.py</code> calls for the headline score so that what
 you see here is what the leaderboard would report. It also prints the
-error rate by evidence type, the seven flag columns of
+share of correct answers by evidence type, the seven flag columns of
 <code>train_QA.csv</code>: <strong>Quote</strong> (the answer is a
 sentence in a paper), <strong>Table</strong>, <strong>Figure</strong>,
 <strong>Math</strong> (a calculation from numbers in the text),
@@ -1805,7 +1805,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -1882,7 +1882,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p><strong>Generator.</strong> <code>call_bedrock_chat</code> already
 takes a <code>model_id</code>, so the swap is a profile and a
@@ -2306,9 +2306,9 @@ its top eight for 94% of the table questions and 94% of the figure
 questions; the page-image index managed 91% and 82%. A whole page is a
 weaker key than the caption and surrounding sentences that the text
 chunks already carry. Then reading: with the image index’s top three
-pages attached, Nova 2 Lite went from 0.64 to 0.67 overall, from 41% to
-29% of figure questions wrong, and from 0.85 to 0.93 on citation F1,
-while the table questions did not move (43% to 46% wrong). Seventeen
+pages attached, Nova 2 Lite went from 0.64 to 0.67 overall, from 59% to
+71% of figure questions correct, and from 0.85 to 0.93 on citation F1,
+while the table questions did not move (57% to 54% correct). Seventeen
 figure questions is two questions of difference, so read the direction,
 not the decimals. For the bill, every image is a few hundred to a
 thousand input tokens at Nova 2 Lite’s rate on the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">pricing page</a>, so a
