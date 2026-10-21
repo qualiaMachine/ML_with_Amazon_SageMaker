@@ -1017,8 +1017,9 @@ instances, so about <code>$0.02</code> on <code>ml.m5.large</code>.</p>
 <span id="cb16-30"><a href="#cb16-30" tabindex="-1" aria-label="code-block-16-30"></a><span class="bu">print</span>(<span class="ss">f"Single-instance job billed </span><span class="sc">{</span>desc_cpu[<span class="st">'BillableTimeInSeconds'</span>]<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min; two-instance job billed </span><span class="sc">{</span>desc_2x[<span class="st">'BillableTimeInSeconds'</span>]<span class="op">*</span><span class="dv">2</span><span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min"</span>)</span></code></pre>
 </div>
 <p>Look at the job’s log in CloudWatch, the AWS logging service
-introduced in the last episode (SageMaker console, Training jobs, your
-job, View logs): there are two log streams, <code>algo-1</code> and
+introduced in the last episode (<a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a> in the SageMaker console, your job, <strong>View
+logs</strong>): there are two log streams, <code>algo-1</code> and
 <code>algo-2</code>, and each one prints all 1000 epochs. The wall-clock
 time is about the same as the single-instance run (slightly longer, if
 anything, because two instances have to be provisioned), and the

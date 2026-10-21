@@ -2889,7 +2889,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3942,7 +3942,8 @@ AWS service that collects logs and metrics from every other service:
 everything a training job prints goes to a CloudWatch log stream named
 after the job, and it stays there after the instance is gone. The
 quickest way to it is the <strong>View logs</strong> link on the job’s
-page in the SageMaker console.</p>
+page in the SageMaker console: <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a>, then your job.</p>
 <p>A <strong>second bucket</strong> also appeared,
 <code>sagemaker-&lt;region&gt;-&lt;account-id&gt;</code>. The SageMaker
 SDK creates this <em>default bucket</em> the first time it needs
@@ -4216,8 +4217,9 @@ interacting with your own job before making any changes.</p>
 <strong>View training jobs</strong>
 <ul>
 <li>In the left-hand navigation menu, select <strong>Training
-jobs</strong>. You’ll see a list of recent training jobs, which may
-include jobs from other users in the account.</li>
+jobs</strong> (or open <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">this
+link</a> in the class region). You’ll see a list of recent training
+jobs, which may include jobs from other users in the account.</li>
 </ul>
 </li>
 <li>
@@ -4995,8 +4997,9 @@ instances, so about <code>$0.02</code> on <code>ml.m5.large</code>.</p>
 <span id="cb16-30"><a href="#cb16-30" tabindex="-1" aria-label="code-block-16-30"></a><span class="bu">print</span>(<span class="ss">f"Single-instance job billed </span><span class="sc">{</span>desc_cpu[<span class="st">'BillableTimeInSeconds'</span>]<span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min; two-instance job billed </span><span class="sc">{</span>desc_2x[<span class="st">'BillableTimeInSeconds'</span>]<span class="op">*</span><span class="dv">2</span><span class="op">/</span><span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min"</span>)</span></code></pre>
 </div>
 <p>Look at the job’s log in CloudWatch, the AWS logging service
-introduced in the last episode (SageMaker console, Training jobs, your
-job, View logs): there are two log streams, <code>algo-1</code> and
+introduced in the last episode (<a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a> in the SageMaker console, your job, <strong>View
+logs</strong>): there are two log streams, <code>algo-1</code> and
 <code>algo-2</code>, and each one prints all 1000 epochs. The wall-clock
 time is about the same as the single-instance run (slightly longer, if
 anything, because two instances have to be provisioned), and the
@@ -5992,7 +5995,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6038,7 +6041,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -7505,15 +7508,16 @@ immediately; the cents already spent are not a reason to let it run.</p>
 <h3 id="while-it-runs">While it runs<a class="anchor" aria-label="anchor" href="#while-it-runs"></a>
 </h3>
 <p>Open a second browser tab on the SageMaker console: <strong>SageMaker
-AI → Training → Training jobs</strong>. Find your job and watch its
-status move through <code>Starting</code>, <code>Downloading</code>,
-<code>Training</code>, <code>Uploading</code>, <code>Completed</code>.
-The job page shows the instance type, the <code>max_run</code> you set,
-the tags, and a link to the job’s log in CloudWatch (the AWS logging
-service, where every <code>print()</code> from the script goes). The log
-is the same text the notebook cell is streaming, but it stays available
-after the kernel is gone, which is what you will use when a job you
-launched yesterday fails overnight.</p>
+AI → Training → <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a></strong>. Find your job and watch its status move through
+<code>Starting</code>, <code>Downloading</code>, <code>Training</code>,
+<code>Uploading</code>, <code>Completed</code>. The job page shows the
+instance type, the <code>max_run</code> you set, the tags, and a link to
+the job’s log in CloudWatch (the AWS logging service, where every
+<code>print()</code> from the script goes). The log is the same text the
+notebook cell is streaming, but it stays available after the kernel is
+gone, which is what you will use when a job you launched yesterday fails
+overnight.</p>
 <p>Things to find in the log while you wait:</p>
 <ul>
 <li>
@@ -9721,7 +9725,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10035,7 +10039,7 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -10678,8 +10682,9 @@ script, mounts the inputs, and says where the output goes.</p>
 </h3>
 <p>To view the job running from the AWS Console, you can visit SageMaker
 AI, and then find the “Data Preparation” dropdown menu on the left side
-panel. Click that to find “Processing jobs”. If you’re in us-east-1, the
-following link should bring you there: <a href="https://us-east-1.console.aws.amazon.com/sagemaker/home?region=us-east-1#/processing-jobs" class="external-link">https://us-east-1.console.aws.amazon.com/sagemaker/home?region=us-east-1#/processing-jobs</a></p>
+panel. Click that to find “Processing jobs”, or open <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs" class="external-link">this
+link</a> in the class region (change <code>us-east-2</code> in it for
+another region).</p>
 <p>It takes ~5-8 minutes in total for the job to complete, most of it
 provisioning the instance and installing the requirements. This is the
 downside of launching jobs, but the good news is that we only need to
@@ -10894,7 +10899,7 @@ total compare with the cost callout, and with the Bedrock run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -10959,7 +10964,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -12464,7 +12469,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -12776,7 +12781,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>

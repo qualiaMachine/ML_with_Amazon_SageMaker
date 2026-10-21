@@ -1687,15 +1687,16 @@ immediately; the cents already spent are not a reason to let it run.</p>
 <div class="section level3">
 <h3 id="while-it-runs">While it runs<a class="anchor" aria-label="anchor" href="#while-it-runs"></a></h3>
 <p>Open a second browser tab on the SageMaker console: <strong>SageMaker
-AI → Training → Training jobs</strong>. Find your job and watch its
-status move through <code>Starting</code>, <code>Downloading</code>,
-<code>Training</code>, <code>Uploading</code>, <code>Completed</code>.
-The job page shows the instance type, the <code>max_run</code> you set,
-the tags, and a link to the job’s log in CloudWatch (the AWS logging
-service, where every <code>print()</code> from the script goes). The log
-is the same text the notebook cell is streaming, but it stays available
-after the kernel is gone, which is what you will use when a job you
-launched yesterday fails overnight.</p>
+AI → Training → <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a></strong>. Find your job and watch its status move through
+<code>Starting</code>, <code>Downloading</code>, <code>Training</code>,
+<code>Uploading</code>, <code>Completed</code>. The job page shows the
+instance type, the <code>max_run</code> you set, the tags, and a link to
+the job’s log in CloudWatch (the AWS logging service, where every
+<code>print()</code> from the script goes). The log is the same text the
+notebook cell is streaming, but it stays available after the kernel is
+gone, which is what you will use when a job you launched yesterday fails
+overnight.</p>
 <p>Things to find in the log while you wait:</p>
 <ul><li>
 <code>pages: 295 total -&gt; 251 train / 44 holdout</code>: the
