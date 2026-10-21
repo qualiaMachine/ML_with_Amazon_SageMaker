@@ -520,9 +520,16 @@ reads the results back.</p>
 <p>The generator is <strong>Qwen3-8B</strong>, an 8-billion-parameter
 open-weight model (Apache 2.0). Bedrock serves the 32B and 235B members
 of that family but not this size, which is the usual situation: the size
-you want is the one missing. Inference needs no gradients, so the
-weights are the memory cost: 8B parameters at two bytes each in bf16 is
-about 16 GB, which fits the 24 GB GPU of an <code>ml.g5.xlarge</code>
+you want is the one missing. The job serves it with
+<strong>vLLM</strong>, an open-source inference engine: you give it a
+model name, it downloads the weights, loads them onto the GPU and
+answers chat requests from Python, the self-hosted counterpart of what
+Bedrock’s runtime does behind <code>converse</code>. Plain
+<code>transformers</code> can generate text too, but vLLM batches
+requests and manages GPU memory far better, so it is what people use to
+serve a model rather than to study one. Inference needs no gradients, so
+the weights are the memory cost: 8B parameters at two bytes each in bf16
+is about 16 GB, which fits the 24 GB GPU of an <code>ml.g5.xlarge</code>
 with room for the KV cache. (The fine-tuning episode has the full memory
 arithmetic; the short version is that inference needs only the weights
 and training needs eight times more per parameter.)</p>
@@ -1115,7 +1122,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -1181,7 +1188,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing

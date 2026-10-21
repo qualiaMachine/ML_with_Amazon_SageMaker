@@ -723,15 +723,18 @@ it now means nothing is lost by restarting.</p>
 <h3 class="callout-title">Installing vLLM takes a few minutes, and the
 meter is running</h3>
 <div class="callout-content">
-<p><code>pip install vllm</code> downloads several gigabytes (it brings
-its own CUDA kernels and may replace the kernel’s PyTorch build) and
-takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer. The 27 GB of model
-weights take another 4–6 minutes to download the first time. At
-<code>$2.61</code> an hour that is about 60 cents of waiting, which is
-fine; what is not fine is doing it twice because the instance was
-deleted and recreated. Keep the Hugging Face cache on the 100 GB volume
-(the <code>HF_HOME</code> line in the serving cell below does that) so
-the weights survive a stop/start.</p>
+<p>vLLM is the open-source inference engine that loads an open-weight
+model onto the GPU and answers chat requests from Python, the
+self-hosted counterpart of Bedrock’s runtime (the Processing Jobs
+episode introduces it). <code>pip install vllm</code> downloads several
+gigabytes (it brings its own CUDA kernels and may replace the kernel’s
+PyTorch build) and takes 5–10 minutes. Qwen3.8 needs vLLM 0.17 or newer.
+The 27 GB of model weights take another 4–6 minutes to download the
+first time. At <code>$2.61</code> an hour that is about 60 cents of
+waiting, which is fine; what is not fine is doing it twice because the
+instance was deleted and recreated. Keep the Hugging Face cache on the
+100 GB volume (the <code>HF_HOME</code> line in the serving cell below
+does that) so the weights survive a stop/start.</p>
 <p>If the install changes PyTorch, restart the kernel (<strong>Kernel →
 Restart</strong>) before continuing.</p>
 </div>
