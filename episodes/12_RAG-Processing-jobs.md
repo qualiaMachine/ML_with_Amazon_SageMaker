@@ -402,7 +402,7 @@ rag_processor.run(
 print(f"RAG batch job complete: {(time.time() - start) / 60:.1f} min wall-clock, including instance startup and the pip install")
 ```
 
-While it runs, open the job on the [Processing jobs page](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs) and click **View logs** for its CloudWatch log. You will see, in order: pip installing vLLM, the weight download (16 GB in shards), vLLM loading the model and reporting how much GPU memory it reserved, then one line per question. The whole job is the 20 minutes in the cost callout; the generation is the last third of it.
+While it runs, read what the container is printing. Open the [Processing jobs page](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs), click the job's name, scroll to **Monitor** and click **View logs**. That opens CloudWatch, the AWS service that stores every job's printed output, at a list with one entry named after your job; click it. The text is the container's stdout, kept after the job ends, updated while it runs (refresh). You will see, in order: pip installing vLLM, the weight download (16 GB in shards), vLLM loading the model and reporting how much GPU memory it reserved, then one line per question. The whole job is the 20 minutes in the cost callout; the generation is the last third of it.
 
 
 ## Step 4 – Download predictions and evaluate
