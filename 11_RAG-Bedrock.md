@@ -205,7 +205,7 @@ Open `wattbot_rag.py` in the Jupyter file browser as you go: each helper is shor
 
 ## Step 3 – Load the metadata and training questions
 
-Pull the two CSV files from the shared bucket into the notebook and inspect them.
+Pull the two CSV files from the shared bucket into the notebook and inspect them. Two helpers first: `download_from_s3` copies one object from the shared bucket (or any bucket you name) into the local data folder, and `smart_read_csv` reads a CSV by trying a few encodings in turn, because author names and titles in `metadata.csv` are not always valid UTF-8.
 
 ```python
 import zipfile
@@ -220,12 +220,7 @@ def download_from_s3(key: str, local_name: str, bucket: str = shared_bucket) -> 
 
 
 def smart_read_csv(path: str) -> pd.DataFrame:
-    """Try several encodings when reading a CSV file.
-
-    Some CSVs (especially those with special characters in author names or titles)
-    may not be valid UTF-8. This helper rotates through common encodings and raises
-    the last error only if all fail.
-    """
+    """Read a CSV, trying utf-8 and then the common Windows and Latin encodings."""
     encodings = ["utf-8", "latin1", "ISO-8859-1", "cp1252"]
     last_error = None
     for enc in encodings:
@@ -236,8 +231,11 @@ def smart_read_csv(path: str) -> pd.DataFrame:
     if last_error is not None:
         raise last_error
     raise RuntimeError(f"Unable to read CSV at {path}")
+```
 
+Now the two files: `train_QA.csv` is the labelled questions and answers we score against, `metadata.csv` is one row per paper with its id, title and URL.
 
+```python
 train_qa_path = download_from_s3(train_key, "train_QA.csv")      # labelled questions + answers: what we score against
 metadata_path = download_from_s3(metadata_key, "metadata.csv")   # one row per paper (id, title, url): the corpus index
 
@@ -504,7 +502,9 @@ The mechanism Bedrock provides for this is an **application inference profile**:
 - You need **one profile per base model** (the profile is model‑specific), so we create one for the generation model and one for the embedding model.
 - Bedrock's tag format uses lowercase `key` / `value`, unlike SageMaker's `Key` / `Value`. The tag *names* (`Name`, `Project`, `Purpose`) stay the same so the Cost Explorer filters line up across services.
 
-The helper below reuses a profile if one with the same name already exists, so re‑running the notebook does not create duplicates.
+Four cells: the tags, two small helpers, the function that finds or creates a profile, and the two calls that produce the ARNs the rest of the episode uses.
+
+First the tags. Bedrock wants lowercase `key` and `value`; the three names are the same ones every SageMaker job in this lesson carries, so one Cost Explorer filter covers both services.
 
 ```python
 import re
@@ -519,22 +519,25 @@ profile_tags = [
     {"key": "Project", "value": project},
     {"key": "Purpose", "value": purpose},
 ]
+```
 
+Two helpers. `_slug` turns a project or user name into something a profile name accepts (letters, digits and single hyphens, at most 64 characters). `_source_arn` returns what the profile points at: for a plain model ID that is the foundation model's ARN; for a cross-region ID such as `us.deepseek.v3-v1:0`, which is itself a system-defined inference profile, it is that profile's ARN.
+
+```python
 def _slug(text: str) -> str:
     # Profile names allow letters, digits, and single spaces/hyphens/underscores, max 64 chars
     return re.sub(r"[^0-9a-zA-Z]+", "-", text).strip("-")[:30]
 
 def _source_arn(model_id: str) -> str:
-    """ARN that the profile should point at.
-
-    Plain model IDs (e.g. 'amazon.titan-embed-text-v2:0') map to a foundation-model ARN.
-    Cross-region IDs (e.g. 'us.deepseek.v3-v1:0') are system-defined
-    inference profiles, so we copy from that profile's ARN instead.
-    """
+    """ARN that the profile should point at: the foundation model, or the system-defined profile for a cross-region ID."""
     if model_id.split(".")[0] in {"us", "eu", "apac", "global", "jp", "au"}:
         return bedrock.get_inference_profile(inferenceProfileIdentifier=model_id)["inferenceProfileArn"]
     return bedrock.get_foundation_model(modelIdentifier=model_id)["modelDetails"]["modelArn"]
+```
 
+The function itself. It builds a profile name from your project and user name, lists the application profiles in the account and returns the ARN if one with that name exists, so rerunning the notebook never creates duplicates. Otherwise it creates the profile with the tags above. An `AccessDeniedException` on either call is turned into a message that says which role the notebook is running as and what to do about it.
+
+```python
 def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
     """Return the ARN of a tagged application inference profile for base_model_id."""
     profile_name = f"{_slug(project)}-{_slug(name)}-{label}"
@@ -567,9 +570,11 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
         raise
     print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
     return resp["inferenceProfileArn"]
+```
 
-# From here on, these ARNs are what we pass as modelId. The base IDs are never sent to
-# the runtime again.
+Now call it twice, once per base model. The two ARNs it returns are what every later cell passes as `modelId`; the base model IDs are never sent to the runtime again.
+
+```python
 bedrock_model_id = get_or_create_inference_profile(base_generation_model_id, "wattbot-gen")
 embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_model_id, "wattbot-embed")
 ```
@@ -656,13 +661,17 @@ docid_to_url = build_docid_to_url(metadata_df)   # doc_id -> url, for the ref_ur
 print(f"docid_to_url has {len(docid_to_url)} entries.")
 ```
 
-Titan Text Embeddings V2 takes one string per `invoke_model` call and returns a 1,024-dimensional normalized vector. `embedding_model_id_bedrock` is the ARN of our tagged profile for it, so every call is attributed to our `Project`/`Name`/`Purpose` tags. The embedding loop takes a few minutes for ~3,000 chunks (one HTTPS round trip each); it saves its progress every 500 chunks so an interrupted run resumes where it stopped, and uploads the finished matrix to your bucket.
+Titan Text Embeddings V2 takes one string per `invoke_model` call and returns a 1,024-dimensional normalized vector. `embedding_model_id_bedrock` is the ARN of our tagged profile for it, so every call is attributed to our `Project`/`Name`/`Purpose` tags. Three cells: where the result is saved, the call that embeds one string, and the loop that embeds every chunk once and caches the matrix. First the paths.
 
 ```python
 data_dir = Path(local_data_dir)
-emb_save_path = data_dir / "embeddings_bedrock.npy"
-emb_partial_path = data_dir / "embeddings_bedrock.partial.npy"
+emb_save_path = data_dir / "embeddings_bedrock.npy"             # the finished matrix, one row per chunk
+emb_partial_path = data_dir / "embeddings_bedrock.partial.npy"  # progress file, so an interrupted run resumes
+```
 
+The call itself. `invoke_model` takes a provider-specific JSON body; Titan's is `{"inputText": ...}`, and its response carries the vector under `embedding`. `embed_query` is the same call wrapped for retrieval time, when we embed one question at a time.
+
+```python
 def bedrock_embed_text(text: str, model_id: str = embedding_model_id_bedrock) -> List[float]:
     """Call the Titan embedding model (through our tagged profile) for one string."""
     response = bedrock_runtime.invoke_model(
@@ -681,8 +690,11 @@ def bedrock_embed_text(text: str, model_id: str = embedding_model_id_bedrock) ->
 def embed_query(question: str) -> np.ndarray:
     """The retrieval-time half of the pipeline: the same model, one question at a time."""
     return np.asarray(bedrock_embed_text(question), dtype="float32")
+```
 
+Embedding 3,000 chunks is a few minutes and a few cents, so do not do it twice. The cell below looks for the finished matrix locally, then in your bucket, and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped. One small helper asks S3 whether an object exists.
 
+```python
 def _s3_object_exists(bucket: str, key: str) -> bool:
     try:
         s3.head_object(Bucket=bucket, Key=key)
