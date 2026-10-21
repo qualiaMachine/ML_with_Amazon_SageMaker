@@ -504,7 +504,9 @@ The mechanism Bedrock provides for this is an **application inference profile**:
 - You need **one profile per base model** (the profile is model‑specific), so we create one for the generation model and one for the embedding model.
 - Bedrock's tag format uses lowercase `key` / `value`, unlike SageMaker's `Key` / `Value`. The tag *names* (`Name`, `Project`, `Purpose`) stay the same so the Cost Explorer filters line up across services.
 
-The helper below reuses a profile if one with the same name already exists, so re‑running the notebook does not create duplicates.
+Four cells: the tags, two small helpers, the function that finds or creates a profile, and the two calls that produce the ARNs the rest of the episode uses.
+
+First the tags. Bedrock wants lowercase `key` and `value`; the three names are the same ones every SageMaker job in this lesson carries, so one Cost Explorer filter covers both services.
 
 ```python
 import re
@@ -519,22 +521,25 @@ profile_tags = [
     {"key": "Project", "value": project},
     {"key": "Purpose", "value": purpose},
 ]
+```
 
+Two helpers. `_slug` turns a project or user name into something a profile name accepts (letters, digits and single hyphens, at most 64 characters). `_source_arn` returns what the profile points at: for a plain model ID that is the foundation model's ARN; for a cross-region ID such as `us.deepseek.v3-v1:0`, which is itself a system-defined inference profile, it is that profile's ARN.
+
+```python
 def _slug(text: str) -> str:
     # Profile names allow letters, digits, and single spaces/hyphens/underscores, max 64 chars
     return re.sub(r"[^0-9a-zA-Z]+", "-", text).strip("-")[:30]
 
 def _source_arn(model_id: str) -> str:
-    """ARN that the profile should point at.
-
-    Plain model IDs (e.g. 'amazon.titan-embed-text-v2:0') map to a foundation-model ARN.
-    Cross-region IDs (e.g. 'us.deepseek.v3-v1:0') are system-defined
-    inference profiles, so we copy from that profile's ARN instead.
-    """
+    """ARN that the profile should point at: the foundation model, or the system-defined profile for a cross-region ID."""
     if model_id.split(".")[0] in {"us", "eu", "apac", "global", "jp", "au"}:
         return bedrock.get_inference_profile(inferenceProfileIdentifier=model_id)["inferenceProfileArn"]
     return bedrock.get_foundation_model(modelIdentifier=model_id)["modelDetails"]["modelArn"]
+```
 
+The function itself. It builds a profile name from your project and user name, lists the application profiles in the account and returns the ARN if one with that name exists, so rerunning the notebook never creates duplicates. Otherwise it creates the profile with the tags above. An `AccessDeniedException` on either call is turned into a message that says which role the notebook is running as and what to do about it.
+
+```python
 def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
     """Return the ARN of a tagged application inference profile for base_model_id."""
     profile_name = f"{_slug(project)}-{_slug(name)}-{label}"
@@ -567,9 +572,11 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
         raise
     print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
     return resp["inferenceProfileArn"]
+```
 
-# From here on, these ARNs are what we pass as modelId. The base IDs are never sent to
-# the runtime again.
+Now call it twice, once per base model. The two ARNs it returns are what every later cell passes as `modelId`; the base model IDs are never sent to the runtime again.
+
+```python
 bedrock_model_id = get_or_create_inference_profile(base_generation_model_id, "wattbot-gen")
 embedding_model_id_bedrock = get_or_create_inference_profile(base_embedding_model_id, "wattbot-embed")
 ```
