@@ -605,11 +605,13 @@ learners can explore alternatives for their own RAG systems.</p>
 <code>ml.t3.medium</code> is enough, because the models run on Bedrock
 rather than in the notebook. The notebook’s execution role must allow
 Bedrock access, which the default SageMaker role does not. On the class
-account the instructor has added those permissions to
-<code>ml-sagemaker-use</code>, the role every notebook in this lesson
-runs with; on your own account, attach the policy in the “Permissions
-and verification” callout below to your role before starting. The first
-Bedrock call in Step 7 tells you plainly if they are missing.</p>
+account that is the <code>ml-sagemaker-bedrock-use</code> role you
+picked when creating the notebook instance. If your instance was created
+with the older <code>ml-sagemaker-use</code> role, the first Bedrock
+call fails with an access-denied error: stop the instance, choose
+<strong>Edit</strong>, change the IAM role, and start it again. On your
+own account, attach the policy in the “Permissions and verification”
+callout below to your role before starting.</p>
 <p>See <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> for further guidance on instance types.</p>
 <div class="section level3">
@@ -1185,17 +1187,18 @@ exists, so re‑running the notebook does not create duplicates.</p>
 <span id="cb14-51"><a href="#cb14-51" tabindex="-1" aria-label="code-block-14-51"></a>            <span class="cf">raise</span> <span class="pp">PermissionError</span>(</span>
 <span id="cb14-52"><a href="#cb14-52" tabindex="-1" aria-label="code-block-14-52"></a>                <span class="ss">f"This notebook's role has no Bedrock permissions (</span><span class="sc">{</span>role<span class="sc">}</span><span class="ss">).</span><span class="ch">\n</span><span class="ss">"</span></span>
 <span id="cb14-53"><a href="#cb14-53" tabindex="-1" aria-label="code-block-14-53"></a>                <span class="st">"The Bedrock episode needs the policy in the 'Permissions and verification' callout attached to the "</span></span>
-<span id="cb14-54"><a href="#cb14-54" tabindex="-1" aria-label="code-block-14-54"></a>                <span class="st">"notebook's execution role: ask the account administrator (on the class account, the instructor) to add it. "</span></span>
-<span id="cb14-55"><a href="#cb14-55" tabindex="-1" aria-label="code-block-14-55"></a>                <span class="st">"Nothing to change in this notebook; rerun this cell once it is attached."</span></span>
-<span id="cb14-56"><a href="#cb14-56" tabindex="-1" aria-label="code-block-14-56"></a>            ) <span class="im">from</span> e</span>
-<span id="cb14-57"><a href="#cb14-57" tabindex="-1" aria-label="code-block-14-57"></a>        <span class="cf">raise</span></span>
-<span id="cb14-58"><a href="#cb14-58" tabindex="-1" aria-label="code-block-14-58"></a>    <span class="bu">print</span>(<span class="ss">f"Created inference profile </span><span class="sc">{</span>profile_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>resp[<span class="st">'inferenceProfileArn'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb14-59"><a href="#cb14-59" tabindex="-1" aria-label="code-block-14-59"></a>    <span class="cf">return</span> resp[<span class="st">"inferenceProfileArn"</span>]</span>
-<span id="cb14-60"><a href="#cb14-60" tabindex="-1" aria-label="code-block-14-60"></a></span>
-<span id="cb14-61"><a href="#cb14-61" tabindex="-1" aria-label="code-block-14-61"></a><span class="co"># From here on, these ARNs are what we pass as modelId. The base IDs are never sent to</span></span>
-<span id="cb14-62"><a href="#cb14-62" tabindex="-1" aria-label="code-block-14-62"></a><span class="co"># the runtime again.</span></span>
-<span id="cb14-63"><a href="#cb14-63" tabindex="-1" aria-label="code-block-14-63"></a>bedrock_model_id <span class="op">=</span> get_or_create_inference_profile(base_generation_model_id, <span class="st">"wattbot-gen"</span>)</span>
-<span id="cb14-64"><a href="#cb14-64" tabindex="-1" aria-label="code-block-14-64"></a>embedding_model_id_bedrock <span class="op">=</span> get_or_create_inference_profile(base_embedding_model_id, <span class="st">"wattbot-embed"</span>)</span></code></pre>
+<span id="cb14-54"><a href="#cb14-54" tabindex="-1" aria-label="code-block-14-54"></a>                <span class="st">"notebook's execution role. On the class account, the instance must use the ml-sagemaker-bedrock-use role: "</span></span>
+<span id="cb14-55"><a href="#cb14-55" tabindex="-1" aria-label="code-block-14-55"></a>                <span class="st">"stop it, Edit, change the IAM role, start it again. On your own account, attach the policy to your role. "</span></span>
+<span id="cb14-56"><a href="#cb14-56" tabindex="-1" aria-label="code-block-14-56"></a>                <span class="st">"Nothing to change in this notebook; rerun this cell afterwards."</span></span>
+<span id="cb14-57"><a href="#cb14-57" tabindex="-1" aria-label="code-block-14-57"></a>            ) <span class="im">from</span> e</span>
+<span id="cb14-58"><a href="#cb14-58" tabindex="-1" aria-label="code-block-14-58"></a>        <span class="cf">raise</span></span>
+<span id="cb14-59"><a href="#cb14-59" tabindex="-1" aria-label="code-block-14-59"></a>    <span class="bu">print</span>(<span class="ss">f"Created inference profile </span><span class="sc">{</span>profile_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>resp[<span class="st">'inferenceProfileArn'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-60"><a href="#cb14-60" tabindex="-1" aria-label="code-block-14-60"></a>    <span class="cf">return</span> resp[<span class="st">"inferenceProfileArn"</span>]</span>
+<span id="cb14-61"><a href="#cb14-61" tabindex="-1" aria-label="code-block-14-61"></a></span>
+<span id="cb14-62"><a href="#cb14-62" tabindex="-1" aria-label="code-block-14-62"></a><span class="co"># From here on, these ARNs are what we pass as modelId. The base IDs are never sent to</span></span>
+<span id="cb14-63"><a href="#cb14-63" tabindex="-1" aria-label="code-block-14-63"></a><span class="co"># the runtime again.</span></span>
+<span id="cb14-64"><a href="#cb14-64" tabindex="-1" aria-label="code-block-14-64"></a>bedrock_model_id <span class="op">=</span> get_or_create_inference_profile(base_generation_model_id, <span class="st">"wattbot-gen"</span>)</span>
+<span id="cb14-65"><a href="#cb14-65" tabindex="-1" aria-label="code-block-14-65"></a>embedding_model_id_bedrock <span class="op">=</span> get_or_create_inference_profile(base_embedding_model_id, <span class="st">"wattbot-embed"</span>)</span></code></pre>
 </div>
 <div id="permissions-and-verification" class="callout">
 <div class="callout-square">

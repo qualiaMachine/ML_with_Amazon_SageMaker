@@ -766,7 +766,7 @@ any links that you are not going to use.
  -->
 </div></section><section id="aio-02_Data-storage-setting-up-S3"><p>Content from <a href="02_Data-storage-setting-up-S3.html">Data Storage: Setting up S3</a></p>
 <hr>
-<p>Last updated on 2026-10-20 |
+<p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/02_Data-storage-setting-up-S3.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 20 minutes</p>
@@ -1203,8 +1203,10 @@ also give it to you)</li>
 never acts as you; it acts as an IAM <strong>role</strong> attached to
 your notebook instance and to every job you launch (the <em>execution
 role</em>). In the workshop account there are two:
-<code>ml-sagemaker-use</code>, which the notebook and jobs use, and
-<code>ml-sagemaker-bedrock-use</code>, used in the Bedrock episode. The
+<code>ml-sagemaker-bedrock-use</code>, which you will pick when you
+create your notebook instance in the next episode and which every job
+inherits, and the older SageMaker-only <code>ml-sagemaker-use</code>,
+listed so that a notebook created with it still reads the bucket. The
 <code>&lt;account-id&gt;</code> is the 12-digit number shown next to the
 account name at the top right of the console.</li>
 <li>
@@ -1430,7 +1432,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -1611,7 +1613,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-03_SageMaker-notebooks-as-controllers"><p>Content from <a href="03_SageMaker-notebooks-as-controllers.html">Notebooks as Controllers</a></p>
 <hr>
-<p>Last updated on 2026-10-20 |
+<p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/03_SageMaker-notebooks-as-controllers.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 20 minutes</p>
@@ -1768,12 +1770,16 @@ not make it larger than you need.</p></li>
 <p><strong>Permissions and encryption</strong>:</p>
 <ul>
 <li>
-<strong>IAM role</strong>: For this workshop, we have pre-configured
-the “ml-sagemaker-use” role to enable access to AWS services like
-SageMaker, with some restrictions to prevent overuse/misuse of
-resources. Select the “ml-sagemaker-use” role. Outside of the workshop,
-you create/select a role that includes the
-<code>AmazonSageMakerFullAccess</code> policy.</li>
+<strong>IAM role</strong>: Select
+<strong><code>ml-sagemaker-bedrock-use</code></strong>. It is
+pre-configured for this workshop with access to SageMaker and, for the
+RAG episodes, Bedrock, with some restrictions to prevent overuse or
+misuse of resources. The account also has an older
+<code>ml-sagemaker-use</code> role without the Bedrock permissions; a
+notebook created with it fails in the Bedrock episode. Outside of the
+workshop, you create or select a role that includes the
+<code>AmazonSageMakerFullAccess</code> policy and, for Bedrock, the
+policy in that episode.</li>
 <li>
 <strong>Root access</strong>: Determines whether the user can run
 administrative commands within the notebook instance. You should
@@ -2904,7 +2910,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3149,7 +3155,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3267,7 +3273,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3536,7 +3542,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -4901,7 +4907,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5090,7 +5096,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6524,15 +6530,15 @@ them through the adapter. This episode uses LoRA.</p>
 </h3>
 <p>What makes fine-tuning an LLM different is scale. The training
 episodes ran for minutes on a <code>$0.12</code>-an-hour CPU; a
-fine-tune runs for hours on a GPU, and every knob multiplies the bill:
-model size, epochs, image resolution, instance type, and whether anyone
-is watching when the job should have ended. Any one of them off by 10x
-is a 10x bill, and the first run is never the last. <strong>Fine-tuning
-is one of the most common surprise costs we see hurt people</strong>,
-and it is the reason this episode spends as long on estimating and
-capping a run as on running it. We measure the gain ourselves: the
-episode ends by scoring the base model and the fine-tuned model on the
-same held-out pages.</p>
+fine-tune runs for hours on a GPU, and every setting multiplies the
+bill: model size, epochs, image resolution, instance type, and whether
+anyone is watching when the job should have ended. Any one of them off
+by 10x is a 10x bill, and the first run is never the last.
+<strong>Fine-tuning is one of the most common surprise costs we see hurt
+people</strong>, and it is the reason this episode spends as long on
+estimating and capping a run as on running it. We measure the gain
+ourselves: the episode ends by scoring the base model and the fine-tuned
+model on the same held-out pages.</p>
 </div>
 <div class="section level3">
 <h3 id="the-task-badger-scribe">The task: Badger Scribe<a class="anchor" aria-label="anchor" href="#the-task-badger-scribe"></a>
@@ -6697,8 +6703,8 @@ below)</td>
 </table>
 <p>Tokens seen is examples × tokens per example × passes over the data,
 and it is what the time rule below multiplies by model size. The number
-of passes is a knob you tune, and the class run’s two passes are a
-budget choice for a 40-minute job, not a recommendation: large
+of passes is a choice, and the class run’s two passes are a budget
+choice for a 40-minute job, not a recommendation: large
 instruction-tuning corpora are usually passed over one to three times,
 but a few hundred examples usually take three to five. Each extra pass
 adds one more unit of the same row, so a ten-pass run over the whole
@@ -7130,7 +7136,7 @@ points are a third of the bill.</p>
 linearly with image resolution (every 28 × 28 pixel block of the page
 becomes one token in the model’s sequence). Doubling
 <code>max_pixels</code> doubles the time; doubling epochs doubles it
-again. Those two knobs, left at careless values, are why the estimate
+again. Those two settings, left at careless values, are why the estimate
 must be written down before the first run and compared to the real
 <code>BillableTimeInSeconds</code> after it.</p>
 <p>We set <code>max_run</code> to about twice the estimate. If a run
@@ -7520,7 +7526,7 @@ should have used. Re-run the estimator with it and compare with the
 </div>
 <p>Multiply by pages and passes and that is the “tokens seen” in the
 cost table. Halve <code>max_pixels</code> and the image count halves
-with it; that is the knob Exercise 1 turns.</p>
+with it; that is what Exercise 1 changes.</p>
 </div>
 <div class="section level3">
 <h3 id="the-scripts">The scripts<a class="anchor" aria-label="anchor" href="#the-scripts"></a>
@@ -7688,7 +7694,7 @@ scored when.</p>
 <span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a>    <span class="st">"lora_r"</span>: <span class="dv">16</span>,                     <span class="co"># adapter rank: how many trainable parameters LoRA adds per layer</span></span>
 <span id="cb23-6"><a href="#cb23-6" tabindex="-1" aria-label="code-block-23-6"></a>    <span class="st">"batch_size"</span>: <span class="dv">1</span>,</span>
 <span id="cb23-7"><a href="#cb23-7" tabindex="-1" aria-label="code-block-23-7"></a>    <span class="st">"grad_accum"</span>: <span class="dv">4</span>,                  <span class="co"># effective batch of 4 pages -&gt; ~125 optimizer steps over 2 passes</span></span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a>    <span class="st">"max_pixels"</span>: <span class="dv">1280</span> <span class="op">*</span> <span class="dv">28</span> <span class="op">*</span> <span class="dv">28</span>,     <span class="co"># ~1 megapixel per page; the cost knob: tokens per page scale with it</span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1" aria-label="code-block-23-8"></a>    <span class="st">"max_pixels"</span>: <span class="dv">1280</span> <span class="op">*</span> <span class="dv">28</span> <span class="op">*</span> <span class="dv">28</span>,     <span class="co"># ~1 megapixel per page; tokens per page, and so cost, scale with it</span></span>
 <span id="cb23-9"><a href="#cb23-9" tabindex="-1" aria-label="code-block-23-9"></a>    <span class="st">"eval_pages"</span>: <span class="dv">15</span>,                 <span class="co"># holdout pages scored before (eval_before=1) and after training</span></span>
 <span id="cb23-10"><a href="#cb23-10" tabindex="-1" aria-label="code-block-23-10"></a>    <span class="st">"eval_before"</span>: <span class="dv">1</span>,</span>
 <span id="cb23-11"><a href="#cb23-11" tabindex="-1" aria-label="code-block-23-11"></a>    <span class="st">"curve_pages"</span>: <span class="dv">8</span>,                 <span class="co"># of those 15, scored again at the end of every epoch: the CER curve</span></span>
@@ -7942,7 +7948,7 @@ shapes:</p>
 <strong>Still falling at the last epoch</strong>: another pass would
 probably have helped, and the time rule says what it costs (one more
 unit of the training row). That is the usual result on a few hundred
-pages, and the reason the table’s “passes” column is a knob and not a
+pages, and the reason the table’s “passes” column is a choice and not a
 rule.</li>
 <li>
 <strong>Flat</strong>: you have what this data can give; more passes
@@ -8125,13 +8131,13 @@ means giving up a quarter of the data.</p>
 50%, your estimating is good enough to be trusted with a bigger run. If
 you are not, find out which line was wrong before launching anything
 else.</p>
-<div id="exercise-1-the-resolution-knob" class="callout challenge">
+<div id="exercise-1-image-resolution" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="exercise-1-the-resolution-knob" class="callout-inner">
-<h3 class="callout-title">Exercise 1: The resolution knob</h3>
+<div id="exercise-1-image-resolution" class="callout-inner">
+<h3 class="callout-title">Exercise 1: Image resolution</h3>
 <div class="callout-content">
 <p>Relaunch the same job with <code>"max_pixels": 2560 * 28 * 28</code>
 (~2 megapixels) and the job name
@@ -8153,9 +8159,9 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 attention cost grows faster than linearly. On these scans the strokes
 are legible well below 1 megapixel, so the extra pixels mostly buy
 tokens that carry no information, and CER usually moves very little.
-Resolution is the first knob to turn <em>down</em> when a fine-tune is
-over budget, and the first to turn <em>up</em> if the model is
-misreading small characters such as the <code>½</code> fractions.</p>
+Resolution is the first thing to lower when a fine-tune is over budget,
+and the first to raise if the model is misreading small characters such
+as the <code>½</code> fractions.</p>
 </div>
 </div>
 </div>
@@ -8277,9 +8283,9 @@ folder, and the cap written down with its worst case.</p>
 <span id="cb36-2"><a href="#cb36-2" tabindex="-1" aria-label="code-block-36-2"></a>full_checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>full_job_name<span class="sc">}</span><span class="ss">/"</span></span>
 <span id="cb36-3"><a href="#cb36-3" tabindex="-1" aria-label="code-block-36-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 160 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">160</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>full_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>The knobs change in two places: four passes, and 40 evaluation pages,
-enough to match the instructor’s run. <code>grad_accum</code> 8 doubles
-the effective batch, which suits a longer run.</p>
+<p>Two settings change: four passes, and 40 evaluation pages, enough to
+match the instructor’s run. <code>grad_accum</code> 8 doubles the
+effective batch, which suits a longer run.</p>
 <div class="codewrapper sourceCode" id="cb37">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9374,11 +9380,13 @@ learners can explore alternatives for their own RAG systems.</p>
 <code>ml.t3.medium</code> is enough, because the models run on Bedrock
 rather than in the notebook. The notebook’s execution role must allow
 Bedrock access, which the default SageMaker role does not. On the class
-account the instructor has added those permissions to
-<code>ml-sagemaker-use</code>, the role every notebook in this lesson
-runs with; on your own account, attach the policy in the “Permissions
-and verification” callout below to your role before starting. The first
-Bedrock call in Step 7 tells you plainly if they are missing.</p>
+account that is the <code>ml-sagemaker-bedrock-use</code> role you
+picked when creating the notebook instance. If your instance was created
+with the older <code>ml-sagemaker-use</code> role, the first Bedrock
+call fails with an access-denied error: stop the instance, choose
+<strong>Edit</strong>, change the IAM role, and start it again. On your
+own account, attach the policy in the “Permissions and verification”
+callout below to your role before starting.</p>
 <p>See <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> for further guidance on instance types.</p>
 <div class="section level3">
@@ -9983,17 +9991,18 @@ exists, so re‑running the notebook does not create duplicates.</p>
 <span id="cb14-51"><a href="#cb14-51" tabindex="-1" aria-label="code-block-14-51"></a>            <span class="cf">raise</span> <span class="pp">PermissionError</span>(</span>
 <span id="cb14-52"><a href="#cb14-52" tabindex="-1" aria-label="code-block-14-52"></a>                <span class="ss">f"This notebook's role has no Bedrock permissions (</span><span class="sc">{</span>role<span class="sc">}</span><span class="ss">).</span><span class="ch">\n</span><span class="ss">"</span></span>
 <span id="cb14-53"><a href="#cb14-53" tabindex="-1" aria-label="code-block-14-53"></a>                <span class="st">"The Bedrock episode needs the policy in the 'Permissions and verification' callout attached to the "</span></span>
-<span id="cb14-54"><a href="#cb14-54" tabindex="-1" aria-label="code-block-14-54"></a>                <span class="st">"notebook's execution role: ask the account administrator (on the class account, the instructor) to add it. "</span></span>
-<span id="cb14-55"><a href="#cb14-55" tabindex="-1" aria-label="code-block-14-55"></a>                <span class="st">"Nothing to change in this notebook; rerun this cell once it is attached."</span></span>
-<span id="cb14-56"><a href="#cb14-56" tabindex="-1" aria-label="code-block-14-56"></a>            ) <span class="im">from</span> e</span>
-<span id="cb14-57"><a href="#cb14-57" tabindex="-1" aria-label="code-block-14-57"></a>        <span class="cf">raise</span></span>
-<span id="cb14-58"><a href="#cb14-58" tabindex="-1" aria-label="code-block-14-58"></a>    <span class="bu">print</span>(<span class="ss">f"Created inference profile </span><span class="sc">{</span>profile_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>resp[<span class="st">'inferenceProfileArn'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb14-59"><a href="#cb14-59" tabindex="-1" aria-label="code-block-14-59"></a>    <span class="cf">return</span> resp[<span class="st">"inferenceProfileArn"</span>]</span>
-<span id="cb14-60"><a href="#cb14-60" tabindex="-1" aria-label="code-block-14-60"></a></span>
-<span id="cb14-61"><a href="#cb14-61" tabindex="-1" aria-label="code-block-14-61"></a><span class="co"># From here on, these ARNs are what we pass as modelId. The base IDs are never sent to</span></span>
-<span id="cb14-62"><a href="#cb14-62" tabindex="-1" aria-label="code-block-14-62"></a><span class="co"># the runtime again.</span></span>
-<span id="cb14-63"><a href="#cb14-63" tabindex="-1" aria-label="code-block-14-63"></a>bedrock_model_id <span class="op">=</span> get_or_create_inference_profile(base_generation_model_id, <span class="st">"wattbot-gen"</span>)</span>
-<span id="cb14-64"><a href="#cb14-64" tabindex="-1" aria-label="code-block-14-64"></a>embedding_model_id_bedrock <span class="op">=</span> get_or_create_inference_profile(base_embedding_model_id, <span class="st">"wattbot-embed"</span>)</span></code></pre>
+<span id="cb14-54"><a href="#cb14-54" tabindex="-1" aria-label="code-block-14-54"></a>                <span class="st">"notebook's execution role. On the class account, the instance must use the ml-sagemaker-bedrock-use role: "</span></span>
+<span id="cb14-55"><a href="#cb14-55" tabindex="-1" aria-label="code-block-14-55"></a>                <span class="st">"stop it, Edit, change the IAM role, start it again. On your own account, attach the policy to your role. "</span></span>
+<span id="cb14-56"><a href="#cb14-56" tabindex="-1" aria-label="code-block-14-56"></a>                <span class="st">"Nothing to change in this notebook; rerun this cell afterwards."</span></span>
+<span id="cb14-57"><a href="#cb14-57" tabindex="-1" aria-label="code-block-14-57"></a>            ) <span class="im">from</span> e</span>
+<span id="cb14-58"><a href="#cb14-58" tabindex="-1" aria-label="code-block-14-58"></a>        <span class="cf">raise</span></span>
+<span id="cb14-59"><a href="#cb14-59" tabindex="-1" aria-label="code-block-14-59"></a>    <span class="bu">print</span>(<span class="ss">f"Created inference profile </span><span class="sc">{</span>profile_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>resp[<span class="st">'inferenceProfileArn'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb14-60"><a href="#cb14-60" tabindex="-1" aria-label="code-block-14-60"></a>    <span class="cf">return</span> resp[<span class="st">"inferenceProfileArn"</span>]</span>
+<span id="cb14-61"><a href="#cb14-61" tabindex="-1" aria-label="code-block-14-61"></a></span>
+<span id="cb14-62"><a href="#cb14-62" tabindex="-1" aria-label="code-block-14-62"></a><span class="co"># From here on, these ARNs are what we pass as modelId. The base IDs are never sent to</span></span>
+<span id="cb14-63"><a href="#cb14-63" tabindex="-1" aria-label="code-block-14-63"></a><span class="co"># the runtime again.</span></span>
+<span id="cb14-64"><a href="#cb14-64" tabindex="-1" aria-label="code-block-14-64"></a>bedrock_model_id <span class="op">=</span> get_or_create_inference_profile(base_generation_model_id, <span class="st">"wattbot-gen"</span>)</span>
+<span id="cb14-65"><a href="#cb14-65" tabindex="-1" aria-label="code-block-14-65"></a>embedding_model_id_bedrock <span class="op">=</span> get_or_create_inference_profile(base_embedding_model_id, <span class="st">"wattbot-embed"</span>)</span></code></pre>
 </div>
 <div id="permissions-and-verification" class="callout">
 <div class="callout-square">
