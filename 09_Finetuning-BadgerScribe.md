@@ -340,6 +340,21 @@ print("train pages:", len(train_df), " test pages:", len(test_df))
 print(train_df.groupby(["category", "label_source"]).size())
 ```
 
+Not all 295 labelled pages are trained on. The script first sets 15% of them aside, by category and with a fixed seed, so the same 44 pages are held out for every run and every learner; those are the pages every CER in this episode is measured on. Of the 251 that remain, the class run trains on a 120-page slice to keep the job near half an hour; the homework uses all 251. The holdout is scored three ways: 15 pages before and after training, and 8 of those 15 at the end of every pass. Here are those numbers for this run, from the same settings the training job gets in Step 1:
+
+```python
+holdout_frac, class_pages, eval_pages, curve_pages = 0.15, 120, 15, 8   # the Step 1 hyperparameters that decide the split
+
+n_holdout = round(len(train_df) * holdout_frac)
+n_pool = len(train_df) - n_holdout
+print(f"{len(train_df)} labelled pages")
+print(f"  held out for scoring:   {n_holdout}  ({holdout_frac:.0%}, fixed seed, never trained on)")
+print(f"  available for training: {n_pool}")
+print(f"  trained on in class:    {class_pages}  (the homework uses all {n_pool})")
+print(f"  scored before/after:    {eval_pages} of the {n_holdout} holdout pages; {curve_pages} of those after every pass")
+print(f"test pages (no labels, scored only by Kaggle): {len(test_df)}")
+```
+
 Look at one page and its transcription. Note what "verbatim" means here: the writer's spelling and punctuation, umlauts and `ß` kept as written, Kurrent letterforms mapped to their Latin equivalents, and `#` for a character the transcriber could not read.
 
 ```python
