@@ -233,7 +233,7 @@ The same rule, in `helpers.estimate_training_cost`, picks an instance and prints
 helpers.estimate_training_cost(params_billions=0.125, examples=1_000_000, tokens_per_example=256, epochs=3)
 ```
 
-About ten GPU-hours and ten to fifteen dollars on the cheapest instance that fits; a job you want capped and tagged before it starts.
+About eight GPU-hours and nine dollars on the cheapest instance that fits, eight hours of wall-clock on one GPU; a job you want capped and tagged before it starts.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 

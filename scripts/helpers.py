@@ -309,7 +309,7 @@ FLOPS_PER_PARAM_TOKEN = {"lora": 4.0, "full": 6.0}
 
 def estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs=2, method="lora",
                            instance_type=None, runs=1, utilization=0.25, gradient_checkpointing=True,
-                           activations_gb=4.0, startup_minutes=10, verbose=True):
+                           activations_gb=4.0, startup_minutes=10, verbose=True, from_scratch=False):
     """
     Back-of-the-envelope cost of a fine-tuning run, using the two rules from the
     fine-tuning episode. Good to within about a factor of two, which is enough to tell
@@ -376,7 +376,8 @@ def estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs
     }
     if verbose:
         gpus = f'{spec["gpus"]} x {spec["gpu"]}'
-        print(f"{method.upper()} fine-tune of a {params_billions:g}B model: {examples:,} examples x "
+        what = "Training from scratch" if from_scratch else f"{method.upper()} fine-tune"
+        print(f"{what} of a {params_billions:g}B model: {examples:,} examples x "
               f"{tokens_per_example:,} tokens x {epochs:g} passes = {tokens/1e6:,.1f}M tokens")
         print(f"memory:     ~{mem_gb:.0f} GB needed; {instance_type} has {spec['gpus'] * spec['gpu_mem_gb']} GB ({gpus})")
         if not fits(spec):
@@ -400,7 +401,7 @@ def estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs
         print(f"set max_run={result['max_run_seconds']}  ({max_run_minutes:.0f} min, about twice the estimate)")
         if "note" in spec:
             print(f"warning:    {spec['gpu']}: {spec['note']}")
-        if method == "full":
+        if method == "full" and not from_scratch:
             print("warning:    full fine-tuning updates every weight; do not run one on the class account")
         if method == "lora" and params_billions > 7:
             print("warning:    LoRA above 7B is outside what the class account allows")
@@ -420,4 +421,4 @@ def estimate_training_cost(params_billions, examples, tokens_per_example=1, epoc
     compute, and a timed local smoke test is the better estimate (Training part 2 episode).
     """
     return estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs=epochs, method="full",
-                                  instance_type=instance_type, runs=runs, **kw)
+                                  instance_type=instance_type, runs=runs, from_scratch=True, **kw)
