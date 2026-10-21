@@ -39,11 +39,11 @@ For research RAG, almost all the work is batch: embed everything once, answer a 
 
 The generator is **Qwen3-8B**, an 8-billion-parameter open-weight model (Apache 2.0). Bedrock serves the 32B and 235B members of that family but not this size, which is the usual situation: the size you want is the one missing. The job runs it with `transformers`, the same library the fine-tuning episode trained with: `from_pretrained` downloads the weights onto the GPU, and `generate` writes the answer to a chat prompt, the self-hosted counterpart of what Bedrock does behind `converse`. Inference needs no gradients, so the weights are the memory cost: 8B parameters at two bytes each in bf16 is about 16 GB, which fits the 24 GB GPU of an `ml.g5.xlarge` with room for the KV cache. (The fine-tuning episode has the full memory arithmetic; the short version is that inference needs only the weights and training needs eight times more per parameter.)
 
-Why bother serving a model yourself when Bedrock is a call away? Because open-weight models that fit one GPU are now close to the frontier on the kinds of tasks research code runs, on data that never leaves your account. The newest of this family, Qwen3.8-27B, runs on a single 48 GB GPU in 8-bit weights and lands within a few points of a frontier commercial model:
+Why bother serving a model yourself when Bedrock is a call away? Because open-weight models that fit one GPU are now close to the frontier on the kinds of tasks research code runs, on data that never leaves your account. The newest of this family, Qwen3.8-27B, fits one GPU and lands within a few points of a frontier commercial model:
 
 ![Qwen3.8-27B against Claude Opus 4.8 on three benchmarks: 73.0 vs 74.6 on Terminal-Bench 2.1, 89.2 vs 93.6 on GPQA Diamond, 83.7 vs 80.5 on CharXiv reasoning](fig/qwen27b-vs-opus.png){alt="Paired horizontal bars comparing a 27B open-weight model on one GPU with a frontier commercial model; within a few points on agent tasks and science questions, ahead on chart reasoning"}
 
-Qwen figures are from the Qwen3.8-27B model card and were not reproduced here; Opus 4.8 figures are from its published evaluations. This episode runs the 8B model on the cheaper GPU because that is what the class account's quota allows; the callout below says what changes for the 27B.
+Qwen figures are from the Qwen3.8-27B model card and were not reproduced here; Opus 4.8 figures are from its published evaluations.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
@@ -57,7 +57,6 @@ Qwen figures are from the Qwen3.8-27B model card and were not reproduced here; O
 
 About `$0.75` for the episode, and the GPUs are off the moment each script ends. Both jobs carry `max_runtime_in_seconds`, so a hung job costs at most the cap. Compare the same pipeline on a GPU notebook instance (the optional GPU-notebook episode at the end of the lesson): the meter runs until someone stops it, and a forgotten `ml.g5.xlarge` is `$34` a day.
 
-**The 27B version.** Swap `generation_model_id` to `Qwen/Qwen3.8-27B-FP8` and `instance_type` to `ml.g6e.xlarge` (one L40S, 48 GB, `$2.61`/h): the FP8 weights are 27 GB, the job takes about 30 minutes and costs about `$1.30`. FP8 needs vLLM: write a `code_rag/requirements.txt` with `vllm>=0.17` and `peft>=0.18` (that vLLM brings a newer `transformers`, and the container's `peft` must follow), add `"--engine", "vllm"` to the arguments, and expect five minutes of install; the script removes the container's `flash-attn` build, which no longer links against vLLM's PyTorch. It needs the `ml.g6e.xlarge for processing job usage` quota, whose default is zero and whose increase takes days; the class account did not have it when this was written.
 
 The trade-off is latency. A job takes minutes to start, so this pattern is for batch questions, not a chatbot. For interactive use, Bedrock answers in seconds; for interactive use of a model Bedrock does not have, an inference endpoint does, at an hourly rate you have to remember to turn off.
 
@@ -201,7 +200,7 @@ Neither job installs anything. The Hugging Face container ships `transformers` a
 
 ### Why not vLLM?
 
-vLLM is the open-source inference engine most people serve open-weight models with: you give it a model name, it loads the weights onto the GPU and answers chat requests, batching many at once and managing GPU memory so that throughput scales. That is what you want behind an API with users. This job sends 82 prompts one at a time, so the batching is never used, and what vLLM would cost is a multi-gigabyte install that replaces the container's PyTorch, five minutes of billed GPU time per run, and a dependency that drifts: every vLLM release pins a PyTorch, and the container's own `flash-attn` binary stops loading when that PyTorch changes. `transformers.generate`, already in the container, does the same 82 prompts in about ten minutes with nothing to install. The batch script keeps vLLM behind `--engine vllm` for the two cases it earns its place: FP8 weights (the 27B variant) and serving many requests. The GPU-notebook episode uses it for the former.
+vLLM is the open-source inference engine most people serve open-weight models with: you give it a model name, it loads the weights onto the GPU and answers chat requests, batching many at once so that throughput scales. That is what you want behind an API with users. This job sends 82 prompts one at a time, so the batching would go unused, and the install is several gigabytes of billed GPU time. `transformers.generate`, already in the container, does the same 82 prompts in about ten minutes with nothing to install. The GPU-notebook episode uses vLLM, where its 8-bit weights are needed to fit a larger model.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -479,7 +478,7 @@ Under the caps we set, the worst case for a job that hangs (a stuck download, a 
 
 - Bedrock's catalog is curated and lags releases; when you need a specific open-weight model you rent a GPU and serve it yourself.
 - Of the ways to rent a GPU, a Processing job is the one that cannot be forgotten: it bills while the script runs and ends on its own, with `max_runtime_in_seconds` as the backstop. Use it for batch work; use Bedrock or an endpoint when you need answers in seconds.
-- Inference needs only the weights: Qwen3-8B in bf16 is ~16 GB and fits one 24 GB GPU; the 27B model in FP8 is ~27 GB and needs a 48 GB one.
+- Inference needs only the weights: Qwen3-8B in bf16 is ~16 GB and fits one 24 GB GPU.
 - A job's inputs and outputs are S3 prefixes mounted into the container; the notebook only stages files and reads results, so it stays a cheap CPU instance.
 - The pipeline logic (`wattbot_rag.py`) ships with the job unchanged from the Bedrock episode; only the two model callables differ.
 - Tags do not propagate from the notebook: every job gets its own `tags=`.
