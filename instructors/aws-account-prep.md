@@ -128,7 +128,41 @@ Console: **Service Quotas → Amazon Bedrock**, and **Bedrock → Model access**
 
 - Enable model access for the two models the Bedrock episode uses: `deepseek.v3-v1:0` (generation) and `amazon.titan-embed-text-v2:0` (embeddings).
 - Request increases to the **tokens per minute** and **requests per minute** quotas for both. Fifty notebooks each embedding ~3,000 chunks in a loop will exceed the default embedding RPM; ask for 5–10x whatever the console shows.
-- The student execution role needs, in addition to `bedrock:InvokeModel`: `bedrock:CreateInferenceProfile`, `bedrock:GetInferenceProfile`, `bedrock:ListInferenceProfiles`, `bedrock:GetFoundationModel`, `bedrock:TagResource`. `InvokeModel` must be allowed on **both** the application inference profile ARN and the underlying model ARN. Without these, profile creation fails and students fall back to untagged calls, which is the usual reason Bedrock spend shows up untagged.
+- **The learner execution role needs Bedrock permissions**, and the default SageMaker role has none: the Bedrock episode's first Bedrock call fails with `AccessDeniedException ... bedrock:ListInferenceProfiles` until they are added. Attach the policy below as an inline policy on `ml-sagemaker-use` (one role for the whole workshop is simpler than a second role for the RAG episodes), with `<account-id>` filled in. `InvokeModel` must be allowed on **both** the application inference profile ARN and the underlying foundation-model ARN, or calls through the profile are denied; `DeleteInferenceProfile` is for the cleanup episode.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BedrockCallModels",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream"],
+      "Resource": [
+        "arn:aws:bedrock:*::foundation-model/*",
+        "arn:aws:bedrock:*:<account-id>:application-inference-profile/*",
+        "arn:aws:bedrock:*:<account-id>:inference-profile/*"
+      ]
+    },
+    {
+      "Sid": "BedrockTaggedProfiles",
+      "Effect": "Allow",
+      "Action": ["bedrock:CreateInferenceProfile", "bedrock:GetInferenceProfile", "bedrock:ListInferenceProfiles",
+                 "bedrock:DeleteInferenceProfile", "bedrock:TagResource", "bedrock:ListTagsForResource"],
+      "Resource": [
+        "arn:aws:bedrock:*:<account-id>:application-inference-profile/*",
+        "arn:aws:bedrock:*:<account-id>:inference-profile/*"
+      ]
+    },
+    {
+      "Sid": "BedrockCatalog",
+      "Effect": "Allow",
+      "Action": ["bedrock:GetFoundationModel", "bedrock:ListFoundationModels", "bedrock:ListInferenceProfiles"],
+      "Resource": "*"
+    }
+  ]
+}
+```
 
 ## Cost allocation tags
 
