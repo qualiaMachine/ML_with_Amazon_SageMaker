@@ -745,7 +745,11 @@ def embed_multimodal(
             }
         else:
             params["text"] = {"truncationMode": "END", "value": text}
-        body: Dict[str, Any] = {"taskType": "SINGLE_EMBEDDING", "singleEmbeddingParams": params}
+        body: Dict[str, Any] = {
+            "schemaVersion": "nova-multimodal-embed-v1",   # without it Nova validates the body as a chat request and asks for "messages"
+            "taskType": "SINGLE_EMBEDDING",
+            "singleEmbeddingParams": params,
+        }
     else:
         body = {"embeddingConfig": {"outputEmbeddingLength": dimension}}
         if text is not None:
