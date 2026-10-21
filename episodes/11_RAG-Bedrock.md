@@ -68,7 +68,7 @@ We’ll work with **Amazon Bedrock–hosted foundation models** for both embeddi
 
   - An open‑weight mixture‑of‑experts model (671B parameters in total, about 37B active per token) that Bedrock serves on‑demand, so there is no GPU to manage.
   - Particularly useful when you want many calls (e.g., one per question) and care about low latency and lower per‑token pricing compared to flagship models (check the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) for current rates).
-  - The same code works for any chat model in the catalog, because we call it through the provider-neutral `converse` API: switch `base_generation_model_id` to a Claude, Llama, or Mistral model ID and nothing else changes.
+  - The same code works for any chat model in the catalog. Bedrock has one chat call, `converse`, that takes the same input for every provider (a system prompt and a list of user and assistant messages) and returns the reply in the same shape, so switching `base_generation_model_id` to a Claude, Llama, or Mistral model ID changes nothing else.
 
 - **(Optional) Multimodal models for tables and figures**
 
@@ -147,7 +147,7 @@ s3 = boto3.client("s3", region_name=region)
 
 ```python
 # Base model IDs. Any chat model in the Bedrock catalog works as the generator (a Claude or Llama ID, say),
-# because we call it through the provider-neutral `converse` API.
+# because converse, Bedrock's chat call, takes the same messages and returns the same shape for every provider.
 base_generation_model_id = "deepseek.v3-v1:0"             # writes the answers; $0.62 in / $1.85 out per million tokens (Oct 2026)
 base_embedding_model_id = "amazon.titan-embed-text-v2:0"  # turns text into vectors for retrieval; $0.02 per million tokens
 ```
@@ -172,7 +172,7 @@ local_data_dir = "./data"              # working copies on this notebook instanc
 os.makedirs(local_data_dir, exist_ok=True)
 ```
 
-**Two Bedrock clients.** Bedrock has two APIs. `bedrock-runtime` is the one that calls models (`converse` for chat, `invoke_model` for embeddings); it is what every answer and every embedding in this episode goes through. `bedrock` is the control plane: listing models, creating the inference profiles that carry our tags. The runtime client gets a retry setting because on-demand Bedrock throughput is rate-limited per model: a loop of a few thousand embedding calls will occasionally be throttled, and the adaptive mode backs off and retries instead of raising.
+**Two Bedrock clients.** Bedrock has two APIs. `bedrock-runtime` is the one that calls models (`converse`, the chat call, for answers; `invoke_model`, the raw call with a provider-specific body, for embeddings); it is what every answer and every embedding in this episode goes through. `bedrock` is the control plane: listing models, creating the inference profiles that carry our tags. The runtime client gets a retry setting because on-demand Bedrock throughput is rate-limited per model: a loop of a few thousand embedding calls will occasionally be throttled, and the adaptive mode backs off and retries instead of raising.
 
 ```python
 bedrock_runtime = boto3.client(
