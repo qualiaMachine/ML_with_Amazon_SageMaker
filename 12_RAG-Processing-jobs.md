@@ -444,6 +444,7 @@ def job_cost(job_name: str, price_per_hour: float):
     print(f"  wall-clock:                {provisioning + billed:.1f} min from launch to end")
     print(f"  provisioning (not billed): {provisioning:.1f} min")
     print(f"  billed window:             {billed:.1f} min at ${price_per_hour}/h = ${cost:.2f}")
+    print(f"  output:                    {d['ProcessingOutputConfig']['Outputs'][0]['S3Output']['S3Uri']}")   # where the job's files went
     return cost
 
 total = job_cost(embedding_processor.latest_job.job_name, 1.41)

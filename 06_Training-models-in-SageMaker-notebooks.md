@@ -510,15 +510,25 @@ def job_cost_report(job_name: str, price_per_hour: float):
     billable = desc["BillableTimeInSeconds"] * n   # BillableTimeInSeconds: container pull to model upload, charged per instance
     wall = (desc["TrainingEndTime"] - desc["CreationTime"]).total_seconds()   # from the launch request to the end, including unbilled provisioning
     print(f"{job_name}: status {desc['TrainingJobStatus']}, wall-clock {wall/60:.1f} min, billable {billable/60:.1f} min on {n} instance(s), cost ${billable/3600*price_per_hour:.3f} at ${price_per_hour}/h")
+    print(f"    model: {desc['ModelArtifacts']['S3ModelArtifacts']}")   # the model.tar.gz this job uploaded to output_path
     return desc
 
 desc = job_cost_report(xgboost_estimator.latest_training_job.name, price_per_hour)  # latest_training_job: the job fit() just ran
 ```
 
+The `model:` line is where the trained model went. Everything else the job wrote sits next to it under the same prefix; list it straight from the notebook:
+
+```python
+# Everything the job wrote, straight from S3: the model tarball plus the profiler's small files
+job_prefix = f"{output_folder}/{xgboost_estimator.latest_training_job.name}/"
+for obj in s3.list_objects_v2(Bucket=bucket_name, Prefix=job_prefix).get("Contents", []):
+    print(f"{obj['Size'] / 1024:8.1f} KB  s3://{bucket_name}/{obj['Key']}")
+```
+
 Compare this with the estimate you made above. The job's log (scroll up in the `fit()` output) shows the script itself trained in a fraction of a second, yet the bill is about two minutes. The rest is container pull, data download and model upload: the fixed overhead of every job, the same whether you train for one minute or one hour. The extra minute between calling `fit()` and the first billed second is SageMaker finding an instance, which is free.
 
 #### What landed in S3
-Open the [S3 console](https://us-east-2.console.aws.amazon.com/s3/home?region=us-east-2) and look at what the job wrote.
+The listing above is what you would see in the [S3 console](https://us-east-2.console.aws.amazon.com/s3/home?region=us-east-2); open it once to see the same thing the console's way.
 
 In **your bucket**, under `xgboost/<job-name>/` (the prefix from `output_path` plus the job name):
 
