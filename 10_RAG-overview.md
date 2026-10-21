@@ -106,6 +106,8 @@ Bedrock is not free of downsides; it's just that none of them are "you forgot an
 
 With that framing, here are the main patterns, ordered from "reach for this first" to "only when you really need it."
 
+![Four columns, Bedrock API, Processing job, GPU notebook and Inference endpoint, compared on where the model runs, what runs between calls, billing unit, latency, model choice, what you must remember, a cost example and which episode covers it; Bedrock is marked as the default and Processing jobs as the safe way to use a GPU](fig/rag-approaches.svg){alt="Comparison table of four ways to run RAG on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)."}
+
 ### 1. Amazon Bedrock — managed embedding and generation APIs (default)
 
 Call embedding and generation models via API from your RAG pipeline. You still own and manage retrieval logic (chunking, indexing, reranking, evaluation), but you outsource the heavy model lifecycle work entirely. You pay per token, nothing runs between calls, and there is nothing to shut down. Bedrock also gives RAG systems access to proprietary models (e.g., Claude) that would otherwise need to be purchased and integrated separately.
