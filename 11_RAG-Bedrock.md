@@ -660,7 +660,7 @@ def embed_query(question: str) -> np.ndarray:
     return np.asarray(bedrock_embed_text(question), dtype="float32")
 ```
 
-Embedding 3,000 chunks is a few minutes and a few cents, so do not do it twice. The cell below looks for the finished matrix locally, then in your bucket, then in the shared bucket (every notebook in the class would otherwise send the same 2,880 calls to the same model in the same ten minutes, which Bedrock's per-minute quota would throttle), and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped. One small helper asks S3 whether an object exists.
+Embedding 3,000 chunks is a few minutes and a few cents, so do not do it twice. The cell below looks for the finished matrix locally, then in your bucket, and only then computes it, saving progress every 500 chunks so an interrupted run picks up where it stopped. In a room of fifty notebooks doing this at once, Bedrock's per-minute quota on the embedding model will throttle some calls; the client retries with backoff, so the loop slows rather than fails. One small helper asks S3 whether an object exists.
 
 ```python
 def _s3_object_exists(bucket: str, key: str) -> bool:
@@ -678,10 +678,6 @@ if emb_save_path.exists():
 elif _s3_object_exists(bucket_name, embeddings_key):
     s3.download_file(bucket_name, embeddings_key, str(emb_save_path))
     print(f"Downloaded cached embeddings from s3://{bucket_name}/{embeddings_key}")
-    chunk_embeddings = np.load(emb_save_path)
-elif _s3_object_exists(shared_bucket, "wattbot/embeddings_bedrock.npy"):   # the instructor's copy: same chunks, same model, so the same vectors
-    s3.download_file(shared_bucket, "wattbot/embeddings_bedrock.npy", str(emb_save_path))
-    print(f"Downloaded the class copy of the embeddings from s3://{shared_bucket}/wattbot/embeddings_bedrock.npy")
     chunk_embeddings = np.load(emb_save_path)
 else:
     # Resume from a partial save if a previous run was interrupted
