@@ -286,6 +286,8 @@ There is no data upload in this episode. The competition data is published as a 
 
 The training job reads the images and the model straight from that bucket; the only files your notebook downloads are the small CSVs. Outputs go to your own bucket from the S3 episode, under `badger-scribe/`.
 
+The first cell is the same setup as every episode: a SageMaker session, the region and the execution role, and an S3 client. Then the names this episode needs: the shared bucket the jobs read from, your own bucket they write to, your username for job names, and the two S3 prefixes that become the job's `train` and `model` input channels.
+
 ```python
 import os
 import json
@@ -318,11 +320,13 @@ print("Region:", region)
 print("Role:", role)
 ```
 
+Download the four small files (the two page lists, the metadata and the competition's scoring script) and look at how the training pages split by category and by who transcribed them.
+
 ```python
 for fname in ["train.csv", "test.csv", "metadata.csv", "metric.py"]:
     s3_client.download_file(shared_bucket, f"{data_prefix}/{fname}", os.path.join(local_data_dir, fname))
 
-train_df = pd.read_csv(os.path.join(local_data_dir, "train.csv"), keep_default_na=False)
+train_df = pd.read_csv(os.path.join(local_data_dir, "train.csv"), keep_default_na=False)   # keep_default_na=False: an empty cell stays "" instead of becoming NaN, so every transcription is a string
 test_df = pd.read_csv(os.path.join(local_data_dir, "test.csv"), keep_default_na=False)
 
 print("train pages:", len(train_df), " test pages:", len(test_df))
@@ -352,6 +356,8 @@ The cost estimate in Step 0 used 1,600 tokens per page. That number is tokens, n
 ```python
 %pip install -q "transformers>=4.56"   # the processor that turns an image + text into the model's tokens; same version as the training job
 ```
+
+Fetch the processor's config files from the shared bucket and load the processor with the same pixel limits the training script uses. Then run one page through it twice: once with the transcription, to count everything, and once with only the prompt, to find where the transcription's tokens start.
 
 ```python
 from transformers import AutoProcessor
@@ -633,7 +639,7 @@ print(json.dumps(summary, indent=2))
 Both evaluations ran on the same 15 pages, so the difference is the fine-tune and nothing else.
 
 ```python
-before = pd.read_csv(os.path.join(run_dir, "eval_before.csv"), keep_default_na=False)
+before = pd.read_csv(os.path.join(run_dir, "eval_before.csv"), keep_default_na=False)   # empty predictions stay "" rather than NaN
 after = pd.read_csv(os.path.join(run_dir, "eval_after.csv"), keep_default_na=False)
 
 # cer = character error rate per page: edits / characters in the reference, lower is better
