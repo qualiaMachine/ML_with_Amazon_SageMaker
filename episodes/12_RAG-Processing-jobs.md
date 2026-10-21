@@ -128,6 +128,8 @@ print("Bucket:", bucket_name)
 
 The jobs read three files from S3: `train_QA.csv` and `metadata.csv` from the shared bucket, and `chunks.jsonl` from your bucket, where the Bedrock episode cached it. The PDFs themselves are not needed again: chunking was done once, and the jobs work from the chunks. We download the three files to the notebook only to confirm they exist and to look at them; the jobs fetch their own copies from S3.
 
+First the keys and the full S3 URIs. The URIs are the form a `ProcessingInput` takes, so they are built here once and reused when the jobs are launched.
+
 ```python
 train_qa_key = "wattbot/train_QA.csv"
 metadata_key = "wattbot/metadata.csv"
@@ -139,11 +141,16 @@ metadata_s3 = f"s3://{shared_bucket}/{metadata_key}"
 chunks_s3_uri = f"s3://{bucket_name}/{chunks_s3_key}"
 
 def smart_read_csv(path: str) -> pd.DataFrame:
+    """Read a CSV as utf-8, falling back to latin-1 for the odd accented author name."""
     try:
         return pd.read_csv(path)
     except UnicodeDecodeError:
         return pd.read_csv(path, encoding="latin-1")
+```
 
+Then download the three files, skipping any already on disk, and load them so we can check the counts before spending GPU time on them.
+
+```python
 train_qa_path = os.path.join(local_data_dir, "train_QA.csv")
 metadata_path = os.path.join(local_data_dir, "metadata.csv")
 local_chunks_path = os.path.join(local_data_dir, "chunks.jsonl")
