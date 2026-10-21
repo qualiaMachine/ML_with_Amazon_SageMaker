@@ -572,16 +572,16 @@ for the 27B.</p>
 <td>
 <code>ml.g5.xlarge</code> (A10G, 24 GB)</td>
 <td><code>$1.41</code></td>
-<td>~20 min: 5 startup, ~5 installing vLLM, ~3 downloading 16 GB of
+<td>~15 min: 5 startup, ~2 installing vLLM, ~3 downloading 16 GB of
 weights, the rest generating</td>
-<td>~<code>$0.50</code>
+<td>~<code>$0.35</code>
 </td>
 </tr><tr><td>Controller notebook</td>
 <td><code>ml.t3.medium</code></td>
 <td><code>$0.05</code></td>
 <td>2 h</td>
 <td><code>$0.10</code></td>
-</tr></tbody></table><p>About <code>$0.80</code> for the episode, and the GPUs are off the
+</tr></tbody></table><p>About <code>$0.65</code> for the episode, and the GPUs are off the
 moment each script ends. Both jobs carry
 <code>max_runtime_in_seconds</code>, so a hung job costs at most the
 cap. Compare the same pipeline on a GPU notebook instance (the optional
@@ -592,8 +592,11 @@ someone stops it, and a forgotten <code>ml.g5.xlarge</code> is
 <code>generation_model_id</code> to <code>Qwen/Qwen3.8-27B-FP8</code>
 and <code>instance_type</code> to <code>ml.g6e.xlarge</code> (one L40S,
 48 GB, <code>$2.61</code>/h): the FP8 weights are 27 GB, the job takes
-about 30 minutes and costs about <code>$1.30</code>, and nothing else
-changes. It needs the
+about 30 minutes and costs about <code>$1.30</code>. Qwen3.8 also needs
+a newer vLLM (<code>vllm&gt;=0.17</code> in
+<code>requirements.txt</code>, plus <code>peft&gt;=0.18</code> because
+that vLLM brings a newer <code>transformers</code>), which replaces the
+container’s PyTorch and adds five minutes of install. It needs the
 <code>ml.g6e.xlarge for processing job usage</code> quota, whose default
 is zero and whose increase takes days; the class account did not have it
 when this was written.</p>
@@ -768,18 +771,21 @@ field.</p>
 already have, so it has no <code>requirements.txt</code> and starts as
 soon as the instance is up. The RAG job needs vLLM, which the container
 does not ship. A <code>requirements.txt</code> in the job’s
-<code>source_dir</code> is installed before the script runs. vLLM pins
-its own PyTorch and a newer <code>transformers</code>, so the
-container’s <code>peft</code> has to move with it; the pin on
-<code>peft</code> is there because an older <code>peft</code> left
-behind imports a class the newer <code>transformers</code> removed, and
-the job dies on that import before it reaches the model.</p>
+<code>source_dir</code> is installed before the script runs. The version
+is pinned on purpose: every vLLM release pins a PyTorch, and 0.11.0 is
+the last one built on the PyTorch 2.8 the container already has, so the
+install adds a few hundred megabytes and leaves the container’s
+<code>torch</code>, <code>transformers</code> and
+<code>flash-attn</code> alone. A newer vLLM replaces PyTorch, and the
+container’s <code>flash-attn</code> binary, built against the old one,
+then fails to load (the script removes it in that case, but the install
+is five times larger).</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># A requirements.txt next to the script is pip-installed in the container before the script runs; only the RAG job has one</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code_rag/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"vllm&gt;=0.17"</span>, <span class="st">"peft&gt;=0.18"</span>]) <span class="op">+</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)   <span class="co"># vLLM for the generator; peft upgraded to match the transformers vLLM installs</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    f.write(<span class="st">"vllm==0.11.0</span><span class="ch">\n</span><span class="st">"</span>)   <span class="co"># the last vLLM built on the container's PyTorch 2.8; see the text above</span></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a><span class="bu">print</span>(<span class="st">"code_embed:"</span>, os.listdir(<span class="st">"code_embed"</span>))</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a><span class="bu">print</span>(<span class="st">"code_rag:  "</span>, os.listdir(<span class="st">"code_rag"</span>))</span></code></pre>
@@ -793,22 +799,21 @@ the job dies on that import before it reaches the model.</p>
 <h3 class="callout-title">The RAG job’s pip install is part of its
 bill</h3>
 <div class="callout-content">
-<p>vLLM ships its own CUDA kernels and pins its own PyTorch, so
-<code>pip install vllm</code> in the RAG job pulls several gigabytes and
-replaces the container’s <code>torch</code>, <code>transformers</code>
-and <code>peft</code> with the versions it wants. In the log this looks
-alarming: a wall of <code>Downloading</code> lines, then
-<code>Uninstalling torch-2.8.0</code>,
-<code>Uninstalling transformers-4.56.2</code> and a dozen more, then an
-<code>Installing collected packages</code> line after which nothing
-prints for several minutes while the wheels unpack. It is not stuck. The
-step ends with <code>Successfully installed</code>, and only then does
-the script start. All of that is normal (the container is thrown away
-when the job ends) but it takes 5 to 8 of the job’s ~20 minutes, on a
-GPU instance that is billing the whole time: roughly 15 cents per run.
-For a job you launch often, bake the install into a custom container
-image instead; for a job you launch twice in a workshop, paying for the
-install is cheaper than building the image.</p>
+<p>vLLM ships its own CUDA kernels, so even the pinned
+<code>pip install vllm==0.11.0</code> pulls a few hundred megabytes. In
+the log this is a wall of <code>Downloading</code> lines, then
+<code>Installing collected packages</code>, after which nothing prints
+for a minute or two while the wheels unpack. It is not stuck. The step
+ends with <code>Successfully installed</code>, and only then does the
+script start. It takes about 2 of the job’s ~15 minutes, on a GPU
+instance that is billing the whole time: a few cents per run. (An
+unpinned install would pull vLLM’s newest release and its own PyTorch,
+several gigabytes and five minutes more, and the log would also show
+<code>Uninstalling torch</code> and
+<code>Uninstalling transformers</code>.) For a job you launch often,
+bake the install into a custom container image instead; for a job you
+launch twice in a workshop, paying for the install is cheaper than
+building the image.</p>
 </div>
 </div>
 </div>
@@ -1066,7 +1071,7 @@ named after your job; click it. The text is the container’s stdout, kept
 after the job ends, updated while it runs (refresh). You will see, in
 order: pip installing vLLM, the weight download (16 GB in shards), vLLM
 loading the model and reporting how much GPU memory it reserved, then
-one line per question. The whole job is the 20 minutes in the cost
+one line per question. The whole job is the 15 minutes in the cost
 callout; the generation is the last third of it.</p>
 </section><section><h2 class="section-heading" id="step-4-download-predictions-and-evaluate">Step 4 – Download predictions and evaluate<a class="anchor" aria-label="anchor" href="#step-4-download-predictions-and-evaluate"></a></h2>
 <hr class="half-width"><p>Finally, we download <code>wattbot_solutions.csv</code> from S3,
@@ -1133,7 +1138,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -1160,10 +1165,10 @@ the billed run.</p>
 <span id="cb13-17"><a href="#cb13-17" tabindex="-1" aria-label="code-block-13-17"></a><span class="bu">print</span>(<span class="ss">f"GPU total for the episode: $</span><span class="sc">{</span>total<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Expect the embedding job to bill 5-6 minutes (about
-<code>$0.13</code>) and the RAG job 15-20 minutes (about
-<code>$0.35</code>-<code>$0.50</code>), so roughly
-<code>$0.50</code>-<code>$0.65</code> of GPU time against the callout’s
-<code>$0.70</code>. In the RAG job’s log, the first 8-10 minutes of the
+<code>$0.13</code>) and the RAG job 10-15 minutes (about
+<code>$0.25</code>-<code>$0.35</code>), so roughly
+<code>$0.40</code>-<code>$0.50</code> of GPU time against the callout’s
+<code>$0.50</code>. In the RAG job’s log, the first 5-6 minutes of the
 billed window are pip and the download; the model loads for another
 minute; the remaining minutes are the questions, two generation calls
 each. So well over half of what you paid for was setup, which is the
@@ -1199,7 +1204,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still installing
@@ -1209,7 +1214,7 @@ prefix is empty because the script never reached the point of writing
 <code>wattbot_solutions.csv</code>, and the bill is the full 600
 seconds: 600 / 3600 × <code>$1.41</code> ≈ <code>$0.24</code> for
 nothing. A cap has to leave room for the setup that precedes the work,
-which is why ours is six times the 20-minute estimate rather than ten
+which is why ours is eight times the 15-minute estimate rather than ten
 percent over it.</p>
 <p>Under the caps we set, the worst case for a job that hangs (a stuck
 download, a model that never finishes loading) is 2 h ×
