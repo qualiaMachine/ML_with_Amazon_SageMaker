@@ -79,6 +79,10 @@ def build_answer_prompt(question: str, context: str, answer_unit: Optional[str] 
 
 
 def explanation_system_prompt(with_evidence_type: bool = False) -> str:
+    """System prompt for the second LLM call, which explains how the retrieved
+    evidence supports the answer. The with_evidence_type variant also asks the
+    model to label the evidence (text, table, figure, ...) in a fixed one-line
+    format that the parser downstream relies on."""
     if with_evidence_type:
         return (
             "You are annotating how an answer is supported by a research paper. "
@@ -331,6 +335,7 @@ def embed_query_with(embedder) -> Callable[[str], np.ndarray]:
     """Wrap a sentence-transformers model as an `embed_query(question)` callable."""
 
     def embed_query(question: str) -> np.ndarray:
+        """One question -> one unit-length vector, with the same model that embedded the chunks."""
         return embedder.encode([question], convert_to_numpy=True, normalize_embeddings=True)[0]
 
     return embed_query

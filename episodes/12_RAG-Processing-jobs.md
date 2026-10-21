@@ -224,6 +224,8 @@ def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning
 
 ### Launch the embedding job
 
+Open `scripts/embedding_inference.py` first; it is under fifty lines. It reads a JSONL file of chunks from the job's input directory, embeds them with whatever sentence-transformer `--model_id` names, normalises the vectors so a dot product is a cosine similarity, and saves one `embeddings.npy` to the output directory. Nothing in it knows about WattBot, which is the point of a Processing job script: inputs in, outputs out, no state.
+
 A `HuggingFaceProcessor` is the Processing-job counterpart of the estimator: the same role, tags, instance type and container versions, plus a runtime cap. Its `run` call names the script, mounts the inputs, and says where the output goes.
 
 ```python
@@ -306,7 +308,7 @@ For the second job, we pass four inputs:
 - `train_QA.csv` – training questions (shared bucket)
 - `metadata.csv` – to resolve `ref_id` → URL (shared bucket)
 
-The script `wattbot_rag_batch.py` is short, because the pipeline lives in `scripts/wattbot_rag.py`, the same module the Bedrock episode imported:
+Open `scripts/wattbot_rag_batch.py` and read `main` before launching it. It is short, because the pipeline lives in `scripts/wattbot_rag.py`, the same module the Bedrock episode imported:
 
 - `retrieve_top_k`: cosine similarity over the embedding matrix
 - `run_single_qa`: retrieval, the answer call, the hybrid unanswerable rule (retrieval threshold OR the model's own `is_blank`), the explanation call

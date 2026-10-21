@@ -1,3 +1,15 @@
+"""Embed a JSONL file of text chunks with a sentence-transformer. Runs as a
+SageMaker Processing job (the Processing Jobs episode's first job).
+
+Input:  <input_dir>/<input_filename>, one JSON object per line with a text field
+Output: <output_dir>/embeddings.npy, one row per chunk, in the same order,
+        unit-normalised so a dot product is a cosine similarity
+
+The job's ProcessingInput copies the chunk file to input_dir before this runs,
+and its ProcessingOutput copies output_dir to S3 when it exits. Nothing in the
+script is WattBot-specific: any JSONL with a text field works.
+"""
+
 import argparse
 import json
 import os
@@ -6,6 +18,7 @@ from sentence_transformers import SentenceTransformer
 
 
 def main():
+    """Parse the flags, read the chunks, embed them on whatever device is available, save the matrix."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_id", type=str, required=True)
     parser.add_argument("--input_filename", type=str, default="wattbot_chunks.jsonl")
@@ -29,12 +42,12 @@ def main():
 
     print(f"Loaded {len(texts)} chunks")
 
-    model = SentenceTransformer(args.model_id)
+    model = SentenceTransformer(args.model_id)   # downloads from Hugging Face the first time; uses the GPU if the job has one
     embeddings = model.encode(
         texts,
         convert_to_numpy=True,
         show_progress_bar=True,
-        normalize_embeddings=True,
+        normalize_embeddings=True,   # unit length, so retrieval can use a plain dot product as cosine similarity
     )
 
     os.makedirs(args.output_dir, exist_ok=True)

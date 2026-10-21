@@ -55,6 +55,8 @@ from badger_common import (
 
 
 def parse_args():
+    """Every knob the notebook can set reaches the script as a command-line flag;
+    SageMaker turns the estimator's hyperparameters dict into exactly these flags."""
     p = argparse.ArgumentParser()
     # --- what to train ---
     # A local directory works as a model id for from_pretrained; SageMaker sets
@@ -108,6 +110,10 @@ def split_pages(df: pd.DataFrame, holdout_frac: float, seed: int):
 
 
 class PageDataset(Dataset):
+    """One training example per page: the page image, the instruction prompt
+    built for its category, and the reference transcription as the answer.
+    The Collator below turns a batch of these into tensors."""
+
     def __init__(self, df, images_dir, doc_ctx, max_pixels):
         self.rows = df.to_dict("records")
         self.images_dir = images_dir
@@ -159,6 +165,8 @@ class Collator:
 # ---------------------------------------------------------------------------
 @torch.no_grad()
 def transcribe(model, processor, image, prompt, max_new_tokens):
+    """Transcribe one page: build the user turn (image + prompt), generate greedily,
+    and return only the newly generated text (the input tokens are sliced off)."""
     text = processor.apply_chat_template(user_messages(prompt), tokenize=False, add_generation_prompt=True)
     enc = processor(text=[text], images=[image], return_tensors="pt").to(model.device)
     out = model.generate(**enc, max_new_tokens=max_new_tokens, do_sample=False, repetition_penalty=1.05)
@@ -206,6 +214,9 @@ def evaluate(model, processor, df, images_dir, doc_ctx, max_pixels, n_pages, max
 
 # ---------------------------------------------------------------------------
 def main():
+    """The whole job, in order: split pages, load the base model, attach LoRA,
+    score the base model on the holdout, train (saving a checkpoint and a CER point
+    per epoch), save the adapter, score again, write the summary and the curves."""
     args = parse_args()
     torch.manual_seed(args.seed)
     from peft import LoraConfig, get_peft_model
