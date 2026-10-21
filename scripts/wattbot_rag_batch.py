@@ -190,6 +190,7 @@ def main():
     except UnicodeDecodeError:
         metadata_df = pd.read_csv(metadata_path, encoding="latin1")
 
+    train_df = wr.drop_questions_without_papers(train_df, {c["doc_id"] for c in chunked_docs})
     if args.per_type:
         train_df = wr.sample_questions_by_type(train_df, per_type=args.per_type)
     if args.max_questions:
