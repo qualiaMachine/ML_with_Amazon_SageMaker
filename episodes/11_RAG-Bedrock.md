@@ -866,18 +866,18 @@ scored_df = compute_wattbot_score(
 The score tells you *which* questions failed, not why. Two different failures look the same in that table. Either retrieval never surfaced the right paper, so the model had nothing to work with, or the right passage was in front of it and it still declined or misread it. The cell below separates them for the lowest-scoring rows: it joins the model's own explanation and the passages it cited back onto the score, then reruns retrieval for the question (one embedding call) and reports whether the ground-truth paper was among the top-k chunks and what the best cosine score was.
 
 ```python
-from wattbot_rag import retrieve_top_k
+from wattbot_rag import retrieve_top_k, split_ref_ids
 
 worst = scored_df.sort_values("wattbot_score").head(8)
 by_id = results_df.set_index("id")   # the model's answer, explanation and cited passages, keyed by question id
 
 for _, row in worst.iterrows():
     qid = row["id"]
-    gt_refs = set(eval(row["ref_id_gt"])) if isinstance(row["ref_id_gt"], str) and row["ref_id_gt"].startswith("[") else {row["ref_id_gt"]}
-    retrieved = retrieve_top_k(embed_query(row["question"]), chunk_embeddings, chunked_docs, k=8)
+    gt_refs = set(split_ref_ids(row["ref_id_gt"]))   # train_QA.csv stores the list as a string
+    retrieved = retrieve_top_k(embed_query(row["question_gt"]), chunk_embeddings, chunked_docs, k=8)   # the merge suffixed both sides' columns
     retrieved_docs = [r["doc_id"] for r in retrieved]
     print("=" * 96)
-    print(f"{qid}: {row['question']}")
+    print(f"{qid}: {row['question_gt']}")
     print(f"  expected: {row['answer_value_gt']}  from {sorted(gt_refs)}")
     print(f"  predicted: {row['answer_value_pred']}  citing {row['ref_id_pred']}")
     print(f"  retrieval: top cosine {retrieved[0]['score']:.3f}; top-8 papers {retrieved_docs}")
