@@ -895,8 +895,9 @@ one per paper, named <code>&lt;id&gt;.pdf</code>. Downloading them from
 the publishers’ sites is slow and unreliable when fifty notebooks do it
 at once, so the instructors did it once with
 <code>scripts/build_wattbot_corpus.py</code> and staged the result as
-<code>corpus.zip</code> in the shared bucket. We download that one file
-and unpack it.</p>
+<code>corpus.zip</code> in the shared bucket. We download that one file,
+unpack it, and delete the zip: the instance’s disk is 20 GB at most and
+the PDFs alone are 400 MB.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -906,9 +907,10 @@ and unpack it.</p>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a>corpus_path <span class="op">=</span> download_from_s3(corpus_key, <span class="st">"corpus.zip"</span>)</span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a><span class="cf">with</span> zipfile.ZipFile(corpus_path, <span class="st">"r"</span>) <span class="im">as</span> zf:</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a>    zf.extractall(PDF_DIR)</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a>pdf_files <span class="op">=</span> <span class="bu">sorted</span>(f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(PDF_DIR) <span class="cf">if</span> f.lower().endswith(<span class="st">".pdf"</span>))</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(pdf_files)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>PDF_DIR<span class="sc">}</span><span class="ss">; metadata lists </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> papers"</span>)</span></code></pre>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a>os.remove(corpus_path)   <span class="co"># the zip is 400 MB and the PDFs are now unpacked; the notebook disk is small</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a>pdf_files <span class="op">=</span> <span class="bu">sorted</span>(f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(PDF_DIR) <span class="cf">if</span> f.lower().endswith(<span class="st">".pdf"</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1" aria-label="code-block-9-10"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(pdf_files)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>PDF_DIR<span class="sc">}</span><span class="ss">; metadata lists </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> papers"</span>)</span></code></pre>
 </div>
 <div id="where-the-corpus-came-from" class="callout">
 <div class="callout-square">

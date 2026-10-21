@@ -1420,7 +1420,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -1656,8 +1656,8 @@ second while it is running and not while it is stopped. The instance’s
 disk is separate: the files you keep under
 <code>/home/ec2-user/SageMaker/</code> survive a stop, and that storage
 volume keeps billing at about <code>$0.14</code> per GB-month (about
-<code>$0.70</code> a month for the default 5 GB) until the instance is
-deleted.</p>
+<code>$2.80</code> a month for the 20 GB this lesson asks for) until the
+instance is deleted.</p>
 </div>
 <div class="section level3">
 <h3 id="using-the-notebook-as-a-controller">Using the notebook as a controller<a class="anchor" aria-label="anchor" href="#using-the-notebook-as-a-controller"></a>
@@ -1750,9 +1750,13 @@ setting related to the environment version and underlying platform. You
 can leave this as the default.</p></li>
 <li><p><strong>Additional configuration (leave collapsed)</strong>:
 holds the <strong>Volume size in GB</strong> of the instance’s
-persistent disk, default 5 GB. The default is enough for this lesson;
-the disk is the one thing a stopped instance keeps billing for, so do
-not make it larger than you need.</p></li>
+persistent disk, default 5 GB. Expand it and set <strong>20 GB</strong>:
+the RAG episodes unpack about a gigabyte of PDFs and page images, the
+fine-tuning episode keeps its data here, and 5 GB fills up on the second
+run. The disk is the one thing a stopped instance keeps billing for,
+<code>$0.14</code> per GB-month, so 20 GB is <code>$2.80</code> a month
+until the instance is deleted; do not go larger than that without a
+reason.</p></li>
 <li>
 <p><strong>Permissions and encryption</strong>:</p>
 <ul>
@@ -1852,8 +1856,8 @@ the plain Python environment is enough).</p>
 notebooks start in that folder. The second lists it, and the notebook
 you just created is the only thing there. <code>SageMaker/</code> is a
 separate disk, the volume whose size sits under <strong>Additional
-configuration</strong> on the create form (5 GB by default). The rest of
-the instance lives on the system disk and is reset when the instance
+configuration</strong> on the create form (the 20 GB you set). The rest
+of the instance lives on the system disk and is reset when the instance
 stops; <code>SageMaker/</code> is the only place that survives a stop.
 JupyterLab’s file browser opens there for that reason, and it is where
 everything in this lesson goes.</p>
@@ -3148,7 +3152,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3266,7 +3270,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3535,7 +3539,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -4909,7 +4913,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -5098,7 +5102,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6249,7 +6253,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6299,7 +6303,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -9601,8 +9605,9 @@ one per paper, named <code>&lt;id&gt;.pdf</code>. Downloading them from
 the publishers’ sites is slow and unreliable when fifty notebooks do it
 at once, so the instructors did it once with
 <code>scripts/build_wattbot_corpus.py</code> and staged the result as
-<code>corpus.zip</code> in the shared bucket. We download that one file
-and unpack it.</p>
+<code>corpus.zip</code> in the shared bucket. We download that one file,
+unpack it, and delete the zip: the instance’s disk is 20 GB at most and
+the PDFs alone are 400 MB.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9612,9 +9617,10 @@ and unpack it.</p>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1" aria-label="code-block-9-4"></a>corpus_path <span class="op">=</span> download_from_s3(corpus_key, <span class="st">"corpus.zip"</span>)</span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a><span class="cf">with</span> zipfile.ZipFile(corpus_path, <span class="st">"r"</span>) <span class="im">as</span> zf:</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a>    zf.extractall(PDF_DIR)</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a>pdf_files <span class="op">=</span> <span class="bu">sorted</span>(f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(PDF_DIR) <span class="cf">if</span> f.lower().endswith(<span class="st">".pdf"</span>))</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(pdf_files)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>PDF_DIR<span class="sc">}</span><span class="ss">; metadata lists </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> papers"</span>)</span></code></pre>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1" aria-label="code-block-9-7"></a>os.remove(corpus_path)   <span class="co"># the zip is 400 MB and the PDFs are now unpacked; the notebook disk is small</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1" aria-label="code-block-9-8"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1" aria-label="code-block-9-9"></a>pdf_files <span class="op">=</span> <span class="bu">sorted</span>(f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(PDF_DIR) <span class="cf">if</span> f.lower().endswith(<span class="st">".pdf"</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1" aria-label="code-block-9-10"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(pdf_files)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>PDF_DIR<span class="sc">}</span><span class="ss">; metadata lists </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> papers"</span>)</span></code></pre>
 </div>
 <div id="where-the-corpus-came-from" class="callout">
 <div class="callout-square">
@@ -11673,7 +11679,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -11737,7 +11743,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -13204,7 +13210,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
