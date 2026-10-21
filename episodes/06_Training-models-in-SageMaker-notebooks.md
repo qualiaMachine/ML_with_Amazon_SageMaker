@@ -419,6 +419,8 @@ print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 #### Estimate before you launch
 Estimate the cost of every job *before* you run it: instance rate x expected minutes, plus about 3 minutes of startup (SageMaker has to provision the instance, pull the container, and download your data before your script starts). An `ml.m5.large` costs about `$0.115`/hour (us-east-1 on-demand; see the [Instances for ML page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)). Our local test finished in under a minute, so the estimate is roughly 1 minute of training + 3 minutes of startup = 4 minutes, or about `$0.01`.
 
+One thing to watch in the estimator below is `hyperparameters`. It is how values get from this notebook into the script. SageMaker turns the dictionary into command-line flags, `--train titanic_train.csv --max_depth 3 --eta 0.1 ...`, and appends them to the command that starts `train_xgboost.py` inside the container, exactly as `%run` passed them a moment ago; the script's `argparse` block reads them. So the keys must be the script's argument names, and anything the script does not define a flag for is ignored. (The job's log prints the full command, under "Invoking script with the following command", which is the place to look when a value does not seem to arrive.)
+
 ```python
 from sagemaker.inputs import TrainingInput
 from sagemaker.xgboost.estimator import XGBoost   # framework estimator: AWS's XGBoost container running your own script
@@ -618,7 +620,7 @@ print("Uploaded:", builtin_s3_path)
 ```
 
 #### Setting up the data path
-In this approach, using `TrainingInput` directly with SageMaker's built-in XGBoost container contrasts with our previous method, where we specified a custom script with argument inputs (specified in hyperparameters) for data paths and settings. Here, we use hyperparameters only to specify the model's hyperparameters. We also add `objective`, because the built-in algorithm's default objective is regression rather than binary classification.
+In this approach, using `TrainingInput` directly with SageMaker's built-in XGBoost container contrasts with our previous method, where we specified a custom script with argument inputs (specified in hyperparameters) for data paths and settings. Here there is no script of ours in the container, so the dictionary goes to AWS's own training code, which reads it as XGBoost's parameters: the keys must be XGBoost's parameter names (`max_depth`, `eta`, `num_round`), not flags we invented, and there is no `train` key because the data arrives as a channel. We also add `objective`, because the built-in algorithm's default objective is regression rather than binary classification.
 
 ```python
 from sagemaker.estimator import Estimator # when using images, we use the general Estimator class: a container image, no script of ours
