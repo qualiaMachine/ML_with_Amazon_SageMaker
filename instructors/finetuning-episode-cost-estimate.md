@@ -2,11 +2,11 @@
 title: 'Fine-tuning episode: cost, capacity and setup'
 ---
 
-Planning notes for running the *Fine-tuning a Vision-Language Model with Training Jobs* episode (Badger Scribe, CHURRO-3B LoRA) with a class of about 50 in a 3-hour slot (quotas below are sized for 100). Prices are on-demand SageMaker rates from the AWS price list published 2026-10-16 (`us-east-1` and the class account's `us-east-2` are the same for these instance types); re-check them before the term, since `ml.g5.xlarge` has already moved from `$1.21` to `$1.41` since the RAG episodes were written.
+Planning notes for running the *Fine-tuning a Vision-Language Model with Training Jobs* episode (Badger Scribe, CHURRO-3B LoRA) with a class of about 50 in a 2-hour slot (3 with the bonus exercises) (quotas below are sized for 100). Prices are on-demand SageMaker rates from the AWS price list published 2026-10-16 (`us-east-1` and the class account's `us-east-2` are the same for these instance types); re-check them before the term, since `ml.g5.xlarge` has already moved from `$1.21` to `$1.41` since the RAG episodes were written.
 
 ## The in-class design
 
-In class, every student runs one job of about 33 minutes: it scores 15 held-out German-letter (`kade_letters`) pages with the base model, trains on all 251 training pages (295 minus a 44-page holdout) for 2 passes, scores 8 holdout pages after each pass for a curve, scores the same 15 pages again, and saves the adapter. The lesson ships only the German letters (295 train, 141 test pages) because every label is human-transcribed (the competition's survey and account-book labels are mostly machine drafts), because they are most of the hidden test set, and because the scans are smaller. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the optional Kaggle submission are homework.
+In class, every student runs one LoRA fine-tuning job of about 33 minutes: it scores 15 held-out German-letter (`kade_letters`) pages with the base model, trains on all 251 training pages (295 minus a 44-page holdout) for 2 passes, scores 8 holdout pages after each pass for a curve, scores the same 15 pages again, and saves the adapter. The lesson ships only the German letters (295 train, 141 test pages) because every label is human-transcribed (the competition's survey and account-book labels are mostly machine drafts), because they are most of the hidden test set, and because the scans are smaller. Before/after lives inside that one job, so there are no separate inference jobs during class. The full run, the Processing jobs over the test set and the optional Kaggle submission are homework.
 
 Launches use `wait=True` and an explicit `job_name=f"badger-{username}-churro-mini"`. The explicit name is the double-launch guard: SageMaker rejects a second job with the same name, so a queued Shift+Enter fails harmlessly. Interrupting the cell does not stop the job; the episode says so in a callout, and you should say it out loud.
 
@@ -15,24 +15,24 @@ Launches use `wait=True` and an explicit `job_name=f"badger-{username}-churro-mi
 | Item | Instance | Billable time | Cost |
 |---|---|---|---|
 | Controller notebook (CPU) | `ml.t3.medium` (`$0.05`/h) | 3 h | `$0.15` |
-| In-class fine-tune (251 German-letter pages × 2 passes, 15 pages scored before and after, 8-page curve) | `ml.g5.xlarge` (`$1.41`/h) | ~32 min | `$0.75` |
-| Exercise 1: same job at 2 megapixels | `ml.g5.xlarge` | ~60 min | `$1.40` |
-| **In class** | | **~1.5 GPU-hours** | **~`$2.30`** |
-| Homework: full fine-tune (251 pages × 4 passes, 40 pages scored before and after) | `ml.g5.xlarge` | ~65 min | `$1.50` |
-| Homework: base and fine-tuned over holdout + test (~185 pages, two Processing jobs) | `ml.g5.xlarge` | ~15 min each | `$0.70` |
-| **In class + homework** | | **~3.1 GPU-hours** | **~`$4.50`** |
+| In-class LoRA fine-tune (251 German-letter pages × 2 passes, 15 pages scored before and after, 8-page curve) | `ml.g5.xlarge` (`$1.41`/h) | ~32 min | `$0.75` |
+| **In class** | | **~0.5 GPU-hours** | **~`$0.90`** |
+| Bonus Exercise 1, if anyone does it: the class job at 2 megapixels | `ml.g5.xlarge` | ~60 min | `$1.40` |
+| Homework: longer LoRA run (251 pages × 4 passes, 40 pages scored before and after) | `ml.g5.xlarge` | ~65 min | `$1.50` |
+| Homework: base and LoRA fine-tuned over holdout + test (~185 pages, two Processing jobs) | `ml.g5.xlarge` | ~15 min each | `$0.70` |
+| **In class + bonus + homework** | | **~3.1 GPU-hours** | **~`$4.50`** |
 
-Assumptions behind the training lines: CHURRO-3B in bf16 with LoRA rank 16, gradient checkpointing, one page per step, `max_pixels` of 1280 × 28 × 28 (about one megapixel, ~1,300 visual tokens plus ~300 text tokens per page), and, measured on the class job on 2026-10-21, 1.45 s per page-pass of training, 17–21 s per page for greedy generation on an A10G, about 5 minutes of billed startup (container pull, ~130 MB of images, 7.5 GB of weights copied from the shared bucket as a `model` channel) and under a minute of unbilled provisioning. The 2-megapixel and homework rows are scaled from those rates. Every job is capped (`max_run` of 65 min on the class job, 130 min on the full run, 45 min on each Processing job), so the worst case from the scripted steps is about `$7` per student.
+Assumptions behind the training lines: CHURRO-3B in bf16 with LoRA rank 16, gradient checkpointing, one page per step, `max_pixels` of 1280 × 28 × 28 (about one megapixel, ~1,300 visual tokens plus ~300 text tokens per page), and, measured on the class job on 2026-10-21, 1.45 s per page-pass of training, 17–21 s per page for greedy generation on an A10G, about 5 minutes of billed startup (container pull, ~130 MB of images, 7.5 GB of weights copied from the shared bucket as a `model` channel) and under a minute of unbilled provisioning. The 2-megapixel and homework rows are scaled from those rates. Every job is capped (`max_run` of 65 min on the class job, 130 min on the homework run, 45 min on each Processing job), so the worst case from the scripted steps is about `$7` per student.
 
 ## What the class spends
 
 | Scenario | Per student | 50 students (double for 100) |
 |---|---|---|
-| In class, one clean pass each (class job + Exercise 1) | `$2.30` | `$115` |
-| In class, realistic (one extra relaunch each) | ~`$3.05` | ~`$150` |
-| In class, everything hits its `max_run` cap | ~`$3.20` | ~`$160` |
+| In class, one clean pass each | `$0.90` | `$45` |
+| In class, realistic (one extra relaunch each) | ~`$1.65` | ~`$85` |
+| In class, two launches each at the `max_run` cap | ~`$3.20` | ~`$160` |
 | Homework, if everyone does it | ~`$2.20` | ~`$110` |
-| **Budget to request** (realistic class + homework + 50%) | | **`$400`** |
+| **Budget to request** (realistic class + homework + 50%) | | **`$300`** |
 
 For comparison, teaching the same material on `ml.g5.xlarge` *notebook* instances costs about the same during class (`$1.41` × 3 h × 50 = `$212`) but adds the forgotten-instance risk: each one left running costs `$34`/day, `$237`/week, `$1,029`/month. Two forgotten instances over a long weekend exceed the entire jobs-based budget above. That difference is the point of the episode, and it is worth saying out loud to the class.
 
@@ -44,8 +44,9 @@ For comparison, teaching the same material on `ml.g5.xlarge` *notebook* instance
 | 0:30–0:40 | Everyone launches the class job (`wait=True`) |
 | 0:40–1:15 | While it runs (~33 min), in the console: job page, `max_run`, tags, CloudWatch log, the checkpoint folder in S3; forgotten-instance arithmetic; quotas |
 | 1:15–1:45 | Step 2: bill vs. estimate, before/after CER, the curves, a page side by side; the holdout callouts |
-| 1:45–2:45 | Exercise 1 (relaunch at 2 MP; ~60 min, so launch first and discuss Exercise 2 while it runs) |
-| 2:45–3:00 | Step 3 totals; walk through the homework section; cleanup |
+| 1:45–2:00 | Step 3 totals; walk through the homework section; cleanup |
+
+The bonus exercises are not scheduled. With a third hour, Exercise 1 (the class job at 2 megapixels) is about an hour of GPU time, so launch it first and discuss Exercise 2 while it runs.
 
 If the jobs are still queueing at 0:50 (capacity), teach the console and the cost arithmetic from your own job's page, run before class.
 
