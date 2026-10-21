@@ -595,10 +595,12 @@ framework-specific Estimator classes (e.g., XGBoost, PyTorch, SKLearn)
 to streamline training setups, each suited to different model types and
 workflows.</li>
 <li>
-<strong>Custom scripts vs. built-in images</strong>: Custom training
-scripts offer flexibility with preprocessing and custom logic, while
-built-in images are optimized for rapid deployment and simpler
-setups.</li>
+<strong>Your script vs. the built-in algorithm</strong>: both run in
+AWS’s XGBoost container. <code>XGBoost(entry_point=...)</code> runs your
+script in it and is the pattern every later episode uses;
+<code>Estimator(image_uri=...)</code> with no script runs AWS’s own
+training code, which needs the data pre-shaped and takes XGBoost’s own
+parameters.</li>
 <li>
 <strong>Training data channels</strong>: Using
 <code>TrainingInput</code> ensures SageMaker manages data

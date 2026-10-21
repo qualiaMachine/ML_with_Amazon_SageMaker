@@ -265,9 +265,10 @@
       <div class="accordion-body">
         <ul><li><a href="#initial-setup">Initial setup</a></li>
 <li><a href="#testing-train.py-on-this-notebooks-instance">Testing train.py on this notebook’s instance</a></li>
-<li><a href="#training-via-sagemaker-using-notebook-as-controller---custom-train.py-script">Training via SageMaker (using notebook as controller) - custom
-train.py script</a></li>
-<li><a href="#training-with-sagemakers-built-in-xgboost-image">Training with SageMaker’s Built-in XGBoost Image</a></li>
+<li><a href="#training-via-sagemaker-your-script-inside-awss-xgboost-container">Training via SageMaker: your script inside AWS’s XGBoost
+container</a></li>
+<li><a href="#the-built-in-algorithm-awss-training-code-in-the-same-container">The built-in algorithm: AWS’s training code in the same
+container</a></li>
 <li><a href="#monitoring-training">Monitoring training</a></li>
 <li><a href="#when-training-takes-too-long">When training takes too long</a></li>
         </ul></div><!--/div.accordion-body-->
@@ -467,8 +468,9 @@ it, and check what it cost afterwards?</li>
 notebook and using SageMaker’s managed infrastructure.</li>
 <li>Learn to configure and use SageMaker’s Estimator classes for
 different frameworks (e.g., XGBoost, PyTorch, SKLearn).</li>
-<li>Compare performance, cost, and setup between custom scripts and
-built-in images in SageMaker.</li>
+<li>Tell apart the two ways to run XGBoost on SageMaker, your script in
+AWS’s container versus AWS’s built-in algorithm in the same container,
+and know when each fits.</li>
 <li>Conduct training with data stored in S3 and monitor training job
 status using the SageMaker console.</li>
 <li>Estimate the cost of a job before launching it, tag it so it shows
@@ -930,8 +932,8 @@ transformed exactly as the training rows were.</p>
 <p>A reasonably high test set accuracy suggests our code/model is
 working correctly.</p>
 </div>
-</section><section><h2 class="section-heading" id="training-via-sagemaker-using-notebook-as-controller---custom-train-py-script">Training via SageMaker (using notebook as controller) - custom
-train.py script<a class="anchor" aria-label="anchor" href="#training-via-sagemaker-using-notebook-as-controller---custom-train-py-script"></a></h2>
+</section><section><h2 class="section-heading" id="training-via-sagemaker-your-script-inside-awss-xgboost-container">Training via SageMaker: your script inside AWS’s XGBoost
+container<a class="anchor" aria-label="anchor" href="#training-via-sagemaker-your-script-inside-awss-xgboost-container"></a></h2>
 <hr class="half-width"><p>Unlike “local” training (using this notebook), this next approach
 leverages SageMaker’s managed infrastructure to handle resources,
 parallelism, and scalability. By specifying instance parameters, such as
@@ -984,6 +986,47 @@ trees on tabular data are CPU work, so a <code>g4dn</code> or
 </div>
 </div>
 <div class="section level3">
+<h3 id="two-ways-to-run-xgboost-on-sagemaker-and-why-the-names-mislead">Two ways to run XGBoost on SageMaker, and why the names mislead<a class="anchor" aria-label="anchor" href="#two-ways-to-run-xgboost-on-sagemaker-and-why-the-names-mislead"></a></h3>
+<p>Every training job runs inside a container image, and for XGBoost
+that image comes from AWS either way. The question is whose training
+code runs in it:</p>
+<table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th></th>
+<th>Your script</th>
+<th>AWS’s built-in algorithm</th>
+</tr></thead><tbody><tr><td>Estimator</td>
+<td><code>XGBoost(entry_point="train_xgboost.py", ...)</code></td>
+<td>
+<code>Estimator(image_uri=&lt;AWS XGBoost image&gt;, ...)</code>, no
+<code>entry_point</code>
+</td>
+</tr><tr><td>Who wrote the training code</td>
+<td>you: the same <code>train_xgboost.py</code> you just ran with
+<code>%run</code>
+</td>
+<td>AWS; nothing of yours is uploaded</td>
+</tr><tr><td>What <code>hyperparameters</code> are</td>
+<td>flags for your script’s <code>argparse</code>
+</td>
+<td>XGBoost’s own parameter names</td>
+</tr><tr><td>Data</td>
+<td>whatever your script reads; it preprocesses the raw CSV itself</td>
+<td>a headerless, all-numeric CSV with the label first, prepared
+beforehand</td>
+</tr><tr><td>When it fits</td>
+<td>preprocessing, custom logic, anything the algorithm alone cannot
+do</td>
+<td>standard tabular XGBoost with nothing to write</td>
+</tr></tbody></table><p>The class names point the wrong way. <code>XGBoost</code> is a
+<em>framework estimator</em>: a convenience that looks up AWS’s XGBoost
+image and runs your script in it; <code>PyTorch</code>,
+<code>SKLearn</code> and <code>HuggingFace</code> are the same idea for
+other frameworks. The plain <code>Estimator</code> takes an image
+directly, and when that image is one of AWS’s built-in algorithms the
+image’s own code does the training. We do the script version first,
+because it is the one that generalises to every later episode, and the
+built-in algorithm at the end of this one.</p>
+</div>
+<div class="section level3">
 <h3 id="overview-of-estimator-classes-in-sagemaker">Overview of Estimator classes in SageMaker<a class="anchor" aria-label="anchor" href="#overview-of-estimator-classes-in-sagemaker"></a></h3>
 <p>To launch this training “job”, we’ll use the XGBoost Estimator. In
 SageMaker, Estimator classes streamline the configuration and training
@@ -996,11 +1039,12 @@ Estimator classes in SageMaker:</p>
 <h4 id="estimator-base-class">1. <strong><code>Estimator</code> (Base Class)</strong>
 <a class="anchor" aria-label="anchor" href="#estimator-base-class"></a></h4>
 <ul><li>
-<strong>Purpose</strong>: General-purpose for custom Docker
-containers or defining an image URI directly.</li>
+<strong>Purpose</strong>: Runs whatever image you name: one of AWS’s
+built-in algorithms, or a container of your own.</li>
 <li>
-<strong>Configuration</strong>: Requires specifying an
-<code>image_uri</code> and custom entry points.</li>
+<strong>Configuration</strong>: Requires an <code>image_uri</code>;
+with a built-in algorithm there is no <code>entry_point</code>, the
+image’s own code trains.</li>
 <li>
 <strong>Dependencies</strong>: You can use
 <code>requirements.txt</code> to install Python packages or configure a
@@ -1013,8 +1057,8 @@ need tailored environments not covered by built-in containers.</li>
 <h4 id="xgboost-estimator">2. <strong><code>XGBoost</code> Estimator</strong>
 <a class="anchor" aria-label="anchor" href="#xgboost-estimator"></a></h4>
 <ul><li>
-<strong>Purpose</strong>: Provides an optimized container
-specifically for XGBoost models.</li>
+<strong>Purpose</strong>: AWS’s XGBoost container running
+<em>your</em> script; the class saves you looking up the image.</li>
 <li>
 <strong>Configuration</strong>:
 <ul><li>
@@ -1248,7 +1292,7 @@ to look when a value does not seem to arrive.)</p>
 <span id="cb13-16"><a href="#cb13-16" tabindex="-1" aria-label="code-block-13-16"></a>output_folder <span class="op">=</span> <span class="st">'xgboost'</span></span>
 <span id="cb13-17"><a href="#cb13-17" tabindex="-1" aria-label="code-block-13-17"></a>output_path <span class="op">=</span> <span class="ss">f's3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>output_folder<span class="sc">}</span><span class="ss">/'</span>   <span class="co"># S3 prefix (a "folder") where SageMaker uploads the job's outputs</span></span>
 <span id="cb13-18"><a href="#cb13-18" tabindex="-1" aria-label="code-block-13-18"></a></span>
-<span id="cb13-19"><a href="#cb13-19" tabindex="-1" aria-label="code-block-13-19"></a><span class="co"># Set up the SageMaker XGBoost Estimator with custom script</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1" aria-label="code-block-13-19"></a><span class="co"># The XGBoost framework estimator: AWS's XGBoost container, running our script</span></span>
 <span id="cb13-20"><a href="#cb13-20" tabindex="-1" aria-label="code-block-13-20"></a>xgboost_estimator <span class="op">=</span> XGBoost(</span>
 <span id="cb13-21"><a href="#cb13-21" tabindex="-1" aria-label="code-block-13-21"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-xgboost"</span>,   <span class="co"># prefix of the job name: who + which model; SageMaker appends a timestamp to make it unique</span></span>
 <span id="cb13-22"><a href="#cb13-22" tabindex="-1" aria-label="code-block-13-22"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
@@ -1445,25 +1489,27 @@ the unpacked archive and score the test set the same way as before.</p>
 <span id="cb16-25"><a href="#cb16-25" tabindex="-1" aria-label="code-block-16-25"></a>accuracy <span class="op">=</span> accuracy_score(y_test, predictions)</span>
 <span id="cb16-26"><a href="#cb16-26" tabindex="-1" aria-label="code-block-16-26"></a><span class="bu">print</span>(<span class="ss">f"Test Set Accuracy: </span><span class="sc">{</span>accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>Now that we’ve covered training using a custom script with the
-<code>XGBoost</code> estimator, let’s examine the built-in image-based
-approach. Using SageMaker’s pre-configured XGBoost image streamlines the
-setup by eliminating the need to manage custom scripts for common
-workflows, and it can also provide optimization advantages. Below, we’ll
-discuss both the code and pros and cons of the image-based setup
-compared to the custom script approach.</p>
+<p>Now the other route from the table at the top of this section: the
+same AWS XGBoost container, but with AWS’s own training code instead of
+our script. Nothing of ours is uploaded; we hand the algorithm data in
+the shape it expects and XGBoost’s own parameters. Below, we’ll discuss
+both the code and pros and cons of the image-based setup compared to the
+custom script approach.</p>
 </div>
-</section><section><h2 class="section-heading" id="training-with-sagemakers-built-in-xgboost-image">Training with SageMaker’s Built-in XGBoost Image<a class="anchor" aria-label="anchor" href="#training-with-sagemakers-built-in-xgboost-image"></a></h2>
-<hr class="half-width"><p>With the SageMaker-provided XGBoost container, you can bypass custom
-script configuration if your workflow aligns with standard XGBoost
-training. This setup is particularly useful when you need quick, default
-configurations without custom preprocessing or additional libraries.</p>
+</section><section><h2 class="section-heading" id="the-built-in-algorithm-awss-training-code-in-the-same-container">The built-in algorithm: AWS’s training code in the same
+container<a class="anchor" aria-label="anchor" href="#the-built-in-algorithm-awss-training-code-in-the-same-container"></a></h2>
+<hr class="half-width"><p>When the job is standard XGBoost on a table, there is nothing to
+write: the built-in algorithm trains, evaluates and saves the model
+itself. The price is that it does only that. Preprocessing has to happen
+before the data reaches it, and the data has to arrive in its
+format.</p>
 <div class="section level3">
-<h3 id="comparison-custom-script-vs--built-in-image">Comparison: Custom Script vs. Built-in Image<a class="anchor" aria-label="anchor" href="#comparison-custom-script-vs--built-in-image"></a></h3>
+<h3 id="comparison-your-script-vs--the-built-in-algorithm">Comparison: your script vs. the built-in algorithm<a class="anchor" aria-label="anchor" href="#comparison-your-script-vs--the-built-in-algorithm"></a></h3>
 <table class="table"><colgroup><col width="20%"><col width="41%"><col width="38%"></colgroup><thead><tr><th>Feature</th>
-<th>Custom Script (<code>XGBoost</code> with
+<th>Your script (<code>XGBoost</code> with
 <code>entry_point</code>)</th>
-<th>Built-in XGBoost Image</th>
+<th>Built-in algorithm (<code>Estimator</code> with
+<code>image_uri</code>, no script)</th>
 </tr></thead><tbody><tr><td><strong>Flexibility</strong></td>
 <td>Allows for custom preprocessing, data transformation, or advanced
 parameterization. Requires a Python script and custom dependencies can
@@ -1488,17 +1534,13 @@ when adding specific libraries or functionalities.</td>
 on datasets without complex preprocessing.</td>
 </tr></tbody></table><p><strong>When to use each approach</strong>:</p>
 <ul><li>
-<strong>Custom script</strong>: Recommended if you need to implement
-custom data preprocessing, advanced feature engineering, or specific
-workflow steps that require more control over training.</li>
+<strong>Your script</strong>: whenever the job needs preprocessing,
+feature engineering, or any logic of your own around the training call.
+This is the route every later episode uses.</li>
 <li>
-<strong>Built-in image</strong>: Ideal when running standard XGBoost
-training, especially for quick experiments or production deployments
-where default configurations suffice.</li>
-</ul><p>Both methods offer powerful and flexible approaches to model training
-on SageMaker, allowing you to select the approach best suited to your
-needs. Below is an example of training using the built-in XGBoost
-Image.</p>
+<strong>Built-in algorithm</strong>: standard XGBoost on a table
+that is already in its format, with nothing to write.</li>
+</ul><p>Below is the same Titanic job on the built-in algorithm.</p>
 <div class="section level4">
 <h4 id="preparing-data-for-the-built-in-algorithm">Preparing data for the built-in algorithm<a class="anchor" aria-label="anchor" href="#preparing-data-for-the-built-in-algorithm"></a></h4>
 <p>The built-in algorithm will not run our
@@ -1514,7 +1556,7 @@ the expected layout, and upload it to its own prefix in our bucket.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="im">from</span> train_xgboost <span class="im">import</span> preprocess_data</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a><span class="co"># Same preprocessing the custom script applies: fill missing values, encode Sex/Embarked, drop text columns</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a><span class="co"># Same preprocessing our script applies: fill missing values, encode Sex/Embarked, drop text columns</span></span>
 <span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a>X, y <span class="op">=</span> preprocess_data(pd.read_csv(train_filename))</span>
 <span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a></span>
 <span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a><span class="co"># Built-in XGBoost wants: no header, all numeric, label first</span></span>
@@ -1530,13 +1572,12 @@ the expected layout, and upload it to its own prefix in our bucket.</p>
 </div>
 <div class="section level4">
 <h4 id="setting-up-the-data-path">Setting up the data path<a class="anchor" aria-label="anchor" href="#setting-up-the-data-path"></a></h4>
-<p>In this approach, using <code>TrainingInput</code> directly with
-SageMaker’s built-in XGBoost container contrasts with our previous
-method, where we specified a custom script with argument inputs
-(specified in hyperparameters) for data paths and settings. Here there
-is no script of ours in the container, so the dictionary goes to AWS’s
-own training code, which reads it as XGBoost’s parameters: the keys must
-be XGBoost’s parameter names (<code>max_depth</code>, <code>eta</code>,
+<p>With our script, the data path was just another flag the script read.
+The built-in algorithm has no flags: the data arrives as a
+<code>TrainingInput</code> channel it knows to look for. Here there is
+no script of ours in the container, so the dictionary goes to AWS’s own
+training code, which reads it as XGBoost’s parameters: the keys must be
+XGBoost’s parameter names (<code>max_depth</code>, <code>eta</code>,
 <code>num_round</code>), not flags we invented, and there is no
 <code>train</code> key because the data arrives as a channel. We also
 add <code>objective</code>, because the built-in algorithm’s default
@@ -1723,10 +1764,12 @@ framework-specific Estimator classes (e.g., XGBoost, PyTorch, SKLearn)
 to streamline training setups, each suited to different model types and
 workflows.</li>
 <li>
-<strong>Custom scripts vs. built-in images</strong>: Custom training
-scripts offer flexibility with preprocessing and custom logic, while
-built-in images are optimized for rapid deployment and simpler
-setups.</li>
+<strong>Your script vs. the built-in algorithm</strong>: both run in
+AWS’s XGBoost container. <code>XGBoost(entry_point=...)</code> runs your
+script in it and is the pattern every later episode uses;
+<code>Estimator(image_uri=...)</code> with no script runs AWS’s own
+training code, which needs the data pre-shaped and takes XGBoost’s own
+parameters.</li>
 <li>
 <strong>Training data channels</strong>: Using
 <code>TrainingInput</code> ensures SageMaker manages data
