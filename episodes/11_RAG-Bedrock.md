@@ -536,7 +536,7 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
 
         resp = bedrock.create_inference_profile(
             inferenceProfileName=profile_name,
-            description=f"{project} / {name} WattBot RAG ({label}) -> {base_model_id}",
+            description=f"{project} {name} WattBot RAG {label} on {base_model_id}",   # letters, digits, : and . only, single spaces or hyphens between
             modelSource={"copyFrom": _source_arn(base_model_id)},   # the profile is an alias for one base model
             tags=profile_tags,   # usage billed through the profile carries these tags; raw model-ID calls carry none
         )
