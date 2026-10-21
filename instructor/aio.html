@@ -1430,7 +1430,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2904,7 +2904,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3014,11 +3014,9 @@ up on the bill, and read back its billable time afterwards.</li>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb</code>.
 When asked for a kernel, pick
-<strong><code>conda_pytorch</code></strong> (on older Amazon Linux 2
-instances it is called <code>conda_pytorch_p310</code>); we will use the
-same kernel for the next two episodes. The <code>conda_python3</code>
-kernel has no PyTorch, and on current instances no scikit-learn
-either.</p>
+<strong><code>conda_pytorch</code></strong>; we will use the same kernel
+for the next two episodes. The <code>conda_python3</code> kernel has no
+PyTorch, and on current instances no scikit-learn either.</p>
 </div>
 <div class="section level4">
 <h4 id="cd-to-instance-home-directory">2. CD to instance home directory<a class="anchor" aria-label="anchor" href="#cd-to-instance-home-directory"></a>
@@ -3150,7 +3148,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3268,7 +3266,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3537,7 +3535,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -3748,7 +3746,7 @@ feature engineering, or model modifications. Here’s how to include it
 (illustration only; we don’t run this):</p>
 <pre class="text"><code>from sagemaker.sklearn.estimator import SKLearn
 sklearn_estimator = SKLearn(
-    base_job_name=notebook_instance_name,
+    base_job_name=f"{notebook_instance_name}-xgboost",   # job name = who + which model; SageMaker appends a timestamp
     entry_point="train_script.py",
     role=role,
     instance_count=1,
@@ -3843,7 +3841,7 @@ minutes, or about <code>$0.01</code>.</p>
 <span id="cb13-18"><a href="#cb13-18" tabindex="-1" aria-label="code-block-13-18"></a></span>
 <span id="cb13-19"><a href="#cb13-19" tabindex="-1" aria-label="code-block-13-19"></a><span class="co"># Set up the SageMaker XGBoost Estimator with custom script</span></span>
 <span id="cb13-20"><a href="#cb13-20" tabindex="-1" aria-label="code-block-13-20"></a>xgboost_estimator <span class="op">=</span> XGBoost(</span>
-<span id="cb13-21"><a href="#cb13-21" tabindex="-1" aria-label="code-block-13-21"></a>    base_job_name<span class="op">=</span>notebook_instance_name,  <span class="co"># prefix of the job name; SageMaker appends a timestamp to make it unique</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1" aria-label="code-block-13-21"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-xgboost"</span>,   <span class="co"># prefix of the job name: who + which model; SageMaker appends a timestamp to make it unique</span></span>
 <span id="cb13-22"><a href="#cb13-22" tabindex="-1" aria-label="code-block-13-22"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
 <span id="cb13-23"><a href="#cb13-23" tabindex="-1" aria-label="code-block-13-23"></a>    entry_point<span class="op">=</span><span class="st">'train_xgboost.py'</span>,      <span class="co"># the script SageMaker runs inside the container on the training instance</span></span>
 <span id="cb13-24"><a href="#cb13-24" tabindex="-1" aria-label="code-block-13-24"></a>    source_dir<span class="op">=</span><span class="st">'ML_with_AWS_SageMaker/scripts'</span>,  <span class="co"># Directory where your script is located (uploaded to the job with it)</span></span>
@@ -4176,7 +4174,7 @@ objective is regression rather than binary classification.</p>
 <span id="cb18-6"><a href="#cb18-6" tabindex="-1" aria-label="code-block-18-6"></a></span>
 <span id="cb18-7"><a href="#cb18-7" tabindex="-1" aria-label="code-block-18-7"></a><span class="co"># Use Estimator directly for built-in container without specifying entry_point</span></span>
 <span id="cb18-8"><a href="#cb18-8" tabindex="-1" aria-label="code-block-18-8"></a>xgboost_estimator_builtin <span class="op">=</span> Estimator(</span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1" aria-label="code-block-18-9"></a>    base_job_name<span class="op">=</span>notebook_instance_name,</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1" aria-label="code-block-18-9"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-xgboost"</span>,   <span class="co"># job name = who + which model; SageMaker appends a timestamp</span></span>
 <span id="cb18-10"><a href="#cb18-10" tabindex="-1" aria-label="code-block-18-10"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
 <span id="cb18-11"><a href="#cb18-11" tabindex="-1" aria-label="code-block-18-11"></a>    <span class="co"># image_uris.retrieve looks up AWS's prebuilt XGBoost container for this region; its built-in training code replaces entry_point</span></span>
 <span id="cb18-12"><a href="#cb18-12" tabindex="-1" aria-label="code-block-18-12"></a>    image_uri<span class="op">=</span>sagemaker.image_uris.retrieve(<span class="st">"xgboost"</span>, region, version<span class="op">=</span><span class="st">"1.7-1"</span>),</span>
@@ -4448,8 +4446,7 @@ determine when each is appropriate in SageMaker.</li>
 <hr class="half-width">
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/07_Training-models-in-SageMaker-notebooks-part2.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances).</p>
+Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 </section><section><h2 class="section-heading" id="setup-notebook-as-controller">Setup notebook as controller<a class="anchor" aria-label="anchor" href="#setup-notebook-as-controller"></a>
 </h2>
 <hr class="half-width">
@@ -4740,7 +4737,7 @@ where the output goes, and a two-hour <code>max_run</code> cap.</p>
 <span id="cb12-11"><a href="#cb12-11" tabindex="-1" aria-label="code-block-12-11"></a></span>
 <span id="cb12-12"><a href="#cb12-12" tabindex="-1" aria-label="code-block-12-12"></a><span class="co"># Define the PyTorch estimator and pass hyperparameters as arguments</span></span>
 <span id="cb12-13"><a href="#cb12-13" tabindex="-1" aria-label="code-block-12-13"></a>pytorch_estimator <span class="op">=</span> PyTorch(</span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1" aria-label="code-block-12-14"></a>    base_job_name<span class="op">=</span>notebook_instance_name,  <span class="co"># SageMaker appends a timestamp to make each job name unique</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1" aria-label="code-block-12-14"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn"</span>,   <span class="co"># who + which model; SageMaker appends a timestamp to make each job name unique</span></span>
 <span id="cb12-15"><a href="#cb12-15" tabindex="-1" aria-label="code-block-12-15"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
 <span id="cb12-16"><a href="#cb12-16" tabindex="-1" aria-label="code-block-12-16"></a>    entry_point<span class="op">=</span><span class="st">"ML_with_AWS_SageMaker/scripts/train_nn.py"</span>,  <span class="co"># copied into the container and run there</span></span>
 <span id="cb12-17"><a href="#cb12-17" tabindex="-1" aria-label="code-block-12-17"></a>    role<span class="op">=</span>role,</span>
@@ -4843,7 +4840,7 @@ Explain the result.</p>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1" aria-label="code-block-15-2"></a>instance_count <span class="op">=</span> <span class="dv">1</span></span>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1" aria-label="code-block-15-3"></a></span>
 <span id="cb15-4"><a href="#cb15-4" tabindex="-1" aria-label="code-block-15-4"></a>pytorch_estimator_gpu <span class="op">=</span> PyTorch(</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1" aria-label="code-block-15-5"></a>    base_job_name<span class="op">=</span>notebook_instance_name,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1" aria-label="code-block-15-5"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn"</span>,</span>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1" aria-label="code-block-15-6"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1" aria-label="code-block-15-7"></a>    entry_point<span class="op">=</span><span class="st">"ML_with_AWS_SageMaker/scripts/train_nn.py"</span>,</span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1" aria-label="code-block-15-8"></a>    role<span class="op">=</span>role,</span>
@@ -4985,7 +4982,7 @@ instances, so about <code>$0.02</code> on <code>ml.m5.large</code>.</p>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a>instance_type <span class="op">=</span> <span class="st">"ml.m5.large"</span></span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a></span>
 <span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a>pytorch_estimator_2x <span class="op">=</span> PyTorch(</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a>    base_job_name<span class="op">=</span>notebook_instance_name,</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn"</span>,</span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a>    entry_point<span class="op">=</span><span class="st">"ML_with_AWS_SageMaker/scripts/train_nn.py"</span>,</span>
 <span id="cb16-8"><a href="#cb16-8" tabindex="-1" aria-label="code-block-16-8"></a>    role<span class="op">=</span>role,</span>
@@ -5162,8 +5159,7 @@ jobs.</li>
 <hr class="half-width">
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/08_Hyperparameter-tuning.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances).</p>
+Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 </section><section><h2 class="section-heading" id="hyperparameter-tuning-in-sagemaker">Hyperparameter tuning in SageMaker<a class="anchor" aria-label="anchor" href="#hyperparameter-tuning-in-sagemaker"></a>
 </h2>
 <hr class="half-width">
@@ -5320,7 +5316,7 @@ hyperparameter search on.</p>
 <span id="cb4-23"><a href="#cb4-23" tabindex="-1" aria-label="code-block-4-23"></a></span>
 <span id="cb4-24"><a href="#cb4-24" tabindex="-1" aria-label="code-block-4-24"></a><span class="co"># Define the PyTorch estimator with entry script and environment details</span></span>
 <span id="cb4-25"><a href="#cb4-25" tabindex="-1" aria-label="code-block-4-25"></a>pytorch_estimator <span class="op">=</span> PyTorch(</span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1" aria-label="code-block-4-26"></a>    base_job_name<span class="op">=</span>notebook_instance_name, <span class="co"># adjust to your notebook name,</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1" aria-label="code-block-4-26"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn"</span>,   <span class="co"># who + which model; the tuner appends its own suffix to each child job</span></span>
 <span id="cb4-27"><a href="#cb4-27" tabindex="-1" aria-label="code-block-4-27"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
 <span id="cb4-28"><a href="#cb4-28" tabindex="-1" aria-label="code-block-4-28"></a>    entry_point<span class="op">=</span><span class="st">"ML_with_AWS_SageMaker/scripts/train_nn.py"</span>,  <span class="co"># Your script for training</span></span>
 <span id="cb4-29"><a href="#cb4-29" tabindex="-1" aria-label="code-block-4-29"></a>    role<span class="op">=</span>role,</span>
@@ -5504,7 +5500,7 @@ ensure our code is functional before attempting to scale up.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="co"># Tuner configuration</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a>tuner <span class="op">=</span> HyperparameterTuner(</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>    base_tuning_job_name<span class="op">=</span>notebook_instance_name,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>    base_tuning_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn-tune"</span>,</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>    estimator<span class="op">=</span>pytorch_estimator,  <span class="co"># the blueprint: every child training job is this estimator with different hyperparameters</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>    <span class="co"># same regex as the estimator; the value it captures is what the tuner compares across child jobs</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>    metric_definitions<span class="op">=</span>[{<span class="st">"Name"</span>: <span class="st">"validation:accuracy"</span>, <span class="st">"Regex"</span>: <span class="st">"validation:accuracy = ([0-9</span><span class="ch">\\</span><span class="st">.]+)"</span>}],</span>
@@ -5657,7 +5653,7 @@ minutes.</p>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1" aria-label="code-block-10-6"></a></span>
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1" aria-label="code-block-10-7"></a><span class="co"># Define the Tuner configuration</span></span>
 <span id="cb10-8"><a href="#cb10-8" tabindex="-1" aria-label="code-block-10-8"></a>tuner <span class="op">=</span> HyperparameterTuner(</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1" aria-label="code-block-10-9"></a>    base_tuning_job_name<span class="op">=</span>notebook_instance_name,</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1" aria-label="code-block-10-9"></a>    base_tuning_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn-tune"</span>,</span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1" aria-label="code-block-10-10"></a>    estimator<span class="op">=</span>pytorch_estimator,</span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1" aria-label="code-block-10-11"></a>    metric_definitions<span class="op">=</span>[{<span class="st">"Name"</span>: <span class="st">"validation:accuracy"</span>, <span class="st">"Regex"</span>: <span class="st">"validation:accuracy = ([0-9</span><span class="ch">\\</span><span class="st">.]+)"</span>}],</span>
 <span id="cb10-12"><a href="#cb10-12" tabindex="-1" aria-label="code-block-10-12"></a>    objective_metric_name<span class="op">=</span><span class="st">"validation:accuracy"</span>,  <span class="co"># Ensure this matches the metric name exactly</span></span>
@@ -5985,7 +5981,7 @@ and the runtime print.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a>tuner_parallel <span class="op">=</span> HyperparameterTuner(</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a>    base_tuning_job_name<span class="op">=</span>notebook_instance_name,</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a>    base_tuning_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-nn-tune"</span>,</span>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>    estimator<span class="op">=</span>pytorch_estimator,</span>
 <span id="cb18-4"><a href="#cb18-4" tabindex="-1" aria-label="code-block-18-4"></a>    metric_definitions<span class="op">=</span>[{<span class="st">"Name"</span>: <span class="st">"validation:accuracy"</span>, <span class="st">"Regex"</span>: <span class="st">"validation:accuracy = ([0-9</span><span class="ch">\\</span><span class="st">.]+)"</span>}],</span>
 <span id="cb18-5"><a href="#cb18-5" tabindex="-1" aria-label="code-block-18-5"></a>    objective_metric_name<span class="op">=</span><span class="st">"validation:accuracy"</span>,</span>
@@ -6011,7 +6007,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6057,7 +6053,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6202,8 +6198,7 @@ to multi-GPU instances for larger models.</li>
 </div>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances).</p>
+Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 <section><h2 class="section-heading" id="why-fine-tune-an-llm">Why fine-tune an LLM<a class="anchor" aria-label="anchor" href="#why-fine-tune-an-llm"></a>
 </h2>
 <hr class="half-width">
@@ -6690,7 +6685,7 @@ realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -6978,7 +6973,7 @@ whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; five things have to be
 in place before the session. Each is written out in the instructor
@@ -7344,7 +7339,7 @@ its progress.</p>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>                           <span class="co"># $/hour, us-east-1 on-demand</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>estimated_minutes <span class="op">=</span> <span class="dv">35</span>                    <span class="co"># the Step 0 estimate</span></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a>max_run_minutes <span class="op">=</span> <span class="dv">70</span>                      <span class="co"># about twice the estimate; SageMaker kills the job at this cap, whatever it is doing</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-mini-v1"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-mini"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
 <span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a>checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">/"</span>   <span class="co"># the script saves the adapter here at the end of every epoch</span></span>
 <span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a></span>
 <span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a><span class="bu">print</span>(<span class="ss">f"job name:     </span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -7469,11 +7464,11 @@ An empty list means go.</p>
 SageMaker requires training job names to be unique in the account, so
 running this cell a second time fails immediately with
 <code>ResourceInUse</code> and nothing is launched. To run again on
-purpose, change <code>v1</code> to <code>v2</code> in both
-<code>training_job_name</code> and (automatically)
-<code>checkpoint_s3_uri</code>; to <strong>resume</strong> a job that
-was killed, keep the <code>checkpoint_s3_uri</code> and change only the
-job name.</li>
+purpose, add a suffix to <code>training_job_name</code>
+(<code>-2</code>, <code>-2mp</code>, whatever says what changed);
+<code>checkpoint_s3_uri</code> follows it automatically. To
+<strong>resume</strong> a job that was killed, keep the
+<code>checkpoint_s3_uri</code> and change only the job name.</li>
 <li>
 <code>wait=True</code> (the default) blocks the notebook until the
 job ends and streams its log here. For a 25-minute job that is the right
@@ -7707,7 +7702,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect startup to be close to 10 minutes, the two evaluations 2–4
@@ -7812,11 +7807,11 @@ else.</p>
 <h3 class="callout-title">Exercise 1: The resolution knob</h3>
 <div class="callout-content">
 <p>Relaunch the same job with <code>"max_pixels": 2560 * 28 * 28</code>
-(~2 megapixels) and the job name <code>badger-{username}-mini-v2</code>.
-Before it starts, write down your prediction for its billable time. Then
-compare <code>train_minutes</code> and <code>seconds_per_page</code> in
-the two summaries, and the before/after CER. Did the extra pixels
-help?</p>
+(~2 megapixels) and the job name
+<code>badger-{username}-churro-mini-2mp</code>. Before it starts, write
+down your prediction for its billable time. Then compare
+<code>train_minutes</code> and <code>seconds_per_page</code> in the two
+summaries, and the before/after CER. Did the extra pixels help?</p>
 </div>
 </div>
 </div>
@@ -7825,7 +7820,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -7865,7 +7860,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Startup (~10 min, <code>$0.44</code> at <code>$2.61</code>/h) does
 not speed up: the container pull and the S3 downloads are the same on
@@ -7914,7 +7909,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Nothing more for this run: the script already checkpoints to
 <code>/opt/ml/checkpoints</code> at the end of every epoch, SageMaker
@@ -7950,7 +7945,7 @@ folder, and the cap written down with its worst case.</p>
 <div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1" aria-label="code-block-35-1"></a>full_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-full-v1"</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1" aria-label="code-block-35-1"></a>full_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-full"</span></span>
 <span id="cb35-2"><a href="#cb35-2" tabindex="-1" aria-label="code-block-35-2"></a>full_checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>full_job_name<span class="sc">}</span><span class="ss">/"</span></span>
 <span id="cb35-3"><a href="#cb35-3" tabindex="-1" aria-label="code-block-35-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 90 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">90</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>full_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
@@ -8123,7 +8118,7 @@ where the output is copied when the job ends.</li>
 <span id="cb42-34"><a href="#cb42-34" tabindex="-1" aria-label="code-block-42-34"></a>        <span class="co"># ProcessingOutput: whatever the script writes under source is copied to destination when the job ends</span></span>
 <span id="cb42-35"><a href="#cb42-35" tabindex="-1" aria-label="code-block-42-35"></a>        outputs<span class="op">=</span>[ProcessingOutput(output_name<span class="op">=</span><span class="st">"predictions"</span>, source<span class="op">=</span><span class="st">"/opt/ml/processing/output"</span>, destination<span class="op">=</span>output_uri)],</span>
 <span id="cb42-36"><a href="#cb42-36" tabindex="-1" aria-label="code-block-42-36"></a>        arguments<span class="op">=</span>arguments,</span>
-<span id="cb42-37"><a href="#cb42-37" tabindex="-1" aria-label="code-block-42-37"></a>        job_name<span class="op">=</span><span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-transcribe-</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">-v1"</span>,   <span class="co"># unique, like the training jobs</span></span>
+<span id="cb42-37"><a href="#cb42-37" tabindex="-1" aria-label="code-block-42-37"></a>        job_name<span class="op">=</span><span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-transcribe-</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>,   <span class="co"># unique, like the training jobs</span></span>
 <span id="cb42-38"><a href="#cb42-38" tabindex="-1" aria-label="code-block-42-38"></a>        wait<span class="op">=</span><span class="va">False</span>, logs<span class="op">=</span><span class="va">False</span>,           <span class="co"># launch and return, so the two jobs run at the same time</span></span>
 <span id="cb42-39"><a href="#cb42-39" tabindex="-1" aria-label="code-block-42-39"></a>    )</span>
 <span id="cb42-40"><a href="#cb42-40" tabindex="-1" aria-label="code-block-42-40"></a>    <span class="cf">return</span> output_uri</span></code></pre>
@@ -8819,11 +8814,11 @@ chunking the corpus, from a cheap CPU notebook with nothing left running
 afterward. The Processing Jobs episode reruns the same pipeline on a
 self-hosted open-weight model that Bedrock does not carry, as jobs that
 end on their own, so you can see what Bedrock abstracts away and what it
-costs to do yourself. The fine-tuning episode follows. An optional
-self-study episode after it runs the same self-hosted pipeline
-interactively on a GPU notebook instance, for prototyping alone at a
-keyboard. All three RAG episodes share one module of pipeline code
-(<code>scripts/wattbot_rag.py</code> in the lesson repository).</p>
+costs to do yourself. An optional self-study episode after them runs the
+same self-hosted pipeline interactively on a GPU notebook instance, for
+prototyping alone at a keyboard. All three RAG episodes share one module
+of pipeline code (<code>scripts/wattbot_rag.py</code> in the lesson
+repository).</p>
 <p>When you build your own RAG system afterward, start from the Bedrock
 episode.</p>
 </div>
@@ -8919,11 +8914,10 @@ Bedrock-hosted model (DeepSeek V3) and score them against
 </div>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/11_RAG-Bedrock.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances). This is the first
-hands-on RAG episode, and it starts where the overview told you to
-start: <strong>Amazon Bedrock</strong>. We build a complete RAG pipeline
-for the <a href="https://www.kaggle.com/competitions/WattBot2025/overview" class="external-link">WattBot
+Select the <strong><code>conda_pytorch</code></strong> kernel. This is
+the first hands-on RAG episode, and it starts where the overview told
+you to start: <strong>Amazon Bedrock</strong>. We build a complete RAG
+pipeline for the <a href="https://www.kaggle.com/competitions/WattBot2025/overview" class="external-link">WattBot
 2025</a> challenge from a small, CPU-only SageMaker notebook. Nothing in
 this episode needs a GPU: the core model work — <strong>both text
 embeddings and answer generation</strong> — runs on Bedrock-hosted
@@ -9693,7 +9687,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10007,15 +10001,16 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p>Fill in the two prices from the Bedrock pricing page; the rest sums
-the usage blocks and prints the cost.</p>
+<p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
+for DeepSeek on-demand in October 2026; update them for the model and
+region you used. The rest sums the usage blocks and prints the cost.</p>
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.0</span>    <span class="co"># &lt;-- EDIT ME: DeepSeek V3 on-demand, $ per million input tokens</span></span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">0.0</span>   <span class="co"># &lt;-- EDIT ME: DeepSeek V3 on-demand, $ per million output tokens</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">1.85</span>   <span class="co"># $ per million output tokens, same source</span></span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a></span>
 <span id="cb20-4"><a href="#cb20-4" tabindex="-1" aria-label="code-block-20-4"></a>in_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"inputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
 <span id="cb20-5"><a href="#cb20-5" tabindex="-1" aria-label="code-block-20-5"></a>out_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"outputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
@@ -10212,9 +10207,8 @@ against the Bedrock run.</li>
 </div>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/12_RAG-Processing-jobs.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances). ## When Bedrock
-does not have your model</p>
+Select the <strong><code>conda_pytorch</code></strong> kernel. ## When
+Bedrock does not have your model</p>
 <p>The Bedrock episode is the default for RAG: per-token billing,
 nothing left running, two API calls. Bedrock’s catalog is curated,
 though. It carries Amazon’s models, Anthropic, Meta, Mistral, DeepSeek,
@@ -11270,9 +11264,7 @@ GB will not fit the weights or the vLLM install). This volume bills at
 repository as in the controller-notebook episode (this is a new
 instance, so it has no copy yet), and open
 <code>/ML_with_AWS_SageMaker/notebooks/13_RAG-GPU-notebook.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances); it is the one with
-PyTorch and CUDA.</p>
+Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 <p>See <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> for further guidance. This instance bills by the hour from
 the moment it starts, whether or not it is doing anything: <strong>stop
@@ -11297,7 +11289,7 @@ those two resources are the only things being billed.</p>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="co"># also verify you have selected a PyTorch (conda_pytorch_*) kernel</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="co"># also verify you have selected the conda_pytorch kernel</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="im">import</span> torch</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="bu">print</span>(<span class="st">"torch cuda available:"</span>, torch.cuda.is_available())   <span class="co"># False means PyTorch cannot use the GPU even if nvidia-smi sees it</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="bu">print</span>(<span class="st">"num gpus:"</span>, torch.cuda.device_count())</span></code></pre>
@@ -11386,7 +11378,9 @@ download helper.</p>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a><span class="co"># Local working directory in the notebook instance</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>local_data_dir <span class="op">=</span> <span class="st">"./data"</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a><span class="bu">print</span>(<span class="st">"Local data dir:"</span>, local_data_dir)</span></code></pre>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>session_start <span class="op">=</span> time.time()   <span class="co"># the meter on this GPU instance started when it booted; this marks where the episode's work began</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1" aria-label="code-block-6-9"></a><span class="bu">print</span>(<span class="st">"Local data dir:"</span>, local_data_dir)</span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="get-the-shared-wattbot-helpers">Get the shared WattBot helpers<a class="anchor" aria-label="anchor" href="#get-the-shared-wattbot-helpers"></a>
@@ -11669,11 +11663,10 @@ Wattbot project in general), but very relevant for production-scale
 systems.</p></li>
 </ul>
 <p>In this episode we deliberately stick with a simple in-memory index
-so the retrieval step is easy to inspect and debug. In later episodes
-(or your own projects), you can <strong>swap out the retrieval
-layer</strong> for FAISS or a vector DB without changing the overall RAG
-architecture: the model still sees “top–k retrieved chunks” as
-context.</p>
+so the retrieval step is easy to inspect and debug. In your own projects
+you can <strong>swap out the retrieval layer</strong> for FAISS or a
+vector DB without changing the overall RAG architecture: the model still
+sees “top–k retrieved chunks” as context.</p>
 <p><code>retrieve_top_k</code> from <code>wattbot_rag.py</code> is that
 search: normalize the query and the matrix, one matrix multiply for the
 cosine similarities, <code>argsort</code> for the top <em>k</em>. Open
@@ -12046,6 +12039,21 @@ prose.</li>
 “workbench”: you can swap in better models, smarter retrieval
 strategies, and richer document preprocessing without changing the
 overall pipeline structure.</p>
+<div class="section level3">
+<h3 id="what-did-this-episode-cost">What did this episode cost?<a class="anchor" aria-label="anchor" href="#what-did-this-episode-cost"></a>
+</h3>
+<p>There is no job record to ask here; the bill is simply the instance’s
+hours. This counts from the setup cell, so the boot, the install and
+every pause since are in it, and it keeps counting until you stop the
+instance.</p>
+<div class="codewrapper sourceCode" id="cb24">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a>g6e_price <span class="op">=</span> <span class="fl">2.61</span>   <span class="co"># $/hour, ml.g6e.xlarge on-demand</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1" aria-label="code-block-24-2"></a>hours <span class="op">=</span> (time.time() <span class="op">-</span> session_start) <span class="op">/</span> <span class="dv">3600</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1" aria-label="code-block-24-3"></a><span class="bu">print</span>(<span class="ss">f"this notebook has been running </span><span class="sc">{</span>hours <span class="op">*</span> <span class="dv">60</span><span class="sc">:.0f}</span><span class="ss"> min since the setup cell: $</span><span class="sc">{</span>hours <span class="op">*</span> g6e_price<span class="sc">:.2f}</span><span class="ss"> so far, and counting"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline as Processing jobs billed about $1.30 (that episode); on Bedrock, a few cents"</span>)</span></code></pre>
+</div>
 <p>The Processing Jobs episode does the same work, with the same
 <code>wattbot_rag.py</code>, as short-lived SageMaker jobs, so the GPU
 only bills while it is embedding or generating. Stop this instance now,
@@ -12102,6 +12110,7 @@ interface used here.</li>
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
+</div>
 </section></section><section id="aio-14_CLI-equivalents"><p>Content from <a href="14_CLI-equivalents.html">(Optional) The Same Jobs from the Terminal</a></p>
 <hr>
 <p>Last updated on 2026-10-20 |
@@ -12423,7 +12432,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>

@@ -485,8 +485,7 @@ to multi-GPU instances for larger models.</li>
 </div>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances).</p>
+Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 <section><h2 class="section-heading" id="why-fine-tune-an-llm">Why fine-tune an LLM<a class="anchor" aria-label="anchor" href="#why-fine-tune-an-llm"></a></h2>
 <hr class="half-width"><p>The training episodes so far trained small models from scratch. This
 episode fine-tunes a large language model: a vision-language model with
@@ -893,7 +892,7 @@ realistic project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: full fine-tuning a 7B model needs ~112 GB
 plus activations, and the g5 has 24 GB. On the p4d the 8 × 40 GB = 320
@@ -1110,7 +1109,7 @@ whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; five things have to be
 in place before the session. Each is written out in the instructor
@@ -1465,7 +1464,7 @@ its progress.</p>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>g5_price <span class="op">=</span> <span class="fl">1.41</span>                           <span class="co"># $/hour, us-east-1 on-demand</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>estimated_minutes <span class="op">=</span> <span class="dv">35</span>                    <span class="co"># the Step 0 estimate</span></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a>max_run_minutes <span class="op">=</span> <span class="dv">70</span>                      <span class="co"># about twice the estimate; SageMaker kills the job at this cap, whatever it is doing</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-mini-v1"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>training_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-mini"</span>   <span class="co"># must be unique in the account: a rerun fails instead of launching a second job</span></span>
 <span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a>checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">/"</span>   <span class="co"># the script saves the adapter here at the end of every epoch</span></span>
 <span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a></span>
 <span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a><span class="bu">print</span>(<span class="ss">f"job name:     </span><span class="sc">{</span>training_job_name<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -1587,11 +1586,11 @@ An empty list means go.</p>
 SageMaker requires training job names to be unique in the account, so
 running this cell a second time fails immediately with
 <code>ResourceInUse</code> and nothing is launched. To run again on
-purpose, change <code>v1</code> to <code>v2</code> in both
-<code>training_job_name</code> and (automatically)
-<code>checkpoint_s3_uri</code>; to <strong>resume</strong> a job that
-was killed, keep the <code>checkpoint_s3_uri</code> and change only the
-job name.</li>
+purpose, add a suffix to <code>training_job_name</code>
+(<code>-2</code>, <code>-2mp</code>, whatever says what changed);
+<code>checkpoint_s3_uri</code> follows it automatically. To
+<strong>resume</strong> a job that was killed, keep the
+<code>checkpoint_s3_uri</code> and change only the job name.</li>
 <li>
 <code>wait=True</code> (the default) blocks the notebook until the
 job ends and streams its log here. For a 25-minute job that is the right
@@ -1813,7 +1812,7 @@ real bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Expect startup to be close to 10 minutes, the two evaluations 2–4
 minutes each and the three curve points about a minute each. Training is
@@ -1912,11 +1911,11 @@ else.</p>
 <h3 class="callout-title">Exercise 1: The resolution knob</h3>
 <div class="callout-content">
 <p>Relaunch the same job with <code>"max_pixels": 2560 * 28 * 28</code>
-(~2 megapixels) and the job name <code>badger-{username}-mini-v2</code>.
-Before it starts, write down your prediction for its billable time. Then
-compare <code>train_minutes</code> and <code>seconds_per_page</code> in
-the two summaries, and the before/after CER. Did the extra pixels
-help?</p>
+(~2 megapixels) and the job name
+<code>badger-{username}-churro-mini-2mp</code>. Before it starts, write
+down your prediction for its billable time. Then compare
+<code>train_minutes</code> and <code>seconds_per_page</code> in the two
+summaries, and the before/after CER. Did the extra pixels help?</p>
 </div>
 </div>
 </div>
@@ -1925,7 +1924,7 @@ help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -1965,7 +1964,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Startup (~10 min, <code>$0.44</code> at <code>$2.61</code>/h) does
 not speed up: the container pull and the S3 downloads are the same on
@@ -2014,7 +2013,7 @@ estimator and relaunch under a new job name.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Nothing more for this run: the script already checkpoints to
 <code>/opt/ml/checkpoints</code> at the end of every epoch, SageMaker
@@ -2047,7 +2046,7 @@ folder, and the cap written down with its worst case.</p>
 <div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1" aria-label="code-block-35-1"></a>full_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-full-v1"</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" tabindex="-1" aria-label="code-block-35-1"></a>full_job_name <span class="op">=</span> <span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-full"</span></span>
 <span id="cb35-2"><a href="#cb35-2" tabindex="-1" aria-label="code-block-35-2"></a>full_checkpoint_s3_uri <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/checkpoints/</span><span class="sc">{</span>full_job_name<span class="sc">}</span><span class="ss">/"</span></span>
 <span id="cb35-3"><a href="#cb35-3" tabindex="-1" aria-label="code-block-35-3"></a><span class="bu">print</span>(<span class="ss">f"max_run cap: 90 min -&gt; worst case $</span><span class="sc">{</span>g5_price <span class="op">*</span> <span class="dv">90</span> <span class="op">/</span> <span class="dv">60</span><span class="sc">:.2f}</span><span class="ss">; checkpoints -&gt; </span><span class="sc">{</span>full_checkpoint_s3_uri<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
@@ -2217,7 +2216,7 @@ where the output is copied when the job ends.</li>
 <span id="cb42-34"><a href="#cb42-34" tabindex="-1" aria-label="code-block-42-34"></a>        <span class="co"># ProcessingOutput: whatever the script writes under source is copied to destination when the job ends</span></span>
 <span id="cb42-35"><a href="#cb42-35" tabindex="-1" aria-label="code-block-42-35"></a>        outputs<span class="op">=</span>[ProcessingOutput(output_name<span class="op">=</span><span class="st">"predictions"</span>, source<span class="op">=</span><span class="st">"/opt/ml/processing/output"</span>, destination<span class="op">=</span>output_uri)],</span>
 <span id="cb42-36"><a href="#cb42-36" tabindex="-1" aria-label="code-block-42-36"></a>        arguments<span class="op">=</span>arguments,</span>
-<span id="cb42-37"><a href="#cb42-37" tabindex="-1" aria-label="code-block-42-37"></a>        job_name<span class="op">=</span><span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-transcribe-</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">-v1"</span>,   <span class="co"># unique, like the training jobs</span></span>
+<span id="cb42-37"><a href="#cb42-37" tabindex="-1" aria-label="code-block-42-37"></a>        job_name<span class="op">=</span><span class="ss">f"badger-</span><span class="sc">{</span>username<span class="sc">}</span><span class="ss">-churro-transcribe-</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">"</span>,   <span class="co"># unique, like the training jobs</span></span>
 <span id="cb42-38"><a href="#cb42-38" tabindex="-1" aria-label="code-block-42-38"></a>        wait<span class="op">=</span><span class="va">False</span>, logs<span class="op">=</span><span class="va">False</span>,           <span class="co"># launch and return, so the two jobs run at the same time</span></span>
 <span id="cb42-39"><a href="#cb42-39" tabindex="-1" aria-label="code-block-42-39"></a>    )</span>
 <span id="cb42-40"><a href="#cb42-40" tabindex="-1" aria-label="code-block-42-40"></a>    <span class="cf">return</span> output_uri</span></code></pre>

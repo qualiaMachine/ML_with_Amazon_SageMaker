@@ -492,11 +492,10 @@ Bedrock-hosted model (DeepSeek V3) and score them against
 </div>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/11_RAG-Bedrock.ipynb</code>.
-Select the <strong><code>conda_pytorch</code></strong> kernel
-(<code>conda_pytorch_p310</code> on older instances). This is the first
-hands-on RAG episode, and it starts where the overview told you to
-start: <strong>Amazon Bedrock</strong>. We build a complete RAG pipeline
-for the <a href="https://www.kaggle.com/competitions/WattBot2025/overview" class="external-link">WattBot
+Select the <strong><code>conda_pytorch</code></strong> kernel. This is
+the first hands-on RAG episode, and it starts where the overview told
+you to start: <strong>Amazon Bedrock</strong>. We build a complete RAG
+pipeline for the <a href="https://www.kaggle.com/competitions/WattBot2025/overview" class="external-link">WattBot
 2025</a> challenge from a small, CPU-only SageMaker notebook. Nothing in
 this episode needs a GPU: the core model work — <strong>both text
 embeddings and answer generation</strong> — runs on Bedrock-hosted
@@ -1215,7 +1214,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1518,15 +1517,16 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
-<p>Fill in the two prices from the Bedrock pricing page; the rest sums
-the usage blocks and prints the cost.</p>
+<p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
+for DeepSeek on-demand in October 2026; update them for the model and
+region you used. The rest sums the usage blocks and prints the cost.</p>
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.0</span>    <span class="co"># &lt;-- EDIT ME: DeepSeek V3 on-demand, $ per million input tokens</span></span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">0.0</span>   <span class="co"># &lt;-- EDIT ME: DeepSeek V3 on-demand, $ per million output tokens</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">1.85</span>   <span class="co"># $ per million output tokens, same source</span></span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a></span>
 <span id="cb20-4"><a href="#cb20-4" tabindex="-1" aria-label="code-block-20-4"></a>in_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"inputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
 <span id="cb20-5"><a href="#cb20-5" tabindex="-1" aria-label="code-block-20-5"></a>out_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"outputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
