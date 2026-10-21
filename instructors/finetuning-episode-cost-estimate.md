@@ -44,7 +44,7 @@ For comparison, teaching the same material on `ml.g5.xlarge` *notebook* instance
 | 0:30–0:40 | Everyone launches the class job (`wait=True`) |
 | 0:40–1:15 | While it runs (~33 min), in the console: job page, `max_run`, tags, CloudWatch log, the checkpoint folder in S3; forgotten-instance arithmetic; quotas |
 | 1:15–1:45 | Step 2: bill vs. estimate, before/after CER, the curves, a page side by side; the holdout callouts |
-| 1:45–2:45 | Exercise 1 (relaunch at 2 MP; ~60 min, so launch first and discuss Exercises 2 and 3 while it runs) |
+| 1:45–2:45 | Exercise 1 (relaunch at 2 MP; ~60 min, so launch first and discuss Exercise 2 while it runs) |
 | 2:45–3:00 | Step 3 totals; walk through the homework section; cleanup |
 
 If the jobs are still queueing at 0:50 (capacity), teach the console and the cost arithmetic from your own job's page, run before class.
@@ -65,8 +65,6 @@ New accounts often have these at 0 to 4. Quota increases for GPU instances can t
 **Model download.** The base weights (`stanford-oval/churro-3B`, ~7.5 GB) are *not* pulled from Hugging Face by the jobs. They are staged once in the shared bucket under `badger-scribe/model/churro-3B/` (step on the *Shared data bucket* page) and every estimator passes that prefix as a `model` channel; the Processing jobs mount the same prefix and pass it as `--model_id`. SageMaker copies it from S3 in ~1–2 minutes per job, and a hundred jobs starting in the same minute hit S3, which is built for that, rather than one Hugging Face repository. The scripts fall back to the Hub only when no `model` channel is given (self-paced learners who skipped the staging step), in which case the instance needs internet access (default outside a VPC). The CHURRO weights carry the Qwen research license (non-commercial), which is fine for a class.
 
 **Warm pools.** `keep_alive_period_in_seconds` on the estimator keeps the instance for the next job, which would let a relaunch skip the startup overhead. It needs its own quota (`ml.g5.xlarge for training warm pool usage`) and it bills for the idle time at the full rate, so for a class it adds a way to leave meters running. Leave it off.
-
-**Spot.** Managed spot training saves up to 70%. The script checkpoints after each pass to `/opt/ml/checkpoints` and resumes, so spot is viable on the homework run; 50 simultaneous spot requests in class will see interruptions and capacity waits. Keep it as the exercise it is.
 
 ## Before class
 

@@ -534,7 +534,7 @@ print(f"tags:         {make_job_tags('Training')}")
 
 - **`max_run` is the only thing standing between a bug and your whole budget.** A training loop that diverges, hangs on a bad batch or waits on a dead data loader bills the same as one that works. The cap turns "whatever it takes" into a number you chose: here **`$1.88` worst case**. Set it to about twice the estimate, never leave it at the default of 24 hours, and on a **`$25`-an-hour instance treat it as the price of the launch**.
 - **A unique `job_name` prevents the double launch.** Running the launch cell twice fails with `ResourceInUse` instead of starting a second job. Without it, SageMaker generates a fresh name every time and happily runs two copies.
-- **Checkpoints to S3 bound the wasted work.** The script saves the adapter and optimizer state to `/opt/ml/checkpoints` at the end of every epoch, SageMaker syncs that folder to `checkpoint_s3_uri` while the job runs, and when a job is launched with the same `checkpoint_s3_uri` the script resumes from the latest checkpoint. A job killed by `max_run`, a spot interruption or a crash costs at most one epoch, not the whole run. **On a ten-hour run, this is the difference between losing ten minutes and losing `$150`.**
+- **Checkpoints to S3 bound the wasted work.** The script saves the adapter and optimizer state to `/opt/ml/checkpoints` at the end of every epoch, SageMaker syncs that folder to `checkpoint_s3_uri` while the job runs, and when a job is launched with the same `checkpoint_s3_uri` the script resumes from the latest checkpoint. A job killed by `max_run` or a crash costs at most one epoch, not the whole run. **On a ten-hour run, this is the difference between losing ten minutes and losing `$150`.**
 - **Tags make the bill readable.** Every job carries `Name`, `Project` and `Purpose`; without them a GPU job is anonymous spend that nobody can attribute.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -822,22 +822,6 @@ The hourly rate is the wrong thing to compare; the cost per run is what matters,
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-::::::::::::::::::::::::::::::::::::: challenge
-
-### Exercise 3: Managed spot training
-
-SageMaker can run a training job on spare ("spot") capacity at a discount of up to 70% in exchange for the risk of being interrupted. Add `use_spot_instances=True` and `max_wait=3 * 60 * 60` (the total time allowed including waiting for capacity; it must be at least `max_run`) to the estimator and relaunch under a new job name.
-
-What else would the script need before this is safe to rely on for a 10-hour run?
-
-:::::::::::::::::::::::: solution
-
-Nothing more for this run: the script already checkpoints to `/opt/ml/checkpoints` at the end of every epoch, SageMaker syncs that to `checkpoint_s3_uri`, and a job restarted after an interruption resumes from the latest checkpoint. What changes for a ten-hour run is the granularity: an epoch may be hours, so switch to `save_strategy="steps"` with a `save_steps` worth about ten minutes of training, so that an interruption costs minutes rather than hours. Spot is the right choice for long, restartable jobs and the wrong one for a 40-minute class exercise, where waiting for capacity can take longer than the job.
-
-:::::::::::::::::::::::::::::::::
-
-::::::::::::::::::::::::::::::::::::::::::::::::
-
 ## Homework: the full run and (optionally) a Kaggle submission
 
 Everything below is the same pattern at a larger scale: about `$1.50` for the fine-tune and `$0.80` for inference, roughly two hours of wall-clock time that you do not need to sit through. Launch, go do something else, come back.
@@ -885,7 +869,6 @@ full_estimator = HuggingFace(
     max_run=130 * 60,                     # 130 minutes: twice the estimate
     checkpoint_s3_uri=full_checkpoint_s3_uri,
     checkpoint_local_path="/opt/ml/checkpoints",
-    # Exercise 3: adding use_spot_instances=True, max_wait=3 * 60 * 60 runs this on spot capacity; max_wait (run + waiting) must be >= max_run
     transformers_version="4.56",
     pytorch_version="2.8",
     py_version="py312",
