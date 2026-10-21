@@ -324,7 +324,7 @@ Open `scripts/wattbot_rag_batch.py` and read `main` before launching it. It is s
 - `run_single_qa`: retrieval, the answer call, the hybrid unanswerable rule (retrieval threshold OR the model's own `is_blank`), the explanation call
 - `compute_wattbot_score`: the metric we use at the end
 
-What the batch script adds is the two model callables: `embed_query` wraps the same `gte-large` model and pooling the embedding job used (`hf_embedder.py`) (the question has to be embedded with the same model as the chunks), and `generate` wraps a vLLM engine serving Qwen3.8-27B with thinking mode off. The job writes `wattbot_solutions.csv` in the WattBot submission format.
+What the batch script adds is the two model callables: `embed_query` wraps the same `gte-large` model and pooling the embedding job used (`hf_embedder.py`) (the question has to be embedded with the same model as the chunks), and `generate` wraps a vLLM engine serving the generator (Qwen3-8B here) with thinking mode off. The job writes `wattbot_solutions.csv` in the WattBot submission format.
 
 ```python
 emb_output_s3 = f"s3://{bucket_name}/{emb_output_prefix}/embeddings.npy"

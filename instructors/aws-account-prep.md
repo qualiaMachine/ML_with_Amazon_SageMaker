@@ -23,8 +23,8 @@ Console: **Service Quotas → AWS services → Amazon SageMaker**, in the region
 | `ml.g5.xlarge for training job usage` | 100 | fine-tuning episode (one job per student at once) |
 | `ml.g6e.xlarge for training job usage` | 100 | optional: fine-tuning Exercise 2 |
 | `Number of instances across all training jobs` | 250 (already applied) | account-level ceiling; 250 covers 100 students |
-| `ml.g5.xlarge for processing job usage` | 200 | Processing Jobs episode and fine-tuning homework (two jobs per student, possibly at once) |
-| `ml.g6e.xlarge for processing job usage` | 100 | Processing Jobs episode: the RAG job serves Qwen3.8-27B. **Default is usually 0** |
+| `ml.g5.xlarge for processing job usage` | 200 | Processing Jobs episode (both jobs) and fine-tuning homework (two jobs per student, possibly at once) |
+| `ml.g6e.xlarge for processing job usage` | 100 (optional) | only the Processing Jobs episode's 27B variant. **Default is usually 0** and the increase takes days; the episode runs Qwen3-8B on `ml.g5.xlarge` without it |
 | `Number of instances across all processing jobs` | 250 (already applied) | account-level ceiling |
 
 Also check `ml.g5.xlarge for training warm pool usage` is left at its default of 0; the episodes do not use warm pools and a nonzero quota lets a student leave an idle GPU billing.
