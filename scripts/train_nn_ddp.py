@@ -3,11 +3,14 @@
 The companion of train_nn.py in the "Training part 2" episode. Same network, same
 data, same full-batch loop, plus the three things data parallelism needs:
 
-1. join the process group the launcher set up (one process per instance);
-2. give each process its own shard of the training rows;
+1. join the process group the launcher set up: one copy of this script per
+   instance, each numbered from zero. A copy's number is its RANK; the number
+   of copies is the WORLD SIZE. The rank is the only thing that differs between
+   the copies, so everything that must differ between instances keys off it;
+2. give each copy its own shard of the training rows, chosen by its rank;
 3. wrap the model in DistributedDataParallel, which averages the gradients
-   across processes after every backward pass, so every copy of the model
-   takes the same step and stays identical.
+   across copies after every backward pass, so every copy of the model takes
+   the same step and stays identical.
 
 Launched by SageMaker with distribution={"mpi": {"enabled": True,
 "processes_per_host": 1}} it runs on CPU or GPU instances; launched with
@@ -80,8 +83,9 @@ def train(train_path, val_path, epochs, learning_rate):
     X_val = torch.tensor(val_data["X_val"], dtype=torch.float32).to(device)
     y_val = torch.tensor(val_data["y_val"], dtype=torch.float32).unsqueeze(1).to(device)
 
-    # 2. The shard: rows rank, rank + world_size, rank + 2 * world_size, ... Each process trains on
-    #    its own slice; together the slices are the whole training set, with no row seen twice.
+    # 2. The shard: every world_size-th row starting at this copy's rank, so with two copies rank 0
+    #    takes rows 0, 2, 4, ... and rank 1 takes rows 1, 3, 5, ... Together the slices are the whole
+    #    training set with no row seen twice, and no copy needed to ask another which rows to take.
     X_shard, y_shard = X_train[rank::world_size].to(device), y_train[rank::world_size].to(device)
     print(f"[rank {rank} of {world_size}] training on {len(X_shard)} of {len(X_train)} rows", flush=True)
 
@@ -110,7 +114,7 @@ def train(train_path, val_path, epochs, learning_rate):
             print(f"Epoch [{epoch+1}/{epochs}], Loss: {loss.item():.4f}, Val Loss: {val_loss.item():.4f}, Val Accuracy: {val_accuracy:.4f}", flush=True)
             print(f"validation:accuracy = {val_accuracy:.4f}", flush=True)
 
-    if rank == 0:   # one copy of the model is enough: every process holds the same weights
+    if rank == 0:   # one saved model is enough: every copy holds the same weights, and rank 0 exists in every world
         weights = model.module.state_dict() if world_size > 1 else model.state_dict()
         model_output_path = "/opt/ml/model/nn_model.pth" if os.path.exists("/opt/ml/model") else "nn_model.pth"
         torch.save(weights, model_output_path)
