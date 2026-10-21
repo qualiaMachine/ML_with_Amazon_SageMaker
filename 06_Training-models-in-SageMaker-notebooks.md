@@ -400,7 +400,7 @@ To avoid this, we explicitly tag each training job at launch time. This ensures 
 ```python
 name = "DoeJohn" # replace with your name
 project = "SinkOrSwim" # replace with your challenge name
-purpose = "Training"
+purpose = "Training"        # one of: Storage, Notebook, Training, Tuning, Inference
 
 # Tags: key/value labels attached to the job's resources, so its cost shows up under your name and project on the bill
 job_tags = [
