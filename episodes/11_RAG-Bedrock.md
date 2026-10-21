@@ -136,7 +136,7 @@ Reopen JupyterLab once the status is *InService*, and rerun from Step 1: `role` 
 
 This episode reads from two buckets and you create neither of them here:
 
-- **The shared bucket** (your instructor gives you its name) holds the WattBot inputs under `wattbot/`: `metadata.csv` (the index of papers), `train_QA.csv` (labelled questions and answers), `corpus.zip` (the PDFs) and `pages.jsonl` (the text of every PDF page, extracted once). It is read-only and there is one copy for the whole class.
+- **The shared bucket**, `ml-marathon-shared`, already set in the first cell below, holds the WattBot inputs under `wattbot/`: `metadata.csv` (the index of papers), `train_QA.csv` (labelled questions and answers), `corpus.zip` (the PDFs) and `pages.jsonl` (the text of every PDF page, extracted once). It is read-only and there is one copy for the whole class.
 - **Your bucket** from the S3 episode (`challenge-lastnamefirstname`) is where this episode writes what it derives, under a `wattbot/` prefix: the chunked text (`wattbot/chunks.jsonl`), the embeddings (`wattbot/embeddings/`) and the predictions (`wattbot/solutions/`). Its tags cover its storage cost; your notebook instance carries the tags you gave it when you created it, and in this episode those two resources plus the per-token Bedrock calls (tagged through an inference profile, see "Cost tracking" below) are the only things being billed.
 
 ::::::::::::::::::::::::::::::::::::: callout
