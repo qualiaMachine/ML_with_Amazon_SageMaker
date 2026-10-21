@@ -795,7 +795,8 @@ def drop_questions_without_papers(train_df: pd.DataFrame, available_doc_ids) -> 
 
 
 def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 150,
-                               min_width: float = 80, min_height: float = 36) -> List[Dict[str, Any]]:
+                               min_width: float = 80, min_height: float = 36,
+                               pages: Optional[Sequence[int]] = None) -> List[Dict[str, Any]]:
     """Crop every table and figure out of one PDF with PyMuPDF (`pip install pymupdf`).
 
     Three detectors, all built into PyMuPDF: `find_tables` for tables (ruled or
@@ -809,8 +810,11 @@ def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 1
     identifier a question will use. A caption with no detected box falls back to the
     whole page, so every table and figure the text mentions gets an image.
 
+    `pages` limits the work to those page numbers (0-based); the pages whose text
+    carries a caption, found with `find_caption_pages`, are the ones worth the time.
+
     Returns one record per crop: doc_id, page_num, page_label, kind ("table" or
-    "figure"), caption, png_path. Crops are PNGs at `dpi` in `out_dir`.
+    "figure"), caption, png_path, whole_page. Crops are PNGs at `dpi` in `out_dir`.
     """
     import pymupdf
     from pathlib import Path
@@ -820,6 +824,8 @@ def extract_figures_and_tables(pdf_path: str, doc_id: str, out_dir, dpi: int = 1
     records: List[Dict[str, Any]] = []
     doc = pymupdf.open(pdf_path)
     for page in doc:
+        if pages is not None and page.number not in set(pages):
+            continue
         page_area = page.rect.get_area()
         tables = [pymupdf.Rect(t.bbox) for t in page.find_tables().tables]
         boxes: List[Tuple[str, Any]] = [("table", r) for r in tables]
