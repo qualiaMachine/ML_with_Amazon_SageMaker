@@ -460,7 +460,7 @@ As in every episode: tags do not propagate from the notebook to the jobs it laun
 name = "DoeJohn"         # replace with your name
 project = "SinkOrSwim"   # replace with your challenge name
 
-def make_job_tags(purpose: str):
+def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning, Inference
     return [
         {"Key": "Name", "Value": name},
         {"Key": "Project", "Value": project},
