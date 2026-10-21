@@ -357,7 +357,7 @@ The cost estimate in Step 0 used 1,600 tokens per page. That number is tokens, n
 %pip install -q "transformers>=4.56"   # the processor that turns an image + text into the model's tokens; same version as the training job
 ```
 
-Fetch the processor's config files from the shared bucket and load the processor with the same pixel limits the training script uses. Then run one page through it twice: once with the transcription, to count everything, and once with only the prompt, to find where the transcription's tokens start.
+Fetch the processor's config files from the shared bucket and load the processor with the same pixel limits the training script uses. Then run one page through it twice: once with the transcription, to count everything, and once with only the prompt, to find where the transcription's tokens start. The count splits three ways: the image, the instruction prompt the script sends with every page (the transcription rules from `build_prompt` plus the chat-template markup around them, the same on every page), and the transcription itself.
 
 ```python
 from transformers import AutoProcessor
@@ -380,7 +380,8 @@ n_prompt = processor(text=[processor.apply_chat_template(bc.user_messages(prompt
 n_image = int((enc["image_grid_thw"].prod(dim=1) // 4).sum())   # 14-px patches merged 2x2: one token per 28x28 block
 
 print(f"page {row.page_id}: {image.size[0]} x {image.size[1]} px after resizing -> {n_image} image tokens")
-print(f"instructions: {n_prompt - n_image} tokens;  transcription: {len(row.text.split())} words, {len(row.text)} characters -> {n_total - n_prompt} tokens")
+print(f"instruction prompt (same text on every page): {n_prompt - n_image} tokens")
+print(f"transcription: {len(row.text.split())} words, {len(row.text)} characters -> {n_total - n_prompt} tokens")
 print(f"tokens the model sees for this page: {n_total}")
 ```
 
@@ -398,12 +399,12 @@ for pid in sample.page_id:
     grid = processor.image_processor(images=[bc.load_page_image(path, bc.DEFAULT_MAX_PIXELS)], return_tensors="pt")["image_grid_thw"]
     image_tokens.append(int((grid.prod(dim=1) // 4).sum()))
 
-n_instructions = n_prompt - n_image                      # the same for every page
+n_instructions = n_prompt - n_image                      # the instruction prompt: the same text, so the same count, on every page
 avg_text, avg_image = text_tokens.mean(), sum(image_tokens) / len(image_tokens)
 avg_tokens_per_page = avg_image + n_instructions + avg_text
 print(f"text tokens per page, all {len(train_df)} training pages: mean {avg_text:.0f}, min {text_tokens.min()}, max {text_tokens.max()}")
 print(f"image tokens per page, {len(image_tokens)} sampled pages: mean {avg_image:.0f}")
-print(f"average tokens per page: {avg_image:.0f} image + {n_instructions} instructions + {avg_text:.0f} text = {avg_tokens_per_page:.0f}")
+print(f"average tokens per page: {avg_image:.0f} image + {n_instructions} instruction prompt + {avg_text:.0f} transcription = {avg_tokens_per_page:.0f}")
 ```
 
 That average is the `tokens_per_example` the estimate should have used. Re-run the estimator with it and compare with the 1,600 guess:
