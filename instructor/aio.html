@@ -2910,7 +2910,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3155,7 +3155,7 @@ potential issues early. <strong>In your group, discuss:</strong></p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Which checks do you think are most critical before scaling up?</p>
 <ul>
@@ -3273,7 +3273,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3542,7 +3542,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -6255,7 +6255,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6305,7 +6305,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -10460,6 +10460,51 @@ tells the scorer to derive that flag from
 <span id="cb29-6"><a href="#cb29-6" tabindex="-1" aria-label="code-block-29-6"></a>    n_examples<span class="op">=</span><span class="dv">20</span>,</span>
 <span id="cb29-7"><a href="#cb29-7" tabindex="-1" aria-label="code-block-29-7"></a>)</span></code></pre>
 </div>
+<div class="section level3">
+<h3 id="why-were-the-wrong-ones-wrong">Why were the wrong ones wrong?<a class="anchor" aria-label="anchor" href="#why-were-the-wrong-ones-wrong"></a>
+</h3>
+<p>The score tells you <em>which</em> questions failed, not why. Two
+different failures look the same in that table. Either retrieval never
+surfaced the right paper, so the model had nothing to work with, or the
+right passage was in front of it and it still declined or misread it.
+The cell below separates them for the lowest-scoring rows: it joins the
+model’s own explanation and the passages it cited back onto the score,
+then reruns retrieval for the question (one embedding call) and reports
+whether the ground-truth paper was among the top-k chunks and what the
+best cosine score was.</p>
+<div class="codewrapper sourceCode" id="cb30">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> retrieve_top_k, split_ref_ids</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a>worst <span class="op">=</span> scored_df.sort_values(<span class="st">"wattbot_score"</span>).head(<span class="dv">8</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a>by_id <span class="op">=</span> results_df.set_index(<span class="st">"id"</span>)   <span class="co"># the model's answer, explanation and cited passages, keyed by question id</span></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1" aria-label="code-block-30-5"></a></span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1" aria-label="code-block-30-6"></a><span class="cf">for</span> _, row <span class="kw">in</span> worst.iterrows():</span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1" aria-label="code-block-30-7"></a>    qid <span class="op">=</span> row[<span class="st">"id"</span>]</span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1" aria-label="code-block-30-8"></a>    gt_refs <span class="op">=</span> <span class="bu">set</span>(split_ref_ids(row[<span class="st">"ref_id_gt"</span>]))   <span class="co"># train_QA.csv stores the list as a string</span></span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1" aria-label="code-block-30-9"></a>    retrieved <span class="op">=</span> retrieve_top_k(embed_query(row[<span class="st">"question_gt"</span>]), chunk_embeddings, chunked_docs, k<span class="op">=</span><span class="dv">8</span>)   <span class="co"># the merge suffixed both sides' columns</span></span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1" aria-label="code-block-30-10"></a>    retrieved_docs <span class="op">=</span> [r[<span class="st">"doc_id"</span>] <span class="cf">for</span> r <span class="kw">in</span> retrieved]</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1" aria-label="code-block-30-11"></a>    <span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">96</span>)</span>
+<span id="cb30-12"><a href="#cb30-12" tabindex="-1" aria-label="code-block-30-12"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>qid<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>row[<span class="st">'question_gt'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a>    <span class="bu">print</span>(<span class="ss">f"  expected: </span><span class="sc">{</span>row[<span class="st">'answer_value_gt'</span>]<span class="sc">}</span><span class="ss">  from </span><span class="sc">{</span><span class="bu">sorted</span>(gt_refs)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a>    <span class="bu">print</span>(<span class="ss">f"  predicted: </span><span class="sc">{</span>row[<span class="st">'answer_value_pred'</span>]<span class="sc">}</span><span class="ss">  citing </span><span class="sc">{</span>row[<span class="st">'ref_id_pred'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-15"><a href="#cb30-15" tabindex="-1" aria-label="code-block-30-15"></a>    <span class="bu">print</span>(<span class="ss">f"  retrieval: top cosine </span><span class="sc">{</span>retrieved[<span class="dv">0</span>][<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">; top-8 papers </span><span class="sc">{</span>retrieved_docs<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" tabindex="-1" aria-label="code-block-30-16"></a>    <span class="bu">print</span>(<span class="ss">f"  ground-truth paper retrieved: </span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> gt_refs <span class="op">&amp;</span> <span class="bu">set</span>(retrieved_docs) <span class="cf">else</span> <span class="st">'NO'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-17"><a href="#cb30-17" tabindex="-1" aria-label="code-block-30-17"></a>    <span class="cf">if</span> by_id.loc[qid, <span class="st">"explanation"</span>] <span class="op">!=</span> <span class="st">"is_blank"</span>:</span>
+<span id="cb30-18"><a href="#cb30-18" tabindex="-1" aria-label="code-block-30-18"></a>        <span class="bu">print</span>(<span class="ss">f"  model's explanation: </span><span class="sc">{</span>by_id<span class="sc">.</span>loc[qid, <span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-19"><a href="#cb30-19" tabindex="-1" aria-label="code-block-30-19"></a>        <span class="bu">print</span>(<span class="ss">f"  passages it cited: </span><span class="sc">{</span><span class="bu">str</span>(by_id.loc[qid, <span class="st">'supporting_materials'</span>])[:<span class="dv">400</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+</div>
+<p>Read the two lines at the bottom of each block together.
+“Ground-truth paper retrieved: NO” is a retrieval problem: a different
+chunk size, a reranker, or a better embedding model is the fix, and no
+generator will help. “Yes” with <code>is_blank</code> is the model
+declining on evidence it had, which the system prompt and the retrieval
+threshold control. “Yes” with a wrong value is a reading error, and the
+cited passage usually shows what it latched onto: a nearby number, a
+different unit, a different model in the same table. Each of those is a
+different lever, and the score alone would have you pulling the wrong
+one.</p>
 <div id="what-did-that-run-cost" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -10491,29 +10536,30 @@ of the <code>ml.g6e.xlarge</code> the Processing Jobs episode rents?</p>
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
 region you used. The rest sums the usage blocks and prints the cost.</p>
-<div class="codewrapper sourceCode" id="cb30">
+<div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region</span></span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">1.85</span>   <span class="co"># $ per million output tokens, same source</span></span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a></span>
-<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a>in_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"inputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
-<span id="cb30-5"><a href="#cb30-5" tabindex="-1" aria-label="code-block-30-5"></a>out_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"outputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
-<span id="cb30-6"><a href="#cb30-6" tabindex="-1" aria-label="code-block-30-6"></a>gen_cost <span class="op">=</span> in_tokens <span class="op">/</span> <span class="fl">1e6</span> <span class="op">*</span> price_in_per_m <span class="op">+</span> out_tokens <span class="op">/</span> <span class="fl">1e6</span> <span class="op">*</span> price_out_per_m</span>
-<span id="cb30-7"><a href="#cb30-7" tabindex="-1" aria-label="code-block-30-7"></a></span>
-<span id="cb30-8"><a href="#cb30-8" tabindex="-1" aria-label="code-block-30-8"></a><span class="co"># Titan bills per input token; ~4 characters per token is a fair estimate for English prose</span></span>
-<span id="cb30-9"><a href="#cb30-9" tabindex="-1" aria-label="code-block-30-9"></a>embed_tokens <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">len</span>(ch[<span class="st">"text"</span>]) <span class="cf">for</span> ch <span class="kw">in</span> chunked_docs) <span class="op">/</span> <span class="dv">4</span></span>
-<span id="cb30-10"><a href="#cb30-10" tabindex="-1" aria-label="code-block-30-10"></a>embed_cost <span class="op">=</span> embed_tokens <span class="op">/</span> <span class="fl">1e6</span> <span class="op">*</span> <span class="fl">0.02</span></span>
-<span id="cb30-11"><a href="#cb30-11" tabindex="-1" aria-label="code-block-30-11"></a></span>
-<span id="cb30-12"><a href="#cb30-12" tabindex="-1" aria-label="code-block-30-12"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(bedrock_usage)<span class="sc">}</span><span class="ss"> generation calls: </span><span class="sc">{</span>in_tokens<span class="sc">:,}</span><span class="ss"> input + </span><span class="sc">{</span>out_tokens<span class="sc">:,}</span><span class="ss"> output tokens -&gt; $</span><span class="sc">{</span>gen_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a><span class="bu">print</span>(<span class="ss">f"~</span><span class="sc">{</span>embed_tokens<span class="sc">:,.0f}</span><span class="ss"> embedding tokens -&gt; $</span><span class="sc">{</span>embed_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a><span class="bu">print</span>(<span class="ss">f"Total ~$</span><span class="sc">{</span>gen_cost <span class="op">+</span> embed_cost<span class="sc">:.2f}</span><span class="ss">; one hour of ml.g6e.xlarge is $2.61"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1" aria-label="code-block-31-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region</span></span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1" aria-label="code-block-31-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">1.85</span>   <span class="co"># $ per million output tokens, same source</span></span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1" aria-label="code-block-31-3"></a></span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1" aria-label="code-block-31-4"></a>in_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"inputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1" aria-label="code-block-31-5"></a>out_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"outputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1" aria-label="code-block-31-6"></a>gen_cost <span class="op">=</span> in_tokens <span class="op">/</span> <span class="fl">1e6</span> <span class="op">*</span> price_in_per_m <span class="op">+</span> out_tokens <span class="op">/</span> <span class="fl">1e6</span> <span class="op">*</span> price_out_per_m</span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1" aria-label="code-block-31-7"></a></span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1" aria-label="code-block-31-8"></a><span class="co"># Titan bills per input token; ~4 characters per token is a fair estimate for English prose</span></span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1" aria-label="code-block-31-9"></a>embed_tokens <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">len</span>(ch[<span class="st">"text"</span>]) <span class="cf">for</span> ch <span class="kw">in</span> chunked_docs) <span class="op">/</span> <span class="dv">4</span></span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1" aria-label="code-block-31-10"></a>embed_cost <span class="op">=</span> embed_tokens <span class="op">/</span> <span class="fl">1e6</span> <span class="op">*</span> <span class="fl">0.02</span></span>
+<span id="cb31-11"><a href="#cb31-11" tabindex="-1" aria-label="code-block-31-11"></a></span>
+<span id="cb31-12"><a href="#cb31-12" tabindex="-1" aria-label="code-block-31-12"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(bedrock_usage)<span class="sc">}</span><span class="ss"> generation calls: </span><span class="sc">{</span>in_tokens<span class="sc">:,}</span><span class="ss"> input + </span><span class="sc">{</span>out_tokens<span class="sc">:,}</span><span class="ss"> output tokens -&gt; $</span><span class="sc">{</span>gen_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb31-13"><a href="#cb31-13" tabindex="-1" aria-label="code-block-31-13"></a><span class="bu">print</span>(<span class="ss">f"~</span><span class="sc">{</span>embed_tokens<span class="sc">:,.0f}</span><span class="ss"> embedding tokens -&gt; $</span><span class="sc">{</span>embed_cost<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb31-14"><a href="#cb31-14" tabindex="-1" aria-label="code-block-31-14"></a><span class="bu">print</span>(<span class="ss">f"Total ~$</span><span class="sc">{</span>gen_cost <span class="op">+</span> embed_cost<span class="sc">:.2f}</span><span class="ss">; one hour of ml.g6e.xlarge is $2.61"</span>)</span></code></pre>
 </div>
 <p>With ~40 questions, two calls each and ~3,000-token prompts, the run
 is on the order of 250K input and 20K output tokens: cents, not dollars,
 at any price in DeepSeek V3’s class, plus about two cents of embeddings.
 That matches the overview’s “well under <code>$1</code>” for the whole
 pipeline, and it is a small fraction of a single GPU-hour.</p>
+</div>
 </div>
 </div>
 </div>
@@ -12989,7 +13035,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-15_Resource-management-cleanup"><p>Content from <a href="15_Resource-management-cleanup.html">Resource Management and Monitoring</a></p>
 <hr>
-<p>Last updated on 2026-10-20 |
+<p>Last updated on 2026-10-21 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/15_Resource-management-cleanup.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 35 minutes</p>
@@ -13029,7 +13075,78 @@ costs.</li>
 </div>
 </div>
 </div>
-<section><h2 class="section-heading" id="shutting-down-notebook-instances">Shutting down notebook instances<a class="anchor" aria-label="anchor" href="#shutting-down-notebook-instances"></a>
+<section><h2 class="section-heading" id="initial-setup">Initial setup<a class="anchor" aria-label="anchor" href="#initial-setup"></a>
+</h2>
+<hr class="half-width">
+<p>Open the notebook from:
+<code>/ML_with_AWS_SageMaker/notebooks/15_Resource-management-cleanup.ipynb</code>.
+Any kernel works; <strong><code>conda_python3</code></strong> is fine.
+This episode is mostly console steps, but the cells below ask AWS what
+is still running or stored under your name, so you can check the list
+against reality before and after you clean up.</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="im">import</span> boto3</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="im">import</span> sagemaker</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a><span class="im">import</span> sys</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a>sys.path.insert(<span class="dv">0</span>, <span class="st">"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="im">import</span> helpers</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a>session <span class="op">=</span> sagemaker.Session()</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a>sm <span class="op">=</span> session.sagemaker_client</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a>region <span class="op">=</span> session.boto_region_name</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>                              <span class="co"># replace with your name, as used in job names and tags</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>            <span class="co"># replace with your bucket</span></span></code></pre>
+</div>
+</section><section><h2 class="section-heading" id="what-is-still-running-under-your-name">What is still running under your name?<a class="anchor" aria-label="anchor" href="#what-is-still-running-under-your-name"></a>
+</h2>
+<hr class="half-width">
+<p>Everything this lesson launched carries your name in its job name or
+its tags, so one pass over the job lists shows what is still billing. A
+completed job holds nothing; an InProgress one bills until it ends or
+hits its cap.</p>
+<div class="codewrapper sourceCode" id="cb2">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="bu">print</span>(<span class="st">"Notebook instances (bill while InService; volume bills while Stopped):"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="cf">for</span> nb <span class="kw">in</span> sm.list_notebook_instances()[<span class="st">"NotebookInstances"</span>]:</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>    <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>nb[<span class="st">'NotebookInstanceName'</span>]<span class="sc">:&lt;40}</span><span class="ss"> </span><span class="sc">{</span>nb[<span class="st">'NotebookInstanceStatus'</span>]<span class="sc">:&lt;12}</span><span class="ss"> </span><span class="sc">{</span>nb[<span class="st">'InstanceType'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Jobs still InProgress with your name in them:"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>running <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a><span class="cf">for</span> kind, lister, key, name_key <span class="kw">in</span> [</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a>    (<span class="st">"training"</span>,   sm.list_training_jobs,              <span class="st">"TrainingJobSummaries"</span>,            <span class="st">"TrainingJobName"</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>    (<span class="st">"tuning"</span>,     sm.list_hyper_parameter_tuning_jobs, <span class="st">"HyperParameterTuningJobSummaries"</span>, <span class="st">"HyperParameterTuningJobName"</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>    (<span class="st">"processing"</span>, sm.list_processing_jobs,            <span class="st">"ProcessingJobSummaries"</span>,          <span class="st">"ProcessingJobName"</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a>]:</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a>    <span class="cf">for</span> job <span class="kw">in</span> lister(StatusEquals<span class="op">=</span><span class="st">"InProgress"</span>, NameContains<span class="op">=</span>name, MaxResults<span class="op">=</span><span class="dv">50</span>)[key]:</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1" aria-label="code-block-2-13"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>kind<span class="sc">:&lt;11}</span><span class="ss"> </span><span class="sc">{</span>job[name_key]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1" aria-label="code-block-2-14"></a>        running <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1" aria-label="code-block-2-15"></a><span class="bu">print</span>(<span class="st">"  none"</span> <span class="cf">if</span> running <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="ss">f"  </span><span class="sc">{</span>running<span class="sc">}</span><span class="ss"> job(s) still billing: stop them from the console if you no longer need them"</span>)</span></code></pre>
+</div>
+<p>Then storage, which bills whether or not anything runs:</p>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a>helpers.get_s3_bucket_size(bucket_name)</span></code></pre>
+</div>
+<p>And the Bedrock inference profiles, which cost nothing to keep but
+are yours to remove (the instructors’ cleanup does not touch them):</p>
+<div class="codewrapper sourceCode" id="cb4">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a>bedrock <span class="op">=</span> boto3.client(<span class="st">"bedrock"</span>, region_name<span class="op">=</span>region)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a>profiles <span class="op">=</span> [p <span class="cf">for</span> p <span class="kw">in</span> bedrock.list_inference_profiles(typeEquals<span class="op">=</span><span class="st">"APPLICATION"</span>)[<span class="st">"inferenceProfileSummaries"</span>] <span class="cf">if</span> name <span class="kw">in</span> p[<span class="st">"inferenceProfileName"</span>]]</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a><span class="cf">for</span> p <span class="kw">in</span> profiles:</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1" aria-label="code-block-4-4"></a>    <span class="bu">print</span>(p[<span class="st">"inferenceProfileName"</span>], p[<span class="st">"inferenceProfileArn"</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1" aria-label="code-block-4-5"></a><span class="bu">print</span>(<span class="st">"none"</span> <span class="cf">if</span> <span class="kw">not</span> profiles <span class="cf">else</span> <span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(profiles)<span class="sc">}</span><span class="ss"> profile(s); delete with bedrock.delete_inference_profile(inferenceProfileIdentifier=&lt;arn&gt;)"</span>)</span></code></pre>
+</div>
+<p>Now the console steps. Rerun the cells above when you are done; every
+list should be empty or Stopped.</p>
+</section><section><h2 class="section-heading" id="shutting-down-notebook-instances">Shutting down notebook instances<a class="anchor" aria-label="anchor" href="#shutting-down-notebook-instances"></a>
 </h2>
 <hr class="half-width">
 <p>Notebook instances in SageMaker are billed per second, so it’s
