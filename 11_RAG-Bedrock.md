@@ -106,6 +106,8 @@ If there is no instructor-staged bucket, stage the three input files in your own
 
 ### Step 1 – Configure the notebook
 
+Imports, then a SageMaker session, the region and role, an S3 client and a Bedrock client, then the bucket names and the local folder the data is cached in.
+
 ```python
 import os
 import json
@@ -281,6 +283,8 @@ In short: **pages first → then chunks** keeps the workflow cleaner and easier 
 ```python
 %pip install -q pypdf
 ```
+
+Open each PDF listed in the metadata with `pypdf` and turn every page into one record: its text, the document id, title and URL, and the page number.
 
 ```python
 from pypdf import PdfReader
@@ -779,6 +783,8 @@ scored_df = compute_wattbot_score(
 Every `converse` response carried a `usage` block, and `call_bedrock_chat` kept them all in `bedrock_usage`. Sum the input and output tokens over the evaluation run and price them at the current on-demand rates for DeepSeek V3 on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) (fill the two prices in below). Add the embedding step: ~3,000 chunks of 1,200 characters at Titan Text Embeddings V2's `$0.02` per million input tokens. How does the total compare with the overview's estimate for "the whole WattBot pipeline on Bedrock", and with one hour of the `ml.g6e.xlarge` the Processing Jobs episode rents?
 
 :::::::::::::::::::::::: solution
+
+Fill in the two prices from the Bedrock pricing page; the rest sums the usage blocks and prints the cost.
 
 ```python
 price_in_per_m = 0.0    # <-- EDIT ME: DeepSeek V3 on-demand, $ per million input tokens

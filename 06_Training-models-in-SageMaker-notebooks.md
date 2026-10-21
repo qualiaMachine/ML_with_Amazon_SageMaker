@@ -230,6 +230,9 @@ Test train.py on this notebook's instance (or when possible, on your own machine
 ```
 
 ### Local test
+
+Run the training script here in the notebook first, on the small data, with the hyperparameters passed in as variables. A local run finds bugs for free, and the same script then runs unchanged as a SageMaker job.
+
 ```python
 import time as t # we'll use the time package to measure runtime
 
@@ -257,6 +260,8 @@ Training on this relatively small dataset should take less than a minute, but as
 
 ### Sanity check: Quick evaluation on test set
 This next section isn't SageMaker specific, but it does serve as a good sanity check to ensure our model is training properly. Here's how you would apply the outputted model to your test set using your local notebook instance.
+
+Score the model you just trained locally on the test set, reusing the script's own `preprocess_data` so the test rows are transformed exactly as the training rows were.
 
 ```python
 import xgboost as xgb
@@ -537,6 +542,8 @@ import tarfile
 with tarfile.open(local_model_path) as tar:
     tar.extractall()
 ```
+
+Now the same evaluation on the model the job trained: load it from the unpacked archive and score the test set the same way as before.
 
 ```python
 import xgboost as xgb

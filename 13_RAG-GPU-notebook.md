@@ -150,6 +150,7 @@ If the install changes PyTorch, restart the kernel (**Kernel → Restart**) befo
 
 ## Import data from bucket into notebook
 
+The same setup as the Bedrock episode: session, region, role, an S3 client, the two bucket names and a local data folder, plus a small download helper.
 
 ```python
 import os
@@ -202,6 +203,8 @@ The retrieval, prompts, answer parsing, per-question orchestration and the score
 !cp /home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/wattbot_rag.py .
 ```
 
+Import the pieces of the shared RAG module we reuse: the prompts, the retrieval and scoring functions, and the per-question runner.
+
 ```python
 from wattbot_rag import (
     ANSWER_SYSTEM_PROMPT,
@@ -214,6 +217,7 @@ from wattbot_rag import (
 )
 ```
 
+Download the two WattBot input files from the shared bucket.
 
 ```python
 # Download metadata.csv and train_QA.csv from the shared bucket
@@ -238,6 +242,7 @@ import torch
 from sentence_transformers import SentenceTransformer   # embedding-model wrapper: encode(list of strings) -> matrix
 ```
 
+A CSV reader that tries a few encodings, because some metadata files are not valid UTF-8.
 
 ```python
 def smart_read_csv(path: str) -> pd.DataFrame:
@@ -339,6 +344,7 @@ embedder = SentenceTransformer(
 
 ```
 
+Embed every chunk in batches on the GPU and stack the results into one matrix, one row per chunk.
 
 ```python
 def embed_texts(embedder, docs, batch_size: int = 32) -> np.ndarray:
@@ -504,6 +510,7 @@ print("Generator model and helper loaded.")
 
 ```
 
+One throwaway question, to confirm the generator answers before spending time on the real ones.
 
 ```python
 

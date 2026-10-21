@@ -224,6 +224,8 @@ def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning
 
 ### Launch the embedding job
 
+A `HuggingFaceProcessor` is the Processing-job counterpart of the estimator: the same role, tags, instance type and container versions, plus a runtime cap. Its `run` call names the script, mounts the inputs, and says where the output goes.
+
 ```python
 embedding_model_id = "thenlper/gte-large"
 
@@ -402,6 +404,8 @@ solutions_df = pd.read_csv(local_solutions_path)
 solutions_df.head()
 ```
 
+Score the predictions with the competition's own metric, the same function the Bedrock episode used, so the two runs compare directly.
+
 ```python
 from wattbot_rag import compute_wattbot_score
 
@@ -423,6 +427,8 @@ Compare the overall score with the Bedrock run. The retrieval logic, prompts and
 Ask SageMaker what it recorded for each job: `session.sagemaker_client.describe_processing_job(ProcessingJobName=...)` returns `CreationTime`, `ProcessingStartTime` and `ProcessingEndTime`. The job names are `embedding_processor.latest_job.job_name` and `rag_processor.latest_job.job_name`. For each job, compute the minutes between creation and start (provisioning, before the instance is billed) and between start and end (the billed window), and price the billed window at `$1.41`/h for the `ml.g5.xlarge` and `$2.61`/h for the `ml.g6e.xlarge`. Then, from the RAG job's CloudWatch log timestamps, estimate how much of its billed window was setup (pip install and weight download) and how much was generation. How does the total compare with the cost callout, and with the Bedrock run?
 
 :::::::::::::::::::::::: solution
+
+`describe_processing_job` returns three timestamps; the gap between the first two is unbilled provisioning, between the last two the billed run.
 
 ```python
 def job_cost(job_name: str, price_per_hour: float):

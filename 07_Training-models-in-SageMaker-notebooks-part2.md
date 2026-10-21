@@ -115,6 +115,8 @@ We reuse the `preprocess_data()` function from the lesson's `scripts/train_nn.py
 !pip install scikit-learn   # the notebook kernels do not ship it; train_nn.py imports it
 ```
 
+Load the Titanic CSV, run it through the script's `preprocess_data`, split off a validation set, and save the arrays and the scaler. The training script reads these files; the scaler is kept so test data can later be transformed the same way.
+
 ```python
 import numpy as np
 import joblib
@@ -198,6 +200,8 @@ def job_cost_report(job_name: str, price_per_hour: float):
 # us-east-1 on-demand rates (2026-10-16); check the instances page for your region
 prices = {"ml.m5.large": 0.115, "ml.m5.xlarge": 0.23, "ml.g4dn.xlarge": 0.74}
 ```
+
+Set up the estimator for a longer run: the epochs, the instance, where the output goes, and a two-hour `max_run` cap.
 
 ```python
 from sagemaker.pytorch import PyTorch

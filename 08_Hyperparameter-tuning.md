@@ -388,6 +388,8 @@ print(f"Best model artifact S3 URI: {best_model_s3_uri}")
 
 #### Retrieve and load best model
 
+Download the winning job's `model.tar.gz` and unpack it; SageMaker packs whatever the script saved to `/opt/ml/model` into that archive.
+
 ```python
 import tarfile
 
@@ -411,6 +413,8 @@ In our previous episode, we converted our train dataset into train/validate subs
 !pip install scikit-learn   # train_nn.py imports it; not in the notebook kernels
 ```
 
+Fetch the test CSV and the training-set scaler, transform the test rows the same way the training rows were, and save the arrays.
+
 ```python
 import pandas as pd
 import numpy as np
@@ -431,6 +435,8 @@ np.savez('test_data.npz', X_test=X_test, y_test=y_test)
 ```
 
 #### Evaluate the model on test data
+
+Rebuild the network from the script's class, load the saved weights, and measure accuracy on the test set.
 
 ```python
 from train_nn import TitanicNet
