@@ -84,7 +84,7 @@ For a full catalog of available models (including Claude variants, Amazon models
 
 ## Notebook + dataset setup
 
-For this episode you need a SageMaker notebook instance, but **not a GPU one**. A small CPU instance such as `ml.t3.medium` is enough, because the models run on Bedrock rather than in the notebook. The notebook's execution role must allow Bedrock access, which the default SageMaker role does not. On the class account the instructor has added those permissions to `ml-sagemaker-use`, the role every notebook in this lesson runs with; on your own account, attach the policy in the "Permissions and verification" callout below to your role before starting. The first Bedrock call in Step 7 tells you plainly if they are missing.
+For this episode you need a SageMaker notebook instance, but **not a GPU one**. A small CPU instance such as `ml.t3.medium` is enough, because the models run on Bedrock rather than in the notebook. The notebook's execution role must allow Bedrock access, which the default SageMaker role does not. On the class account that is the `ml-sagemaker-bedrock-use` role you picked when creating the notebook instance. If your instance was created with the older `ml-sagemaker-use` role, the first Bedrock call fails with an access-denied error: stop the instance, choose **Edit**, change the IAM role, and start it again. On your own account, attach the policy in the "Permissions and verification" callout below to your role before starting.
 
 See [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) for further guidance on instance types.
 
@@ -540,8 +540,9 @@ def get_or_create_inference_profile(base_model_id: str, label: str) -> str:
             raise PermissionError(
                 f"This notebook's role has no Bedrock permissions ({role}).\n"
                 "The Bedrock episode needs the policy in the 'Permissions and verification' callout attached to the "
-                "notebook's execution role: ask the account administrator (on the class account, the instructor) to add it. "
-                "Nothing to change in this notebook; rerun this cell once it is attached."
+                "notebook's execution role. On the class account, the instance must use the ml-sagemaker-bedrock-use role: "
+                "stop it, Edit, change the IAM role, start it again. On your own account, attach the policy to your role. "
+                "Nothing to change in this notebook; rerun this cell afterwards."
             ) from e
         raise
     print(f"Created inference profile {profile_name}: {resp['inferenceProfileArn']}")
