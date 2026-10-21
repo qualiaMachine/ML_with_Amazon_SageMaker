@@ -162,6 +162,8 @@ def main():
         default="Qwen/Qwen3-8B",
         help="Open-weight chat model for generation.",
     )
+    parser.add_argument("--max_questions", type=int, default=0, help="answer only the first N questions (0 = all); the scorer compares the rows it finds")
+    parser.add_argument("--per_type", type=int, default=0, help="answer a stratified sample: up to N questions per evidence type, seed 0 (0 = all). The Bedrock episode uses the same draw, so the two runs are scored on the same questions")
     parser.add_argument("--engine", choices=["transformers", "vllm"], default="transformers",
                         help="transformers: nothing to install, one prompt at a time. vllm: needs vllm in requirements.txt; for FP8 weights or many requests.")
     args = parser.parse_args()
@@ -188,6 +190,10 @@ def main():
     except UnicodeDecodeError:
         metadata_df = pd.read_csv(metadata_path, encoding="latin1")
 
+    if args.per_type:
+        train_df = wr.sample_questions_by_type(train_df, per_type=args.per_type)
+    if args.max_questions:
+        train_df = train_df.head(args.max_questions)
     print(f"Chunks: {len(chunked_docs)}")
     print(f"Train QAs: {len(train_df)}")
     print("Embeddings shape:", chunk_embeddings.shape, flush=True)

@@ -624,3 +624,157 @@ def compute_wattbot_score(
             )
         print("-" * 80)
     return merged
+
+
+# ---------------------------------------------------------------------------
+# Evaluation subsets
+# ---------------------------------------------------------------------------
+
+ALL_EVIDENCE_FLAGS = ["Quote", "Table", "Figure", "Math", "is_NA", "CrossPaper", "Reconcile"]
+
+
+def sample_questions_by_type(
+    train_df: pd.DataFrame, per_type: int = 10, seed: int = 0, flags: Sequence[str] = ALL_EVIDENCE_FLAGS
+) -> pd.DataFrame:
+    """A stratified subset of train_QA.csv: up to `per_type` questions from each evidence type.
+
+    The 2026 file flags each question by the evidence its answer rests on (Quote,
+    Table, Figure, Math, is_NA, CrossPaper, Reconcile; a question can carry several).
+    Drawing the same number from each flag keeps the rare types (17 Figure questions,
+    5 unanswerable ones) in a short run, where the first N rows of the file would be
+    almost all Quote. `per_type=0` returns the whole file. The seed makes the draw
+    repeatable, so two pipelines scored on it are scored on the same questions.
+    """
+    if not per_type:
+        return train_df
+    present = [f for f in flags if f in train_df.columns]
+    if not present:
+        return train_df.head(per_type * len(flags))
+    keep = set()
+    for f in present:
+        rows = train_df[train_df[f].fillna(0).astype(int) == 1]
+        keep |= set(rows.sample(min(per_type, len(rows)), random_state=seed)["id"])
+    return train_df[train_df["id"].isin(keep)].reset_index(drop=True)
+
+
+# ---------------------------------------------------------------------------
+# Multimodal retrieval: page images for the table and figure questions
+# ---------------------------------------------------------------------------
+
+CAPTION_RE = re.compile(r"^\s*(Table|Fig\.?|Figure)\s*([A-Z]?\d+)", re.IGNORECASE | re.MULTILINE)
+
+
+def find_caption_pages(page_docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """The pages whose text carries a table or figure caption, with the captions found.
+
+    pypdf keeps caption lines ("Table 3: ...", "Figure 2. ...") even where it loses the
+    table's layout or the figure entirely, so a line starting with one of those words
+    marks a page worth looking at as an image. Returns one record per such page:
+    doc_id, page_num, page_label, captions (for example ["Figure 2", "Table 3"]).
+    """
+    out = []
+    for p in page_docs:
+        found = CAPTION_RE.findall(p.get("text", "") or "")
+        if not found:
+            continue
+        captions = sorted({("Figure" if w.lower().startswith("fig") else "Table") + " " + n for w, n in found})
+        out.append(
+            {
+                "doc_id": p["doc_id"],
+                "page_num": int(p["page_num"]),
+                "page_label": str(p.get("page_label", int(p["page_num"]) + 1)),
+                "captions": captions,
+            }
+        )
+    return out
+
+
+def render_page_png(pdf_path: str, page_num: int, dpi: int = 100) -> bytes:
+    """Render one page of a PDF to PNG bytes with pypdfium2 (`pip install pypdfium2`).
+
+    100 dpi makes a letter page about 850 x 1100 pixels: captions and axis labels stay
+    readable, and the file is well under the multimodal models' size limits.
+    """
+    import io
+
+    import pypdfium2 as pdfium
+
+    pdf = pdfium.PdfDocument(pdf_path)
+    try:
+        image = pdf[page_num].render(scale=dpi / 72).to_pil()
+    finally:
+        pdf.close()
+    buf = io.BytesIO()
+    image.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def embed_multimodal(
+    client,
+    model_id: str,
+    text: Optional[str] = None,
+    image_png: Optional[bytes] = None,
+    purpose: str = "index",
+    dimension: int = 1024,
+) -> np.ndarray:
+    """One vector for a text string or a PNG image from a Bedrock multimodal embedding model.
+
+    `client` is a bedrock-runtime client in a region that has the model (us-east-1 for
+    both, as of October 2026). Two request shapes are supported, chosen by model ID:
+    Amazon Nova Multimodal Embeddings (`amazon.nova-2-multimodal-embeddings-v1:0`),
+    whose body says whether the vector is for indexing or for a query and takes one
+    input per call, and Titan Multimodal Embeddings G1 (`amazon.titan-embed-image-v1`),
+    which takes `inputText` and/or `inputImage`. `purpose` is "index" for what is
+    stored and "query" for the question. Vectors are L2-normalised so cosine similarity
+    is a dot product.
+    """
+    import base64
+
+    if text is None and image_png is None:
+        raise ValueError("give text or image_png")
+    if "nova" in model_id:
+        params: Dict[str, Any] = {
+            "embeddingPurpose": "GENERIC_INDEX" if purpose == "index" else "GENERIC_RETRIEVAL",
+            "embeddingDimension": dimension,
+        }
+        if image_png is not None:
+            params["image"] = {
+                "format": "png",
+                "source": {"bytes": base64.b64encode(image_png).decode()},
+                "detailLevel": "DOCUMENT_IMAGE",   # a rendered page, not a photo
+            }
+        else:
+            params["text"] = {"truncationMode": "END", "value": text}
+        body: Dict[str, Any] = {"taskType": "SINGLE_EMBEDDING", "singleEmbeddingParams": params}
+    else:
+        body = {"embeddingConfig": {"outputEmbeddingLength": dimension}}
+        if text is not None:
+            body["inputText"] = text[:1000]   # Titan G1 reads at most 256 tokens of text
+        if image_png is not None:
+            body["inputImage"] = base64.b64encode(image_png).decode()
+    response = client.invoke_model(
+        modelId=model_id, contentType="application/json", accept="application/json", body=json.dumps(body)
+    )
+    out = json.loads(response["body"].read())
+    vec = out["embeddings"][0]["embedding"] if "embeddings" in out else out["embedding"]
+    v = np.asarray(vec, dtype="float32")
+    return v / (np.linalg.norm(v) + 1e-12)
+
+
+def image_blocks(images: Sequence[Tuple[str, bytes]]) -> List[Dict[str, Any]]:
+    """`converse` content blocks for labelled PNG images: a text label, then the image, per page.
+
+    `images` is a list of (label, png_bytes); the label (for example "luccioni2024, page 6")
+    lets the model cite the paper the page came from.
+    """
+    blocks: List[Dict[str, Any]] = []
+    for label, png in images:
+        blocks.append({"text": f"[page image: {label}]"})
+        blocks.append({"image": {"format": "png", "source": {"bytes": png}}})
+    return blocks
+
+
+def hit_at_k(retrieved_doc_ids: Sequence[Sequence[str]], gt_ref_ids: Sequence[Sequence[str]]) -> float:
+    """Fraction of questions whose top-k retrieved documents include a ground-truth paper."""
+    hits = [bool(set(r) & set(g)) for r, g in zip(retrieved_doc_ids, gt_ref_ids)]
+    return float(np.mean(hits)) if hits else float("nan")
