@@ -797,13 +797,20 @@ bill</h3>
 <div class="callout-content">
 <p>vLLM ships its own CUDA kernels and pins its own PyTorch, so
 <code>pip install vllm</code> in the RAG job pulls several gigabytes and
-replaces the container’s <code>torch</code> and
-<code>transformers</code> with the versions it wants. That is normal
-(the container is thrown away when the job ends) but it takes about 5 of
-the job’s ~30 minutes, on a GPU instance that is billing the whole time:
-roughly 20 cents per run. For a job you launch often, bake the install
-into a custom container image instead; for a job you launch twice in a
-workshop, paying for the install is cheaper than building the image.</p>
+replaces the container’s <code>torch</code>, <code>transformers</code>
+and <code>peft</code> with the versions it wants. In the log this looks
+alarming: a wall of <code>Downloading</code> lines, then
+<code>Uninstalling torch-2.8.0</code>,
+<code>Uninstalling transformers-4.56.2</code> and a dozen more, then an
+<code>Installing collected packages</code> line after which nothing
+prints for several minutes while the wheels unpack. It is not stuck. The
+step ends with <code>Successfully installed</code>, and only then does
+the script start. All of that is normal (the container is thrown away
+when the job ends) but it takes 5 to 8 of the job’s ~20 minutes, on a
+GPU instance that is billing the whole time: roughly 15 cents per run.
+For a job you launch often, bake the install into a custom container
+image instead; for a job you launch twice in a workshop, paying for the
+install is cheaper than building the image.</p>
 </div>
 </div>
 </div>
