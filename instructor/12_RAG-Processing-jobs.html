@@ -1092,11 +1092,12 @@ the billed run.</p>
 <span id="cb12-9"><a href="#cb12-9" tabindex="-1" aria-label="code-block-12-9"></a>    <span class="bu">print</span>(<span class="ss">f"  wall-clock:                </span><span class="sc">{</span>provisioning <span class="op">+</span> billed<span class="sc">:.1f}</span><span class="ss"> min from launch to end"</span>)</span>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1" aria-label="code-block-12-10"></a>    <span class="bu">print</span>(<span class="ss">f"  provisioning (not billed): </span><span class="sc">{</span>provisioning<span class="sc">:.1f}</span><span class="ss"> min"</span>)</span>
 <span id="cb12-11"><a href="#cb12-11" tabindex="-1" aria-label="code-block-12-11"></a>    <span class="bu">print</span>(<span class="ss">f"  billed window:             </span><span class="sc">{</span>billed<span class="sc">:.1f}</span><span class="ss"> min at $</span><span class="sc">{</span>price_per_hour<span class="sc">}</span><span class="ss">/h = $</span><span class="sc">{</span>cost<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1" aria-label="code-block-12-12"></a>    <span class="cf">return</span> cost</span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1" aria-label="code-block-12-13"></a></span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1" aria-label="code-block-12-14"></a>total <span class="op">=</span> job_cost(embedding_processor.latest_job.job_name, <span class="fl">1.41</span>)</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1" aria-label="code-block-12-15"></a>total <span class="op">+=</span> job_cost(rag_processor.latest_job.job_name, <span class="fl">2.61</span>)</span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1" aria-label="code-block-12-16"></a><span class="bu">print</span>(<span class="ss">f"GPU total for the episode: $</span><span class="sc">{</span>total<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1" aria-label="code-block-12-12"></a>    <span class="bu">print</span>(<span class="ss">f"  output:                    </span><span class="sc">{</span>d[<span class="st">'ProcessingOutputConfig'</span>][<span class="st">'Outputs'</span>][<span class="dv">0</span>][<span class="st">'S3Output'</span>][<span class="st">'S3Uri'</span>]<span class="sc">}</span><span class="ss">"</span>)   <span class="co"># where the job's files went</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1" aria-label="code-block-12-13"></a>    <span class="cf">return</span> cost</span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1" aria-label="code-block-12-14"></a></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1" aria-label="code-block-12-15"></a>total <span class="op">=</span> job_cost(embedding_processor.latest_job.job_name, <span class="fl">1.41</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1" aria-label="code-block-12-16"></a>total <span class="op">+=</span> job_cost(rag_processor.latest_job.job_name, <span class="fl">2.61</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1" aria-label="code-block-12-17"></a><span class="bu">print</span>(<span class="ss">f"GPU total for the episode: $</span><span class="sc">{</span>total<span class="sc">:.2f}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Typical numbers: the embedding job bills 5-6 minutes (about
 <code>$0.13</code>), the RAG job 22-28 minutes (about
