@@ -123,7 +123,7 @@ Notebook instances in SageMaker are billed per second, so it’s essential to st
 4. Choose **Stop** to shut it down temporarily or **Delete** to permanently remove it.
    > **Tip:** If you plan to reuse the notebook later, stopping it is sufficient. Deleting is recommended if you are finished with the workshop.
 
-A stopped instance stops the compute charge but keeps its storage volume, which bills at about `$0.14` per GB-month. The default 5 GB is cents; the 100 GB volume the optional GPU-notebook episode asks for is `$14` a month. If you enlarged the volume to hold model weights, delete the instance once the episode is done.
+A stopped instance stops the compute charge but keeps its storage volume, which bills at about `$0.14` per GB-month. The 20 GB the controllers episode set is `$2.80` a month; the 100 GB volume the optional GPU-notebook episode asks for is `$14` a month. If you enlarged the volume to hold model weights, delete the instance once the episode is done.
 
 ## Cleaning up S3 storage
 
