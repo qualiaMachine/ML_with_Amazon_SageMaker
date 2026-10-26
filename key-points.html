@@ -610,41 +610,30 @@ spends one to three minutes on container pull and data download (billed)
 before the script runs; for a job whose script finishes in seconds, that
 overhead is the whole bill.</li>
 <li>
-<strong>GPU training</strong>: While beneficial for larger models or
-datasets, GPUs may introduce overhead for smaller tasks; selecting the
-right instance type is critical for cost-efficiency.</li>
-<li>
-<strong>Data parallelism vs. model parallelism</strong>: Data
-parallelism splits data across instances and synchronizes model weights,
-suitable for typical neural network tasks. Model parallelism, which
-divides model layers, is ideal for very large models that exceed memory
-capacity.</li>
-<li>
-<strong><code>instance_count</code> alone is not distributed
-training</strong>: Without <code>distribution=</code> on the estimator
-and distributed code in the script, <code>instance_count=2</code> runs
-the full script on the full data on each instance and bills twice. Data
-parallelism is three additions to the script (join the process group,
-shard the rows, wrap the model in <code>DistributedDataParallel</code>)
-and one argument on the estimator; <code>train_nn_ddp.py</code> has
-them, and reaches the single-instance run’s loss on half the rows per
-instance.</li>
-<li>
-<strong>SageMaker configuration</strong>: By adjusting instance
-counts and types, SageMaker supports scalable training setups. Starting
-with CPU training and scaling as needed with GPUs or distributed setups
-allows for performance optimization.</li>
-<li>
-<strong>Testing locally first</strong>: Before deploying large-scale
-training in SageMaker, test locally with a smaller setup to ensure code
-correctness and efficient resource usage.</li>
-<li>
 <strong>Estimate before you launch</strong>: for small models, time
 a smoke test and scale it by epochs and rows, plus about three minutes
-of startup; for large ones, 6 FLOPs per parameter per example-token,
-divided by a quarter of the GPU’s peak.
-<code>helpers.estimate_training_cost</code> does the second; write the
-number down and compare it to the bill.</li>
+of startup; for large ones, 6 FLOPs per parameter per token, divided by
+a quarter of the GPU’s peak. <code>helpers.estimate_training_cost</code>
+does the second; write the number down and compare it to the bill.</li>
+<li>
+<strong>GPU or CPU is a measurement</strong>: the same script on an
+<code>ml.g4dn.xlarge</code> was slower and dearer than on an
+<code>ml.m5.large</code> for this network, because the step is too small
+to keep a GPU busy; the GPU pays when the model and batch are
+large.</li>
+<li>
+<strong>More than one machine is the last move</strong>: a faster
+single device first, then more GPUs in one box, then more instances.
+<code>instance_count=2</code> on its own runs the whole job twice and
+bills twice; data parallelism needs <code>distribution=</code> on the
+estimator and, for your own script, three additions: join the process
+group, shard the rows, wrap the model in DDP.</li>
+<li>
+<strong>Parallelism pays when the step’s computation is large next
+to the gradient exchange</strong>: big model, big batch, fast link.
+<code>helpers.estimate_parallel_speedup</code> gives the speedup and the
+cost ratio before you rent the devices; on 569 rows of tabular data it
+is 1x speed at 2x cost, measured.</li>
 </ul></section><section id="08_Hyperparameter-tuning"><h2 class="section-heading"><a href="08_Hyperparameter-tuning.html">Hyperparameter Tuning in SageMaker: Neural Network Example</a></h2>
 <hr class="half-width">
 <ul>
