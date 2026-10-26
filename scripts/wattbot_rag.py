@@ -17,8 +17,9 @@ the `code_rag/` directory shipped with a Processing job):
   and `compute_wattbot_score`.
 - episodes/12_RAG-Processing-jobs.md: the notebook only imports
   `compute_wattbot_score`; the job itself runs `scripts/wattbot_rag_batch.py`.
-- scripts/wattbot_rag_batch.py: `embed_query` is a sentence-transformer
-  (`embed_query_with`) and `generate` is a vLLM engine serving Qwen3.8-27B.
+- scripts/wattbot_rag_batch.py: `embed_query` is a Hugging Face embedder
+  (`embed_query_with` over `HFEmbedder`) and `generate` is Qwen3-8B through
+  `transformers` (or vLLM with `--engine vllm`).
 - episodes/13_RAG-GPU-notebook.md (optional): same as the batch script, but
   interactively, with `with_evidence_type=True` so each explanation is
   prefixed with the kind of evidence it rests on.
@@ -518,7 +519,7 @@ def run_single_qa(
 
 
 # ---------------------------------------------------------------------------
-# Scoring (WattBot metric: 0.75 answer_value + 0.15 ref_id Jaccard + 0.10 is_NA)
+# Scoring (WattBot 2026 metric: 0.75 answer_value + 0.20 ref_id F1 + 0.05 is_NA)
 # ---------------------------------------------------------------------------
 
 
@@ -530,7 +531,7 @@ def evidence_flags(gt: pd.DataFrame):
 
     The competition's solution file carries Quote/Table/Figure/Math/is_NA flags saying
     what kind of evidence each answer rests on, and Score.py breaks the error rate down
-    by them. The public train_QA.csv has no such columns; its free-text `explanation`
+    by them. The 2026 train_QA.csv has them; an older file without them has a free-text `explanation`
     column says the same thing informally ("Quote", "Table 3", "Figure, Quote", or a
     worked calculation). When the flags are missing, derive them from that column so
     the breakdown still prints. A question can carry several flags.
