@@ -132,7 +132,7 @@ Multiply the bytes per parameter by the parameter count, add about 4 GB for acti
 
 Read it across a row. A 7B model you can run on one 24 GB GPU needs 116 GB to fully fine-tune, which is a four-GPU box at `$13` an hour with the model sharded across the GPUs. The jump is the one from the inference rows to the training rows in the first table: training cannot run on quantized weights the way inference can, because each step's update is too small for 8-bit or 4-bit numbers to hold. LoRA avoids the jump by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
 
-**Rule 2, time: how many GPU-hours?** Training on one token costs three matrix products per layer, each one multiply and one add per weight. A full fine-tune does all three; LoRA skips the weight update for the frozen base.
+**Rule 2, time: how many GPU-hours?** The unit is the floating-point operation, one multiply or add. FLOPs is a count of them; FLOPS, capital S, is a rate, operations per second, and is how a GPU's speed is quoted. Training on one token costs three matrix products per layer, each one multiply and one add per weight, so 2 FLOPs per weight per product. A full fine-tune does all three; LoRA skips the weight update for the frozen base.
 
 ![Three matrix products per token: forward (2 FLOPs per weight), error passed back to the inputs (2), and the weight update (2); full fine-tuning does all three for 6, LoRA skips the update for 4](fig/flops-per-token.svg){alt="A layer W with an input arrow, an output arrow, an error arrow going back and an update arrow into W, each labelled 2 FLOPs; a box totals 6 for full fine-tuning and 4 for LoRA"}
 
