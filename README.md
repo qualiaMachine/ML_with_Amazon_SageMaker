@@ -45,7 +45,7 @@ throughout; no prior AWS experience is needed.
 
 ### Cost controls
 
-The cloud is often very affordable for research workloads, and this lesson shows it: run as written, the whole workshop, training jobs, a tuning job, a LoRA fine-tune on a GPU and two RAG pipelines, costs each learner a few dollars. What keeps it there is habit rather than restraint. Every episode tags its resources, caps job runtime, estimates cost before launching and checks the bill after, and cleans up. The final episode covers monitoring and cleanup, and the rules a shared account can enforce.
+The cloud is often very affordable for research workloads, and this lesson shows it: run as written, the whole workshop, training jobs, a tuning job, a LoRA fine-tune on a GPU and two RAG pipelines, costs each learner a few dollars. Every episode tags its resources, caps job runtime, estimates cost before launching and checks the bill after, and cleans up. The final episode covers monitoring and cleanup, and the rules a shared account can enforce.
 
 ### What it does not cover
 
