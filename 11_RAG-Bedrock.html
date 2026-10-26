@@ -2395,9 +2395,8 @@ or fine‑tune.<br></li>
 <li>You already have institutional access to cost‑effective on‑prem or
 cloud GPUs.</li>
 </ul></li>
-</ul><p>The core <strong>RAG evaluation logic stays identical</strong> across
-all three episodes, which is the main takeaway: once you have a clean
-retrieval + normalization pipeline (like WattBot’s, in
+</ul><p>The RAG evaluation logic is the same in all three episodes: once you
+have a clean retrieval + normalization pipeline (like WattBot’s, in
 <code>wattbot_rag.py</code>), swapping out the generator is mostly a
 matter of re‑implementing <code>embed_query</code> and
 <code>generate</code> for each compute option you care about.</p>
