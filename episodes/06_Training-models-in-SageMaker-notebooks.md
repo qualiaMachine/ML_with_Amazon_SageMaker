@@ -25,7 +25,7 @@ exercises: 20
 ## Initial setup 
 
 #### 1. Open prefilled .ipynb notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`**; we will use the same kernel for the next two episodes. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`**; every notebook from here to the end of the lesson uses it. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
 
 #### 2. Move to the project folder and import the helpers
 Work from the Titanic project folder the S3 episode created, and make the lesson repository's `scripts/` importable. The training scripts for this episode (`train_xgboost.py`) and the next (`train_nn.py`) are in that folder.
