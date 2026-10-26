@@ -487,9 +487,9 @@ up on the bill, and read back its billable time afterwards.</li>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb</code>.
 When asked for a kernel, pick
-<strong><code>conda_pytorch</code></strong>; we will use the same kernel
-for the next two episodes. The <code>conda_python3</code> kernel has no
-PyTorch, and on current instances no scikit-learn either.</p>
+<strong><code>conda_pytorch</code></strong>; every notebook from here to
+the end of the lesson uses it. The <code>conda_python3</code> kernel has
+no PyTorch, and on current instances no scikit-learn either.</p>
 </div>
 <div class="section level4">
 <h4 id="move-to-the-project-folder-and-import-the-helpers">2. Move to the project folder and import the helpers<a class="anchor" aria-label="anchor" href="#move-to-the-project-folder-and-import-the-helpers"></a></h4>
@@ -1357,8 +1357,8 @@ Inference, the instance type must be one the lesson uses, the runtime
 cap must be 48 hours or less, and endpoints and EC2 instances cannot be
 created at all.</p>
 <p>The error message does not say which rule was broken. AWS does not
-let an administrator attach an explanation to a refusal, so the lesson’s
-helper module fills the gap.
+let an administrator attach an explanation to a refusal. The lesson’s
+helper module does the explaining instead.
 <code>helpers.check_launch(job_tags, instance_type, max_run)</code>
 checks a launch against the same rules before it is sent and says what
 to change; the tag cell above and every launch in the later episodes
