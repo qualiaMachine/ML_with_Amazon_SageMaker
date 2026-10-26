@@ -235,6 +235,8 @@ In step 5, we define the input data paths for the training job and launch the hy
 
 Estimate first: one child job is the same ~1 minute of training plus ~3 minutes of startup we saw in the previous episode, so about `$0.01`.
 
+If the launch is refused with an `AccessDeniedException` ending in `explicit deny`, the account's checks are the cause: a missing tag, an instance type outside the lesson's list, or a resource kind the lesson never creates; the first training episode's callout *If the launch is refused* says what to look at.
+
 ```python
 # Define the input paths
 train_input = TrainingInput(f"s3://{bucket_name}/train_data.npz", content_type="application/x-npz")

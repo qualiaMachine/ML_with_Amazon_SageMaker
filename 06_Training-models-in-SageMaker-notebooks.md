@@ -493,6 +493,14 @@ print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_t
 
 When running longer training jobs, you can check on their status periodically from the AWS SageMaker Console (where we originally launched our Notebook instance) on left side panel under "Training".
 
+::::::::::::::::::::::::::::::::::::: callout
+
+### If the launch is refused
+
+The class account checks every launch. A job is refused, with an `AccessDeniedException` that ends in `with an explicit deny in an identity-based policy`, when any of these is true: it carries no `Name`, `Project` or `Purpose` tag; its instance type is not one the lesson uses; or it is an endpoint or an EC2 instance, which the lesson never creates. The message does not say which, so check in that order. In this episode that means the `tags=job_tags` line and `instance_type`. The same check applies to every job in the later episodes.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 #### Hyperparameters
 The `hyperparameters` section in this code defines the input arguments of `train_xgboost.py`. The first is the name of the training input file, and the others are hyperparameters for the XGBoost model, such as `max_depth`, `eta`, `subsample`, `colsample_bytree`, and `num_round`.
 
