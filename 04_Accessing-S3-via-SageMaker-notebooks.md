@@ -43,7 +43,12 @@ Work from a project folder beside the lesson clone, so downloads and outputs sta
 ```
 
 ```python
+import os
+os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"   # the SDK otherwise prints a deprecation notice on import and on every estimator
 import sagemaker                      # SageMaker Python SDK: higher-level API for training jobs, tuning, deployment
+import logging
+logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
+logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
 from sagemaker import get_execution_role
 
 role = sagemaker.get_execution_role() # the IAM role attached to this notebook instance; every call below acts as this role

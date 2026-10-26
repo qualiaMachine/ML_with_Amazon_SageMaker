@@ -136,7 +136,12 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 import pandas as pd
 import numpy as np
+import os
+os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"   # the SDK otherwise prints a deprecation notice on import and on every estimator
 import sagemaker
+import logging
+logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
+logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
 
 session = sagemaker.Session()
 region = session.boto_region_name

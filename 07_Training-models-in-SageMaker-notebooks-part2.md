@@ -30,7 +30,12 @@ The same setup as the previous episode: role, S3 client, bucket, filenames.
 ```python
 import boto3
 import pandas as pd
+import os
+os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"   # the SDK otherwise prints a deprecation notice on import and on every estimator
 import sagemaker
+import logging
+logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
+logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
 from sagemaker import get_execution_role
 
 # Initialize the SageMaker role (will reflect notebook instance's policy)
