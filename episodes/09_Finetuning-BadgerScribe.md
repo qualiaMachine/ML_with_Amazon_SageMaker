@@ -525,11 +525,13 @@ name = "DoeJohn"         # replace with your name
 project = "SinkOrSwim"   # your challenge: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell or SnapshotWI; SinkOrSwim is the workshop itself
 
 def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning, Inference
-    return [
+    return helpers.check_launch([   # checked against the account's rules first, with a message that names the problem
         {"Key": "Name", "Value": name},
         {"Key": "Project", "Value": project},
         {"Key": "Purpose", "Value": purpose},
-    ]
+    ])
+
+make_job_tags("Training")   # fails here, with the fix, rather than at the launch
 ```
 
 ## Step 1: Launch the LoRA fine-tune

@@ -98,6 +98,7 @@ job_tags = [
     {"Key": "Project", "Value": project},
     {"Key": "Purpose", "Value": purpose},
 ]
+helpers.check_launch(job_tags)   # the account's rules, checked here first: AWS's own refusal does not say which rule
 print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 ```
 

@@ -1,0 +1,180 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "NothingThatRunsUntilDeleted",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateEndpoint",
+        "sagemaker:CreateEndpointConfig",
+        "sagemaker:CreateInferenceComponent",
+        "ec2:RunInstances"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "OnlyLessonInstanceTypes",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateTransformJob",
+        "sagemaker:CreateNotebookInstance",
+        "sagemaker:UpdateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ForAnyValue:StringNotEquals": {
+          "sagemaker:InstanceTypes": [
+            "ml.t3.medium",
+            "ml.m5.large",
+            "ml.m5.xlarge",
+            "ml.g4dn.xlarge",
+            "ml.g5.xlarge",
+            "ml.g6.xlarge",
+            "ml.g6e.xlarge",
+            "ml.g6e.2xlarge"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ProjectTagRequired",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/Project": "true"
+        }
+      }
+    },
+    {
+      "Sid": "NameTagRequired",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/Name": "true"
+        }
+      }
+    },
+    {
+      "Sid": "PurposeTagRequired",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/Purpose": "true"
+        }
+      }
+    },
+    {
+      "Sid": "ProjectTagFromTheList",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestTag/Project": [
+            "SinkOrSwim",
+            "WattBot2026",
+            "BadgerScribe",
+            "BadgerCode",
+            "BrainDecoding",
+            "PoisonedWell",
+            "SnapshotWI"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "NameTagNotBlank",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestTag/Name": "?*"
+        }
+      }
+    },
+    {
+      "Sid": "PurposeTagFromTheList",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestTag/Purpose": [
+            "Storage",
+            "Notebook",
+            "Training",
+            "Tuning",
+            "Inference"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "RuntimeCapAtMost48Hours",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "NumericGreaterThan": {
+          "sagemaker:MaxRuntimeInSeconds": "172800"
+        }
+      }
+    },
+    {
+      "Sid": "ProcessingJobsNeedACap",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateProcessingJob"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Null": {
+          "sagemaker:MaxRuntimeInSeconds": "true"
+        }
+      }
+    }
+  ]
+}
