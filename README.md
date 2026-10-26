@@ -1,4 +1,4 @@
-# Machine Learning with Amazon SageMaker
+# Machine Learning on AWS with SageMaker and Bedrock
 
 A Carpentries-style lesson on machine learning workflows on AWS, developed for
 the UW-Madison ML Marathon and Research Bazaar and usable by anyone with an AWS
