@@ -631,44 +631,6 @@ pipeline over research papers on Amazon Bedrock, then run the same
 pipeline as SageMaker Processing jobs with an open-weight model.</li>
 </ol><p>Every job is tagged, capped, estimated before launch and checked
 against the bill after.</p>
-<div id="the-accounts-rules-before-you-launch-anything" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<span class="callout-header">Callout</span>
-<div id="the-accounts-rules-before-you-launch-anything" class="callout-inner">
-<h3 class="callout-title">The account’s rules, before you launch
-anything</h3>
-<div class="callout-content">
-<p>The workshop account refuses a launch that breaks any of these,
-before it costs anything: a job without the three tags
-<code>Name</code>, <code>Project</code> and <code>Purpose</code>; a
-blank <code>Name</code>; a <code>Project</code> that is not one of the
-year’s challenge names (<code>SinkOrSwim</code> for the workshop
-itself); a <code>Purpose</code> outside <code>Storage</code>,
-<code>Notebook</code>, <code>Training</code>, <code>Tuning</code>,
-<code>Inference</code>; an instance type the lesson does not use; a
-runtime cap over 48 hours; and any endpoint or EC2 instance. The refusal
-is an <code>AccessDeniedException</code> that ends in
-<code>explicit deny</code> and says nothing else, which is the one
-unhelpful message in this lesson: AWS cannot attach an explanation to
-it. So the lesson gives you three ways to get the explanation yourself,
-which work in any notebook on the account, during the workshop and
-after:</p>
-<ul><li>
-<code>helpers.rules()</code> prints the current rules;</li>
-<li>
-<code>helpers.check_launch(tags, instance_type, max_run)</code>
-checks a launch before it is sent and names what to change;</li>
-<li>
-<code>helpers.explain_refusal()</code> reads the refused request
-back from the account’s log and names the rule it broke.</li>
-</ul><p>The <a href="refused-launch.html">If a Launch Is Refused</a> page is
-the same list on one page. Read it before emailing the instructor about
-an <code>AccessDenied</code>.</p>
-</div>
-</div>
-</div>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
