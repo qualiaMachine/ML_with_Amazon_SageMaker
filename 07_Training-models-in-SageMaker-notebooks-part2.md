@@ -173,7 +173,7 @@ print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 
 Every job in this lesson gets an estimate written down before `fit()`. There are two ways to make it, and which one applies depends on the size of the model.
 
-**Small models: time a smoke test and scale it.** For a network like `TitanicNet`, the arithmetic is nothing; the time is Python overhead per epoch plus the job's fixed startup. Each epoch costs the same as the last, so training time scales linearly with epochs, and with rows once the data is bigger than a batch. So measure the 100-epoch run you just did, multiply by the epochs and rows you plan, and add the startup:
+**Small models: time a smoke test and scale it.** For a network like `TitanicNet`, the arithmetic is nothing; the time is Python overhead per epoch plus the job's fixed startup. Each epoch costs the same as the last, so training time scales linearly with epochs, and with rows once the data is bigger than a batch. So measure the 100-epoch run you just did, multiply by the epochs and rows you plan, and add the two or three minutes of startup, which are billed and are most of the bill for a job this small:
 
 ```python
 local_seconds_per_epoch = (t.time() - start_time) / epochs     # from the smoke test above: wall-clock over its 100 epochs
@@ -232,6 +232,41 @@ Line by line:
 - **max_run**: twice the wall-clock estimate, in seconds, ready to paste into the estimator. A job that runs past this is killed, so a hung run costs at most `$18`, not a week.
 
 The function also returns the same numbers as a dictionary, so a notebook can use `max_run_seconds` and `instance_type` directly rather than copying them from the printout. Eight hours and nine dollars on one GPU is a job you want capped and tagged before it starts.
+
+### What a language model costs, before anyone launches one
+
+Run the same function on two sizes a project might be tempted by: a 1-billion-parameter model and a 7-billion one, each trained from scratch on a million documents of 2,000 tokens, one pass. Nothing is launched; the function only does the arithmetic.
+
+```python
+helpers.estimate_training_cost(params_billions=1, examples=1_000_000, tokens_per_example=2000, epochs=1)
+```
+
+```output
+Training from scratch of a 1B model: 1,000,000 examples x 2,000 tokens x 1 passes = 2,000.0M tokens
+memory:     ~20 GB needed; ml.g6.xlarge has 24 GB (1 x L4)
+compute:    1.80e+19 FLOPs at 25% of the 121 TFLOPS peak = 165.29 GPU-hours
+wall-clock: ~9927 min including 10 min startup
+cost:       ~$186.97 per run at $1.13/h; ~$186.97 for 1 run(s)
+set max_run=1191300  (19855 min, about twice the estimate)
+```
+
+```python
+helpers.estimate_training_cost(params_billions=7, examples=1_000_000, tokens_per_example=2000, epochs=1)
+```
+
+```output
+Training from scratch of a 7B model: 1,000,000 examples x 2,000 tokens x 1 passes = 2,000.0M tokens
+memory:     ~116 GB needed; ml.g6e.12xlarge has 192 GB (4 x L40S)
+compute:    1.26e+20 FLOPs at 25% of the 362 TFLOPS peak = 386.74 GPU-hours
+wall-clock: ~5811 min including 10 min startup
+cost:       ~$1270.69 per run at $13.12/h; ~$1270.69 for 1 run(s)
+set max_run=697200  (11620 min, about twice the estimate)
+warning:    multi-GPU instance; not allowed on the class account, and more GPUs do not make the run cheaper
+```
+
+Read the two against the 125M run above. The 1B model still fits on the cheapest GPU, but the arithmetic is 165 GPU-hours: a week of wall-clock on one GPU, `$187`, and a `max_run` of 330 hours, which the account refuses, since no job may run longer than 48 hours. A run like that has to be split into checkpointed jobs of a day or two each, or moved to a four-GPU box, which finishes in two days for the same `$187` plus the startup, and which the class account does not allow. The 7B model no longer fits on one GPU at all: 116 GB of weights, gradients and optimizer state need the four-GPU `ml.g6e.12xlarge` at `$13` an hour, four days of it, `$1,270` for one pass over two billion tokens. And two billion tokens is a small corpus; the models on Bedrock were trained on thousands of times more.
+
+That is why nothing in this lesson trains a language model, and why the Marathon's rules say no full training above 20 million parameters and inference only above 8 billion. What the lesson does instead is in the fine-tuning episode: LoRA on a 3-billion-parameter model, which trains a few million adapter parameters on 251 pages for about a dollar, and the RAG episodes, which use a trained model through Bedrock by the token. The function is for the day a project asks for more: run it first, and the number says whether the run is a job, a grant line, or something to do differently.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
