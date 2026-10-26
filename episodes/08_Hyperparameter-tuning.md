@@ -478,9 +478,9 @@ with torch.no_grad():
 ### Conclusions
 In about 10 minutes, we produced a model that is 77-80% accurate on the test set. However, this performance does come at a cost (albeit manageable if you've stuck with our advice thus far). This next section will help you assess the total compute time that was used by your tuning job.
 
-Each child job is billed like any training job; the tuning job itself costs nothing. Here's a breakdown of what's happening:
+Each child job is billed like any training job; the tuning job itself costs nothing.
 
-* Billable Time (`BillableTimeInSeconds`): the seconds each child job's instance was yours, from container pull through the script to model upload. The wait for an instance before that is not billed. (`TrainingTimeInSeconds` is the same number on on-demand instances; it only differs on spot.)
+* Billable Time (`BillableTimeInSeconds`): the seconds each child job's instance was yours, from container pull through the script to model upload. The wait for an instance before that is not billed.
 
 * Instance Count: billable seconds are multiplied by the number of instances the job used.
 
