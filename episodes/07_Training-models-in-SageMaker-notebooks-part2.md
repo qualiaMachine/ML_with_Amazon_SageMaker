@@ -24,8 +24,8 @@ exercises: 15
 ## Initial setup: open prefilled .ipynb notebook
 Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/07_Training-models-in-SageMaker-notebooks-part2.ipynb`. Select the **`conda_pytorch`** kernel.
 
-## Setup notebook as controller
-Once your notebook is open, we can setup our SageMaker controller as usual:
+## Setup
+The same setup as the previous episode: role, S3 client, bucket, filenames.
 
 ```python
 import boto3
@@ -48,7 +48,6 @@ train_filename = 'titanic_train.csv'
 test_filename = 'titanic_test.csv'
 ```
 
-Create a SageMaker session to manage interactions with Amazon SageMaker, such as training jobs, model deployments, and data input/output. As before, the region comes from the notebook instance.
 
 ```python
 region = boto3.Session().region_name  # inherited from the notebook instance; do not hard-code a region
@@ -57,7 +56,7 @@ sagemaker_client = session.sagemaker_client  # low-level boto3 client; describe_
 print(f"region = {region}")
 ```
 
-We should also record our local instance information to report this information during testing. First, let's make sure we're starting in the same location to access helper functions
+Work in the Titanic folder beside the lesson clone, with the helper module on the path, and record which instance this notebook runs on so that runtimes can be compared.
 
 ```python
 # The Titanic project folder from the S3 episode, beside the lesson clone: downloads and outputs land here, not in the repository
@@ -84,31 +83,10 @@ s3.download_file(bucket_name, test_filename, test_filename)
 ```
 
 ## Training a neural network with SageMaker
-Let's see how to do a similar experiment, but this time using PyTorch neural networks. We will again demonstrate how to test our custom model train script (`train_nn.py`) before deploying to SageMaker, and discuss some strategies (e.g., using a GPU) for improving train time when needed.
+The same experiment as the previous episode with a PyTorch network in place of XGBoost: test the script here, run it as a job, and then, the question this episode is for, see what a GPU and a second instance do to the time and the bill.
 
-### Preparing the data (compressed npz files)
-When deploying a PyTorch model on SageMaker, it's helpful to prepare the input data in a format that's directly accessible and compatible with PyTorch's data handling methods. The next code cell will prep our npz files from the existing csv versions. 
-
-:::::::::::::::::::::::::::::::: callout
-#### Why are we using this file format? 
-
-1. **Optimized data loading**:  
-   The `.npz` format stores arrays in a compressed, binary format, making it efficient for both storage and loading. PyTorch can easily handle `.npz` files, especially in batch processing, without requiring complex data transformations during training.
-
-2. **Batch compatibility**:  
-   When training neural networks in PyTorch, it's common to load data in batches. By storing data in an `.npz` file, we can quickly load the entire dataset or specific parts (e.g., `X_train`, `y_train`) into memory and feed it to the PyTorch `DataLoader`, enabling efficient batched data loading.
-
-3. **Reduced I/O overhead in SageMaker**:  
-   Storing data in `.npz` files minimizes the I/O operations during training, reducing time spent on data handling. This is especially beneficial in cloud environments like SageMaker, where efficient data handling directly impacts training costs and performance.
-
-4. **Consistency and compatibility**:  
-   Using `.npz` files allows us to ensure consistency between training and validation datasets. Each file (`train_data.npz` and `val_data.npz`) stores the arrays in a standardized way that can be easily accessed by keys (`X_train`, `y_train`, `X_val`, `y_val`). This structure is compatible with PyTorch's `Dataset` class, making it straightforward to design custom datasets for training.
-
-5. **Support for multiple data types**:  
-   `.npz` files support storage of multiple arrays within a single file. This is helpful for organizing features and labels without additional code. Here, the `train_data.npz` file contains both `X_train` and `y_train`, keeping everything related to training data in one place. Similarly, `val_data.npz` organizes validation features and labels, simplifying file management.
-
-Saving the data as `.npz` files keeps loading fast and the arrays in the shape the training script expects.
-:::::::::::::::::::::::::::::::::::::::
+### Preparing the data
+The training script reads NumPy arrays from `.npz` files rather than CSVs: one file holds the training features and labels, one the validation ones, already encoded and standardized, so the script does no preprocessing of its own. The cells below make those two files from the Titanic CSV and upload them.
 
 Open `ML_with_AWS_SageMaker/scripts/train_nn.py` in the file browser and read it before going on; it is short. Three things to find: `TitanicNet`, a three-layer network with 7 inputs and one output; the training loop in `train()`, which prints `validation:accuracy = ...` once per hundred epochs (the hyperparameter-tuning episode's metric regex reads that line); and the last lines, which save the model to `/opt/ml/model` inside a job and next to the script otherwise, the same trick as `train_xgboost.py`. Questions now are cheaper than questions once it is running on a billed instance.
 
@@ -429,7 +407,7 @@ If training time continues to be critical, sticking with a CPU instance may be t
 
 ## Distributed Training for Neural Networks in SageMaker
 
-The previous episode gave the rule of thumb: upgrade the single instance first, and consider multiple instances only when the dataset no longer fits in one instance's memory (tens of GB or more) or a single-instance run takes longer than about 10 hours. The GPU exercise was Option 1. Let's now look at Option 2, starting with what `instance_count=2` does.
+When a run is too slow, the first move is a bigger machine, which is what the GPU exercise above was. The second is more than one machine, which pays only when the dataset no longer fits in one instance's memory (tens of GB or more) or a single-instance run takes longer than about 10 hours. This section measures it, starting with what `instance_count=2` does on its own.
 
 ### What `instance_count=2` does on its own
 
