@@ -422,3 +422,117 @@ def estimate_training_cost(params_billions, examples, tokens_per_example=1, epoc
     """
     return estimate_finetune_cost(params_billions, examples, tokens_per_example, epochs=epochs, method="full",
                                   instance_type=instance_type, runs=runs, from_scratch=True, **kw)
+
+
+# ---------------------------------------------------------------------------
+# The account's guard rails, checked in the notebook before a launch
+# ---------------------------------------------------------------------------
+# guardrails.json, next to this file, is the IAM policy the administrator attaches to the
+# role (see the instructor page "AWS account preparation"). AWS refuses a launch that breaks
+# one of its rules with a message that names no rule, so check_launch applies the same rules
+# here first and says which one, and what to change. The lists are read from the policy file,
+# so the two cannot drift apart.
+import json as _json
+
+GUARDRAILS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "guardrails.json")
+
+
+def load_guard_rails(path=GUARDRAILS_FILE):
+    """Return the lists the policy enforces: projects, purposes, instance_types, max_run_seconds."""
+    with open(path) as f:
+        statements = {s["Sid"]: s for s in _json.load(f)["Statement"]}
+    return {
+        "projects": statements["ProjectTagFromTheList"]["Condition"]["StringNotLike"]["aws:RequestTag/Project"],
+        "purposes": statements["PurposeTagFromTheList"]["Condition"]["StringNotLike"]["aws:RequestTag/Purpose"],
+        "instance_types": statements["OnlyLessonInstanceTypes"]["Condition"]["ForAnyValue:StringNotEquals"]["sagemaker:InstanceTypes"],
+        "max_run_seconds": int(statements["RuntimeCapAtMost48Hours"]["Condition"]["NumericGreaterThan"]["sagemaker:MaxRuntimeInSeconds"]),
+    }
+
+
+def check_launch(tags, instance_type=None, max_run=None):
+    """Check a job's tags (and optionally its instance type and runtime cap) against the account's rules.
+
+    Raises ValueError with a plain message naming every problem and the fix; returns the tags
+    unchanged when they pass, so it can wrap the list: job_tags = helpers.check_launch([...]).
+    """
+    rules = load_guard_rails()
+    problems = []
+    values = {t["Key"]: t["Value"] for t in tags}
+    for key in ("Name", "Project", "Purpose"):
+        if key not in values:
+            problems.append(f"no {key} tag: every job needs the three tags Name, Project and Purpose")
+    if "Name" in values and not values["Name"].strip():
+        problems.append("Name is blank: set name to your last and first name run together, e.g. DoeJohn")
+    if "Project" in values and values["Project"] not in rules["projects"]:
+        problems.append(f"Project {values['Project']!r} is not on the account's list: use one of {', '.join(rules['projects'])}, spelled exactly")
+    if "Purpose" in values and values["Purpose"] not in rules["purposes"]:
+        problems.append(f"Purpose {values['Purpose']!r} is not on the list: use one of {', '.join(rules['purposes'])}")
+    if instance_type is not None and instance_type not in rules["instance_types"]:
+        problems.append(f"instance type {instance_type} is not one the lesson uses: choose from {', '.join(rules['instance_types'])}")
+    if max_run is not None and max_run > rules["max_run_seconds"]:
+        problems.append(f"max_run of {max_run} s is above the account's cap of {rules['max_run_seconds']} s ({rules['max_run_seconds'] // 3600} hours)")
+    if problems:
+        raise ValueError("this launch would be refused by the account:\n  - " + "\n  - ".join(problems))
+    return tags
+
+
+def rules(path=GUARDRAILS_FILE):
+    """Print the account's launch rules, read from the policy file."""
+    r = load_guard_rails(path)
+    print("A job on this account is refused unless:")
+    print("  - it carries the three tags Name, Project and Purpose, and Name is not blank")
+    print(f"  - Project is one of: {', '.join(r['projects'])}")
+    print(f"  - Purpose is one of: {', '.join(r['purposes'])}")
+    print(f"  - its instance type is one of: {', '.join(r['instance_types'])}")
+    print(f"  - its runtime cap is at most {r['max_run_seconds']} s ({r['max_run_seconds'] // 3600} hours); Processing jobs must set one")
+    print("  - it is a job, not an endpoint or an EC2 instance")
+    print("AWS's refusal names none of these; helpers.check_launch(tags, instance_type, max_run) does, before the launch,")
+    print("and helpers.explain_refusal() does afterwards, from the request CloudTrail recorded.")
+
+
+def explain_refusal(minutes=60, region=None):
+    """Find recent refused launches in CloudTrail and say which rule each one broke.
+
+    CloudTrail records every API call on the account, including the ones IAM refused, with the
+    request as sent: tags, instance type and runtime cap. This reads the refusals of the last
+    `minutes` minutes (events appear in CloudTrail 5 to 15 minutes after the call) and applies
+    the account's rules to each, which gives the message the refusal itself could not carry.
+    The role needs cloudtrail:LookupEvents; without it this says so and points at check_launch.
+    """
+    ct = boto3.client("cloudtrail", region_name=region)
+    start = datetime.utcnow() - timedelta(minutes=minutes)
+    try:
+        pages = ct.get_paginator("lookup_events").paginate(
+            LookupAttributes=[{"AttributeKey": "EventSource", "AttributeValue": "sagemaker.amazonaws.com"}],
+            StartTime=start)
+        events = [e for page in pages for e in page["Events"]]
+    except Exception as e:
+        print(f"could not read CloudTrail ({type(e).__name__}): the role needs cloudtrail:LookupEvents.")
+        print("Check the launch before sending it instead: helpers.check_launch(tags, instance_type, max_run)")
+        return []
+    found = []
+    for ev in events:
+        d = _json.loads(ev["CloudTrailEvent"])
+        if "AccessDenied" not in d.get("errorCode", ""):
+            continue
+        params = d.get("requestParameters") or {}
+        tags = [{"Key": t["key"], "Value": t["value"]} for t in params.get("tags", [])]
+        res = params.get("resourceConfig") or (params.get("processingResources") or {}).get("clusterConfig") or {}
+        instance_type = res.get("instanceType")
+        cap = (params.get("stoppingCondition") or {}).get("maxRuntimeInSeconds")
+        when = ev["EventTime"].strftime("%H:%M:%S")
+        print(f"{when}  {d['eventName']}  name={params.get('trainingJobName') or params.get('processingJobName') or params.get('hyperParameterTuningJobName') or '?'}")
+        try:
+            check_launch(tags, instance_type, cap)
+            if d["eventName"] == "CreateProcessingJob" and cap is None:
+                print("    Processing job without a runtime cap: pass max_runtime_in_seconds=")
+            elif d["eventName"] in ("CreateEndpoint", "CreateEndpointConfig", "CreateModel"):
+                print("    endpoints cannot be created on this account: use a job, or Bedrock")
+            else:
+                print("    tags, instance type and cap all pass: check that tags= is on the estimator, and that this is your job")
+        except ValueError as e:
+            print("    " + str(e).replace("\n", "\n    "))
+        found.append(d)
+    if not found:
+        print(f"no refused SageMaker launches in the last {minutes} minutes; CloudTrail can take 15 minutes to show one")
+    return found
