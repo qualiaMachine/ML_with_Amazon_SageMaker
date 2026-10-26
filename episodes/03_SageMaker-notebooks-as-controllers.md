@@ -48,7 +48,7 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
 #### 2. Create a new notebook instance
 - In the SageMaker left-side menu, click on **Notebook instances**, then click **Create notebook instance**.
-- **Notebook name**: the same words as your bucket, capitalised: `Challenge-LastnameFirstname`, e.g. `SinkOrSwim-DoeJohn`. One instance serves the whole workshop; the individual `.ipynb` notebooks inside it are where the per-episode work lives. SageMaker allows letters, digits and hyphens (no spaces or underscores, up to 63 characters); capitals are fine here and in tags, only bucket names must be lowercase. This name is also reused as the prefix of every training job you launch from the notebook, which is how you will find your jobs in a shared account.
+- **Notebook name**: the same words as your bucket, capitalised: `Challenge-LastnameFirstname`, e.g. `WattBot2026-DoeJohn`. One instance serves the whole workshop; the individual `.ipynb` notebooks inside it are where the per-episode work lives. SageMaker allows letters, digits and hyphens (no spaces or underscores, up to 63 characters); capitals are fine here and in tags, only bucket names must be lowercase. This name is also reused as the prefix of every training job you launch from the notebook, which is how you will find your jobs in a shared account.
 - **Instance type**: sets the CPU, memory and price of the virtual machine. Our notebook is a controller, so pick a small one: `ml.t3.medium` (2 vCPU, 4 GB RAM, `$0.05`/hour). The jobs we launch from it will run on more powerful instances; the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page compares them.
 - **Platform identifier**: This is an internal AWS setting related to the environment version and underlying platform. You can leave this as the default.
 - **Additional configuration (leave collapsed)**: holds the **Volume size in GB** of the instance's persistent disk, default 5 GB. Expand it and set **20 GB**: the RAG episodes unpack about a gigabyte of PDFs and page images, the fine-tuning episode keeps its data here, and 5 GB fills up on the second run. The disk is the one thing a stopped instance keeps billing for, `$0.14` per GB-month, so 20 GB is `$2.80` a month until the instance is deleted; do not go larger than that without a reason.
@@ -62,7 +62,7 @@ We'll follow these steps to create our first "SageMaker notebook instance".
 
   | Key | Value |
   |---|---|
-  | `Project` | your challenge name (`SinkOrSwim`, `WattBot2026`, `BadgerScribe`, `BadgerCode`, ...), e.g. `SinkOrSwim` |
+  | `Project` | your challenge, one of `WattBot2026`, `BadgerScribe`, `BadgerCode`, `BrainDecoding`, `PoisonedWell`, `SnapshotWI` |
   | `Name` | your name, e.g. `DoeJohn` |
   | `Purpose` | what this resource is for, `Notebook` |
 

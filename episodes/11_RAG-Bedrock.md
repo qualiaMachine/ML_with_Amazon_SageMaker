@@ -519,7 +519,7 @@ Before and after, in the generation call:
 | | `modelId` you pass | Who it is billed to |
 |---|---|---|
 | Raw model ID | `deepseek.v3-v1:0` | nobody: anonymous DeepSeek spend on the account |
-| Your profile | `arn:aws:bedrock:us-east-2:<account-id>:application-inference-profile/adewnu8wqxpy` | `Name=DoeJohn, Project=SinkOrSwim, Purpose=Inference` |
+| Your profile | `arn:aws:bedrock:us-east-2:<account-id>:application-inference-profile/adewnu8wqxpy` | `Name=DoeJohn, Project=WattBot2026, Purpose=Inference` |
 
 So "cost tracking on Bedrock" is: create the alias once per model (one for DeepSeek, one for Titan, because an alias points at exactly one model), keep its ARN in a variable, and use that variable as `modelId` from then on. The profile is free; you pay only for tokens, as before.
 
@@ -529,7 +529,7 @@ One call per model does all of it. `tagged_profile_arn` in `wattbot_rag.py` look
 from wattbot_rag import tagged_profile_arn
 
 name = "DoeJohn"         # replace with your name
-project = "SinkOrSwim"   # replace with your challenge name
+project = "YourChallenge"   # replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI
 print(f"Tags on the profiles, and so on every Bedrock call: Name={name}, Project={project}, Purpose=Inference")   # check them first: a profile tagged DoeJohn bills as DoeJohn
 
 # From here on, these ARNs are what we pass as modelId. The base IDs are never sent to the runtime again.
@@ -544,9 +544,9 @@ embedding_model_id_bedrock = tagged_profile_arn(bedrock, base_embedding_model_id
 Outside a notebook it is one CLI command per model, which is all the helper wraps:
 
 ```bash
-aws bedrock create-inference-profile --inference-profile-name SinkOrSwim-DoeJohn-wattbot-gen \
+aws bedrock create-inference-profile --inference-profile-name WattBot2026-DoeJohn-wattbot-gen \
   --model-source copyFrom=arn:aws:bedrock:us-east-2::foundation-model/deepseek.v3-v1:0 \
-  --tags key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference
+  --tags key=Name,value=DoeJohn key=Project,value=WattBot2026 key=Purpose,value=Inference
 ```
 
 It prints the profile ARN; pass that as `modelId`. The helper adds only the reuse check, so rerunning does not create duplicates.
