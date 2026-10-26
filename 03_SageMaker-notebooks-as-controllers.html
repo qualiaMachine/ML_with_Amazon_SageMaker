@@ -619,7 +619,12 @@ itself</td>
 </tr><tr><td><code>Purpose</code></td>
 <td>what this resource is for, <code>Notebook</code>
 </td>
-</tr></tbody></table><figure><img src="fig/notebook_tags.PNG" alt="Screenshot showing the three required tags on a SageMaker notebook instance" class="figure mx-auto d-block"><div class="figcaption">Tag Setup Example</div>
+</tr></tbody></table><p>Same spelling as on the bucket. The <code>Project</code> and
+<code>Purpose</code> lists from the S3 episode apply to every job you
+launch from this instance, and a value off them is refused at the first
+launch; the training episode shows what that looks like and how to check
+first.</p>
+<figure><img src="fig/notebook_tags.PNG" alt="Screenshot showing the three required tags on a SageMaker notebook instance" class="figure mx-auto d-block"><div class="figcaption">Tag Setup Example</div>
 </figure></li>
 <li><p>Click <strong>Create notebook instance</strong>.</p></li>
 </ul></div>

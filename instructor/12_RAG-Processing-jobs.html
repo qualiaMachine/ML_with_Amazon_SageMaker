@@ -1012,20 +1012,20 @@ Quotas</a> (days, for GPU types). On your own account, request
 <div class="section level3">
 <h3 id="what-launching-a-job-means">What launching a job means<a class="anchor" aria-label="anchor" href="#what-launching-a-job-means"></a></h3>
 <p>This is the first GPU job you launch yourself in this episode (the
-embedding job above was staged for you in class), so here is the whole
-mechanism in plain terms. You describe a machine and point at a script.
-SageMaker rents the machine, copies the files you named from S3 onto its
-disk, runs your script on it, copies whatever the script wrote in its
-output folder back to S3, and shuts the machine down. The notebook does
-nothing but wait and show you the script’s printed output. Nothing from
-this notebook’s memory goes along: not <code>chunked_docs</code>, not
-<code>train_df</code>, not any function defined above. The script sees
-only the files you copied in and the arguments you gave it, which is why
-every input is an S3 location and every setting is a command-line flag.
-That is the same thing <code>estimator.fit</code> did in the fine-tuning
-episode, with one difference: a training job hands back a trained model,
-a Processing job hands back whatever files the script wrote, here a CSV
-of answers.</p>
+embedding job above was staged for you in class), so this is what
+happens when you launch one. You describe a machine and point at a
+script. SageMaker rents the machine, copies the files you named from S3
+onto its disk, runs your script on it, copies whatever the script wrote
+in its output folder back to S3, and shuts the machine down. The
+notebook does nothing but wait and show you the script’s printed output.
+Nothing from this notebook’s memory goes along: not
+<code>chunked_docs</code>, not <code>train_df</code>, not any function
+defined above. The script sees only the files you copied in and the
+arguments you gave it, which is why every input is an S3 location and
+every setting is a command-line flag. That is the same thing
+<code>estimator.fit</code> did in the fine-tuning episode, with one
+difference: a training job hands back a trained model, a Processing job
+hands back whatever files the script wrote, here a CSV of answers.</p>
 <p>The description is two cells. The first builds a
 <code>HuggingFaceProcessor</code>: which machine, which container image,
 how long it may run, whose tags it carries. Two of its settings matter
@@ -1192,7 +1192,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -1255,7 +1255,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or

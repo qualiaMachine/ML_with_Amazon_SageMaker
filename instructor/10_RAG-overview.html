@@ -428,7 +428,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Overview of RAG Workflows on AWS</h1>
-        <p>Last updated on 2026-10-21 |
+        <p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/10_RAG-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -504,9 +504,7 @@ language model (LLM) to answer a question.</li>
 </ol><p>No model weights are updated. No backprop. No training job.<br>
 RAG is an inference‑only pattern that layers retrieval logic around an
 LLM.</p>
-<p>This matters for how you should think about compute. The
-<em>only</em> things a RAG pipeline needs from a model are two stateless
-calls:</p>
+<p>A RAG pipeline needs only two stateless calls from a model:</p>
 <ul><li>“Turn this text into an embedding vector.”</li>
 <li>“Given this prompt (question + retrieved chunks), generate an
 answer.”</li>
@@ -548,9 +546,8 @@ way research teams burn through cloud budgets. Bedrock has no equivalent
 failure mode: if you stop calling it, you stop paying.</p>
 <div class="section level3">
 <h3 id="what-forgetting-actually-costs">What forgetting actually costs<a class="anchor" aria-label="anchor" href="#what-forgetting-actually-costs"></a></h3>
-<p>To make this concrete, here is what a GPU notebook instance costs if
-it is left running after you close your laptop (on‑demand prices at time
-of writing; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
+<p>A GPU notebook instance left running after you close your laptop
+costs this much (on‑demand prices at time of writing; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
 page</a>):</p>
 <table style="width:100%;" class="table"><colgroup><col width="16%"><col width="16%"><col width="16%"><col width="16%"><col width="16%"><col width="16%"></colgroup><thead><tr><th>Instance</th>
 <th>GPU</th>
@@ -971,7 +968,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/10_RAG-overview.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/10_RAG-overview.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-21",
+  "dateModified": "2026-10-26",
   "datePublished": "2026-10-26"
 }
 

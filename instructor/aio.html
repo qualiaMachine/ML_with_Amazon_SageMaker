@@ -1210,7 +1210,7 @@ also give it to you)</li>
 <span id="cb1-24"><a href="#cb1-24" tabindex="-1" aria-label="code-block-1-24"></a>	<span class="ot">]</span></span>
 <span id="cb1-25"><a href="#cb1-25" tabindex="-1" aria-label="code-block-1-25"></a><span class="fu">}</span></span></code></pre>
 </div>
-<p>What the policy says, line by line:</p>
+<p>The policy, statement by statement:</p>
 <ul>
 <li>
 <strong>Principal</strong> is <em>who</em> gets access. SageMaker
@@ -1448,7 +1448,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -1551,13 +1551,13 @@ per 1,000 = <code>$0.00004</code><br>
 </ol>
 <p>These costs assume no additional request charges beyond those for
 storage, the download, and <code>GET</code> requests for training.</p>
-<p>Two things to notice. The <code>GET</code> line is the same
-four-thousandths of a cent at every size: request costs depend on how
-many objects you touch, not how big they are. And the download line
-grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a
-dataset of any size, moving it out of AWS costs several times more than
-keeping it there for a month, so plan to keep large data in the region
-and bring code to it, not the other way round.</p>
+<p>The <code>GET</code> line is the same four-thousandths of a cent at
+every size: request costs depend on how many objects you touch, not how
+big they are. And the download line grows from 80% of the total at 1 GB
+to almost all of it at 1 TB: for a dataset of any size, moving it out of
+AWS costs several times more than keeping it there for a month, so plan
+to keep large data in the region and bring code to it, not the other way
+round.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>
 <strong>Wrong region, 100 GB</strong>: 100 reads x 100 GB x
@@ -1855,6 +1855,11 @@ itself</td>
 </tr>
 </tbody>
 </table>
+<p>Same spelling as on the bucket. The <code>Project</code> and
+<code>Purpose</code> lists from the S3 episode apply to every job you
+launch from this instance, and a value off them is refused at the first
+launch; the training episode shows what that looks like and how to check
+first.</p>
 <figure><img src="../fig/notebook_tags.PNG" alt="Screenshot showing the three required tags on a SageMaker notebook instance" class="figure mx-auto d-block"><div class="figcaption">Tag Setup Example</div>
 </figure>
 </li>
@@ -1945,7 +1950,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-04_Accessing-S3-via-SageMaker-notebooks"><p>Content from <a href="04_Accessing-S3-via-SageMaker-notebooks.html">Accessing and Managing Data in S3 with SageMaker Notebooks</a></p>
 <hr>
-<p>Last updated on 2026-10-21 |
+<p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/04_Accessing-S3-via-SageMaker-notebooks.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 30 minutes</p>
@@ -2208,8 +2213,8 @@ in your bucket. You can do this from a Jupyter notebook in SageMaker by
 using the <strong>Boto3</strong> library, which is the AWS SDK for
 Python. This will allow you to calculate the total size of objects
 within a specified bucket.</p>
-<p>The code below will calculate your bucket size for you. Here is a
-breakdown of the important pieces in the next code section:</p>
+<p>The code below calculates your bucket size. The pieces that
+matter:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Paginator</strong>: Since S3 buckets can contain many
@@ -2430,7 +2435,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -4009,26 +4014,34 @@ notebook instance.</p>
 <div id="if-the-launch-is-refused" class="callout-inner">
 <h3 class="callout-title">If the launch is refused</h3>
 <div class="callout-content">
-<p>The class account checks every launch. A job is refused, with an
-<code>AccessDeniedException</code> that ends in
-<code>with an explicit deny in an identity-based policy</code>, when any
-of these is true: it carries no <code>Name</code>, <code>Project</code>
-or <code>Purpose</code> tag, or a blank <code>Name</code>, or a
-<code>Project</code> that is not on the list (SinkOrSwim, WattBot2026,
-BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a
-<code>Purpose</code> that is not Storage, Notebook, Training, Tuning or
-Inference; its instance type is not one the lesson uses; or it is an
-endpoint or an EC2 instance, which the lesson never creates. The message
-does not say which. An IAM refusal cannot carry a custom message, so the
-lesson checks the same rules in the notebook first:
+<p>The account checks every launch against a short list of rules, and
+refuses one that breaks any of them with an
+<code>AccessDeniedException</code> ending in
+<code>with an explicit deny in an identity-based policy</code>. The
+rules: the three tags <code>Name</code>, <code>Project</code> and
+<code>Purpose</code> must be present, <code>Name</code> must not be
+blank, <code>Project</code> must be one of SinkOrSwim, WattBot2026,
+BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI,
+<code>Purpose</code> must be Storage, Notebook, Training, Tuning or
+Inference, the instance type must be one the lesson uses, the runtime
+cap must be 48 hours or less, and endpoints and EC2 instances cannot be
+created at all.</p>
+<p>The error message does not say which rule was broken. AWS does not
+let an administrator attach an explanation to a refusal, so the lesson’s
+helper module fills the gap.
 <code>helpers.check_launch(job_tags, instance_type, max_run)</code>
-reads the account’s policy (<code>scripts/guardrails.json</code>, the
-same file the administrator attached) and stops with a message that
-names the problem and the fix. A launch that passes it and is still
-refused means the <code>tags=job_tags</code> line is missing from the
-estimator. The same check runs before every job in the later episodes,
-and the <a href="refused-launch.html">If a Launch Is Refused</a> page
-has the full list of rules and fixes for your own notebooks after the
+checks a launch against the same rules before it is sent and says what
+to change; the tag cell above and every launch in the later episodes
+call it. <code>helpers.rules()</code> prints the rules.
+<code>helpers.explain_refusal()</code> is for afterwards: it reads the
+refused requests of the last hour from CloudTrail, the account’s log of
+every API call, and says which rule each one broke. All three read the
+rules from <code>scripts/guardrails.json</code>, the same file the
+administrator attached to the account, so they cannot disagree with it.
+A launch that passes <code>check_launch</code> and is still refused is
+almost always a missing <code>tags=job_tags</code> line on the
+estimator. The <a href="refused-launch.html">If a Launch Is Refused</a>
+page has all of this on one page for your own notebooks after the
 workshop.</p>
 </div>
 </div>
@@ -4483,7 +4496,7 @@ job is done, start the instance, and pick the job up by name.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="co"># Launch and return at once: the cell ends in seconds, and the job runs on its own instance</span></span>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>xgboost_estimator.fit({<span class="st">'train'</span>: train_input}, wait<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>job_name <span class="op">=</span> xgboost_estimator.latest_training_job.name   <span class="co"># the one thing you need to come back to this job</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>job_name <span class="op">=</span> xgboost_estimator.latest_training_job.name   <span class="co"># what you need to come back to this job</span></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="bu">print</span>(<span class="st">"launched:"</span>, job_name)</span></code></pre>
 </div>
 <p>Keep the name somewhere outside the kernel: a cell’s printed output
@@ -4513,11 +4526,11 @@ the download-and-evaluate cells above work unchanged.</p>
 <span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a><span class="bu">print</span>(<span class="st">"model:"</span>, xgboost_estimator.model_data)</span>
 <span id="cb22-9"><a href="#cb22-9" tabindex="-1" aria-label="code-block-22-9"></a>desc <span class="op">=</span> job_cost_report(job_name, price_per_hour)</span></code></pre>
 </div>
-<p>One thing to be clear about: interrupting the cell, restarting the
-kernel and stopping the instance all leave the job running. Only
-<strong>Stop</strong> on the job’s page, or the job’s own cap, ends it.
-A job you launched and forgot bills until one of those happens, which is
-what the two habits below are for.</p>
+<p>Interrupting the cell, restarting the kernel and stopping the
+instance all leave the job running. Only <strong>Stop</strong> on the
+job’s page, or the job’s own cap, ends it. A job you launched and forgot
+bills until one of those happens, which is what the two habits below are
+for.</p>
 <div class="section level3">
 <h3 id="two-habits-for-any-run-longer-than-half-an-hour">Two habits for any run longer than half an hour<a class="anchor" aria-label="anchor" href="#two-habits-for-any-run-longer-than-half-an-hour"></a>
 </h3>
@@ -7323,7 +7336,7 @@ project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: a full fine-tune of a 7B model needs about
 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB =
@@ -7629,7 +7642,7 @@ whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; four things have to be
 in place before the session. Each is written out in the instructor
@@ -7867,13 +7880,13 @@ starts.</p>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1" aria-label="code-block-14-12"></a><span class="bu">print</span>(<span class="ss">f"transcription: </span><span class="sc">{</span><span class="bu">len</span>(row.text.split())<span class="sc">}</span><span class="ss"> words, </span><span class="sc">{</span><span class="bu">len</span>(row.text)<span class="sc">}</span><span class="ss"> characters -&gt; </span><span class="sc">{</span>n_total <span class="op">-</span> n_prompt<span class="sc">}</span><span class="ss"> tokens"</span>)</span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1" aria-label="code-block-14-13"></a><span class="bu">print</span>(<span class="ss">f"tokens the model sees for this page: </span><span class="sc">{</span>n_total<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>Two things to notice in the output. The image is close to the
-1,280-token cap whatever the page’s original size, because every scan is
-larger than a megapixel and gets shrunk to it. And the transcription
-comes out near two tokens per word, not the 1.3 of the English rule of
-thumb: German, 1930s spelling and the writer’s abbreviations all split
-into more pieces. That is why the guess in Step 0 is a guess, and why
-the next cell measures the average instead.</p>
+<p>The image is close to the 1,280-token cap whatever the page’s
+original size, because every scan is larger than a megapixel and gets
+shrunk to it. And the transcription comes out near two tokens per word,
+not the 1.3 of the English rule of thumb: German, 1930s spelling and the
+writer’s abbreviations all split into more pieces. That is why the guess
+in Step 0 is a guess, and why the next cell measures the average
+instead.</p>
 <p>One page is a point, not an average. Text length varies a lot from
 page to page; image tokens hardly vary, because almost every scan is
 larger than <code>max_pixels</code> and gets resized to the same cap. So
@@ -8462,7 +8475,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -8839,7 +8852,7 @@ CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8879,7 +8892,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -8944,7 +8957,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-10_RAG-overview"><p>Content from <a href="10_RAG-overview.html">Overview of RAG Workflows on AWS</a></p>
 <hr>
-<p>Last updated on 2026-10-21 |
+<p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/10_RAG-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 15 minutes</p>
@@ -9023,9 +9036,7 @@ language model (LLM) to answer a question.</li>
 <p>No model weights are updated. No backprop. No training job.<br>
 RAG is an inference‑only pattern that layers retrieval logic around an
 LLM.</p>
-<p>This matters for how you should think about compute. The
-<em>only</em> things a RAG pipeline needs from a model are two stateless
-calls:</p>
+<p>A RAG pipeline needs only two stateless calls from a model:</p>
 <ul>
 <li>“Turn this text into an embedding vector.”</li>
 <li>“Given this prompt (question + retrieved chunks), generate an
@@ -9093,9 +9104,8 @@ failure mode: if you stop calling it, you stop paying.</p>
 <div class="section level3">
 <h3 id="what-forgetting-actually-costs">What forgetting actually costs<a class="anchor" aria-label="anchor" href="#what-forgetting-actually-costs"></a>
 </h3>
-<p>To make this concrete, here is what a GPU notebook instance costs if
-it is left running after you close your laptop (on‑demand prices at time
-of writing; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
+<p>A GPU notebook instance left running after you close your laptop
+costs this much (on‑demand prices at time of writing; see the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
 page</a>):</p>
 <table style="width:100%;" class="table">
 <colgroup>
@@ -10494,7 +10504,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10950,7 +10960,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -11030,7 +11040,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -12305,20 +12315,20 @@ Quotas</a> (days, for GPU types). On your own account, request
 <h3 id="what-launching-a-job-means">What launching a job means<a class="anchor" aria-label="anchor" href="#what-launching-a-job-means"></a>
 </h3>
 <p>This is the first GPU job you launch yourself in this episode (the
-embedding job above was staged for you in class), so here is the whole
-mechanism in plain terms. You describe a machine and point at a script.
-SageMaker rents the machine, copies the files you named from S3 onto its
-disk, runs your script on it, copies whatever the script wrote in its
-output folder back to S3, and shuts the machine down. The notebook does
-nothing but wait and show you the script’s printed output. Nothing from
-this notebook’s memory goes along: not <code>chunked_docs</code>, not
-<code>train_df</code>, not any function defined above. The script sees
-only the files you copied in and the arguments you gave it, which is why
-every input is an S3 location and every setting is a command-line flag.
-That is the same thing <code>estimator.fit</code> did in the fine-tuning
-episode, with one difference: a training job hands back a trained model,
-a Processing job hands back whatever files the script wrote, here a CSV
-of answers.</p>
+embedding job above was staged for you in class), so this is what
+happens when you launch one. You describe a machine and point at a
+script. SageMaker rents the machine, copies the files you named from S3
+onto its disk, runs your script on it, copies whatever the script wrote
+in its output folder back to S3, and shuts the machine down. The
+notebook does nothing but wait and show you the script’s printed output.
+Nothing from this notebook’s memory goes along: not
+<code>chunked_docs</code>, not <code>train_df</code>, not any function
+defined above. The script sees only the files you copied in and the
+arguments you gave it, which is why every input is an S3 location and
+every setting is a command-line flag. That is the same thing
+<code>estimator.fit</code> did in the fine-tuning episode, with one
+difference: a training job hands back a trained model, a Processing job
+hands back whatever files the script wrote, here a CSV of answers.</p>
 <p>The description is two cells. The first builds a
 <code>HuggingFaceProcessor</code>: which machine, which container image,
 how long it may run, whose tags it carries. Two of its settings matter
@@ -12487,7 +12497,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12550,7 +12560,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -14171,7 +14181,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -14592,10 +14602,9 @@ attaches a deny policy at the ceiling</td>
 </tr>
 </tbody>
 </table>
-<p>Two things to know before copying them. A deny applies to everyone
-who uses the role, including you, so your own launches need real tag
-values and listed instance types too; that is the point. And the error a
-refused request gets,
+<p>A deny applies to everyone who uses the role, including you, so your
+own launches need real tag values and listed instance types too; that is
+the point. And the error a refused request gets,
 <code>AccessDeniedException ... with an explicit deny in an identity-based policy</code>,
 does not say which rule matched, so write the rules down where the
 people using the account will find them, as the <em>If the launch is
@@ -14604,9 +14613,9 @@ cannot carry a custom message either: AWS says
 <code>explicit deny in an identity-based policy</code> and nothing more,
 which is why this lesson keeps a copy of the policy next to its helper
 code and checks every launch against it in the notebook first, with
-<code>helpers.check_launch</code>, so the message that reaches you names
-the rule. The <a href="refused-launch.html">If a Launch Is Refused</a>
-page is the same list in one place, for the day a job of your own is
+<code>helpers.check_launch</code>, so the message you get names the
+rule. The <a href="refused-launch.html">If a Launch Is Refused</a> page
+is the same list in one place, for the day a job of your own is
 refused.</p>
 <p>Habits that need no administrator:</p>
 <ul>
@@ -14649,7 +14658,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>

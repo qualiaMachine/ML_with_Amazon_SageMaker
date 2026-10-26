@@ -1345,26 +1345,34 @@ notebook instance.</p>
 <div id="if-the-launch-is-refused" class="callout-inner">
 <h3 class="callout-title">If the launch is refused</h3>
 <div class="callout-content">
-<p>The class account checks every launch. A job is refused, with an
-<code>AccessDeniedException</code> that ends in
-<code>with an explicit deny in an identity-based policy</code>, when any
-of these is true: it carries no <code>Name</code>, <code>Project</code>
-or <code>Purpose</code> tag, or a blank <code>Name</code>, or a
-<code>Project</code> that is not on the list (SinkOrSwim, WattBot2026,
-BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a
-<code>Purpose</code> that is not Storage, Notebook, Training, Tuning or
-Inference; its instance type is not one the lesson uses; or it is an
-endpoint or an EC2 instance, which the lesson never creates. The message
-does not say which. An IAM refusal cannot carry a custom message, so the
-lesson checks the same rules in the notebook first:
+<p>The account checks every launch against a short list of rules, and
+refuses one that breaks any of them with an
+<code>AccessDeniedException</code> ending in
+<code>with an explicit deny in an identity-based policy</code>. The
+rules: the three tags <code>Name</code>, <code>Project</code> and
+<code>Purpose</code> must be present, <code>Name</code> must not be
+blank, <code>Project</code> must be one of SinkOrSwim, WattBot2026,
+BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI,
+<code>Purpose</code> must be Storage, Notebook, Training, Tuning or
+Inference, the instance type must be one the lesson uses, the runtime
+cap must be 48 hours or less, and endpoints and EC2 instances cannot be
+created at all.</p>
+<p>The error message does not say which rule was broken. AWS does not
+let an administrator attach an explanation to a refusal, so the lesson’s
+helper module fills the gap.
 <code>helpers.check_launch(job_tags, instance_type, max_run)</code>
-reads the account’s policy (<code>scripts/guardrails.json</code>, the
-same file the administrator attached) and stops with a message that
-names the problem and the fix. A launch that passes it and is still
-refused means the <code>tags=job_tags</code> line is missing from the
-estimator. The same check runs before every job in the later episodes,
-and the <a href="refused-launch.html">If a Launch Is Refused</a> page
-has the full list of rules and fixes for your own notebooks after the
+checks a launch against the same rules before it is sent and says what
+to change; the tag cell above and every launch in the later episodes
+call it. <code>helpers.rules()</code> prints the rules.
+<code>helpers.explain_refusal()</code> is for afterwards: it reads the
+refused requests of the last hour from CloudTrail, the account’s log of
+every API call, and says which rule each one broke. All three read the
+rules from <code>scripts/guardrails.json</code>, the same file the
+administrator attached to the account, so they cannot disagree with it.
+A launch that passes <code>check_launch</code> and is still refused is
+almost always a missing <code>tags=job_tags</code> line on the
+estimator. The <a href="refused-launch.html">If a Launch Is Refused</a>
+page has all of this on one page for your own notebooks after the
 workshop.</p>
 </div>
 </div>
@@ -1764,7 +1772,7 @@ job is done, start the instance, and pick the job up by name.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="co"># Launch and return at once: the cell ends in seconds, and the job runs on its own instance</span></span>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>xgboost_estimator.fit({<span class="st">'train'</span>: train_input}, wait<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>job_name <span class="op">=</span> xgboost_estimator.latest_training_job.name   <span class="co"># the one thing you need to come back to this job</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>job_name <span class="op">=</span> xgboost_estimator.latest_training_job.name   <span class="co"># what you need to come back to this job</span></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="bu">print</span>(<span class="st">"launched:"</span>, job_name)</span></code></pre>
 </div>
 <p>Keep the name somewhere outside the kernel: a cell’s printed output
@@ -1794,11 +1802,11 @@ the download-and-evaluate cells above work unchanged.</p>
 <span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a><span class="bu">print</span>(<span class="st">"model:"</span>, xgboost_estimator.model_data)</span>
 <span id="cb22-9"><a href="#cb22-9" tabindex="-1" aria-label="code-block-22-9"></a>desc <span class="op">=</span> job_cost_report(job_name, price_per_hour)</span></code></pre>
 </div>
-<p>One thing to be clear about: interrupting the cell, restarting the
-kernel and stopping the instance all leave the job running. Only
-<strong>Stop</strong> on the job’s page, or the job’s own cap, ends it.
-A job you launched and forgot bills until one of those happens, which is
-what the two habits below are for.</p>
+<p>Interrupting the cell, restarting the kernel and stopping the
+instance all leave the job running. Only <strong>Stop</strong> on the
+job’s page, or the job’s own cap, ends it. A job you launched and forgot
+bills until one of those happens, which is what the two habits below are
+for.</p>
 <div class="section level3">
 <h3 id="two-habits-for-any-run-longer-than-half-an-hour">Two habits for any run longer than half an hour<a class="anchor" aria-label="anchor" href="#two-habits-for-any-run-longer-than-half-an-hour"></a></h3>
 <p><strong>A cap you chose.</strong> <code>max_run</code> is the most a

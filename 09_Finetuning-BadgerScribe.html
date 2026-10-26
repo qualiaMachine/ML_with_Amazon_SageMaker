@@ -967,7 +967,7 @@ project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: a full fine-tune of a 7B model needs about
 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB =
@@ -1390,13 +1390,13 @@ starts.</p>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1" aria-label="code-block-14-12"></a><span class="bu">print</span>(<span class="ss">f"transcription: </span><span class="sc">{</span><span class="bu">len</span>(row.text.split())<span class="sc">}</span><span class="ss"> words, </span><span class="sc">{</span><span class="bu">len</span>(row.text)<span class="sc">}</span><span class="ss"> characters -&gt; </span><span class="sc">{</span>n_total <span class="op">-</span> n_prompt<span class="sc">}</span><span class="ss"> tokens"</span>)</span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1" aria-label="code-block-14-13"></a><span class="bu">print</span>(<span class="ss">f"tokens the model sees for this page: </span><span class="sc">{</span>n_total<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>Two things to notice in the output. The image is close to the
-1,280-token cap whatever the page’s original size, because every scan is
-larger than a megapixel and gets shrunk to it. And the transcription
-comes out near two tokens per word, not the 1.3 of the English rule of
-thumb: German, 1930s spelling and the writer’s abbreviations all split
-into more pieces. That is why the guess in Step 0 is a guess, and why
-the next cell measures the average instead.</p>
+<p>The image is close to the 1,280-token cap whatever the page’s
+original size, because every scan is larger than a megapixel and gets
+shrunk to it. And the transcription comes out near two tokens per word,
+not the 1.3 of the English rule of thumb: German, 1930s spelling and the
+writer’s abbreviations all split into more pieces. That is why the guess
+in Step 0 is a guess, and why the next cell measures the average
+instead.</p>
 <p>One page is a point, not an average. Text length varies a lot from
 page to page; image tokens hardly vary, because almost every scan is
 larger than <code>max_pixels</code> and gets resized to the same cap. So
@@ -1962,7 +1962,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Expect about 32 billed minutes. Scoring is the line most likely to
 surprise: at 17 to 21 seconds a page, the two 15-page evaluations and
@@ -2323,7 +2323,7 @@ CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -2363,7 +2363,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3

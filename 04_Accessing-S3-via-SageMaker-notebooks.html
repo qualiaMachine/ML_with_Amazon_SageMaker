@@ -424,7 +424,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Accessing and Managing Data in S3 with SageMaker Notebooks</h1>
-        <p>Last updated on 2026-10-21 |
+        <p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/04_Accessing-S3-via-SageMaker-notebooks.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -668,8 +668,8 @@ in your bucket. You can do this from a Jupyter notebook in SageMaker by
 using the <strong>Boto3</strong> library, which is the AWS SDK for
 Python. This will allow you to calculate the total size of objects
 within a specified bucket.</p>
-<p>The code below will calculate your bucket size for you. Here is a
-breakdown of the important pieces in the next code section:</p>
+<p>The code below calculates your bucket size. The pieces that
+matter:</p>
 <ol style="list-style-type: decimal"><li>
 <strong>Paginator</strong>: Since S3 buckets can contain many
 objects, we use a paginator to handle large listings.</li>
@@ -880,7 +880,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>One way to do it:</li>
 </ol><div class="codewrapper sourceCode" id="cb16">
@@ -995,7 +995,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/04_Accessing-S3-via-SageMaker-notebooks.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/04_Accessing-S3-via-SageMaker-notebooks.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-21",
+  "dateModified": "2026-10-26",
   "datePublished": "2026-10-26"
 }
 

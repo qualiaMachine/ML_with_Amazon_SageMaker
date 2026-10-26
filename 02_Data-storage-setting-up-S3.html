@@ -818,7 +818,7 @@ also give it to you)</li>
 <span id="cb1-24"><a href="#cb1-24" tabindex="-1" aria-label="code-block-1-24"></a>	<span class="ot">]</span></span>
 <span id="cb1-25"><a href="#cb1-25" tabindex="-1" aria-label="code-block-1-25"></a><span class="fu">}</span></span></code></pre>
 </div>
-<p>What the policy says, line by line:</p>
+<p>The policy, statement by statement:</p>
 <ul><li>
 <strong>Principal</strong> is <em>who</em> gets access. SageMaker
 never acts as you; it acts as an IAM <strong>role</strong> attached to
@@ -1029,7 +1029,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal"><li>
@@ -1114,13 +1114,13 @@ per 1,000 = <code>$0.00004</code><br></li>
 </ul></li>
 </ol><p>These costs assume no additional request charges beyond those for
 storage, the download, and <code>GET</code> requests for training.</p>
-<p>Two things to notice. The <code>GET</code> line is the same
-four-thousandths of a cent at every size: request costs depend on how
-many objects you touch, not how big they are. And the download line
-grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a
-dataset of any size, moving it out of AWS costs several times more than
-keeping it there for a month, so plan to keep large data in the region
-and bring code to it, not the other way round.</p>
+<p>The <code>GET</code> line is the same four-thousandths of a cent at
+every size: request costs depend on how many objects you touch, not how
+big they are. And the download line grows from 80% of the total at 1 GB
+to almost all of it at 1 TB: for a dataset of any size, moving it out of
+AWS costs several times more than keeping it there for a month, so plan
+to keep large data in the region and bring code to it, not the other way
+round.</p>
 <ol start="3" style="list-style-type: decimal"><li>
 <strong>Wrong region, 100 GB</strong>: 100 reads x 100 GB x
 <code>$0.02</code> = <strong><code>$200</code></strong> of inter-region

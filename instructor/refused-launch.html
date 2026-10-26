@@ -469,7 +469,7 @@ a job, or Bedrock.</td>
 </tr></tbody></table><p>The message is the same for every row, so check them in order. A
 launch that passes every row and is still refused is usually the
 <code>tags=</code> argument left off the estimator.</p>
-</section><section><h2 class="section-heading" id="let-the-notebook-tell-you-which-rule">Let the notebook tell you which rule<a class="anchor" aria-label="anchor" href="#let-the-notebook-tell-you-which-rule"></a></h2>
+</section><section><h2 class="section-heading" id="checking-from-the-notebook">Checking from the notebook<a class="anchor" aria-label="anchor" href="#checking-from-the-notebook"></a></h2>
 <hr class="half-width"><p>The lesson’s helper module applies the same rules before the request
 is sent, and its message names the problem. It works in any notebook on
 your instance, since the lesson repository is cloned there:</p>
@@ -497,13 +497,12 @@ your instance, since the lesson repository is cloned there:</p>
 </div>
 <p>The helper reads its lists from <code>scripts/guardrails.json</code>,
 a copy of the policy on the account, so a <code>git pull</code> in the
-lesson folder keeps it current when the list changes. Run the check once
-in a cell before the launch cell, and the refusal you would have had to
-decode arrives as a sentence instead. Two companions:</p>
+lesson folder keeps it current when the list changes. Run it in a cell
+before the launch cell. Two companions:</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a>helpers.rules()             <span class="co"># prints the current rules in plain words</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a>helpers.rules()             <span class="co"># prints the current rules</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a>helpers.explain_refusal()   <span class="co"># after a refusal: reads the refused requests of the last hour from CloudTrail and names the rule each one broke</span></span></code></pre>
 </div>
 <p><code>explain_refusal</code> works after the fact, on launches made
