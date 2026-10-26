@@ -281,7 +281,7 @@ print(f"{len(pdf_files)} PDFs in {PDF_DIR}; metadata lists {len(metadata_df)} pa
 
 ## Step 5 – Turn PDFs into page-level “documents”
 
-The next unit of work is a list of **page-level records**, one per PDF page. The instructor's staging script already built it for this corpus (`pages.jsonl` in the shared bucket), so below we define the function that does the extraction, then load the staged result rather than rerun it. Each record stores:
+The next unit of work is a list of **page-level records**, one per PDF page. The instructor's staging script already built it for this corpus (`pages.jsonl` in the shared bucket), so the cell below loads the staged result and falls back to extracting only if it is missing. Each record stores:
 
 - `text`: page text (as extracted by `pypdf`).
 - `doc_id`: short ID from `metadata.csv` (e.g., `strubell2019`).
@@ -307,61 +307,10 @@ Chunks keep the page they came from, so that:
 %pip install -q pypdf
 ```
 
-Open each PDF listed in the metadata with `pypdf` and turn every page into one record: its text, the document id, title and URL, and the page number. The function is the reference for what a page record is; on a CPU notebook it takes several minutes over this corpus, so the cell after it first looks for `pages.jsonl`, the same records written once when the corpus was staged.
+`pdfs_to_page_docs` in `wattbot_rag.py` opens each PDF listed in the metadata with `pypdf` and turns every page into one record: its text, the document id, title and URL, and the page number. It is forty lines of plain Python with nothing AWS in it; open the file to read it. On a CPU notebook it takes several minutes over this corpus, so the cell first looks for `pages.jsonl`, the same records written once when the corpus was staged, and runs the extraction only if that file is not there.
 
 ```python
-from pypdf import PdfReader
-
-def pdfs_to_page_docs(metadata: pd.DataFrame, pdf_dir: str) -> List[Dict[str, Any]]:
-    """Load each PDF into a list of page-level dictionaries.
-
-    Each dict has keys: text, doc_id, title, url, page_num, page_label, total_pages.
-    """
-    page_docs: List[Dict[str, Any]] = []
-
-    for _, row in metadata.iterrows():
-        doc_id = str(row["id"]).strip()
-        title = str(row.get("title", "")).strip()
-        url = str(row.get("url", "")).strip()
-
-        pdf_path = os.path.join(pdf_dir, f"{doc_id}.pdf")
-        if not os.path.exists(pdf_path):
-            print(f"Missing PDF for {doc_id}, skipping.")
-            continue
-
-        try:
-            reader = PdfReader(pdf_path)
-        except Exception as e:
-            print(f"Failed to read {pdf_path}: {e}")
-            continue
-
-        total_pages = len(reader.pages)
-        for i, page in enumerate(reader.pages):
-            try:
-                text = page.extract_text() or ""
-            except Exception as e:
-                print(f"Failed to extract text from {doc_id} page {i}: {e}")
-                text = ""
-
-            text = text.strip()
-            if not text:
-                # Still keep the page so we know it exists, but mark it as empty
-                text = "[[EMPTY PAGE TEXT – see original PDF for tables/figures]]"
-
-            page_docs.append(
-                {
-                    "text": text,
-                    "doc_id": doc_id,
-                    "title": title,
-                    "url": url,
-                    "page_num": i,
-                    "page_label": str(i + 1),
-                    "total_pages": total_pages,
-                }
-            )
-
-    return page_docs
-
+from wattbot_rag import pdfs_to_page_docs   # the extraction: open each PDF with pypdf, one record per page; in scripts/wattbot_rag.py
 
 start = time.time()
 try:
