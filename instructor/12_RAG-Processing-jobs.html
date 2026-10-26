@@ -320,7 +320,7 @@
         <ul><li><a href="#setup">Setup</a></li>
 <li><a href="#step-1-check-the-inputs">Step 1 – Check the inputs</a></li>
 <li><a href="#step-2-processing-job-1-embed-all-chunks-on-a-gpu">Step 2 – Processing Job 1: embed all chunks on a GPU</a></li>
-<li><a href="#step-3-processing-job-2-full-wattbot-rag-over-all-questions">Step 3 – Processing Job 2: full WattBot RAG over all questions</a></li>
+<li><a href="#step-3-processing-job-2-the-wattbot-rag-loop-as-a-job">Step 3 – Processing Job 2: the WattBot RAG loop as a job</a></li>
 <li><a href="#step-4-download-predictions-and-evaluate">Step 4 – Download predictions and evaluate</a></li>
         </ul></div><!--/div.accordion-body-->
     </div><!--/div.accordion-collapse-->
@@ -533,11 +533,10 @@ which fits the 24 GB GPU of an <code>ml.g5.xlarge</code> with room for
 the KV cache. (The fine-tuning episode has the full memory arithmetic;
 the short version is that inference needs only the weights and training
 needs eight times more per parameter.)</p>
-<p>Why bother serving a model yourself when Bedrock is a call away?
-Because open-weight models that fit one GPU are now close to the
-frontier on the kinds of tasks research code runs, on data that never
-leaves your account. The newest of this family, Qwen3.8-27B, fits one
-GPU and lands within a few points of a frontier commercial model:</p>
+<p>Open-weight models that fit one GPU are now close to the frontier on
+the kinds of tasks research code runs, on data that never leaves your
+account. The newest of this family, Qwen3.8-27B, fits one GPU and lands
+within a few points of a frontier commercial model:</p>
 <figure><img src="../fig/qwen27b-vs-opus.png" alt="Paired horizontal bars comparing a 27B open-weight model on one GPU with a frontier commercial model; within a few points on agent tasks and science questions, ahead on chart reasoning" class="figure mx-auto d-block"><div class="figcaption">Qwen3.8-27B against Claude Opus 4.8 on three
 benchmarks: 73.0 vs 74.6 on Terminal-Bench 2.1, 89.2 vs 93.6 on GPQA
 Diamond, 83.7 vs 80.5 on CharXiv reasoning</div>
@@ -587,9 +586,9 @@ once the two papers the corpus lacks are dropped); all 220 is about an
 hour of generation, so run that at home. Both jobs carry
 <code>max_runtime_in_seconds</code>, so a hung job costs at most the
 cap. Compare the same pipeline on a GPU notebook instance (the optional
-GPU-notebook episode at the end of the lesson): the meter runs until
-someone stops it, and a forgotten <code>ml.g5.xlarge</code> is
-<code>$34</code> a day.</p>
+GPU-notebook episode that follows): the meter runs until someone stops
+it, and a forgotten <code>ml.g5.xlarge</code> is <code>$34</code> a
+day.</p>
 <p>The trade-off is latency. A job takes minutes to start, so this
 pattern is for batch questions, not a chatbot. For interactive use,
 Bedrock answers in seconds; for interactive use of a model Bedrock does
@@ -603,16 +602,16 @@ remember to turn off.</p>
 the inputs in the shared bucket.</li>
 <li>Run two short-lived GPU Processing jobs: one computes embeddings for
 all chunks; the second runs Qwen3-8B with <code>transformers</code> and
-the full RAG loop (retrieval + generation) over all training
-questions.</li>
+the full RAG loop (retrieval + generation) over the same 53-question
+sample as the Bedrock episode.</li>
 <li>Score the result and compare it with the Bedrock run.</li>
 </ul><section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
 <hr class="half-width"><div class="section level3">
 <h3 id="the-scripts">The scripts<a class="anchor" aria-label="anchor" href="#the-scripts"></a></h3>
 <p>Jobs run in containers, so the code they execute has to be shipped
 with the job: a Processing job cannot import functions defined in this
-notebook. The lesson repository has the three files we need as
-standalone scripts. Clone it:</p>
+notebook. The lesson clone has the four files we need as standalone
+scripts. Copy them:</p>
 <ul><li>
 <code>scripts/embedding_inference.py</code>: generic embedding
 script (JSONL with a <code>text</code> field in,
@@ -814,8 +813,8 @@ directory, embeds them with whatever Hugging Face model
 <code>--model_id</code> names, through the thirty-line wrapper in
 <code>hf_embedder.py</code>, normalises the vectors so a dot product is
 a cosine similarity, and saves one <code>embeddings.npy</code> to the
-output directory. Nothing in it knows about WattBot, which is the point
-of a Processing job script: inputs in, outputs out, no state.</p>
+output directory. Nothing in it knows about WattBot: inputs in, outputs
+out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
 of the estimator: the same role, tags, instance type and container
 versions, plus a runtime cap. Its <code>run</code> call names the
@@ -929,7 +928,7 @@ and inspect its shape to confirm the job ran successfully.</p>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1" aria-label="code-block-8-7"></a><span class="bu">print</span>(<span class="st">"Embeddings shape:"</span>, chunk_embeddings.shape, <span class="st">"for"</span>, <span class="bu">len</span>(chunked_docs), <span class="st">"chunks"</span>)</span></code></pre>
 </div>
 </div>
-</section><section><h2 class="section-heading" id="step-3-processing-job-2-full-wattbot-rag-over-all-questions">Step 3 – Processing Job 2: full WattBot RAG over all questions<a class="anchor" aria-label="anchor" href="#step-3-processing-job-2-full-wattbot-rag-over-all-questions"></a></h2>
+</section><section><h2 class="section-heading" id="step-3-processing-job-2-the-wattbot-rag-loop-as-a-job">Step 3 – Processing Job 2: the WattBot RAG loop as a job<a class="anchor" aria-label="anchor" href="#step-3-processing-job-2-the-wattbot-rag-loop-as-a-job"></a></h2>
 <hr class="half-width"><p>For the second job, we pass four inputs:</p>
 <ul><li>
 <code>chunks.jsonl</code> – serialized chunks (your bucket)</li>
@@ -1124,11 +1123,10 @@ and click <strong>View logs</strong>. That opens CloudWatch, the AWS
 service that stores every job’s printed output, at a list with one entry
 named after your job; click it. The text is the container’s stdout, kept
 after the job ends, updated while it runs (refresh). You will see, in
-order: the weight download (16 GB in shards),
-<code>Loading model with transformers</code>, a line per batch of
-answers and of explanations, then one line per question. The whole job
-is the 20 minutes in the cost callout; the generation is the second half
-of it.</p>
+order: <code>Loading model with transformers</code>, the weight download
+(16 GB in shards), a line per batch of answers and of explanations, then
+one line per question. The whole job is the 20 minutes in the cost
+callout; the generation is the second half of it.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-4-download-predictions-and-evaluate">Step 4 – Download predictions and evaluate<a class="anchor" aria-label="anchor" href="#step-4-download-predictions-and-evaluate"></a></h2>
 <hr class="half-width"><p>Finally, we download <code>wattbot_solutions.csv</code> from S3,
@@ -1198,7 +1196,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -1227,7 +1225,7 @@ the billed run.</p>
 <p>Expect the embedding job to bill about 8 minutes (about
 <code>$0.20</code>) and the RAG job about 17 minutes (about
 <code>$0.40</code>), so about <code>$0.60</code> of GPU time, the
-callout’s figure. In the RAG job’s log, the first 4 minutes of the
+callout’s GPU figure. In the RAG job’s log, the first 4 minutes of the
 billed window are the download and the model load; the rest is the
 questions, two generation calls each. Setup is a third of what you paid
 for, which is the argument for keeping an <code>HF_HOME</code> cache on
@@ -1261,7 +1259,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -1276,10 +1274,9 @@ percent over it.</p>
 <p>Under the caps we set, the worst case for a job that hangs (a stuck
 download, a model that never finishes loading) is 2 h ×
 <code>$1.41</code> = <strong><code>$2.82</code></strong> for either job.
-An <code>ml.g5.xlarge</code> notebook instance forgotten over a weekend
-is 64 h × <code>$1.41</code> = <strong><code>$90</code></strong>, and
-nothing caps it. That is the difference between a job and an instance:
-the job’s worst case is a number you chose before you launched it.</p>
+An <code>ml.g6e.xlarge</code> notebook instance forgotten over a weekend
+is 64 h × <code>$2.61</code> = <strong><code>$167</code></strong>, and
+nothing caps it.</p>
 </div>
 </div>
 </div>

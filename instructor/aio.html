@@ -1309,8 +1309,9 @@ purposes.</li>
 <strong>Uploading</strong> data to S3 is free.</li>
 <li>
 <strong>Downloading</strong> data out of AWS costs
-<code>$0.09</code>/GB beyond the 100 GB a month every account transfers
-out free.</li>
+<code>$0.09</code>/GB. (AWS waives the first 100 GB a month, but per
+organization, not per account; a university’s organization uses that
+elsewhere, so count on the full rate.)</li>
 <li>
 <strong>In-region transfer</strong> (e.g., S3 to EC2) is free, while
 cross-region data transfer is charged (<code>$0.01</code>/GB between
@@ -1401,7 +1402,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -1503,8 +1504,7 @@ per 1,000 = <code>$0.00004</code><br>
 </li>
 </ol>
 <p>These costs assume no request charges beyond the <code>GET</code>s
-for training, and ignore the 100 GB a month of free transfer out, which
-would cover the first three downloads.</p>
+for training.</p>
 <p>The <code>GET</code> line is the same four-thousandths of a cent at
 every size: request costs depend on how many objects you touch, not how
 big they are. The download line is about 80% of the total at every size,
@@ -1685,10 +1685,9 @@ something breaks or a charge looks wrong there is less to go on.</li>
 leaves AWS, not when it moves within a region. The notebook instance
 sits in the same region as your bucket, so reading or downloading files
 from S3 to the instance is free. Pulling the same files to a laptop is a
-transfer out of AWS, <code>$0.09</code> per GB past the 100 GB a month
-every account gets free, wherever the laptop is: “region” means the AWS
-data center your resources live in, and a machine outside AWS is never
-in one.</li>
+transfer out of AWS, <code>$0.09</code> per GB, wherever the laptop is:
+“region” means the AWS data center your resources live in, and a machine
+outside AWS is never in one.</li>
 </ul>
 <p>We’ll follow these steps to create our first “SageMaker notebook
 instance”.</p>
@@ -2267,7 +2266,7 @@ task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2754,7 +2753,7 @@ commit it, push with your PAT, and verify the change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -4517,7 +4516,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -4715,7 +4714,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6080,7 +6079,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -6130,7 +6129,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6862,7 +6861,7 @@ project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: a full fine-tune of a 7B model needs about
 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB =
@@ -7168,7 +7167,7 @@ whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; four things have to be
 in place before the session. Each is written out in the instructor
@@ -8007,7 +8006,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -8384,7 +8383,7 @@ CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8425,7 +8424,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -8604,7 +8603,7 @@ billed</strong>:</p>
 <tr>
 <td><strong>Billing unit</strong></td>
 <td>Per token processed</td>
-<td>Per hour the instance exists</td>
+<td>Per second while the instance runs, at an hourly rate</td>
 </tr>
 <tr>
 <td><strong>Cost while idle</strong></td>
@@ -8700,7 +8699,7 @@ page</a>):</p>
 </td>
 <td>~<code>$167</code>
 </td>
-<td>~<code>$1,905</code>
+<td>~<code>$1,906</code>
 </td>
 </tr>
 <tr>
@@ -8733,14 +8732,14 @@ for current per‑token prices) and Titan Text Embeddings V2
 </tr></thead>
 <tbody>
 <tr>
-<td>Embed ~9,000 chunks (~3M tokens)</td>
-<td>3M input tokens</td>
-<td>~<code>$0.06</code>
+<td>Embed ~9,000 chunks (~2.4M tokens)</td>
+<td>2.4M input tokens</td>
+<td>~<code>$0.05</code>
 </td>
 </tr>
 <tr>
-<td>Answer and explain the 245 training questions (two calls each,
-~1.5K‑token prompts) with DeepSeek V3</td>
+<td>Answer and explain the 220 answerable training questions (two calls
+each, ~1.5K‑token prompts) with DeepSeek V3</td>
 <td>650K in / 40K out</td>
 <td>~<code>$0.50</code>
 </td>
@@ -8755,8 +8754,7 @@ for current per‑token prices) and Titan Text Embeddings V2
 <p>A single forgotten weekend on the <em>cheapest</em> GPU instance
 costs more than fifty full runs of the pipeline on Bedrock; a forgotten
 weekend on the <code>ml.g6e.xlarge</code> the optional GPU-notebook
-episode uses costs more than a hundred. That asymmetry is why Bedrock is
-the default, not just an alternative.</p>
+episode uses costs more than a hundred.</p>
 <div id="bedrock-trade-offs-to-know-about" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -8765,8 +8763,7 @@ the default, not just an alternative.</p>
 <div id="bedrock-trade-offs-to-know-about" class="callout-inner">
 <h3 class="callout-title">Bedrock trade-offs to know about</h3>
 <div class="callout-content">
-<p>Bedrock is not free of downsides; it’s just that none of them are
-“you forgot and it kept charging you.”</p>
+<p>Bedrock’s limits:</p>
 <ul>
 <li>
 <strong>Less control over architecture.</strong> You can only call
@@ -8789,9 +8786,10 @@ inference API or request a quota increase rather than hammering the
 on‑demand endpoint.</li>
 <li>
 <strong>Data handling.</strong> Bedrock does not use your prompts to
-train models and keeps data in‑region, but you should still check your
-institution’s policy before sending sensitive documents to any hosted
-API.</li>
+train models, and keeps data in the region, or within the US when a
+<code>us.</code> cross-region profile is used, but you should still
+check your institution’s policy before sending sensitive documents to
+any hosted API.</li>
 <li>
 <strong>Cost tracking needs one extra step.</strong> On‑demand
 Bedrock calls carry no tags. To attribute spend to a project you route
@@ -8806,8 +8804,8 @@ skipping it leaves the usage anonymous on the bill.</li>
 </section><section><h2 class="section-heading" id="approaches-to-running-rag-on-aws">Approaches to Running RAG on AWS<a class="anchor" aria-label="anchor" href="#approaches-to-running-rag-on-aws"></a>
 </h2>
 <hr class="half-width">
-<p>With that framing, here are the main patterns, ordered from “reach
-for this first” to “only when you really need it.”</p>
+<p>The main patterns, ordered from “reach for this first” to “only when
+you really need it.”</p>
 <figure><img src="../fig/rag-approaches.svg" alt="Comparison table of four ways to run RAG on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)." class="figure mx-auto d-block"><div class="figcaption">Four columns, Bedrock API, Processing job, GPU
 notebook and Inference endpoint, compared on where the model runs, what
 runs between calls, billing unit, latency, model choice, what you must
@@ -8910,11 +8908,11 @@ in this lesson.</p>
 <hr class="half-width">
 <p>Cost tracking in this workshop relies on three tags —
 <code>Name</code>, <code>Project</code>, <code>Purpose</code> — so that
-Cost Explorer can break the shared bill down by challenge. The part that
-trips people up is that <strong>tags never propagate</strong>. Tagging
-your notebook instance tags the notebook instance and nothing else.
-Every other resource you create is a separate line item that is
-anonymous unless you tag it yourself at creation time.</p>
+Cost Explorer can break the shared bill down by challenge. <strong>Tags
+never propagate.</strong> Tagging your notebook instance tags the
+notebook instance and nothing else. Every other resource you create is a
+separate line item that is anonymous unless you tag it yourself at
+creation time.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -8939,7 +8937,7 @@ anonymous unless you tag it yourself at creation time.</p>
 </tr>
 <tr>
 <td>Training / tuning job</td>
-<td>Hourly, while the job runs</td>
+<td>Per second while the job runs, at an hourly rate</td>
 <td>
 <code>tags=</code> argument on the estimator or tuner, <strong>every
 job</strong>
@@ -8947,7 +8945,7 @@ job</strong>
 </tr>
 <tr>
 <td>Processing job</td>
-<td>Hourly, while the job runs</td>
+<td>Per second while the job runs, at an hourly rate</td>
 <td>
 <code>tags=</code> argument on the processor, <strong>every
 job</strong>
@@ -9183,11 +9181,11 @@ and complexity directly.</p>
 <hr class="half-width">
 <p>When you self-host models (as the Processing Jobs episode does next),
 you are responsible for picking a model, managing versions, and making
-sure your instance has enough VRAM. That’s fine for experiments, but it
+sure your instance has enough VRAM. That works for experiments, but it
 can get painful once multiple teams or challenges want to reuse the same
 pipeline.</p>
 <p>Running your <strong>embedding + generation</strong> steps on Amazon
-Bedrock gives you a few nice properties:</p>
+Bedrock gives you:</p>
 <ul>
 <li>
 <strong>Managed, up-to-date models.</strong> You can use
@@ -9200,7 +9198,7 @@ output) when you call the model. For some workloads this is cheaper; for
 large offline batches with smaller models, a dedicated GPU can still
 win.</li>
 <li>
-<strong>Easier sharing and governance.</strong> It’s easier to
+<strong>Easier sharing and governance.</strong> A team can
 standardize on a small set of Bedrock models across courses, hackathons,
 or labs than to manage many separate GPU instances.</li>
 </ul>
@@ -9224,8 +9222,7 @@ clustering, and classification.</li>
 <li>Supports configurable embedding dimensions (256, 512, or 1,024) and
 has presets tuned for retrieval or binary indexing.</li>
 <li>AWS does not publish the exact number of parameters for Titan
-models; you can treat it as a modern transformer specialized for
-embeddings rather than free‑form text generation.</li>
+models;</li>
 </ul>
 </li>
 <li>
@@ -9247,41 +9244,16 @@ messages) and returns the reply in the same shape, so switching
 model ID changes nothing else.</li>
 </ul>
 </li>
-<li>
-<p><strong>(Optional) Multimodal models for tables and
-figures</strong></p>
-<ul>
-<li>Bedrock also exposes <strong>multimodal models</strong> that can
-reason over images, charts, and document layouts (for example, Claude
-models with vision, or Amazon Titan Multimodal Embeddings). These are a
-good fit if much of your evidence lives in <strong>figures, tables, or
-scanned PDFs</strong>.</li>
-<li>To use them from Bedrock you send <strong>both text and image
-content</strong> in a single request:
-<ul>
-<li>Pre‑process PDFs by rendering pages (or cropping individual
-tables/figures) to images using a tool like <code>pdf2image</code> or a
-headless browser.</li>
-<li>Base64‑encode those images and include them as image parts alongside
-text in the model request.</li>
-<li>For multimodal embeddings, you call a Titan multimodal embedding
-model with an <code>inputImage</code> (and optionally
-<code>inputText</code>) payload to obtain a single vector that mixes
-visual and textual information.</li>
-</ul>
-</li>
-<li>This notebook stays with <strong>text‑only</strong> embeddings +
-generation to keep the workflow simple, but the same RAG pattern extends
-naturally to multimodal models once you add an image‑extraction step to
-your preprocessing pipeline.</li>
-</ul>
-</li>
+<li><p><strong>Multimodal models for tables and figures</strong>:
+Bedrock also serves models that embed or read images. Step 13 of this
+episode uses one, Amazon Nova Multimodal Embeddings, on the table and
+figure questions.</p></li>
 </ul>
 <p>For the full list of available models (Claude variants, Amazon
 models, and partner models), open the <a href="https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog" class="external-link">Model
 catalog</a> in the Amazon Bedrock console. Each entry has a model card
-with capabilities, typical use cases, and pricing, for exploring
-alternatives for your own RAG system.</p>
+with capabilities and typical use cases, and a link to the pricing page,
+for exploring alternatives for your own RAG system.</p>
 <div id="choosing-the-two-models" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -9302,10 +9274,10 @@ Bedrock serves without setup.</li>
 <li>
 <strong>Generation models</strong>: <a href="https://lmarena.ai/" class="external-link">LMArena</a> ranks chat models by blind human
 preference, and <a href="https://artificialanalysis.ai/" class="external-link">Artificial
-Analysis</a> plots quality against price per million tokens, which is
-the chart that matters for RAG: the answer is written from retrieved
-text, so a mid-priced model often reads as well as a flagship at a tenth
-of the cost.</li>
+Analysis</a> plots quality against price per million tokens, the chart
+to read for RAG, since the answer is written from retrieved text, so a
+mid-priced model often reads as well as a flagship at a tenth of the
+cost.</li>
 <li>
 <strong>Your own questions</strong>: the benchmarks rank models on
 other people’s data. <code>train_QA.csv</code> has labelled questions
@@ -9345,7 +9317,7 @@ here:</p>
 <ul>
 <li>
 <strong>The shared bucket</strong>, <code>ml-marathon-shared</code>,
-already set in the first cell below, holds the WattBot inputs under
+already set in the setup cells below, holds the WattBot inputs under
 <code>wattbot/</code>: <code>metadata.csv</code> (the index of papers),
 <code>train_QA.csv</code> (labelled questions and answers),
 <code>corpus.zip</code> (the PDFs) and <code>pages.jsonl</code> (the
@@ -9371,14 +9343,14 @@ only things being billed.</li>
 <div id="working-through-the-lesson-on-your-own" class="callout-inner">
 <h3 class="callout-title">Working through the lesson on your own?</h3>
 <div class="callout-content">
-<p>If there is no instructor-staged bucket, stage the three input files
+<p>If there is no instructor-staged bucket, stage the four input files
 in your own bucket under the same keys and point both variables at it:
 <code>metadata.csv</code> and <code>train_QA.csv</code> are in
 <code>data/data.zip</code> in the lesson repository,
 <code>corpus.zip</code> is built once by
 <code>scripts/build_wattbot_corpus.py</code>, and
 <code>instructors/shared-data-bucket.md</code> has the upload commands.
-Then set <code>shared_bucket = bucket_name</code> in the first cell
+Then set <code>shared_bucket = bucket_name</code> in the setup cell
 below and everything else works unchanged.</p>
 </div>
 </div>
@@ -9424,7 +9396,7 @@ each other, and a generation model, the chat model that writes the
 answer from the passages it is given. Both are catalog models on
 Bedrock, named by a model ID; the <a href="https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog" class="external-link">model
 catalog</a> in the console lists everything available in the region with
-its ID and price, and the <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html" class="external-link">supported
+its ID; prices are on the pricing page, and the <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html" class="external-link">supported
 models page</a> in the documentation is the same list as a table. Prices
 are per million tokens on the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>:
 in October 2026, DeepSeek V3 on demand is <code>$0.62</code> in and
@@ -9499,9 +9471,9 @@ WattBot pipeline is the same whether the models run on Bedrock, in a
 Processing job or on a notebook GPU. It lives once in the lesson
 repository, in <code>scripts/wattbot_rag.py</code>, and every RAG
 episode imports it; the only code that differs per episode is the two
-model calls. Clone the repository and copy the module next to this
-notebook (the Processing Jobs episode ships the same file inside its
-jobs).</p>
+model calls. Copy the module from the lesson clone to the folder next to
+this notebook (the Processing Jobs episode ships the same file inside
+its jobs).</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9515,12 +9487,12 @@ jobs).</p>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>    build_docid_to_url,</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>    compute_wattbot_score,</span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>    retrieve_top_k,</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>    run_single_qa,</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>)</span></code></pre>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>    split_ref_ids,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>    run_single_qa,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a>)</span></code></pre>
 </div>
 <p>Open <code>wattbot_rag.py</code> in the Jupyter file browser as you
-go: each helper is short, and the docstring at the top says which
-episode uses what.</p>
+go: each helper is short.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-3-load-the-metadata-and-training-questions">Step 3 – Load the metadata and training questions<a class="anchor" aria-label="anchor" href="#step-3-load-the-metadata-and-training-questions"></a>
 </h2>
@@ -9586,8 +9558,8 @@ the publishers’ sites is slow and unreliable when fifty notebooks do it
 at once, so the instructors did it once with
 <code>scripts/build_wattbot_corpus.py</code> and staged the result as
 <code>corpus.zip</code> in the shared bucket. We download that one file,
-unpack it, and delete the zip: the instance’s disk is 20 GB at most, and
-the zip plus the unpacked PDFs are close to 700 MB.</p>
+unpack it, and delete the zip: the instance’s volume is 20 GB, and the
+zip plus the unpacked PDFs are close to 700 MB.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9651,19 +9623,17 @@ load the staged result rather than rerun it. Each record stores:</p>
 <p>Later, we will <strong>chunk these pages</strong> into smaller
 overlapping segments for embedding.</p>
 <div class="section level3">
-<h3 id="why-we-page-chunk-first">Why we page-chunk first<a class="anchor" aria-label="anchor" href="#why-we-page-chunk-first"></a>
+<h3 id="pages-first-then-chunks">Pages first, then chunks<a class="anchor" aria-label="anchor" href="#pages-first-then-chunks"></a>
 </h3>
-<p>We split the PDF into <strong>pages before chunking</strong> because
-pages give us a stable, easy-to-interpret unit.<br>
-This helps with:</p>
+<p>Chunks keep the page they came from, so that:</p>
 <ul>
 <li>
 <strong>Keeping metadata</strong> (doc ID, URL, page labels) tied to
 the text.<br>
 </li>
 <li>
-<strong>Debugging retrieval</strong> — it’s much easier to
-understand what the model saw if we know which page(s) were used.<br>
+<strong>Debugging retrieval</strong> — the page says what the model
+saw.<br>
 </li>
 <li>
 <strong>Cleaning text</strong> before making smaller overlapping
@@ -9674,8 +9644,6 @@ chunks.<br>
 can try different chunk sizes or strategies without re-extracting the
 PDF.</li>
 </ul>
-<p>In short: <strong>pages first → then chunks</strong> keeps the
-workflow cleaner and easier to reason about.</p>
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9790,8 +9758,7 @@ chunker</strong> that operates on characters:</p>
 </ul>
 <p>In your own work, you may wish to plug in more sophisticated
 <em>semantic chunking</em> methods (e.g., splitting on headings, section
-titles, or sentence boundaries). For now, we’ll keep the implementation
-explicit and easy to debug.</p>
+titles, or sentence boundaries).</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -9959,9 +9926,7 @@ tokens, as before.</p>
 <p>One call per model does all of it. <code>tagged_profile_arn</code> in
 <code>wattbot_rag.py</code> looks for a profile named after your project
 and user name, creates it with the three tags if it is not there, and
-returns its ARN. Open the file if you want to see the forty lines;
-nothing in them is worth memorising. What is worth remembering is the
-sentence above: one tagged profile per model, its ARN in place of the
+returns its ARN. One tagged profile per model, its ARN in place of the
 model ID.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10035,10 +10000,10 @@ duplicates.</p>
 <h3 class="callout-title">Checking the profiles</h3>
 <div class="callout-content">
 <ul>
-<li>You can confirm the routing in the Bedrock console under
-<strong>Inference and Assessment → Cross-region inference → Application
-inference profiles</strong>, or with
-<code>bedrock.list_inference_profiles(typeEquals="APPLICATION")</code>.</li>
+<li>You can confirm the routing with
+<code>bedrock.list_inference_profiles(typeEquals="APPLICATION")</code>;
+the console’s inference-profile pages list only the system-defined
+profiles.</li>
 <li>The keys must be the three approved ones, <code>Name</code>,
 <code>Project</code> and <code>Purpose</code>, spelled exactly; any
 other key is ignored by the bill (the S3 episode says why).</li>
@@ -10171,11 +10136,11 @@ so an interrupted run picks up where it stopped.</p>
 <h3 class="callout-title">In a class, use the instructor’s copy</h3>
 <div class="callout-content">
 <p>Bedrock allows this account 300,000 Titan embedding tokens per
-minute, and the quota is not adjustable. This corpus is about 3 million
-tokens, so one notebook alone needs ten minutes at the full quota; a
-room of them shares it, so everyone’s loop slows to a crawl of retries.
-In class, leave <code>use_instructor_embeddings</code> in the next cell
-at <code>True</code>: the cache cell then downloads the matrix your
+minute. This corpus is about 2.4 million tokens, so one notebook alone
+needs ten minutes at the full quota; a room of them shares it, so
+everyone’s loop slows to a crawl of retries. In class, leave
+<code>use_instructor_embeddings</code> in the next cell at
+<code>True</code>: the cache cell then downloads the matrix your
 instructor computed with the same chunks and the same model from the
 shared bucket and skips the calls. Working on your own, set it to
 <code>False</code> and let the loop run; that is the step to
@@ -10353,12 +10318,12 @@ generation, and write a <code>wattbot_solutions_bedrock.csv</code> file
 that is about twenty minutes. For class we score a stratified sample
 instead: <code>sample_questions_by_type</code> draws ten questions from
 each evidence type (Quote, Table, Figure, Math, unanswerable,
-cross-paper, reconcile), about 55 questions after overlaps, so every row
-of the breakdown in the next step has something in it. The first 55 rows
-of the file would be nearly all Quote questions. The seed fixes the
-draw, and the Processing Jobs episode uses the same one, so the two runs
-are compared on the same questions. Set <code>per_type=0</code> to run
-the whole file.</p>
+cross-paper, reconcile), 53 questions after overlaps and the two missing
+papers, so every row of the breakdown in the next step has something in
+it. The first 53 rows of the file would be nearly all Quote questions.
+The seed fixes the draw, and the Processing Jobs episode uses the same
+one, so the two runs are compared on the same questions. Set
+<code>per_type=0</code> to run the whole file.</p>
 <p>The Processing Jobs episode reuses this same loop with self-hosted
 models; the only difference there is that the embedding, answer and
 explanation phases call local models instead of Bedrock-hosted ones.</p>
@@ -10367,7 +10332,7 @@ explanation phases call local models instead of Bedrock-hosted ones.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> sample_questions_by_type</span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1" aria-label="code-block-28-2"></a></span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a>eval_df <span class="op">=</span> sample_questions_by_type(train_df, per_type<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">0</span>)   <span class="co"># per_type=0 for all 245</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a>eval_df <span class="op">=</span> sample_questions_by_type(train_df, per_type<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">0</span>)   <span class="co"># per_type=0 for all 220 remaining questions</span></span>
 <span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a><span class="bu">print</span>(<span class="ss">f"Scoring </span><span class="sc">{</span><span class="bu">len</span>(eval_df)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(train_df)<span class="sc">}</span><span class="ss"> questions"</span>)</span>
 <span id="cb28-5"><a href="#cb28-5" tabindex="-1" aria-label="code-block-28-5"></a></span>
 <span id="cb28-6"><a href="#cb28-6" tabindex="-1" aria-label="code-block-28-6"></a>results <span class="op">=</span> []</span>
@@ -10435,10 +10400,7 @@ anything: figure and table questions failing while quote questions pass
 points at text extraction, which loses figures and flattens tables, not
 at the model. The wrapper adds a per-row score, joins on
 <code>id</code>, and prints the worst-scoring rows so you can see
-<em>why</em> the pipeline lost points. <code>train_QA.csv</code> has no
-separate “unanswerable” column, so <code>gt_is_na_col="is_blank"</code>
-tells the scorer to derive that flag from
-<code>answer_value == "is_blank"</code> on both sides.</p>
+<em>why</em> the pipeline lost points.</p>
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10463,25 +10425,24 @@ best cosine score was.</p>
 <div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> retrieve_top_k, split_ref_ids</span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a></span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a>worst <span class="op">=</span> scored_df.sort_values(<span class="st">"wattbot_score"</span>).head(<span class="dv">8</span>)</span>
-<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a>by_id <span class="op">=</span> results_df.set_index(<span class="st">"id"</span>)   <span class="co"># the model's answer, explanation and cited passages, keyed by question id</span></span>
-<span id="cb30-5"><a href="#cb30-5" tabindex="-1" aria-label="code-block-30-5"></a></span>
-<span id="cb30-6"><a href="#cb30-6" tabindex="-1" aria-label="code-block-30-6"></a><span class="cf">for</span> _, row <span class="kw">in</span> worst.iterrows():</span>
-<span id="cb30-7"><a href="#cb30-7" tabindex="-1" aria-label="code-block-30-7"></a>    qid <span class="op">=</span> row[<span class="st">"id"</span>]</span>
-<span id="cb30-8"><a href="#cb30-8" tabindex="-1" aria-label="code-block-30-8"></a>    gt_refs <span class="op">=</span> <span class="bu">set</span>(split_ref_ids(row[<span class="st">"ref_id_gt"</span>]))   <span class="co"># train_QA.csv stores the list as a string</span></span>
-<span id="cb30-9"><a href="#cb30-9" tabindex="-1" aria-label="code-block-30-9"></a>    retrieved <span class="op">=</span> retrieve_top_k(embed_query(row[<span class="st">"question_gt"</span>]), chunk_embeddings, chunked_docs, k<span class="op">=</span><span class="dv">8</span>)   <span class="co"># the merge suffixed both sides' columns</span></span>
-<span id="cb30-10"><a href="#cb30-10" tabindex="-1" aria-label="code-block-30-10"></a>    retrieved_docs <span class="op">=</span> [r[<span class="st">"doc_id"</span>] <span class="cf">for</span> r <span class="kw">in</span> retrieved]</span>
-<span id="cb30-11"><a href="#cb30-11" tabindex="-1" aria-label="code-block-30-11"></a>    <span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">96</span>)</span>
-<span id="cb30-12"><a href="#cb30-12" tabindex="-1" aria-label="code-block-30-12"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>qid<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>row[<span class="st">'question_gt'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a>    <span class="bu">print</span>(<span class="ss">f"  expected: </span><span class="sc">{</span>row[<span class="st">'answer_value_gt'</span>]<span class="sc">}</span><span class="ss">  from </span><span class="sc">{</span><span class="bu">sorted</span>(gt_refs)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a>    <span class="bu">print</span>(<span class="ss">f"  predicted: </span><span class="sc">{</span>row[<span class="st">'answer_value_pred'</span>]<span class="sc">}</span><span class="ss">  citing </span><span class="sc">{</span>row[<span class="st">'ref_id_pred'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-15"><a href="#cb30-15" tabindex="-1" aria-label="code-block-30-15"></a>    <span class="bu">print</span>(<span class="ss">f"  retrieval: top cosine </span><span class="sc">{</span>retrieved[<span class="dv">0</span>][<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">; top-8 papers </span><span class="sc">{</span>retrieved_docs<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-16"><a href="#cb30-16" tabindex="-1" aria-label="code-block-30-16"></a>    <span class="bu">print</span>(<span class="ss">f"  ground-truth paper retrieved: </span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> gt_refs <span class="op">&amp;</span> <span class="bu">set</span>(retrieved_docs) <span class="cf">else</span> <span class="st">'NO'</span><span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-17"><a href="#cb30-17" tabindex="-1" aria-label="code-block-30-17"></a>    <span class="cf">if</span> by_id.loc[qid, <span class="st">"explanation"</span>] <span class="op">!=</span> <span class="st">"is_blank"</span>:</span>
-<span id="cb30-18"><a href="#cb30-18" tabindex="-1" aria-label="code-block-30-18"></a>        <span class="bu">print</span>(<span class="ss">f"  model's explanation: </span><span class="sc">{</span>by_id<span class="sc">.</span>loc[qid, <span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-19"><a href="#cb30-19" tabindex="-1" aria-label="code-block-30-19"></a>        <span class="bu">print</span>(<span class="ss">f"  passages it cited: </span><span class="sc">{</span><span class="bu">str</span>(by_id.loc[qid, <span class="st">'supporting_materials'</span>])[:<span class="dv">400</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a>worst <span class="op">=</span> scored_df.sort_values(<span class="st">"wattbot_score"</span>).head(<span class="dv">8</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a>by_id <span class="op">=</span> results_df.set_index(<span class="st">"id"</span>)   <span class="co"># the model's answer, explanation and cited passages, keyed by question id</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1" aria-label="code-block-30-5"></a><span class="cf">for</span> _, row <span class="kw">in</span> worst.iterrows():</span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1" aria-label="code-block-30-6"></a>    qid <span class="op">=</span> row[<span class="st">"id"</span>]</span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1" aria-label="code-block-30-7"></a>    gt_refs <span class="op">=</span> <span class="bu">set</span>(split_ref_ids(row[<span class="st">"ref_id_gt"</span>]))   <span class="co"># train_QA.csv stores the list as a string</span></span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1" aria-label="code-block-30-8"></a>    retrieved <span class="op">=</span> retrieve_top_k(embed_query(row[<span class="st">"question_gt"</span>]), chunk_embeddings, chunked_docs, k<span class="op">=</span><span class="dv">8</span>)   <span class="co"># the merge suffixed both sides' columns</span></span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1" aria-label="code-block-30-9"></a>    retrieved_docs <span class="op">=</span> [r[<span class="st">"doc_id"</span>] <span class="cf">for</span> r <span class="kw">in</span> retrieved]</span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1" aria-label="code-block-30-10"></a>    <span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">96</span>)</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1" aria-label="code-block-30-11"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>qid<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>row[<span class="st">'question_gt'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-12"><a href="#cb30-12" tabindex="-1" aria-label="code-block-30-12"></a>    <span class="bu">print</span>(<span class="ss">f"  expected: </span><span class="sc">{</span>row[<span class="st">'answer_value_gt'</span>]<span class="sc">}</span><span class="ss">  from </span><span class="sc">{</span><span class="bu">sorted</span>(gt_refs)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a>    <span class="bu">print</span>(<span class="ss">f"  predicted: </span><span class="sc">{</span>row[<span class="st">'answer_value_pred'</span>]<span class="sc">}</span><span class="ss">  citing </span><span class="sc">{</span>row[<span class="st">'ref_id_pred'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a>    <span class="bu">print</span>(<span class="ss">f"  retrieval: top cosine </span><span class="sc">{</span>retrieved[<span class="dv">0</span>][<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">; top-8 papers </span><span class="sc">{</span>retrieved_docs<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-15"><a href="#cb30-15" tabindex="-1" aria-label="code-block-30-15"></a>    <span class="bu">print</span>(<span class="ss">f"  ground-truth paper retrieved: </span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> gt_refs <span class="op">&amp;</span> <span class="bu">set</span>(retrieved_docs) <span class="cf">else</span> <span class="st">'NO'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" tabindex="-1" aria-label="code-block-30-16"></a>    <span class="cf">if</span> by_id.loc[qid, <span class="st">"explanation"</span>] <span class="op">!=</span> <span class="st">"is_blank"</span>:</span>
+<span id="cb30-17"><a href="#cb30-17" tabindex="-1" aria-label="code-block-30-17"></a>        <span class="bu">print</span>(<span class="ss">f"  model's explanation: </span><span class="sc">{</span>by_id<span class="sc">.</span>loc[qid, <span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-18"><a href="#cb30-18" tabindex="-1" aria-label="code-block-30-18"></a>        <span class="bu">print</span>(<span class="ss">f"  passages it cited: </span><span class="sc">{</span><span class="bu">str</span>(by_id.loc[qid, <span class="st">'supporting_materials'</span>])[:<span class="dv">400</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Read the two lines at the bottom of each block together.
 “Ground-truth paper retrieved: NO” is a retrieval problem: a different
@@ -10535,7 +10496,7 @@ region you used. The rest sums the usage blocks and prints the cost.</p>
 <div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1" aria-label="code-block-31-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1" aria-label="code-block-31-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek V3 on-demand, October 2026; check the pricing page for your model and region</span></span>
 <span id="cb31-2"><a href="#cb31-2" tabindex="-1" aria-label="code-block-31-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">1.85</span>   <span class="co"># $ per million output tokens, same source</span></span>
 <span id="cb31-3"><a href="#cb31-3" tabindex="-1" aria-label="code-block-31-3"></a></span>
 <span id="cb31-4"><a href="#cb31-4" tabindex="-1" aria-label="code-block-31-4"></a>in_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"inputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
@@ -10581,14 +10542,14 @@ out.</p>
 the catalog (for example <code>us.amazon.nova-2-lite-v1:0</code>,
 <code>us.meta.llama4-maverick-17b-instruct-v1:0</code>, or a Mistral or
 Claude model if your account has access), wrap it in a tagged profile as
-in Step 7, and rerun the Step 11 loop on the same 55-question sample
+in Step 7, and rerun the Step 11 loop on the same 53-question sample
 with <code>call_bedrock_chat</code> pointed at it. Score it with
 <code>compute_wattbot_score</code> and price it from its
 <code>usage</code> blocks. Which evidence types moved, and what did a
 point of score cost?</li>
 <li>
 <strong>A different embedder.</strong> Retrieval is the other half.
-The Ohio catalog has one other embedding model, Cohere Embed v4
+The Ohio catalog also lists Cohere Embed v4
 (<code>cohere.embed-v4:0</code>), and its request body is different from
 Titan’s: a list of <code>texts</code> and an <code>input_type</code>
 that is <code>search_document</code> for the corpus and
@@ -10720,14 +10681,14 @@ flattened copy.</p>
 <p>A <strong>multimodal embedding model</strong> is one model that maps
 text <em>and</em> images into the same vector space, so a text question
 can be compared with an image directly: the picture of a table lands
-near a sentence about its contents. Bedrock has two: <a href="https://aws.amazon.com/blogs/aws/amazon-nova-multimodal-embeddings-now-available-in-amazon-bedrock/" class="external-link">Amazon
+near a sentence about its contents. Bedrock has two from Amazon: <a href="https://aws.amazon.com/blogs/aws/amazon-nova-multimodal-embeddings-now-available-in-amazon-bedrock/" class="external-link">Amazon
 Nova Multimodal Embeddings</a> (text, images, documents, video and
 audio, released 2025) and the older Titan Multimodal Embeddings G1 (text
 and images). Both are per-call, like Titan Text, and billed per image
 plus per text token; the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 has the rates, on the order of a hundredth of a cent per image. One
-catch: in October 2026 both are offered in <code>us-east-1</code> only
-(check the <a href="https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/model-catalog" class="external-link">model
+catch: in October 2026 Nova Multimodal Embeddings is offered in
+<code>us-east-1</code> and not in Ohio (check the <a href="https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/model-catalog" class="external-link">model
 catalog</a> for that region). A Bedrock call is an HTTPS request and the
 region is a parameter, so from Ohio that is a second client pointed at
 Virginia; it also means the images leave the region, which is the thing
@@ -10769,8 +10730,8 @@ N” or “Figure N” (tables are captioned above, figures below) and widens
 the crop to include that caption, so the image carries the identifier a
 question will use. A caption whose box no detector found falls back to
 the whole page, so nothing the text mentions is missed. Open the
-function; it is sixty lines and every rule in it is a line you can
-change. The detectors are the slow part, a second or two per page on
+function; it is about eighty lines, and every rule in it is a line you
+can change. The detectors are the slow part, a second or two per page on
 this instance, so the cell runs them only on the pages whose text
 carries a caption, under half of the corpus; in class, with
 <code>use_instructor_embeddings</code> set, it downloads the crops your
@@ -10857,7 +10818,7 @@ function handles both.</p>
 </div>
 <p>One call per crop, cached like the text matrix: locally, then in your
 bucket, then computed. The loop runs six calls at a time through a
-thread pool and prints every fifty; a thousand images takes about two
+thread pool and prints every fifty; the 2,213 crops take about four
 minutes. The question side uses the same model with
 <code>purpose="query"</code>.</p>
 <div class="codewrapper sourceCode" id="cb39">
@@ -11017,12 +10978,12 @@ the crops from the pages the top text chunks came from: if the hit-rate
 table says the text index is the better finder, the question is whether
 finding with text and <em>reading</em> with the image is the better
 split. Each run is the same loop as Step 11, so every question costs an
-answer call and an explanation call; the runs with images take about
-five minutes each, because every attached crop is hundreds of input
-tokens. In class, with <code>use_instructor_embeddings</code> set, the
-cell downloads the three result files from your instructor’s run of it
-instead and the next cell scores them; running the loops yourself is for
-after class.</p>
+answer call and an explanation call; our runs took 1.6, 4.0 and 3.0
+minutes, the image runs longer because every attached crop is hundreds
+of input tokens. In class, with <code>use_instructor_embeddings</code>
+set, the cell downloads the three result files from your instructor’s
+run of it instead and the next cell scores them; running the loops
+yourself is for after class.</p>
 <div class="codewrapper sourceCode" id="cb42">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -11173,15 +11134,15 @@ puzzle<a class="anchor" aria-label="anchor" href="#concluding-remarks-bedrock-mo
 </h2>
 <hr class="half-width">
 <p>In this episode we used Bedrock-hosted models for
-<strong>both</strong> embedding and generation. Larger, higher-quality
-models can definitely help a ton — especially on messy real-world
-questions — but it’s important to remember that they are still just
-<strong>one component</strong> in your RAG system.</p>
+<strong>both</strong> embedding and generation. Larger models help,
+especially on messy real-world questions — but it’s important to
+remember that they are still just <strong>one component</strong> in your
+RAG system.</p>
 <ul>
 <li>
-<strong>Bigger or newer models do not magically fix weak
-retrieval.</strong> If your chunks are poorly aligned with the
-questions, a very strong LLM will still struggle.</li>
+<strong>Bigger or newer models do not fix weak retrieval.</strong>
+If your chunks are poorly aligned with the questions, a very strong LLM
+will still struggle.</li>
 <li>
 <strong>Most of the long‑term accuracy gains in RAG systems come
 from the plumbing around the LLMs</strong>, including:
@@ -11201,8 +11162,8 @@ without rewriting your pipeline.</li>
 </ul>
 <p>As you adapt this notebook to your own projects, treat the LLM choice
 as <strong>one tunable component</strong> in a larger system. Iterating
-on chunking, indexing, and retrieval policies will almost always give
-you more headroom than swapping between already-good models.</p>
+on chunking, indexing, and retrieval policies usually gain more than
+swapping between already-good models.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -11358,11 +11319,10 @@ which fits the 24 GB GPU of an <code>ml.g5.xlarge</code> with room for
 the KV cache. (The fine-tuning episode has the full memory arithmetic;
 the short version is that inference needs only the weights and training
 needs eight times more per parameter.)</p>
-<p>Why bother serving a model yourself when Bedrock is a call away?
-Because open-weight models that fit one GPU are now close to the
-frontier on the kinds of tasks research code runs, on data that never
-leaves your account. The newest of this family, Qwen3.8-27B, fits one
-GPU and lands within a few points of a frontier commercial model:</p>
+<p>Open-weight models that fit one GPU are now close to the frontier on
+the kinds of tasks research code runs, on data that never leaves your
+account. The newest of this family, Qwen3.8-27B, fits one GPU and lands
+within a few points of a frontier commercial model:</p>
 <figure><img src="../fig/qwen27b-vs-opus.png" alt="Paired horizontal bars comparing a 27B open-weight model on one GPU with a frontier commercial model; within a few points on agent tasks and science questions, ahead on chart reasoning" class="figure mx-auto d-block"><div class="figcaption">Qwen3.8-27B against Claude Opus 4.8 on three
 benchmarks: 73.0 vs 74.6 on Terminal-Bench 2.1, 89.2 vs 93.6 on GPQA
 Diamond, 83.7 vs 80.5 on CharXiv reasoning</div>
@@ -11431,9 +11391,9 @@ once the two papers the corpus lacks are dropped); all 220 is about an
 hour of generation, so run that at home. Both jobs carry
 <code>max_runtime_in_seconds</code>, so a hung job costs at most the
 cap. Compare the same pipeline on a GPU notebook instance (the optional
-GPU-notebook episode at the end of the lesson): the meter runs until
-someone stops it, and a forgotten <code>ml.g5.xlarge</code> is
-<code>$34</code> a day.</p>
+GPU-notebook episode that follows): the meter runs until someone stops
+it, and a forgotten <code>ml.g5.xlarge</code> is <code>$34</code> a
+day.</p>
 <p>The trade-off is latency. A job takes minutes to start, so this
 pattern is for batch questions, not a chatbot. For interactive use,
 Bedrock answers in seconds; for interactive use of a model Bedrock does
@@ -11448,8 +11408,8 @@ remember to turn off.</p>
 the inputs in the shared bucket.</li>
 <li>Run two short-lived GPU Processing jobs: one computes embeddings for
 all chunks; the second runs Qwen3-8B with <code>transformers</code> and
-the full RAG loop (retrieval + generation) over all training
-questions.</li>
+the full RAG loop (retrieval + generation) over the same 53-question
+sample as the Bedrock episode.</li>
 <li>Score the result and compare it with the Bedrock run.</li>
 </ul>
 <section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
@@ -11460,8 +11420,8 @@ questions.</li>
 </h3>
 <p>Jobs run in containers, so the code they execute has to be shipped
 with the job: a Processing job cannot import functions defined in this
-notebook. The lesson repository has the three files we need as
-standalone scripts. Clone it:</p>
+notebook. The lesson clone has the four files we need as standalone
+scripts. Copy them:</p>
 <ul>
 <li>
 <code>scripts/embedding_inference.py</code>: generic embedding
@@ -11674,8 +11634,8 @@ directory, embeds them with whatever Hugging Face model
 <code>--model_id</code> names, through the thirty-line wrapper in
 <code>hf_embedder.py</code>, normalises the vectors so a dot product is
 a cosine similarity, and saves one <code>embeddings.npy</code> to the
-output directory. Nothing in it knows about WattBot, which is the point
-of a Processing job script: inputs in, outputs out, no state.</p>
+output directory. Nothing in it knows about WattBot: inputs in, outputs
+out, no state.</p>
 <p>A <code>HuggingFaceProcessor</code> is the Processing-job counterpart
 of the estimator: the same role, tags, instance type and container
 versions, plus a runtime cap. Its <code>run</code> call names the
@@ -11791,7 +11751,7 @@ and inspect its shape to confirm the job ran successfully.</p>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1" aria-label="code-block-8-7"></a><span class="bu">print</span>(<span class="st">"Embeddings shape:"</span>, chunk_embeddings.shape, <span class="st">"for"</span>, <span class="bu">len</span>(chunked_docs), <span class="st">"chunks"</span>)</span></code></pre>
 </div>
 </div>
-</section><section><h2 class="section-heading" id="step-3-processing-job-2-full-wattbot-rag-over-all-questions">Step 3 – Processing Job 2: full WattBot RAG over all questions<a class="anchor" aria-label="anchor" href="#step-3-processing-job-2-full-wattbot-rag-over-all-questions"></a>
+</section><section><h2 class="section-heading" id="step-3-processing-job-2-the-wattbot-rag-loop-as-a-job">Step 3 – Processing Job 2: the WattBot RAG loop as a job<a class="anchor" aria-label="anchor" href="#step-3-processing-job-2-the-wattbot-rag-loop-as-a-job"></a>
 </h2>
 <hr class="half-width">
 <p>For the second job, we pass four inputs:</p>
@@ -11993,11 +11953,10 @@ and click <strong>View logs</strong>. That opens CloudWatch, the AWS
 service that stores every job’s printed output, at a list with one entry
 named after your job; click it. The text is the container’s stdout, kept
 after the job ends, updated while it runs (refresh). You will see, in
-order: the weight download (16 GB in shards),
-<code>Loading model with transformers</code>, a line per batch of
-answers and of explanations, then one line per question. The whole job
-is the 20 minutes in the cost callout; the generation is the second half
-of it.</p>
+order: <code>Loading model with transformers</code>, the weight download
+(16 GB in shards), a line per batch of answers and of explanations, then
+one line per question. The whole job is the 20 minutes in the cost
+callout; the generation is the second half of it.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-4-download-predictions-and-evaluate">Step 4 – Download predictions and evaluate<a class="anchor" aria-label="anchor" href="#step-4-download-predictions-and-evaluate"></a>
 </h2>
@@ -12069,7 +12028,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12098,7 +12057,7 @@ the billed run.</p>
 <p>Expect the embedding job to bill about 8 minutes (about
 <code>$0.20</code>) and the RAG job about 17 minutes (about
 <code>$0.40</code>), so about <code>$0.60</code> of GPU time, the
-callout’s figure. In the RAG job’s log, the first 4 minutes of the
+callout’s GPU figure. In the RAG job’s log, the first 4 minutes of the
 billed window are the download and the model load; the rest is the
 questions, two generation calls each. Setup is a third of what you paid
 for, which is the argument for keeping an <code>HF_HOME</code> cache on
@@ -12132,7 +12091,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -12147,10 +12106,9 @@ percent over it.</p>
 <p>Under the caps we set, the worst case for a job that hangs (a stuck
 download, a model that never finishes loading) is 2 h ×
 <code>$1.41</code> = <strong><code>$2.82</code></strong> for either job.
-An <code>ml.g5.xlarge</code> notebook instance forgotten over a weekend
-is 64 h × <code>$1.41</code> = <strong><code>$90</code></strong>, and
-nothing caps it. That is the difference between a job and an instance:
-the job’s worst case is a number you chose before you launched it.</p>
+An <code>ml.g6e.xlarge</code> notebook instance forgotten over a weekend
+is 64 h × <code>$2.61</code> = <strong><code>$167</code></strong>, and
+nothing caps it.</p>
 </div>
 </div>
 </div>
@@ -12383,8 +12341,7 @@ on a training job) guarantees it.</li>
 </div>
 </div>
 </div>
-<p>Self-hosting on a notebook GPU is nonetheless the right starting
-point for understanding the alternatives, because it is:</p>
+<p>Self-hosting on a notebook GPU is the simplest form of it:</p>
 <ul>
 <li>Easy to understand on the AWS side (pick a GPU instance, pick a
 model, go)</li>
@@ -12395,8 +12352,7 @@ Bedrock does not carry</li>
 </ul>
 <p>The Processing Jobs episode runs this same pipeline as short-lived
 jobs, so the GPU only bills while it is embedding or generating; that is
-the pattern to use for real work. Later patterns (inference endpoints,
-batch transform) build on the same idea.</p>
+the pattern to use for real work.</p>
 </section><section><h2 class="section-heading" id="overview-wattbot-rag-on-a-single-notebook-gpu">Overview: WattBot RAG on a single notebook GPU<a class="anchor" aria-label="anchor" href="#overview-wattbot-rag-on-a-single-notebook-gpu"></a>
 </h2>
 <hr class="half-width">
@@ -12504,17 +12460,18 @@ those two resources are the only things being billed.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="co"># also verify you have selected the conda_pytorch kernel</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="im">import</span> torch</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="bu">print</span>(<span class="st">"torch cuda available:"</span>, torch.cuda.is_available())   <span class="co"># False means PyTorch cannot use the GPU even if nvidia-smi sees it</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="bu">print</span>(<span class="st">"num gpus:"</span>, torch.cuda.device_count())</span></code></pre>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="im">import</span> os</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>os.environ[<span class="st">"HF_HOME"</span>] <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/hf_cache"</span>   <span class="co"># before any Hugging Face import: every model download goes to the volume, not the small root disk</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="im">import</span> torch</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a><span class="bu">print</span>(<span class="st">"torch cuda available:"</span>, torch.cuda.is_available())   <span class="co"># False means PyTorch cannot use the GPU even if nvidia-smi sees it</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a><span class="bu">print</span>(<span class="st">"num gpus:"</span>, torch.cuda.device_count())</span></code></pre>
 </div>
 </div>
 <div class="section level3">
 <h3 id="install-vllm-first">Install vLLM first<a class="anchor" aria-label="anchor" href="#install-vllm-first"></a>
 </h3>
-<p>We install the inference server before loading anything else, because
-the install may replace PyTorch and then needs a kernel restart; doing
-it now means nothing is lost by restarting.</p>
+<p>The install may replace PyTorch and then needs a kernel restart, so
+it comes before anything is loaded.</p>
 <div id="installing-vllm-takes-a-few-minutes-and-the-meter-is-running" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -12545,7 +12502,7 @@ Restart</strong>) before continuing.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="co"># Several GB; it may replace torch, so restart the kernel (Kernel -&gt; Restart) if the log says it did</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>pip install <span class="op">-</span>q <span class="st">"vllm&gt;=0.17"</span> <span class="st">"peft&gt;=0.18"</span>   <span class="co"># Qwen3.8 needs vLLM 0.17+, which brings its own PyTorch; peft upgraded to match the transformers it installs</span></span></code></pre>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>pip install <span class="op">-</span>q <span class="st">"vllm&gt;=0.17"</span>   <span class="co"># Qwen3.8 needs vLLM 0.17+, which brings its own PyTorch</span></span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="import-data-from-bucket-into-notebook">Import data from bucket into notebook<a class="anchor" aria-label="anchor" href="#import-data-from-bucket-into-notebook"></a>
@@ -12728,43 +12685,16 @@ and load it.</p>
 </section><section><h2 class="section-heading" id="step-3-build-an-embedding-matrix">Step 3 – Build an embedding matrix<a class="anchor" aria-label="anchor" href="#step-3-build-an-embedding-matrix"></a>
 </h2>
 <hr class="half-width">
-<p>Now we embed each chunk into a vector using an open <strong>embedding
-model</strong>. For WattBot, a strong and relatively efficient choice
-is:</p>
+<p>Now we embed each chunk into a vector with an open <strong>embedding
+model</strong>:</p>
 <div class="section level3">
-<h3 id="thenlpergte-large-recommended-baseline-embedder">
-<code>thenlper/gte-large</code> (Recommended baseline embedder)<a class="anchor" aria-label="anchor" href="#thenlpergte-large-recommended-baseline-embedder"></a>
+<h3 id="thenlpergte-large">
+<code>thenlper/gte-large</code><a class="anchor" aria-label="anchor" href="#thenlpergte-large"></a>
 </h3>
-<ul>
-<li><p>Size / parameters: ~335M parameters, roughly 1.3–1.4 GB in
-BF16/FP16 when loaded on GPU. Fits cleanly on T4 (16 GB), L4, A10G, A10,
-A100, and all g5.* instances. Offers noticeably better retrieval quality
-than smaller 100M–150M models without requiring high-end GPU memory.
-Runs comfortably on g4dn.xlarge, g5.xlarge, or g5.2xlarge during
-workshops. Lets participants see meaningful improvements from chunking
-and retrieval methods without excessive compute cost.</p></li>
-<li><p>Intended use: General-purpose retrieval and semantic search
-across academic PDFs, sustainability reports, and mixed-domain long-form
-documents. Stronger semantic coherence than gte-base or MiniLM, but
-still lightweight enough for workshop hardware.</p></li>
-<li>
-<p>Throughput expectations:</p>
-<ul>
-<li>CPU only: workable for small corpora (&lt;2k chunks) but slow for
-anything larger.<br>
-</li>
-<li>GPU (T4, L4, A10G, A100) with batch sizes around 64–128:
-<ul>
-<li>20k–40k chunks/min on L4 or A10G<br>
-</li>
-<li>10k–15k chunks/min on T4<br>
-</li>
-<li>50k+ chunks/min on A100</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<p>The embedder the Processing Jobs episode used: 335 million
+parameters, 0.7 GB in bf16, 1,024-dimensional vectors, and about 1,100
+chunks a minute on an A10G, so the 9,000 chunks here take a few minutes
+on this GPU.</p>
 <p>We will:</p>
 <ol style="list-style-type: decimal">
 <li>Load the embedding model on GPU if available.</li>
@@ -12781,7 +12711,7 @@ required.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="co"># We'll use a stronger embedding model now that we have a GPU.</span></span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a><span class="co"># This model has ~335M parameters and benefits from GPU acceleration,</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a><span class="co"># but is still reasonable to run on a single 24 GB GPU.</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a><span class="co"># and fits beside the 27B generator on this 48 GB GPU.</span></span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a>embedding_model_id <span class="op">=</span> <span class="st">"thenlper/gte-large"</span></span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a></span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a><span class="bu">print</span>(<span class="st">"CUDA available for embeddings:"</span>, torch.cuda.is_available())</span>
@@ -12809,7 +12739,7 @@ one matrix, one row per chunk.</p>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1" aria-label="code-block-14-12"></a>            normalize_embeddings<span class="op">=</span><span class="va">True</span>,   <span class="co"># unit-length vectors, so a dot product is the cosine similarity</span></span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1" aria-label="code-block-14-13"></a>        )</span>
 <span id="cb14-14"><a href="#cb14-14" tabindex="-1" aria-label="code-block-14-14"></a>        all_embeddings.append(emb)</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1" aria-label="code-block-14-15"></a>    embeddings <span class="op">=</span> np.vstack(all_embeddings) <span class="cf">if</span> all_embeddings <span class="cf">else</span> np.zeros((<span class="dv">0</span>, <span class="dv">768</span>))</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1" aria-label="code-block-14-15"></a>    embeddings <span class="op">=</span> np.vstack(all_embeddings) <span class="cf">if</span> all_embeddings <span class="cf">else</span> np.zeros((<span class="dv">0</span>, <span class="dv">1024</span>))</span>
 <span id="cb14-16"><a href="#cb14-16" tabindex="-1" aria-label="code-block-14-16"></a>    <span class="bu">print</span>(<span class="ss">f"Computed embeddings for </span><span class="sc">{</span><span class="bu">len</span>(texts)<span class="sc">}</span><span class="ss"> chunks in </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> start<span class="sc">:.1f}</span><span class="ss">s"</span>)</span>
 <span id="cb14-17"><a href="#cb14-17" tabindex="-1" aria-label="code-block-14-17"></a>    <span class="cf">return</span> embeddings</span></code></pre>
 </div>
@@ -12835,9 +12765,8 @@ above).</li>
 chunk embeddings.</li>
 <li>Take the top–k most similar chunks as our retrieved context.</li>
 </ol>
-<p>This keeps the retrieval logic completely transparent for teaching,
-while still matching the <em>spirit</em> of production systems that use
-FAISS, Chroma, Weaviate, etc.</p>
+<p>This keeps the retrieval logic in plain view, while matching the
+shape of production systems that use FAISS, Chroma, Weaviate, etc.</p>
 <div class="section level4">
 <h4 id="when-might-faiss-or-a-vector-database-be-worth-exploring">When might FAISS or a vector database be worth exploring?<a class="anchor" aria-label="anchor" href="#when-might-faiss-or-a-vector-database-be-worth-exploring"></a>
 </h4>
@@ -12883,17 +12812,17 @@ embedding collections. This is overkill for our teaching demo (and the
 Wattbot project in general), but very relevant for production-scale
 systems.</p></li>
 </ul>
-<p>In this episode we deliberately stick with a simple in-memory index
-so the retrieval step is easy to inspect and debug. In your own projects
-you can <strong>swap out the retrieval layer</strong> for FAISS or a
-vector DB without changing the overall RAG architecture: the model still
-sees “top–k retrieved chunks” as context.</p>
+<p>This episode uses a simple in-memory index, so the retrieval step is
+easy to inspect and debug. In your own projects you can <strong>swap out
+the retrieval layer</strong> for FAISS or a vector DB without changing
+the overall RAG architecture: the model still sees “top–k retrieved
+chunks” as context.</p>
 <p><code>retrieve_top_k</code> from <code>wattbot_rag.py</code> is that
 search: normalize the query and the matrix, one matrix multiply for the
 cosine similarities, <code>argsort</code> for the top <em>k</em>. Open
 the file to see it; it is a dozen lines. <code>embed_query_with</code>
-wraps the sentence-transformer as the <code>embed_query(question)</code>
-callable the rest of the pipeline expects.</p>
+wraps the embedder as the <code>embed_query(question)</code> callable
+the rest of the pipeline expects.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -12961,21 +12890,20 @@ generate a short explanation (&lt;= 100 characters).</li>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="im">import</span> os</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a><span class="co"># Keep model weights on the notebook's 100 GB volume rather than the small root disk.</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>os.environ[<span class="st">"HF_HOME"</span>] <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/hf_cache"</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a><span class="im">from</span> vllm <span class="im">import</span> LLM, SamplingParams</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a></span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>qwen_model_id <span class="op">=</span> <span class="st">"Qwen/Qwen3.8-27B-FP8"</span>   <span class="co"># pre-quantized FP8 checkpoint; vLLM reads that from its config, so no quantization= argument is needed</span></span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a></span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a>load_start <span class="op">=</span> time.time()</span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>llm <span class="op">=</span> LLM(</span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a>    model<span class="op">=</span>qwen_model_id,                         <span class="co"># Hugging Face id; the weights download to HF_HOME on first use</span></span>
-<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>    max_model_len<span class="op">=</span><span class="dv">8192</span>,                          <span class="co"># longest prompt + answer we need; the model allows 262K, we do not</span></span>
-<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a>    gpu_memory_utilization<span class="op">=</span><span class="fl">0.85</span>,                 <span class="co"># leave ~7 GB for the embedding model and PyTorch overhead</span></span>
-<span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>    limit_mm_per_prompt<span class="op">=</span>{<span class="st">"image"</span>: <span class="dv">0</span>, <span class="st">"video"</span>: <span class="dv">0</span>},  <span class="co"># text only: skip reserving memory for the vision encoder</span></span>
-<span id="cb17-15"><a href="#cb17-15" tabindex="-1" aria-label="code-block-17-15"></a>)</span>
-<span id="cb17-16"><a href="#cb17-16" tabindex="-1" aria-label="code-block-17-16"></a><span class="bu">print</span>(<span class="ss">f"Model loaded in </span><span class="sc">{</span>(time.time() <span class="op">-</span> load_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min (download on first use, then weights into GPU memory)"</span>)</span>
-<span id="cb17-17"><a href="#cb17-17" tabindex="-1" aria-label="code-block-17-17"></a><span class="bu">print</span>(<span class="st">"vLLM engine ready:"</span>, qwen_model_id)</span></code></pre>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a><span class="im">from</span> vllm <span class="im">import</span> LLM, SamplingParams</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>qwen_model_id <span class="op">=</span> <span class="st">"Qwen/Qwen3.8-27B-FP8"</span>   <span class="co"># pre-quantized FP8 checkpoint; vLLM reads that from its config, so no quantization= argument is needed</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a>load_start <span class="op">=</span> time.time()</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a>llm <span class="op">=</span> LLM(</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>    model<span class="op">=</span>qwen_model_id,                         <span class="co"># Hugging Face id; the weights download to HF_HOME on first use</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a>    max_model_len<span class="op">=</span><span class="dv">8192</span>,                          <span class="co"># longest prompt + answer we need; the model allows 262K, we do not</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>    gpu_memory_utilization<span class="op">=</span><span class="fl">0.85</span>,                 <span class="co"># leave ~7 GB for the embedding model and PyTorch overhead</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a>    limit_mm_per_prompt<span class="op">=</span>{<span class="st">"image"</span>: <span class="dv">0</span>, <span class="st">"video"</span>: <span class="dv">0</span>},  <span class="co"># text only: skip reserving memory for the vision encoder</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>)</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1" aria-label="code-block-17-15"></a><span class="bu">print</span>(<span class="ss">f"Model loaded in </span><span class="sc">{</span>(time.time() <span class="op">-</span> load_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min (download on first use, then weights into GPU memory)"</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1" aria-label="code-block-17-16"></a><span class="bu">print</span>(<span class="st">"vLLM engine ready:"</span>, qwen_model_id)</span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -13085,41 +13013,43 @@ makes the explanation call.</li>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a>docid_to_url <span class="op">=</span> build_docid_to_url(metadata_df)</span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a></span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>all_results <span class="op">=</span> []</span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a>max_N <span class="op">=</span> np.inf   <span class="co"># set to e.g. 5 for a smoke test</span></span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>run_start <span class="op">=</span> time.time()</span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1" aria-label="code-block-22-6"></a></span>
-<span id="cb22-7"><a href="#cb22-7" tabindex="-1" aria-label="code-block-22-7"></a><span class="cf">for</span> idx, row <span class="kw">in</span> train_df.iterrows():</span>
-<span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a>    <span class="cf">if</span> idx <span class="op">&gt;=</span> max_N:</span>
-<span id="cb22-9"><a href="#cb22-9" tabindex="-1" aria-label="code-block-22-9"></a>        <span class="cf">break</span></span>
-<span id="cb22-10"><a href="#cb22-10" tabindex="-1" aria-label="code-block-22-10"></a>    <span class="bu">print</span>(<span class="st">"#"</span> <span class="op">*</span> <span class="dv">96</span>)</span>
-<span id="cb22-11"><a href="#cb22-11" tabindex="-1" aria-label="code-block-22-11"></a>    <span class="bu">print</span>(<span class="ss">f"QUESTION: </span><span class="sc">{</span>row[<span class="st">'question'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-12"><a href="#cb22-12" tabindex="-1" aria-label="code-block-22-12"></a></span>
-<span id="cb22-13"><a href="#cb22-13" tabindex="-1" aria-label="code-block-22-13"></a>    res <span class="op">=</span> run_single_qa(</span>
-<span id="cb22-14"><a href="#cb22-14" tabindex="-1" aria-label="code-block-22-14"></a>        row<span class="op">=</span>row,</span>
-<span id="cb22-15"><a href="#cb22-15" tabindex="-1" aria-label="code-block-22-15"></a>        embed_query<span class="op">=</span>embed_query,             <span class="co"># the embedding model on this GPU</span></span>
-<span id="cb22-16"><a href="#cb22-16" tabindex="-1" aria-label="code-block-22-16"></a>        generate<span class="op">=</span>call_qwen_chat,             <span class="co"># the vLLM engine on this GPU; the Bedrock episode passed its converse wrapper here</span></span>
-<span id="cb22-17"><a href="#cb22-17" tabindex="-1" aria-label="code-block-22-17"></a>        chunk_embeddings<span class="op">=</span>chunk_embeddings,</span>
-<span id="cb22-18"><a href="#cb22-18" tabindex="-1" aria-label="code-block-22-18"></a>        chunked_docs<span class="op">=</span>chunked_docs,</span>
-<span id="cb22-19"><a href="#cb22-19" tabindex="-1" aria-label="code-block-22-19"></a>        docid_to_url<span class="op">=</span>docid_to_url,</span>
-<span id="cb22-20"><a href="#cb22-20" tabindex="-1" aria-label="code-block-22-20"></a>        top_k<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb22-21"><a href="#cb22-21" tabindex="-1" aria-label="code-block-22-21"></a>        retrieval_threshold<span class="op">=</span><span class="fl">0.25</span>,</span>
-<span id="cb22-22"><a href="#cb22-22" tabindex="-1" aria-label="code-block-22-22"></a>        with_evidence_type<span class="op">=</span><span class="va">True</span>,             <span class="co"># ask the explanation call to tag [text], [table], [figure]</span></span>
-<span id="cb22-23"><a href="#cb22-23" tabindex="-1" aria-label="code-block-22-23"></a>        verbose<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb22-24"><a href="#cb22-24" tabindex="-1" aria-label="code-block-22-24"></a>    )</span>
-<span id="cb22-25"><a href="#cb22-25" tabindex="-1" aria-label="code-block-22-25"></a>    <span class="bu">print</span>(<span class="ss">f"ANSWER: </span><span class="sc">{</span>res[<span class="st">'answer'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-26"><a href="#cb22-26" tabindex="-1" aria-label="code-block-22-26"></a>    <span class="bu">print</span>(<span class="ss">f"ref_ids: </span><span class="sc">{</span>res[<span class="st">'ref_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-27"><a href="#cb22-27" tabindex="-1" aria-label="code-block-22-27"></a>    <span class="bu">print</span>(<span class="ss">f"EXPLANATION: </span><span class="sc">{</span>res[<span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-28"><a href="#cb22-28" tabindex="-1" aria-label="code-block-22-28"></a>    all_results.append(res)</span>
-<span id="cb22-29"><a href="#cb22-29" tabindex="-1" aria-label="code-block-22-29"></a></span>
-<span id="cb22-30"><a href="#cb22-30" tabindex="-1" aria-label="code-block-22-30"></a>solutions_df <span class="op">=</span> pd.DataFrame(all_results)</span>
-<span id="cb22-31"><a href="#cb22-31" tabindex="-1" aria-label="code-block-22-31"></a><span class="bu">print</span>(<span class="ss">f"Answered </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions in </span><span class="sc">{</span>(time.time() <span class="op">-</span> run_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on the notebook GPU"</span>)</span>
-<span id="cb22-32"><a href="#cb22-32" tabindex="-1" aria-label="code-block-22-32"></a>solutions_path <span class="op">=</span> os.path.join(local_data_dir, <span class="st">"train_solutions_qwen.csv"</span>)</span>
-<span id="cb22-33"><a href="#cb22-33" tabindex="-1" aria-label="code-block-22-33"></a>solutions_df.to_csv(solutions_path, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb22-34"><a href="#cb22-34" tabindex="-1" aria-label="code-block-22-34"></a></span>
-<span id="cb22-35"><a href="#cb22-35" tabindex="-1" aria-label="code-block-22-35"></a><span class="bu">print</span>(<span class="ss">f"Saved solutions for </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions to: </span><span class="sc">{</span>solutions_path<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-36"><a href="#cb22-36" tabindex="-1" aria-label="code-block-22-36"></a>solutions_df.head(<span class="dv">20</span>)</span></code></pre>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> drop_questions_without_papers</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>train_df <span class="op">=</span> drop_questions_without_papers(train_df, {d[<span class="st">"doc_id"</span>] <span class="cf">for</span> d <span class="kw">in</span> chunked_docs})   <span class="co"># as in the other RAG episodes: questions citing papers the corpus lacks are not scored</span></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>all_results <span class="op">=</span> []</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1" aria-label="code-block-22-6"></a>max_N <span class="op">=</span> np.inf   <span class="co"># set to e.g. 5 for a smoke test</span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1" aria-label="code-block-22-7"></a>run_start <span class="op">=</span> time.time()</span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1" aria-label="code-block-22-9"></a><span class="cf">for</span> idx, row <span class="kw">in</span> train_df.iterrows():</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1" aria-label="code-block-22-10"></a>    <span class="cf">if</span> idx <span class="op">&gt;=</span> max_N:</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1" aria-label="code-block-22-11"></a>        <span class="cf">break</span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1" aria-label="code-block-22-12"></a>    <span class="bu">print</span>(<span class="st">"#"</span> <span class="op">*</span> <span class="dv">96</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1" aria-label="code-block-22-13"></a>    <span class="bu">print</span>(<span class="ss">f"QUESTION: </span><span class="sc">{</span>row[<span class="st">'question'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1" aria-label="code-block-22-14"></a></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1" aria-label="code-block-22-15"></a>    res <span class="op">=</span> run_single_qa(</span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1" aria-label="code-block-22-16"></a>        row<span class="op">=</span>row,</span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1" aria-label="code-block-22-17"></a>        embed_query<span class="op">=</span>embed_query,             <span class="co"># the embedding model on this GPU</span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1" aria-label="code-block-22-18"></a>        generate<span class="op">=</span>call_qwen_chat,             <span class="co"># the vLLM engine on this GPU; the Bedrock episode passed its converse wrapper here</span></span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1" aria-label="code-block-22-19"></a>        chunk_embeddings<span class="op">=</span>chunk_embeddings,</span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1" aria-label="code-block-22-20"></a>        chunked_docs<span class="op">=</span>chunked_docs,</span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1" aria-label="code-block-22-21"></a>        docid_to_url<span class="op">=</span>docid_to_url,</span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1" aria-label="code-block-22-22"></a>        top_k<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1" aria-label="code-block-22-23"></a>        retrieval_threshold<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1" aria-label="code-block-22-24"></a>        with_evidence_type<span class="op">=</span><span class="va">True</span>,             <span class="co"># ask the explanation call to tag [text], [table], [figure]</span></span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1" aria-label="code-block-22-25"></a>        verbose<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb22-26"><a href="#cb22-26" tabindex="-1" aria-label="code-block-22-26"></a>    )</span>
+<span id="cb22-27"><a href="#cb22-27" tabindex="-1" aria-label="code-block-22-27"></a>    <span class="bu">print</span>(<span class="ss">f"ANSWER: </span><span class="sc">{</span>res[<span class="st">'answer'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-28"><a href="#cb22-28" tabindex="-1" aria-label="code-block-22-28"></a>    <span class="bu">print</span>(<span class="ss">f"ref_ids: </span><span class="sc">{</span>res[<span class="st">'ref_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-29"><a href="#cb22-29" tabindex="-1" aria-label="code-block-22-29"></a>    <span class="bu">print</span>(<span class="ss">f"EXPLANATION: </span><span class="sc">{</span>res[<span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-30"><a href="#cb22-30" tabindex="-1" aria-label="code-block-22-30"></a>    all_results.append(res)</span>
+<span id="cb22-31"><a href="#cb22-31" tabindex="-1" aria-label="code-block-22-31"></a></span>
+<span id="cb22-32"><a href="#cb22-32" tabindex="-1" aria-label="code-block-22-32"></a>solutions_df <span class="op">=</span> pd.DataFrame(all_results)</span>
+<span id="cb22-33"><a href="#cb22-33" tabindex="-1" aria-label="code-block-22-33"></a><span class="bu">print</span>(<span class="ss">f"Answered </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions in </span><span class="sc">{</span>(time.time() <span class="op">-</span> run_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on the notebook GPU"</span>)</span>
+<span id="cb22-34"><a href="#cb22-34" tabindex="-1" aria-label="code-block-22-34"></a>solutions_path <span class="op">=</span> os.path.join(local_data_dir, <span class="st">"train_solutions_qwen.csv"</span>)</span>
+<span id="cb22-35"><a href="#cb22-35" tabindex="-1" aria-label="code-block-22-35"></a>solutions_df.to_csv(solutions_path, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-36"><a href="#cb22-36" tabindex="-1" aria-label="code-block-22-36"></a></span>
+<span id="cb22-37"><a href="#cb22-37" tabindex="-1" aria-label="code-block-22-37"></a><span class="bu">print</span>(<span class="ss">f"Saved solutions for </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions to: </span><span class="sc">{</span>solutions_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-38"><a href="#cb22-38" tabindex="-1" aria-label="code-block-22-38"></a>solutions_df.head(<span class="dv">20</span>)</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -13144,9 +13074,9 @@ worst rows with the model’s explanation.</p>
 <span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a>)</span></code></pre>
 </div>
 <p>Change <code>retrieval_threshold</code> or <code>top_k</code> in the
-loop above, rerun it, and rescore: with the model loaded, a full pass
-over the training set takes a few minutes, which is what a GPU notebook
-is for. Then stop the instance.</p>
+loop above, rerun it, and rescore: with the model loaded, a pass over
+all 245 questions takes tens of minutes, and a <code>max_N</code> of 50
+a few. Then stop the instance.</p>
 </div>
 </section><section><h2 class="section-heading" id="recap-and-next-steps">Recap and next steps<a class="anchor" aria-label="anchor" href="#recap-and-next-steps"></a>
 </h2>
@@ -13165,9 +13095,7 @@ results out to a CSV for later scoring and analysis.</li>
 the system can explicitly say “I don’t know” when the evidence isn’t
 there.</li>
 </ul>
-<p>This is just a first pass at a RAG pipeline: it works, but there’s a
-lot of headroom to improve both accuracy and robustness. Some natural
-next steps:</p>
+<p>This is just a first pass at a RAG pipeline: some next steps:</p>
 <ul>
 <li><p><strong>Increase the size/quality of models used for embedding
 and generation</strong>: Try stronger embedding models (e.g., larger
@@ -13210,10 +13138,8 @@ prose.</li>
 </ul>
 </li>
 </ul>
-<p>As you iterate, the goal is to treat this notebook as a baseline RAG
-“workbench”: you can swap in better models, smarter retrieval
-strategies, and richer document preprocessing without changing the
-overall pipeline structure.</p>
+<p>Models, retrieval and preprocessing can each be swapped without
+changing the rest of the pipeline.</p>
 <div class="section level3">
 <h3 id="what-did-this-episode-cost">What did this episode cost?<a class="anchor" aria-label="anchor" href="#what-did-this-episode-cost"></a>
 </h3>
@@ -13227,7 +13153,7 @@ instance.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a>g6e_price <span class="op">=</span> <span class="fl">2.61</span>   <span class="co"># $/hour, ml.g6e.xlarge on-demand, from the Instances for ML page</span></span>
 <span id="cb24-2"><a href="#cb24-2" tabindex="-1" aria-label="code-block-24-2"></a>hours <span class="op">=</span> (time.time() <span class="op">-</span> session_start) <span class="op">/</span> <span class="dv">3600</span></span>
 <span id="cb24-3"><a href="#cb24-3" tabindex="-1" aria-label="code-block-24-3"></a><span class="bu">print</span>(<span class="ss">f"this notebook has been running </span><span class="sc">{</span>hours <span class="op">*</span> <span class="dv">60</span><span class="sc">:.0f}</span><span class="ss"> min since the setup cell: $</span><span class="sc">{</span>hours <span class="op">*</span> g6e_price<span class="sc">:.2f}</span><span class="ss"> so far, and counting"</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline as Processing jobs billed about $0.60 (that episode); on Bedrock, about fifteen cents"</span>)</span></code></pre>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline on the 53-question sample billed about $0.60 as Processing jobs; on Bedrock, about fifteen cents"</span>)</span></code></pre>
 </div>
 <p>The Processing Jobs episode does the same work, with the same
 <code>wattbot_rag.py</code>, as short-lived SageMaker jobs, so the GPU
@@ -13249,8 +13175,8 @@ serve it yourself.</li>
 <li>
 <strong>Inference uses reduced-precision weights</strong>: no
 gradients means the weights are the memory cost. FP8 puts a 27B model on
-one 48 GB GPU (<code>ml.g6e.xlarge</code>); bf16 would need 54 GB and a
-multi-GPU instance.</li>
+one 48 GB GPU (<code>ml.g6e.xlarge</code>); bf16 would need 54 GB, an 80
+GB GPU or a multi-GPU instance.</li>
 <li>
 <strong>The meter never stops on its own</strong>:
 <code>ml.g6e.xlarge</code> is <code>$2.61</code>/h, <code>$167</code>
@@ -13360,8 +13286,8 @@ its role signs every call, the lesson’s helper checks a launch against
 the account’s rules before it goes, and the console shows what you
 started next to everyone else’s work. On a laptop you sign in yourself,
 the JSON carries no price and no check, and a mistake is not seen until
-the bill. The rules in the callout, and the request check in section 5,
-are what make the trade worth it.</p>
+the bill. The rules in the callout and the request check in section 5
+cover that.</p>
 <div id="read-this-before-the-first-command" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -13391,9 +13317,9 @@ the notebooks always set. Jobs end on their own. <strong>Endpoints, EC2
 instances and GPU notebook instances do not</strong>, and the lesson
 never creates them from the CLI, or at all.</li>
 <li>
-<strong>An <code>AccessDeniedException</code> on the commands below
-is intended.</strong> The workshop account carries a guard-rail policy
-that denies endpoint and EC2 creation, instance types outside the
+<strong>A refused <code>create</code> command is the account’s
+rules, not a fault.</strong> The workshop account carries a guard-rail
+policy that denies endpoint and EC2 creation, instance types outside the
 lesson’s list, caps over 48 hours, and any job whose three tags are
 missing, blank or off the <code>Project</code> and <code>Purpose</code>
 lists. Do not look for a workaround. The policy is on the notebook role
@@ -13427,12 +13353,12 @@ the profile.</p>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="ex">aws</span> configure sso</span></code></pre>
 </div>
-<p>From then on, every session starts with a login, and a check that you
-are who you think you are, in the account you think you are in:</p>
 <p>The commands in this episode are the same in Bash (macOS, Linux, Git
 Bash on Windows) and in PowerShell; where the shell’s own syntax
 differs, variables, line continuation, writing a file, the two are shown
 as tabs.</p>
+<p>From then on, every session starts with a login, and a check that you
+are who you think you are, in the account you think you are in:</p>
 <div class="tabs">
 <nav><div id="nav-tab-1" class="nav nav-tabs" role="tablist">
 <button class="nav-link active" id="nav-tab-1-1" data-bs-toggle="tab" data-bs-target="#nav-tabpanel-1-1" type="button" role="tab" aria-controls="nav-tabpanel-1-1" aria-selected="true">
@@ -13447,7 +13373,7 @@ as tabs.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13456,7 +13382,7 @@ as tabs.</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13510,7 +13436,7 @@ download you paid for.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13519,7 +13445,7 @@ download you paid for.</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
+<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13532,8 +13458,8 @@ download you paid for.</p>
 </div>
 <p>Cost is billable seconds × instance count × the hourly rate, exactly
 as in the notebooks. Tags are returned by a separate call, which is also
-how you find the untagged job that will show up as “unallocated” on the
-bill:</p>
+how you find the untagged job that shows on the bill under “No tag
+key”:</p>
 <div class="tabs">
 <nav><div id="nav-tab-3" class="nav nav-tabs" role="tablist">
 <button class="nav-link active" id="nav-tab-3-1" data-bs-toggle="tab" data-bs-target="#nav-tabpanel-3-1" type="button" role="tab" aria-controls="nav-tabpanel-3-1" aria-selected="true">
@@ -13548,7 +13474,7 @@ bill:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13556,7 +13482,7 @@ bill:</p>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
+<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13580,9 +13506,8 @@ bill:</p>
 </div>
 <p>A stopped job keeps its logs and whatever it had already written to
 S3; a stopped notebook instance keeps
-<code>/home/ec2-user/SageMaker/</code>. Stopping is never the expensive
-mistake. Deleting an instance when you are done with it is the step that
-stops the storage charge too:</p>
+<code>/home/ec2-user/SageMaker/</code>. Deleting an instance when you
+are done with it is the step that stops the storage charge too:</p>
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13610,9 +13535,8 @@ in the region and let a job read it, which is the lesson’s pattern.</p>
 <hr class="half-width">
 <p>Every <code>estimator.fit()</code> in the training episodes assembled
 a JSON request and sent it to <code>CreateTrainingJob</code>. Here is
-that request. Fill in the five placeholders from your notebook: the
-image URI (run
-<code>print(xgboost_estimator.training_image_uri())</code> in the
+that request. Fill in the placeholders from your notebook: the image URI
+(run <code>print(xgboost_estimator.training_image_uri())</code> in the
 training episode’s notebook), your role ARN (<code>print(role)</code>),
 your bucket, your tag values, and a job name, which must be unique in
 the account.</p>
@@ -13632,7 +13556,7 @@ the account.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13667,7 +13591,7 @@ the account.</p>
 <span id="cb12-29"><a href="#cb12-29" tabindex="-1" aria-label="code-block-12-29"></a><span class="op">JSON</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
+<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13707,14 +13631,14 @@ the account.</p>
 <p>Before sending it, check it the way the notebooks did. The lesson
 repository has the account’s rules in
 <code>scripts/guardrails.json</code> and a script that applies them to a
-request file; a placeholder left in, a wrong <code>Purpose</code> or an
-instance type off the list is named here rather than refused silently by
-AWS:</p>
+request file; a <code>Project</code> or <code>Purpose</code> off the
+lists, an instance type off the list or a cap over 48 hours is named
+here rather than refused silently by AWS:</p>
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="fu">git</span> clone <span class="at">-q</span> https://github.com/qualiaMachine/ML_with_Amazon_SageMaker.git   <span class="co"># once, anywhere on the laptop</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">python</span> ML_with_Amazon_SageMaker/scripts/check_request.py train-xgboost.json</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="fu">git</span> clone <span class="at">-q</span> https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git   <span class="co"># once, anywhere on the laptop</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">python</span> ML_with_AWS_SageMaker/scripts/check_request.py train-xgboost.json</span></code></pre>
 </div>
 <p>Then send it. This one line is <code>estimator.fit()</code>:</p>
 <div class="codewrapper sourceCode" id="cb15">
@@ -13726,10 +13650,11 @@ AWS:</p>
 <code>StoppingCondition.MaxRuntimeInSeconds</code> is the
 <code>max_run</code> you set on every estimator; the SDK would have sent
 24 hours if you had not. <code>Tags</code> is the <code>tags=</code>
-argument, and without it the request is refused on the workshop account.
-<code>ResourceConfig</code> sets the instance type and count, which
-determine the cost; nothing in a JSON file prints a price, so look the
-type up on the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
+argument; without it the request is refused when sent from a notebook
+instance, and nothing checks it from a laptop until the permission set
+carries the policy. <code>ResourceConfig</code> sets the instance type
+and count, which determine the cost; nothing in a JSON file prints a
+price, so look the type up on the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page before sending it, as you would in a notebook.</p>
 <p>The CLI returns the moment the request is accepted; nothing waits. To
 follow the job the way <code>wait=True</code> did:</p>
@@ -13760,7 +13685,7 @@ account.</li>
 <code>aws sagemaker create-notebook-instance</code> with a GPU type:
 a GPU notebook is <code>$60</code> a day while you are asleep. The
 optional GPU-notebook episode creates one through the console, where it
-stays visible, and deletes it the same hour.</li>
+stays visible, and deletes it the same session.</li>
 <li>
 <code>aws ec2 run-instances</code>: bare virtual machines have no
 tags required, no runtime cap and no SageMaker job list to appear
@@ -13771,8 +13696,8 @@ is any instance type outside the lesson’s list, any cap over 48 hours
 and any job whose tags are missing or off the lists; the permission set
 a laptop uses gets the same policy once the administrator attaches it.
 The instructor page <em>Account preparation checklist</em> has the
-policy. On your own account, the same denies take about fifteen minutes
-to set up.</p>
+policy. On your own account, the same denies are an afternoon’s
+work.</p>
 </div>
 </div>
 </div>
@@ -13812,14 +13737,14 @@ finds something. Then run them against your own resources.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
+<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13844,9 +13769,9 @@ you do not recognise is a question for its owner, and on a shared
 account the tags (<code>list-tags</code>) tell you who that is. For an
 endpoint:
 <code>aws sagemaker delete-endpoint --endpoint-name &lt;name&gt;</code>,
-then find out how it was created, because the permission set should have
-refused it. Buckets cost almost nothing over a weekend and need no
-action.</p>
+then find out how it was created, because the notebook role refuses it
+and the permission set should once the policy is attached. Buckets cost
+almost nothing over a weekend and need no action.</p>
 </div>
 </div>
 </div>
@@ -13873,8 +13798,8 @@ almost every reason to open a terminal.</li>
 <code>MaxRuntimeInSeconds</code>, the same instance choice, with no
 price printed next to it.</li>
 <li>Endpoints, EC2 instances and GPU notebooks are not jobs and do not
-end; the workshop account denies creating them, and your own account
-should too.</li>
+end; the workshop account’s notebook role denies creating them, and your
+own account should too.</li>
 </ul>
 </div>
 </div>
@@ -13960,8 +13885,9 @@ against reality before and after you clean up.</p>
 </section><section><h2 class="section-heading" id="what-is-still-running-under-your-name">What is still running under your name?<a class="anchor" aria-label="anchor" href="#what-is-still-running-under-your-name"></a>
 </h2>
 <hr class="half-width">
-<p>Everything this lesson launched carries your name in its job name or
-its tags, so one pass over the job lists shows what is still billing. A
+<p>One pass over the three job lists shows every job still running in
+the account; yours are the ones with your notebook name in the training
+jobs and the <code>WattBot-</code> Processing jobs you launched. A
 completed job holds nothing; an InProgress one bills until it ends or
 hits its cap.</p>
 <div class="codewrapper sourceCode" id="cb2">
@@ -13976,14 +13902,14 @@ hits its cap.</p>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a><span class="co"># The three kinds of job, each with its own list call. The call returns a dictionary; the list of jobs is under a key</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a><span class="co"># whose name differs per kind ("TrainingJobSummaries", ...), and so does the key holding the job's name, so the loop</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a><span class="co"># carries both. StatusEquals keeps only running jobs; NameContains keeps the ones with your name in the job name.</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Jobs still InProgress with your name in them:"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Jobs still InProgress in the account:"</span>)</span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a>running <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a><span class="cf">for</span> kind, lister, key, name_key <span class="kw">in</span> [</span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1" aria-label="code-block-2-13"></a>    (<span class="st">"training"</span>,   sm.list_training_jobs,              <span class="st">"TrainingJobSummaries"</span>,            <span class="st">"TrainingJobName"</span>),</span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1" aria-label="code-block-2-14"></a>    (<span class="st">"tuning"</span>,     sm.list_hyper_parameter_tuning_jobs, <span class="st">"HyperParameterTuningJobSummaries"</span>, <span class="st">"HyperParameterTuningJobName"</span>),</span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1" aria-label="code-block-2-15"></a>    (<span class="st">"processing"</span>, sm.list_processing_jobs,            <span class="st">"ProcessingJobSummaries"</span>,          <span class="st">"ProcessingJobName"</span>),</span>
 <span id="cb2-16"><a href="#cb2-16" tabindex="-1" aria-label="code-block-2-16"></a>]:</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1" aria-label="code-block-2-17"></a>    <span class="cf">for</span> job <span class="kw">in</span> lister(StatusEquals<span class="op">=</span><span class="st">"InProgress"</span>, NameContains<span class="op">=</span>name, MaxResults<span class="op">=</span><span class="dv">50</span>)[key]:</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1" aria-label="code-block-2-17"></a>    <span class="cf">for</span> job <span class="kw">in</span> lister(StatusEquals<span class="op">=</span><span class="st">"InProgress"</span>, MaxResults<span class="op">=</span><span class="dv">50</span>)[key]:   <span class="co"># every running job in the account; the Processing jobs are not named after you, so no name filter</span></span>
 <span id="cb2-18"><a href="#cb2-18" tabindex="-1" aria-label="code-block-2-18"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>kind<span class="sc">:&lt;11}</span><span class="ss"> </span><span class="sc">{</span>job[name_key]<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1" aria-label="code-block-2-19"></a>        running <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1" aria-label="code-block-2-20"></a><span class="bu">print</span>(<span class="st">"  none"</span> <span class="cf">if</span> running <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="ss">f"  </span><span class="sc">{</span>running<span class="sc">}</span><span class="ss"> job(s) still billing: stop them from the console if you no longer need them"</span>)</span></code></pre>
@@ -14011,12 +13937,8 @@ are yours to remove (the instructors’ cleanup does not touch them):</p>
 <p>Deleting them is one call per profile. The cell deletes only the
 profiles the cell above listed, the ones whose name starts with your
 project and your name, so nobody else’s are touched even though the
-account’s policy would allow it; read the list before you set the flag.
-The notebook instance needs the Bedrock role from the RAG episodes for
-this call; on the old role it fails with an access-denied error, and the
-Bedrock console does the same job by hand (Inference and Assessment →
-Cross-region inference → Application inference profiles → select →
-Delete).</p>
+account’s policy would allow it; read the list before you set the
+flag.</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14035,14 +13957,12 @@ list should be empty or Stopped.</p>
 </section><section><h2 class="section-heading" id="shutting-down-notebook-instances">Shutting down notebook instances<a class="anchor" aria-label="anchor" href="#shutting-down-notebook-instances"></a>
 </h2>
 <hr class="half-width">
-<p>Notebook instances in SageMaker are billed per second, so it’s
-essential to stop or delete them when they are no longer needed. Earlier
-in the <strong>Notebooks as controllers</strong> episode, we discussed
-using lower-cost instance types like <code>ml.t3.medium</code>
-(approximately <code>$0.05</code>/hour) for controlling workflows. While
-this makes open notebooks less costly than larger instances, it’s still
-a good habit to stop or delete notebooks to avoid unnecessary spending,
-especially if left idle for long periods.</p>
+<p>Notebook instances bill per second at an hourly rate while they run,
+so stop or delete them when they are no longer needed. Earlier in the
+<strong>Notebooks as controllers</strong> episode, we discussed using
+lower-cost instance types like <code>ml.t3.medium</code> (approximately
+<code>$0.05</code>/hour) for controlling workflows. A small instance
+left running still bills a dollar a day.</p>
 <ol style="list-style-type: decimal">
 <li><strong>Navigate to SageMaker in the AWS Console.</strong></li>
 <li>In the left-hand menu, click <strong>Notebook
@@ -14063,9 +13983,8 @@ instance once the episode is done.</p>
 </section><section><h2 class="section-heading" id="cleaning-up-s3-storage">Cleaning up S3 storage<a class="anchor" aria-label="anchor" href="#cleaning-up-s3-storage"></a>
 </h2>
 <hr class="half-width">
-<p>While S3 storage is relatively inexpensive, cleaning up unused
-buckets and files helps keep costs minimal and your workspace
-organized.</p>
+<p>S3 storage is cheap, and a bucket left behind bills every month until
+it is deleted.</p>
 <ol style="list-style-type: decimal">
 <li><strong>Navigate to the S3 Console.</strong></li>
 <li>Locate the bucket(s) you created for this workshop.</li>
@@ -14083,7 +14002,7 @@ need.</li>
 <blockquote>
 <p><strong>Reminder:</strong> Earlier in the workshop, we set up tags
 for S3 buckets. Use these tags to filter and identify workshop-related
-buckets, ensuring that only unnecessary resources are deleted.</p>
+buckets, so that only workshop resources are deleted.</p>
 </blockquote>
 </section><section><h2 class="section-heading" id="monitoring-and-stopping-active-jobs">Monitoring and stopping active jobs<a class="anchor" aria-label="anchor" href="#monitoring-and-stopping-active-jobs"></a>
 </h2>
@@ -14104,8 +14023,7 @@ results before stopping a job.</li>
 </ol></section><section><h2 class="section-heading" id="billing-and-cost-monitoring">Billing and cost monitoring<a class="anchor" aria-label="anchor" href="#billing-and-cost-monitoring"></a>
 </h2>
 <hr class="half-width">
-<p>Managing your AWS expenses is vital to staying within budget. Follow
-these steps to monitor and control costs:</p>
+<p>To see what you are spending:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Set up billing alerts:</strong>
@@ -14193,17 +14111,17 @@ remove.</p>
 <p>Several things you could have done wrong in this workshop were
 refused before they cost anything: a job launched without the three
 tags, with a blank name, with a Project that is not on the account’s
-list, with an instance type outside the lesson’s list, or with no
-runtime cap, and any endpoint or EC2 instance at all. None of that is
-SageMaker’s own behaviour. It is a set of rules the account
+list, with an instance type outside the lesson’s list, a Processing job
+with no runtime cap, and any endpoint or EC2 instance at all. None of
+that is SageMaker’s own behaviour. It is a set of rules the account
 administrator attached to the role your notebook runs as, written in the
 same IAM policy language that gave the role its permissions, and each
 one says: refuse this request if it looks like this. An AWS account with
 no such rules lets a tagged job and an untagged one through alike, and
 lets a notebook instance run until someone remembers it.</p>
 <p>If you administer an account of your own, a lab’s or a project’s, the
-same rules are an afternoon’s work and they hold across the console, the
-SDK and the CLI, because all three are the same API. The lesson’s
+same rules are an afternoon’s work, and they hold across the console,
+the SDK and the CLI, because all three are the same API. The lesson’s
 <em>Account preparation checklist</em> instructor page has the policy as
 JSON and the one command that attaches it to a role; its <em>Overnight
 safeguards</em> section has the three measures that go with it. In order
@@ -14249,7 +14167,7 @@ missing or too large</td>
 </tr>
 <tr>
 <td>Notebook instances stop at 11 pm</td>
-<td>the forgotten GPU notebook, <code>$60</code> a night</td>
+<td>the forgotten GPU notebook, <code>$63</code> a night</td>
 <td>a ten-line scheduled Lambda function</td>
 </tr>
 <tr>
@@ -14265,9 +14183,8 @@ own launches need real tag values and listed instance types too. And the
 error a refused request gets,
 <code>AccessDeniedException ... with an explicit deny in an identity-based policy</code>,
 does not say which rule matched, so write the rules down where the
-people using the account will find them, as the <em>If the launch is
-refused</em> callout in the first training episode does here. A deny
-cannot carry a custom message either: AWS says
+people using the account will find them. A deny cannot carry a custom
+message either: AWS says
 <code>explicit deny in an identity-based policy</code> and nothing more,
 which is why this lesson keeps a copy of the policy next to its helper
 code and checks every launch against it in the notebook first, with
@@ -14394,8 +14311,9 @@ volume when Stopped</td>
 <p>Stopping the controller and walking away leaves the bucket billing
 for storage, a stopped GPU instance’s volume billing at
 <code>$0.14</code>/GB-month, and any Processing job that had not hit its
-<code>max_run</code> yet. Model artifacts in your bucket are the only
-thing worth keeping; download them once, then delete the bucket.</p>
+<code>max_runtime_in_seconds</code> yet. Model artifacts in your bucket
+are the only thing worth keeping; download them once, then delete the
+bucket.</p>
 </div>
 </div>
 </div>
@@ -14424,8 +14342,6 @@ storage costs.</p></li>
 up alerts.</p></li>
 <li><p>Use tags (set up earlier in the workshop) to track and monitor
 costs by resource.</p></li>
-<li><p>Following best practices for AWS resource management can
-significantly reduce costs and improve efficiency.</p></li>
 </ul>
 </div>
 </div>

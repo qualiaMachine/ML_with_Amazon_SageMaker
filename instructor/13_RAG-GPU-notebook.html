@@ -605,8 +605,7 @@ on a training job) guarantees it.</li>
 </ol></div>
 </div>
 </div>
-<p>Self-hosting on a notebook GPU is nonetheless the right starting
-point for understanding the alternatives, because it is:</p>
+<p>Self-hosting on a notebook GPU is the simplest form of it:</p>
 <ul><li>Easy to understand on the AWS side (pick a GPU instance, pick a
 model, go)</li>
 <li>Ideal for learning what retrieval and generation do, step by
@@ -615,8 +614,7 @@ step</li>
 Bedrock does not carry</li>
 </ul><p>The Processing Jobs episode runs this same pipeline as short-lived
 jobs, so the GPU only bills while it is embedding or generating; that is
-the pattern to use for real work. Later patterns (inference endpoints,
-batch transform) build on the same idea.</p>
+the pattern to use for real work.</p>
 </section><section><h2 class="section-heading" id="overview-wattbot-rag-on-a-single-notebook-gpu">Overview: WattBot RAG on a single notebook GPU<a class="anchor" aria-label="anchor" href="#overview-wattbot-rag-on-a-single-notebook-gpu"></a></h2>
 <hr class="half-width"><p>In this episode we rerun the <a href="https://www.kaggle.com/competitions/WattBot2026" class="external-link">WattBot 2026</a>
 RAG pipeline from the Bedrock episode, this time entirely from a single
@@ -708,16 +706,17 @@ those two resources are the only things being billed.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="co"># also verify you have selected the conda_pytorch kernel</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="im">import</span> torch</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="bu">print</span>(<span class="st">"torch cuda available:"</span>, torch.cuda.is_available())   <span class="co"># False means PyTorch cannot use the GPU even if nvidia-smi sees it</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="bu">print</span>(<span class="st">"num gpus:"</span>, torch.cuda.device_count())</span></code></pre>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="im">import</span> os</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>os.environ[<span class="st">"HF_HOME"</span>] <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/hf_cache"</span>   <span class="co"># before any Hugging Face import: every model download goes to the volume, not the small root disk</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="im">import</span> torch</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a><span class="bu">print</span>(<span class="st">"torch cuda available:"</span>, torch.cuda.is_available())   <span class="co"># False means PyTorch cannot use the GPU even if nvidia-smi sees it</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a><span class="bu">print</span>(<span class="st">"num gpus:"</span>, torch.cuda.device_count())</span></code></pre>
 </div>
 </div>
 <div class="section level3">
 <h3 id="install-vllm-first">Install vLLM first<a class="anchor" aria-label="anchor" href="#install-vllm-first"></a></h3>
-<p>We install the inference server before loading anything else, because
-the install may replace PyTorch and then needs a kernel restart; doing
-it now means nothing is lost by restarting.</p>
+<p>The install may replace PyTorch and then needs a kernel restart, so
+it comes before anything is loaded.</p>
 <div id="installing-vllm-takes-a-few-minutes-and-the-meter-is-running" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -748,7 +747,7 @@ Restart</strong>) before continuing.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="co"># Several GB; it may replace torch, so restart the kernel (Kernel -&gt; Restart) if the log says it did</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>pip install <span class="op">-</span>q <span class="st">"vllm&gt;=0.17"</span> <span class="st">"peft&gt;=0.18"</span>   <span class="co"># Qwen3.8 needs vLLM 0.17+, which brings its own PyTorch; peft upgraded to match the transformers it installs</span></span></code></pre>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="op">%</span>pip install <span class="op">-</span>q <span class="st">"vllm&gt;=0.17"</span>   <span class="co"># Qwen3.8 needs vLLM 0.17+, which brings its own PyTorch</span></span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="import-data-from-bucket-into-notebook">Import data from bucket into notebook<a class="anchor" aria-label="anchor" href="#import-data-from-bucket-into-notebook"></a></h2>
@@ -922,34 +921,15 @@ and load it.</p>
 <code>page_num</code>, <code>page_label</code>,
 <code>chunk_idx_in_page</code>), which we use later to cite sources.</p>
 </section><section><h2 class="section-heading" id="step-3-build-an-embedding-matrix">Step 3 – Build an embedding matrix<a class="anchor" aria-label="anchor" href="#step-3-build-an-embedding-matrix"></a></h2>
-<hr class="half-width"><p>Now we embed each chunk into a vector using an open <strong>embedding
-model</strong>. For WattBot, a strong and relatively efficient choice
-is:</p>
+<hr class="half-width"><p>Now we embed each chunk into a vector with an open <strong>embedding
+model</strong>:</p>
 <div class="section level3">
-<h3 id="thenlpergte-large-recommended-baseline-embedder">
-<code>thenlper/gte-large</code> (Recommended baseline embedder)<a class="anchor" aria-label="anchor" href="#thenlpergte-large-recommended-baseline-embedder"></a></h3>
-<ul><li><p>Size / parameters: ~335M parameters, roughly 1.3–1.4 GB in
-BF16/FP16 when loaded on GPU. Fits cleanly on T4 (16 GB), L4, A10G, A10,
-A100, and all g5.* instances. Offers noticeably better retrieval quality
-than smaller 100M–150M models without requiring high-end GPU memory.
-Runs comfortably on g4dn.xlarge, g5.xlarge, or g5.2xlarge during
-workshops. Lets participants see meaningful improvements from chunking
-and retrieval methods without excessive compute cost.</p></li>
-<li><p>Intended use: General-purpose retrieval and semantic search
-across academic PDFs, sustainability reports, and mixed-domain long-form
-documents. Stronger semantic coherence than gte-base or MiniLM, but
-still lightweight enough for workshop hardware.</p></li>
-<li>
-<p>Throughput expectations:</p>
-<ul><li>CPU only: workable for small corpora (&lt;2k chunks) but slow for
-anything larger.<br></li>
-<li>GPU (T4, L4, A10G, A100) with batch sizes around 64–128:
-<ul><li>20k–40k chunks/min on L4 or A10G<br></li>
-<li>10k–15k chunks/min on T4<br></li>
-<li>50k+ chunks/min on A100</li>
-</ul></li>
-</ul></li>
-</ul><p>We will:</p>
+<h3 id="thenlpergte-large"><code>thenlper/gte-large</code><a class="anchor" aria-label="anchor" href="#thenlpergte-large"></a></h3>
+<p>The embedder the Processing Jobs episode used: 335 million
+parameters, 0.7 GB in bf16, 1,024-dimensional vectors, and about 1,100
+chunks a minute on an A10G, so the 9,000 chunks here take a few minutes
+on this GPU.</p>
+<p>We will:</p>
 <ol style="list-style-type: decimal"><li>Load the embedding model on GPU if available.</li>
 <li>Encode all chunks in batches.</li>
 <li>Store the resulting matrix as a <code>torch.Tensor</code> or
@@ -963,7 +943,7 @@ required.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="co"># We'll use a stronger embedding model now that we have a GPU.</span></span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a><span class="co"># This model has ~335M parameters and benefits from GPU acceleration,</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a><span class="co"># but is still reasonable to run on a single 24 GB GPU.</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a><span class="co"># and fits beside the 27B generator on this 48 GB GPU.</span></span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a>embedding_model_id <span class="op">=</span> <span class="st">"thenlper/gte-large"</span></span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a></span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a><span class="bu">print</span>(<span class="st">"CUDA available for embeddings:"</span>, torch.cuda.is_available())</span>
@@ -991,7 +971,7 @@ one matrix, one row per chunk.</p>
 <span id="cb14-12"><a href="#cb14-12" tabindex="-1" aria-label="code-block-14-12"></a>            normalize_embeddings<span class="op">=</span><span class="va">True</span>,   <span class="co"># unit-length vectors, so a dot product is the cosine similarity</span></span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1" aria-label="code-block-14-13"></a>        )</span>
 <span id="cb14-14"><a href="#cb14-14" tabindex="-1" aria-label="code-block-14-14"></a>        all_embeddings.append(emb)</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1" aria-label="code-block-14-15"></a>    embeddings <span class="op">=</span> np.vstack(all_embeddings) <span class="cf">if</span> all_embeddings <span class="cf">else</span> np.zeros((<span class="dv">0</span>, <span class="dv">768</span>))</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1" aria-label="code-block-14-15"></a>    embeddings <span class="op">=</span> np.vstack(all_embeddings) <span class="cf">if</span> all_embeddings <span class="cf">else</span> np.zeros((<span class="dv">0</span>, <span class="dv">1024</span>))</span>
 <span id="cb14-16"><a href="#cb14-16" tabindex="-1" aria-label="code-block-14-16"></a>    <span class="bu">print</span>(<span class="ss">f"Computed embeddings for </span><span class="sc">{</span><span class="bu">len</span>(texts)<span class="sc">}</span><span class="ss"> chunks in </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> start<span class="sc">:.1f}</span><span class="ss">s"</span>)</span>
 <span id="cb14-17"><a href="#cb14-17" tabindex="-1" aria-label="code-block-14-17"></a>    <span class="cf">return</span> embeddings</span></code></pre>
 </div>
@@ -1014,9 +994,8 @@ above).</li>
 <li>Compute cosine similarity between the question embedding and all
 chunk embeddings.</li>
 <li>Take the top–k most similar chunks as our retrieved context.</li>
-</ol><p>This keeps the retrieval logic completely transparent for teaching,
-while still matching the <em>spirit</em> of production systems that use
-FAISS, Chroma, Weaviate, etc.</p>
+</ol><p>This keeps the retrieval logic in plain view, while matching the
+shape of production systems that use FAISS, Chroma, Weaviate, etc.</p>
 <div class="section level4">
 <h4 id="when-might-faiss-or-a-vector-database-be-worth-exploring">When might FAISS or a vector database be worth exploring?<a class="anchor" aria-label="anchor" href="#when-might-faiss-or-a-vector-database-be-worth-exploring"></a></h4>
 <p>For small–to–medium experiments (a few thousand to maybe tens of
@@ -1055,17 +1034,17 @@ FAISS can use GPUs and sharding to speed up search on very large
 embedding collections. This is overkill for our teaching demo (and the
 Wattbot project in general), but very relevant for production-scale
 systems.</p></li>
-</ul><p>In this episode we deliberately stick with a simple in-memory index
-so the retrieval step is easy to inspect and debug. In your own projects
-you can <strong>swap out the retrieval layer</strong> for FAISS or a
-vector DB without changing the overall RAG architecture: the model still
-sees “top–k retrieved chunks” as context.</p>
+</ul><p>This episode uses a simple in-memory index, so the retrieval step is
+easy to inspect and debug. In your own projects you can <strong>swap out
+the retrieval layer</strong> for FAISS or a vector DB without changing
+the overall RAG architecture: the model still sees “top–k retrieved
+chunks” as context.</p>
 <p><code>retrieve_top_k</code> from <code>wattbot_rag.py</code> is that
 search: normalize the query and the matrix, one matrix multiply for the
 cosine similarities, <code>argsort</code> for the top <em>k</em>. Open
 the file to see it; it is a dozen lines. <code>embed_query_with</code>
-wraps the sentence-transformer as the <code>embed_query(question)</code>
-callable the rest of the pipeline expects.</p>
+wraps the embedder as the <code>embed_query(question)</code> callable
+the rest of the pipeline expects.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1130,21 +1109,20 @@ generate a short explanation (&lt;= 100 characters).</li>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="im">import</span> os</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a><span class="co"># Keep model weights on the notebook's 100 GB volume rather than the small root disk.</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>os.environ[<span class="st">"HF_HOME"</span>] <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/hf_cache"</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a><span class="im">from</span> vllm <span class="im">import</span> LLM, SamplingParams</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a></span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a>qwen_model_id <span class="op">=</span> <span class="st">"Qwen/Qwen3.8-27B-FP8"</span>   <span class="co"># pre-quantized FP8 checkpoint; vLLM reads that from its config, so no quantization= argument is needed</span></span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a></span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a>load_start <span class="op">=</span> time.time()</span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>llm <span class="op">=</span> LLM(</span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a>    model<span class="op">=</span>qwen_model_id,                         <span class="co"># Hugging Face id; the weights download to HF_HOME on first use</span></span>
-<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>    max_model_len<span class="op">=</span><span class="dv">8192</span>,                          <span class="co"># longest prompt + answer we need; the model allows 262K, we do not</span></span>
-<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a>    gpu_memory_utilization<span class="op">=</span><span class="fl">0.85</span>,                 <span class="co"># leave ~7 GB for the embedding model and PyTorch overhead</span></span>
-<span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>    limit_mm_per_prompt<span class="op">=</span>{<span class="st">"image"</span>: <span class="dv">0</span>, <span class="st">"video"</span>: <span class="dv">0</span>},  <span class="co"># text only: skip reserving memory for the vision encoder</span></span>
-<span id="cb17-15"><a href="#cb17-15" tabindex="-1" aria-label="code-block-17-15"></a>)</span>
-<span id="cb17-16"><a href="#cb17-16" tabindex="-1" aria-label="code-block-17-16"></a><span class="bu">print</span>(<span class="ss">f"Model loaded in </span><span class="sc">{</span>(time.time() <span class="op">-</span> load_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min (download on first use, then weights into GPU memory)"</span>)</span>
-<span id="cb17-17"><a href="#cb17-17" tabindex="-1" aria-label="code-block-17-17"></a><span class="bu">print</span>(<span class="st">"vLLM engine ready:"</span>, qwen_model_id)</span></code></pre>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a><span class="im">from</span> vllm <span class="im">import</span> LLM, SamplingParams</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1" aria-label="code-block-17-5"></a></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1" aria-label="code-block-17-6"></a>qwen_model_id <span class="op">=</span> <span class="st">"Qwen/Qwen3.8-27B-FP8"</span>   <span class="co"># pre-quantized FP8 checkpoint; vLLM reads that from its config, so no quantization= argument is needed</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1" aria-label="code-block-17-7"></a></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1" aria-label="code-block-17-8"></a>load_start <span class="op">=</span> time.time()</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1" aria-label="code-block-17-9"></a>llm <span class="op">=</span> LLM(</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1" aria-label="code-block-17-10"></a>    model<span class="op">=</span>qwen_model_id,                         <span class="co"># Hugging Face id; the weights download to HF_HOME on first use</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1" aria-label="code-block-17-11"></a>    max_model_len<span class="op">=</span><span class="dv">8192</span>,                          <span class="co"># longest prompt + answer we need; the model allows 262K, we do not</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1" aria-label="code-block-17-12"></a>    gpu_memory_utilization<span class="op">=</span><span class="fl">0.85</span>,                 <span class="co"># leave ~7 GB for the embedding model and PyTorch overhead</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1" aria-label="code-block-17-13"></a>    limit_mm_per_prompt<span class="op">=</span>{<span class="st">"image"</span>: <span class="dv">0</span>, <span class="st">"video"</span>: <span class="dv">0</span>},  <span class="co"># text only: skip reserving memory for the vision encoder</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>)</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1" aria-label="code-block-17-15"></a><span class="bu">print</span>(<span class="ss">f"Model loaded in </span><span class="sc">{</span>(time.time() <span class="op">-</span> load_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min (download on first use, then weights into GPU memory)"</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1" aria-label="code-block-17-16"></a><span class="bu">print</span>(<span class="st">"vLLM engine ready:"</span>, qwen_model_id)</span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1248,41 +1226,43 @@ makes the explanation call.</li>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a>docid_to_url <span class="op">=</span> build_docid_to_url(metadata_df)</span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a></span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>all_results <span class="op">=</span> []</span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a>max_N <span class="op">=</span> np.inf   <span class="co"># set to e.g. 5 for a smoke test</span></span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>run_start <span class="op">=</span> time.time()</span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1" aria-label="code-block-22-6"></a></span>
-<span id="cb22-7"><a href="#cb22-7" tabindex="-1" aria-label="code-block-22-7"></a><span class="cf">for</span> idx, row <span class="kw">in</span> train_df.iterrows():</span>
-<span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a>    <span class="cf">if</span> idx <span class="op">&gt;=</span> max_N:</span>
-<span id="cb22-9"><a href="#cb22-9" tabindex="-1" aria-label="code-block-22-9"></a>        <span class="cf">break</span></span>
-<span id="cb22-10"><a href="#cb22-10" tabindex="-1" aria-label="code-block-22-10"></a>    <span class="bu">print</span>(<span class="st">"#"</span> <span class="op">*</span> <span class="dv">96</span>)</span>
-<span id="cb22-11"><a href="#cb22-11" tabindex="-1" aria-label="code-block-22-11"></a>    <span class="bu">print</span>(<span class="ss">f"QUESTION: </span><span class="sc">{</span>row[<span class="st">'question'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-12"><a href="#cb22-12" tabindex="-1" aria-label="code-block-22-12"></a></span>
-<span id="cb22-13"><a href="#cb22-13" tabindex="-1" aria-label="code-block-22-13"></a>    res <span class="op">=</span> run_single_qa(</span>
-<span id="cb22-14"><a href="#cb22-14" tabindex="-1" aria-label="code-block-22-14"></a>        row<span class="op">=</span>row,</span>
-<span id="cb22-15"><a href="#cb22-15" tabindex="-1" aria-label="code-block-22-15"></a>        embed_query<span class="op">=</span>embed_query,             <span class="co"># the embedding model on this GPU</span></span>
-<span id="cb22-16"><a href="#cb22-16" tabindex="-1" aria-label="code-block-22-16"></a>        generate<span class="op">=</span>call_qwen_chat,             <span class="co"># the vLLM engine on this GPU; the Bedrock episode passed its converse wrapper here</span></span>
-<span id="cb22-17"><a href="#cb22-17" tabindex="-1" aria-label="code-block-22-17"></a>        chunk_embeddings<span class="op">=</span>chunk_embeddings,</span>
-<span id="cb22-18"><a href="#cb22-18" tabindex="-1" aria-label="code-block-22-18"></a>        chunked_docs<span class="op">=</span>chunked_docs,</span>
-<span id="cb22-19"><a href="#cb22-19" tabindex="-1" aria-label="code-block-22-19"></a>        docid_to_url<span class="op">=</span>docid_to_url,</span>
-<span id="cb22-20"><a href="#cb22-20" tabindex="-1" aria-label="code-block-22-20"></a>        top_k<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb22-21"><a href="#cb22-21" tabindex="-1" aria-label="code-block-22-21"></a>        retrieval_threshold<span class="op">=</span><span class="fl">0.25</span>,</span>
-<span id="cb22-22"><a href="#cb22-22" tabindex="-1" aria-label="code-block-22-22"></a>        with_evidence_type<span class="op">=</span><span class="va">True</span>,             <span class="co"># ask the explanation call to tag [text], [table], [figure]</span></span>
-<span id="cb22-23"><a href="#cb22-23" tabindex="-1" aria-label="code-block-22-23"></a>        verbose<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb22-24"><a href="#cb22-24" tabindex="-1" aria-label="code-block-22-24"></a>    )</span>
-<span id="cb22-25"><a href="#cb22-25" tabindex="-1" aria-label="code-block-22-25"></a>    <span class="bu">print</span>(<span class="ss">f"ANSWER: </span><span class="sc">{</span>res[<span class="st">'answer'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-26"><a href="#cb22-26" tabindex="-1" aria-label="code-block-22-26"></a>    <span class="bu">print</span>(<span class="ss">f"ref_ids: </span><span class="sc">{</span>res[<span class="st">'ref_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-27"><a href="#cb22-27" tabindex="-1" aria-label="code-block-22-27"></a>    <span class="bu">print</span>(<span class="ss">f"EXPLANATION: </span><span class="sc">{</span>res[<span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-28"><a href="#cb22-28" tabindex="-1" aria-label="code-block-22-28"></a>    all_results.append(res)</span>
-<span id="cb22-29"><a href="#cb22-29" tabindex="-1" aria-label="code-block-22-29"></a></span>
-<span id="cb22-30"><a href="#cb22-30" tabindex="-1" aria-label="code-block-22-30"></a>solutions_df <span class="op">=</span> pd.DataFrame(all_results)</span>
-<span id="cb22-31"><a href="#cb22-31" tabindex="-1" aria-label="code-block-22-31"></a><span class="bu">print</span>(<span class="ss">f"Answered </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions in </span><span class="sc">{</span>(time.time() <span class="op">-</span> run_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on the notebook GPU"</span>)</span>
-<span id="cb22-32"><a href="#cb22-32" tabindex="-1" aria-label="code-block-22-32"></a>solutions_path <span class="op">=</span> os.path.join(local_data_dir, <span class="st">"train_solutions_qwen.csv"</span>)</span>
-<span id="cb22-33"><a href="#cb22-33" tabindex="-1" aria-label="code-block-22-33"></a>solutions_df.to_csv(solutions_path, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb22-34"><a href="#cb22-34" tabindex="-1" aria-label="code-block-22-34"></a></span>
-<span id="cb22-35"><a href="#cb22-35" tabindex="-1" aria-label="code-block-22-35"></a><span class="bu">print</span>(<span class="ss">f"Saved solutions for </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions to: </span><span class="sc">{</span>solutions_path<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb22-36"><a href="#cb22-36" tabindex="-1" aria-label="code-block-22-36"></a>solutions_df.head(<span class="dv">20</span>)</span></code></pre>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> drop_questions_without_papers</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a>train_df <span class="op">=</span> drop_questions_without_papers(train_df, {d[<span class="st">"doc_id"</span>] <span class="cf">for</span> d <span class="kw">in</span> chunked_docs})   <span class="co"># as in the other RAG episodes: questions citing papers the corpus lacks are not scored</span></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1" aria-label="code-block-22-4"></a></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1" aria-label="code-block-22-5"></a>all_results <span class="op">=</span> []</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1" aria-label="code-block-22-6"></a>max_N <span class="op">=</span> np.inf   <span class="co"># set to e.g. 5 for a smoke test</span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1" aria-label="code-block-22-7"></a>run_start <span class="op">=</span> time.time()</span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1" aria-label="code-block-22-8"></a></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1" aria-label="code-block-22-9"></a><span class="cf">for</span> idx, row <span class="kw">in</span> train_df.iterrows():</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1" aria-label="code-block-22-10"></a>    <span class="cf">if</span> idx <span class="op">&gt;=</span> max_N:</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1" aria-label="code-block-22-11"></a>        <span class="cf">break</span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1" aria-label="code-block-22-12"></a>    <span class="bu">print</span>(<span class="st">"#"</span> <span class="op">*</span> <span class="dv">96</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1" aria-label="code-block-22-13"></a>    <span class="bu">print</span>(<span class="ss">f"QUESTION: </span><span class="sc">{</span>row[<span class="st">'question'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1" aria-label="code-block-22-14"></a></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1" aria-label="code-block-22-15"></a>    res <span class="op">=</span> run_single_qa(</span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1" aria-label="code-block-22-16"></a>        row<span class="op">=</span>row,</span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1" aria-label="code-block-22-17"></a>        embed_query<span class="op">=</span>embed_query,             <span class="co"># the embedding model on this GPU</span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1" aria-label="code-block-22-18"></a>        generate<span class="op">=</span>call_qwen_chat,             <span class="co"># the vLLM engine on this GPU; the Bedrock episode passed its converse wrapper here</span></span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1" aria-label="code-block-22-19"></a>        chunk_embeddings<span class="op">=</span>chunk_embeddings,</span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1" aria-label="code-block-22-20"></a>        chunked_docs<span class="op">=</span>chunked_docs,</span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1" aria-label="code-block-22-21"></a>        docid_to_url<span class="op">=</span>docid_to_url,</span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1" aria-label="code-block-22-22"></a>        top_k<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1" aria-label="code-block-22-23"></a>        retrieval_threshold<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1" aria-label="code-block-22-24"></a>        with_evidence_type<span class="op">=</span><span class="va">True</span>,             <span class="co"># ask the explanation call to tag [text], [table], [figure]</span></span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1" aria-label="code-block-22-25"></a>        verbose<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb22-26"><a href="#cb22-26" tabindex="-1" aria-label="code-block-22-26"></a>    )</span>
+<span id="cb22-27"><a href="#cb22-27" tabindex="-1" aria-label="code-block-22-27"></a>    <span class="bu">print</span>(<span class="ss">f"ANSWER: </span><span class="sc">{</span>res[<span class="st">'answer'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-28"><a href="#cb22-28" tabindex="-1" aria-label="code-block-22-28"></a>    <span class="bu">print</span>(<span class="ss">f"ref_ids: </span><span class="sc">{</span>res[<span class="st">'ref_id'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-29"><a href="#cb22-29" tabindex="-1" aria-label="code-block-22-29"></a>    <span class="bu">print</span>(<span class="ss">f"EXPLANATION: </span><span class="sc">{</span>res[<span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-30"><a href="#cb22-30" tabindex="-1" aria-label="code-block-22-30"></a>    all_results.append(res)</span>
+<span id="cb22-31"><a href="#cb22-31" tabindex="-1" aria-label="code-block-22-31"></a></span>
+<span id="cb22-32"><a href="#cb22-32" tabindex="-1" aria-label="code-block-22-32"></a>solutions_df <span class="op">=</span> pd.DataFrame(all_results)</span>
+<span id="cb22-33"><a href="#cb22-33" tabindex="-1" aria-label="code-block-22-33"></a><span class="bu">print</span>(<span class="ss">f"Answered </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions in </span><span class="sc">{</span>(time.time() <span class="op">-</span> run_start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min on the notebook GPU"</span>)</span>
+<span id="cb22-34"><a href="#cb22-34" tabindex="-1" aria-label="code-block-22-34"></a>solutions_path <span class="op">=</span> os.path.join(local_data_dir, <span class="st">"train_solutions_qwen.csv"</span>)</span>
+<span id="cb22-35"><a href="#cb22-35" tabindex="-1" aria-label="code-block-22-35"></a>solutions_df.to_csv(solutions_path, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb22-36"><a href="#cb22-36" tabindex="-1" aria-label="code-block-22-36"></a></span>
+<span id="cb22-37"><a href="#cb22-37" tabindex="-1" aria-label="code-block-22-37"></a><span class="bu">print</span>(<span class="ss">f"Saved solutions for </span><span class="sc">{</span><span class="bu">len</span>(solutions_df)<span class="sc">}</span><span class="ss"> questions to: </span><span class="sc">{</span>solutions_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb22-38"><a href="#cb22-38" tabindex="-1" aria-label="code-block-22-38"></a>solutions_df.head(<span class="dv">20</span>)</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -1306,9 +1286,9 @@ worst rows with the model’s explanation.</p>
 <span id="cb23-5"><a href="#cb23-5" tabindex="-1" aria-label="code-block-23-5"></a>)</span></code></pre>
 </div>
 <p>Change <code>retrieval_threshold</code> or <code>top_k</code> in the
-loop above, rerun it, and rescore: with the model loaded, a full pass
-over the training set takes a few minutes, which is what a GPU notebook
-is for. Then stop the instance.</p>
+loop above, rerun it, and rescore: with the model loaded, a pass over
+all 245 questions takes tens of minutes, and a <code>max_N</code> of 50
+a few. Then stop the instance.</p>
 </div>
 </section><section><h2 class="section-heading" id="recap-and-next-steps">Recap and next steps<a class="anchor" aria-label="anchor" href="#recap-and-next-steps"></a></h2>
 <hr class="half-width"><p>In this episode, we:</p>
@@ -1323,9 +1303,7 @@ results out to a CSV for later scoring and analysis.</li>
 <li>Handled unanswerable questions with an <code>is_blank</code> flag so
 the system can explicitly say “I don’t know” when the evidence isn’t
 there.</li>
-</ul><p>This is just a first pass at a RAG pipeline: it works, but there’s a
-lot of headroom to improve both accuracy and robustness. Some natural
-next steps:</p>
+</ul><p>This is just a first pass at a RAG pipeline: some next steps:</p>
 <ul><li><p><strong>Increase the size/quality of models used for embedding
 and generation</strong>: Try stronger embedding models (e.g., larger
 sentence-transformers or domain-tuned embeddings) and more capable LLMs
@@ -1360,10 +1338,8 @@ scientific text (e.g., arXiv / PubMed) so they:</p>
 <li>Are less likely to hallucinate when reading dense scientific
 prose.</li>
 </ul></li>
-</ul><p>As you iterate, the goal is to treat this notebook as a baseline RAG
-“workbench”: you can swap in better models, smarter retrieval
-strategies, and richer document preprocessing without changing the
-overall pipeline structure.</p>
+</ul><p>Models, retrieval and preprocessing can each be swapped without
+changing the rest of the pipeline.</p>
 <div class="section level3">
 <h3 id="what-did-this-episode-cost">What did this episode cost?<a class="anchor" aria-label="anchor" href="#what-did-this-episode-cost"></a></h3>
 <p>There is no job record to ask here; the bill is simply the instance’s
@@ -1376,7 +1352,7 @@ instance.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a>g6e_price <span class="op">=</span> <span class="fl">2.61</span>   <span class="co"># $/hour, ml.g6e.xlarge on-demand, from the Instances for ML page</span></span>
 <span id="cb24-2"><a href="#cb24-2" tabindex="-1" aria-label="code-block-24-2"></a>hours <span class="op">=</span> (time.time() <span class="op">-</span> session_start) <span class="op">/</span> <span class="dv">3600</span></span>
 <span id="cb24-3"><a href="#cb24-3" tabindex="-1" aria-label="code-block-24-3"></a><span class="bu">print</span>(<span class="ss">f"this notebook has been running </span><span class="sc">{</span>hours <span class="op">*</span> <span class="dv">60</span><span class="sc">:.0f}</span><span class="ss"> min since the setup cell: $</span><span class="sc">{</span>hours <span class="op">*</span> g6e_price<span class="sc">:.2f}</span><span class="ss"> so far, and counting"</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline as Processing jobs billed about $0.60 (that episode); on Bedrock, about fifteen cents"</span>)</span></code></pre>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1" aria-label="code-block-24-4"></a><span class="bu">print</span>(<span class="ss">f"the same pipeline on the 53-question sample billed about $0.60 as Processing jobs; on Bedrock, about fifteen cents"</span>)</span></code></pre>
 </div>
 <p>The Processing Jobs episode does the same work, with the same
 <code>wattbot_rag.py</code>, as short-lived SageMaker jobs, so the GPU
@@ -1397,8 +1373,8 @@ serve it yourself.</li>
 <li>
 <strong>Inference uses reduced-precision weights</strong>: no
 gradients means the weights are the memory cost. FP8 puts a 27B model on
-one 48 GB GPU (<code>ml.g6e.xlarge</code>); bf16 would need 54 GB and a
-multi-GPU instance.</li>
+one 48 GB GPU (<code>ml.g6e.xlarge</code>); bf16 would need 54 GB, an 80
+GB GPU or a multi-GPU instance.</li>
 <li>
 <strong>The meter never stops on its own</strong>:
 <code>ml.g6e.xlarge</code> is <code>$2.61</code>/h, <code>$167</code>

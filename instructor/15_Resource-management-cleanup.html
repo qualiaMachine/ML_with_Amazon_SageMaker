@@ -504,8 +504,9 @@ against reality before and after you clean up.</p>
 <span id="cb1-19"><a href="#cb1-19" tabindex="-1" aria-label="code-block-1-19"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>            <span class="co"># replace with your bucket</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="what-is-still-running-under-your-name">What is still running under your name?<a class="anchor" aria-label="anchor" href="#what-is-still-running-under-your-name"></a></h2>
-<hr class="half-width"><p>Everything this lesson launched carries your name in its job name or
-its tags, so one pass over the job lists shows what is still billing. A
+<hr class="half-width"><p>One pass over the three job lists shows every job still running in
+the account; yours are the ones with your notebook name in the training
+jobs and the <code>WattBot-</code> Processing jobs you launched. A
 completed job holds nothing; an InProgress one bills until it ends or
 hits its cap.</p>
 <div class="codewrapper sourceCode" id="cb2">
@@ -520,14 +521,14 @@ hits its cap.</p>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a><span class="co"># The three kinds of job, each with its own list call. The call returns a dictionary; the list of jobs is under a key</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a><span class="co"># whose name differs per kind ("TrainingJobSummaries", ...), and so does the key holding the job's name, so the loop</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a><span class="co"># carries both. StatusEquals keeps only running jobs; NameContains keeps the ones with your name in the job name.</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Jobs still InProgress with your name in them:"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Jobs still InProgress in the account:"</span>)</span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a>running <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a><span class="cf">for</span> kind, lister, key, name_key <span class="kw">in</span> [</span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1" aria-label="code-block-2-13"></a>    (<span class="st">"training"</span>,   sm.list_training_jobs,              <span class="st">"TrainingJobSummaries"</span>,            <span class="st">"TrainingJobName"</span>),</span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1" aria-label="code-block-2-14"></a>    (<span class="st">"tuning"</span>,     sm.list_hyper_parameter_tuning_jobs, <span class="st">"HyperParameterTuningJobSummaries"</span>, <span class="st">"HyperParameterTuningJobName"</span>),</span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1" aria-label="code-block-2-15"></a>    (<span class="st">"processing"</span>, sm.list_processing_jobs,            <span class="st">"ProcessingJobSummaries"</span>,          <span class="st">"ProcessingJobName"</span>),</span>
 <span id="cb2-16"><a href="#cb2-16" tabindex="-1" aria-label="code-block-2-16"></a>]:</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1" aria-label="code-block-2-17"></a>    <span class="cf">for</span> job <span class="kw">in</span> lister(StatusEquals<span class="op">=</span><span class="st">"InProgress"</span>, NameContains<span class="op">=</span>name, MaxResults<span class="op">=</span><span class="dv">50</span>)[key]:</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1" aria-label="code-block-2-17"></a>    <span class="cf">for</span> job <span class="kw">in</span> lister(StatusEquals<span class="op">=</span><span class="st">"InProgress"</span>, MaxResults<span class="op">=</span><span class="dv">50</span>)[key]:   <span class="co"># every running job in the account; the Processing jobs are not named after you, so no name filter</span></span>
 <span id="cb2-18"><a href="#cb2-18" tabindex="-1" aria-label="code-block-2-18"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>kind<span class="sc">:&lt;11}</span><span class="ss"> </span><span class="sc">{</span>job[name_key]<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1" aria-label="code-block-2-19"></a>        running <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1" aria-label="code-block-2-20"></a><span class="bu">print</span>(<span class="st">"  none"</span> <span class="cf">if</span> running <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="ss">f"  </span><span class="sc">{</span>running<span class="sc">}</span><span class="ss"> job(s) still billing: stop them from the console if you no longer need them"</span>)</span></code></pre>
@@ -555,12 +556,8 @@ are yours to remove (the instructors’ cleanup does not touch them):</p>
 <p>Deleting them is one call per profile. The cell deletes only the
 profiles the cell above listed, the ones whose name starts with your
 project and your name, so nobody else’s are touched even though the
-account’s policy would allow it; read the list before you set the flag.
-The notebook instance needs the Bedrock role from the RAG episodes for
-this call; on the old role it fails with an access-denied error, and the
-Bedrock console does the same job by hand (Inference and Assessment →
-Cross-region inference → Application inference profiles → select →
-Delete).</p>
+account’s policy would allow it; read the list before you set the
+flag.</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -577,14 +574,12 @@ Delete).</p>
 <p>Now the console steps. Rerun the cells above when you are done; every
 list should be empty or Stopped.</p>
 </section><section><h2 class="section-heading" id="shutting-down-notebook-instances">Shutting down notebook instances<a class="anchor" aria-label="anchor" href="#shutting-down-notebook-instances"></a></h2>
-<hr class="half-width"><p>Notebook instances in SageMaker are billed per second, so it’s
-essential to stop or delete them when they are no longer needed. Earlier
-in the <strong>Notebooks as controllers</strong> episode, we discussed
-using lower-cost instance types like <code>ml.t3.medium</code>
-(approximately <code>$0.05</code>/hour) for controlling workflows. While
-this makes open notebooks less costly than larger instances, it’s still
-a good habit to stop or delete notebooks to avoid unnecessary spending,
-especially if left idle for long periods.</p>
+<hr class="half-width"><p>Notebook instances bill per second at an hourly rate while they run,
+so stop or delete them when they are no longer needed. Earlier in the
+<strong>Notebooks as controllers</strong> episode, we discussed using
+lower-cost instance types like <code>ml.t3.medium</code> (approximately
+<code>$0.05</code>/hour) for controlling workflows. A small instance
+left running still bills a dollar a day.</p>
 <ol style="list-style-type: decimal"><li><strong>Navigate to SageMaker in the AWS Console.</strong></li>
 <li>In the left-hand menu, click <strong>Notebook
 instances</strong>.</li>
@@ -601,9 +596,8 @@ volume the optional GPU-notebook episode asks for is <code>$14</code> a
 month. If you enlarged the volume to hold model weights, delete the
 instance once the episode is done.</p>
 </section><section><h2 class="section-heading" id="cleaning-up-s3-storage">Cleaning up S3 storage<a class="anchor" aria-label="anchor" href="#cleaning-up-s3-storage"></a></h2>
-<hr class="half-width"><p>While S3 storage is relatively inexpensive, cleaning up unused
-buckets and files helps keep costs minimal and your workspace
-organized.</p>
+<hr class="half-width"><p>S3 storage is cheap, and a bucket left behind bills every month until
+it is deleted.</p>
 <ol style="list-style-type: decimal"><li><strong>Navigate to the S3 Console.</strong></li>
 <li>Locate the bucket(s) you created for this workshop.</li>
 <li>Open the bucket and select any objects (files) you no longer
@@ -617,7 +611,7 @@ need.</li>
 </ol><blockquote>
 <p><strong>Reminder:</strong> Earlier in the workshop, we set up tags
 for S3 buckets. Use these tags to filter and identify workshop-related
-buckets, ensuring that only unnecessary resources are deleted.</p>
+buckets, so that only workshop resources are deleted.</p>
 </blockquote>
 </section><section><h2 class="section-heading" id="monitoring-and-stopping-active-jobs">Monitoring and stopping active jobs<a class="anchor" aria-label="anchor" href="#monitoring-and-stopping-active-jobs"></a></h2>
 <hr class="half-width"><p>SageMaker charges for training, tuning and Processing jobs while they
@@ -633,8 +627,7 @@ jobs</strong>.</li>
 <strong>Tip:</strong> Review the job logs to ensure you’ve saved the
 results before stopping a job.</li>
 </ol></section><section><h2 class="section-heading" id="billing-and-cost-monitoring">Billing and cost monitoring<a class="anchor" aria-label="anchor" href="#billing-and-cost-monitoring"></a></h2>
-<hr class="half-width"><p>Managing your AWS expenses is vital to staying within budget. Follow
-these steps to monitor and control costs:</p>
+<hr class="half-width"><p>To see what you are spending:</p>
 <ol style="list-style-type: decimal"><li>
 <strong>Set up billing alerts:</strong>
 <ul><li>Go to the AWS <strong>Billing Dashboard</strong>.</li>
@@ -709,17 +702,17 @@ remove.</p>
 <hr class="half-width"><p>Several things you could have done wrong in this workshop were
 refused before they cost anything: a job launched without the three
 tags, with a blank name, with a Project that is not on the account’s
-list, with an instance type outside the lesson’s list, or with no
-runtime cap, and any endpoint or EC2 instance at all. None of that is
-SageMaker’s own behaviour. It is a set of rules the account
+list, with an instance type outside the lesson’s list, a Processing job
+with no runtime cap, and any endpoint or EC2 instance at all. None of
+that is SageMaker’s own behaviour. It is a set of rules the account
 administrator attached to the role your notebook runs as, written in the
 same IAM policy language that gave the role its permissions, and each
 one says: refuse this request if it looks like this. An AWS account with
 no such rules lets a tagged job and an untagged one through alike, and
 lets a notebook instance run until someone remembers it.</p>
 <p>If you administer an account of your own, a lab’s or a project’s, the
-same rules are an afternoon’s work and they hold across the console, the
-SDK and the CLI, because all three are the same API. The lesson’s
+same rules are an afternoon’s work, and they hold across the console,
+the SDK and the CLI, because all three are the same API. The lesson’s
 <em>Account preparation checklist</em> instructor page has the policy as
 JSON and the one command that attaches it to a role; its <em>Overnight
 safeguards</em> section has the three measures that go with it. In order
@@ -747,7 +740,7 @@ missing or too large</td>
 <code>ec2:RunInstances</code>
 </td>
 </tr><tr><td>Notebook instances stop at 11 pm</td>
-<td>the forgotten GPU notebook, <code>$60</code> a night</td>
+<td>the forgotten GPU notebook, <code>$63</code> a night</td>
 <td>a ten-line scheduled Lambda function</td>
 </tr><tr><td>A budget per person and a brake on the total</td>
 <td>a quiet overspend</td>
@@ -758,9 +751,8 @@ own launches need real tag values and listed instance types too. And the
 error a refused request gets,
 <code>AccessDeniedException ... with an explicit deny in an identity-based policy</code>,
 does not say which rule matched, so write the rules down where the
-people using the account will find them, as the <em>If the launch is
-refused</em> callout in the first training episode does here. A deny
-cannot carry a custom message either: AWS says
+people using the account will find them. A deny cannot carry a custom
+message either: AWS says
 <code>explicit deny in an identity-based policy</code> and nothing more,
 which is why this lesson keeps a copy of the policy next to its helper
 code and checks every launch against it in the notebook first, with
@@ -859,8 +851,9 @@ volume when Stopped</td>
 </tr></tbody></table><p>Stopping the controller and walking away leaves the bucket billing
 for storage, a stopped GPU instance’s volume billing at
 <code>$0.14</code>/GB-month, and any Processing job that had not hit its
-<code>max_run</code> yet. Model artifacts in your bucket are the only
-thing worth keeping; download them once, then delete the bucket.</p>
+<code>max_runtime_in_seconds</code> yet. Model artifacts in your bucket
+are the only thing worth keeping; download them once, then delete the
+bucket.</p>
 </div>
 </div>
 </div>
@@ -888,8 +881,6 @@ storage costs.</p></li>
 up alerts.</p></li>
 <li><p>Use tags (set up earlier in the workshop) to track and monitor
 costs by resource.</p></li>
-<li><p>Following best practices for AWS resource management can
-significantly reduce costs and improve efficiency.</p></li>
 </ul></div>
 </div>
 </div>

@@ -775,8 +775,8 @@ serve it yourself.</li>
 <li>
 <strong>Inference uses reduced-precision weights</strong>: no
 gradients means the weights are the memory cost. FP8 puts a 27B model on
-one 48 GB GPU (<code>ml.g6e.xlarge</code>); bf16 would need 54 GB and a
-multi-GPU instance.</li>
+one 48 GB GPU (<code>ml.g6e.xlarge</code>); bf16 would need 54 GB, an 80
+GB GPU or a multi-GPU instance.</li>
 <li>
 <strong>The meter never stops on its own</strong>:
 <code>ml.g6e.xlarge</code> is <code>$2.61</code>/h, <code>$167</code>
@@ -820,8 +820,8 @@ almost every reason to open a terminal.</li>
 <code>MaxRuntimeInSeconds</code>, the same instance choice, with no
 price printed next to it.</li>
 <li>Endpoints, EC2 instances and GPU notebooks are not jobs and do not
-end; the workshop account denies creating them, and your own account
-should too.</li>
+end; the workshop account’s notebook role denies creating them, and your
+own account should too.</li>
 </ul></section><section id="15_Resource-management-cleanup"><h2 class="section-heading"><a href="15_Resource-management-cleanup.html">Resource Management and Monitoring</a></h2>
 <hr class="half-width">
 <ul>
@@ -841,8 +841,6 @@ storage costs.</p></li>
 up alerts.</p></li>
 <li><p>Use tags (set up earlier in the workshop) to track and monitor
 costs by resource.</p></li>
-<li><p>Following best practices for AWS resource management can
-significantly reduce costs and improve efficiency.</p></li>
 </ul></section>
 </div>
     </main>

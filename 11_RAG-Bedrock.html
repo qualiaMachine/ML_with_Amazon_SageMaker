@@ -516,11 +516,11 @@ and complexity directly.</p>
 <section><h2 class="section-heading" id="why-bedrock-for-wattbot">Why Bedrock for WattBot?<a class="anchor" aria-label="anchor" href="#why-bedrock-for-wattbot"></a></h2>
 <hr class="half-width"><p>When you self-host models (as the Processing Jobs episode does next),
 you are responsible for picking a model, managing versions, and making
-sure your instance has enough VRAM. That’s fine for experiments, but it
+sure your instance has enough VRAM. That works for experiments, but it
 can get painful once multiple teams or challenges want to reuse the same
 pipeline.</p>
 <p>Running your <strong>embedding + generation</strong> steps on Amazon
-Bedrock gives you a few nice properties:</p>
+Bedrock gives you:</p>
 <ul><li>
 <strong>Managed, up-to-date models.</strong> You can use
 high‑quality models from Anthropic, Amazon, DeepSeek, and others without
@@ -532,7 +532,7 @@ output) when you call the model. For some workloads this is cheaper; for
 large offline batches with smaller models, a dedicated GPU can still
 win.</li>
 <li>
-<strong>Easier sharing and governance.</strong> It’s easier to
+<strong>Easier sharing and governance.</strong> A team can
 standardize on a small set of Bedrock models across courses, hackathons,
 or labs than to manage many separate GPU instances.</li>
 </ul><p>In this notebook, both the <strong>embedding</strong> and
@@ -552,8 +552,7 @@ clustering, and classification.</li>
 <li>Supports configurable embedding dimensions (256, 512, or 1,024) and
 has presets tuned for retrieval or binary indexing.</li>
 <li>AWS does not publish the exact number of parameters for Titan
-models; you can treat it as a modern transformer specialized for
-embeddings rather than free‑form text generation.</li>
+models;</li>
 </ul></li>
 <li>
 <p><strong>DeepSeek V3</strong> (<code>deepseek.v3-v1:0</code> via
@@ -572,36 +571,15 @@ messages) and returns the reply in the same shape, so switching
 <code>base_generation_model_id</code> to a Claude, Llama, or Mistral
 model ID changes nothing else.</li>
 </ul></li>
-<li>
-<p><strong>(Optional) Multimodal models for tables and
-figures</strong></p>
-<ul><li>Bedrock also exposes <strong>multimodal models</strong> that can
-reason over images, charts, and document layouts (for example, Claude
-models with vision, or Amazon Titan Multimodal Embeddings). These are a
-good fit if much of your evidence lives in <strong>figures, tables, or
-scanned PDFs</strong>.</li>
-<li>To use them from Bedrock you send <strong>both text and image
-content</strong> in a single request:
-<ul><li>Pre‑process PDFs by rendering pages (or cropping individual
-tables/figures) to images using a tool like <code>pdf2image</code> or a
-headless browser.</li>
-<li>Base64‑encode those images and include them as image parts alongside
-text in the model request.</li>
-<li>For multimodal embeddings, you call a Titan multimodal embedding
-model with an <code>inputImage</code> (and optionally
-<code>inputText</code>) payload to obtain a single vector that mixes
-visual and textual information.</li>
-</ul></li>
-<li>This notebook stays with <strong>text‑only</strong> embeddings +
-generation to keep the workflow simple, but the same RAG pattern extends
-naturally to multimodal models once you add an image‑extraction step to
-your preprocessing pipeline.</li>
-</ul></li>
+<li><p><strong>Multimodal models for tables and figures</strong>:
+Bedrock also serves models that embed or read images. Step 13 of this
+episode uses one, Amazon Nova Multimodal Embeddings, on the table and
+figure questions.</p></li>
 </ul><p>For the full list of available models (Claude variants, Amazon
 models, and partner models), open the <a href="https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog" class="external-link">Model
 catalog</a> in the Amazon Bedrock console. Each entry has a model card
-with capabilities, typical use cases, and pricing, for exploring
-alternatives for your own RAG system.</p>
+with capabilities and typical use cases, and a link to the pricing page,
+for exploring alternatives for your own RAG system.</p>
 <div id="choosing-the-two-models" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -621,10 +599,10 @@ Bedrock serves without setup.</li>
 <li>
 <strong>Generation models</strong>: <a href="https://lmarena.ai/" class="external-link">LMArena</a> ranks chat models by blind human
 preference, and <a href="https://artificialanalysis.ai/" class="external-link">Artificial
-Analysis</a> plots quality against price per million tokens, which is
-the chart that matters for RAG: the answer is written from retrieved
-text, so a mid-priced model often reads as well as a flagship at a tenth
-of the cost.</li>
+Analysis</a> plots quality against price per million tokens, the chart
+to read for RAG, since the answer is written from retrieved text, so a
+mid-priced model often reads as well as a flagship at a tenth of the
+cost.</li>
 <li>
 <strong>Your own questions</strong>: the benchmarks rank models on
 other people’s data. <code>train_QA.csv</code> has labelled questions
@@ -659,7 +637,7 @@ for ML</a> for further guidance on instance types.</p>
 here:</p>
 <ul><li>
 <strong>The shared bucket</strong>, <code>ml-marathon-shared</code>,
-already set in the first cell below, holds the WattBot inputs under
+already set in the setup cells below, holds the WattBot inputs under
 <code>wattbot/</code>: <code>metadata.csv</code> (the index of papers),
 <code>train_QA.csv</code> (labelled questions and answers),
 <code>corpus.zip</code> (the PDFs) and <code>pages.jsonl</code> (the
@@ -684,14 +662,14 @@ only things being billed.</li>
 <div id="working-through-the-lesson-on-your-own" class="callout-inner">
 <h3 class="callout-title">Working through the lesson on your own?</h3>
 <div class="callout-content">
-<p>If there is no instructor-staged bucket, stage the three input files
+<p>If there is no instructor-staged bucket, stage the four input files
 in your own bucket under the same keys and point both variables at it:
 <code>metadata.csv</code> and <code>train_QA.csv</code> are in
 <code>data/data.zip</code> in the lesson repository,
 <code>corpus.zip</code> is built once by
 <code>scripts/build_wattbot_corpus.py</code>, and
 <code>instructors/shared-data-bucket.md</code> has the upload commands.
-Then set <code>shared_bucket = bucket_name</code> in the first cell
+Then set <code>shared_bucket = bucket_name</code> in the setup cell
 below and everything else works unchanged.</p>
 </div>
 </div>
@@ -736,7 +714,7 @@ each other, and a generation model, the chat model that writes the
 answer from the passages it is given. Both are catalog models on
 Bedrock, named by a model ID; the <a href="https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog" class="external-link">model
 catalog</a> in the console lists everything available in the region with
-its ID and price, and the <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html" class="external-link">supported
+its ID; prices are on the pricing page, and the <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html" class="external-link">supported
 models page</a> in the documentation is the same list as a table. Prices
 are per million tokens on the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>:
 in October 2026, DeepSeek V3 on demand is <code>$0.62</code> in and
@@ -810,9 +788,9 @@ WattBot pipeline is the same whether the models run on Bedrock, in a
 Processing job or on a notebook GPU. It lives once in the lesson
 repository, in <code>scripts/wattbot_rag.py</code>, and every RAG
 episode imports it; the only code that differs per episode is the two
-model calls. Clone the repository and copy the module next to this
-notebook (the Processing Jobs episode ships the same file inside its
-jobs).</p>
+model calls. Copy the module from the lesson clone to the folder next to
+this notebook (the Processing Jobs episode ships the same file inside
+its jobs).</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -826,12 +804,12 @@ jobs).</p>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>    build_docid_to_url,</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>    compute_wattbot_score,</span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>    retrieve_top_k,</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>    run_single_qa,</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>)</span></code></pre>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>    split_ref_ids,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>    run_single_qa,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a>)</span></code></pre>
 </div>
 <p>Open <code>wattbot_rag.py</code> in the Jupyter file browser as you
-go: each helper is short, and the docstring at the top says which
-episode uses what.</p>
+go: each helper is short.</p>
 </div>
 </section><section><h2 class="section-heading" id="step-3-load-the-metadata-and-training-questions">Step 3 – Load the metadata and training questions<a class="anchor" aria-label="anchor" href="#step-3-load-the-metadata-and-training-questions"></a></h2>
 <hr class="half-width"><p>Pull the two CSV files from the shared bucket into the notebook and
@@ -893,8 +871,8 @@ the publishers’ sites is slow and unreliable when fifty notebooks do it
 at once, so the instructors did it once with
 <code>scripts/build_wattbot_corpus.py</code> and staged the result as
 <code>corpus.zip</code> in the shared bucket. We download that one file,
-unpack it, and delete the zip: the instance’s disk is 20 GB at most, and
-the zip plus the unpacked PDFs are close to 700 MB.</p>
+unpack it, and delete the zip: the instance’s volume is 20 GB, and the
+zip plus the unpacked PDFs are close to 700 MB.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -954,16 +932,14 @@ load the staged result rather than rerun it. Each record stores:</p>
 </ul><p>Later, we will <strong>chunk these pages</strong> into smaller
 overlapping segments for embedding.</p>
 <div class="section level3">
-<h3 id="why-we-page-chunk-first">Why we page-chunk first<a class="anchor" aria-label="anchor" href="#why-we-page-chunk-first"></a></h3>
-<p>We split the PDF into <strong>pages before chunking</strong> because
-pages give us a stable, easy-to-interpret unit.<br>
-This helps with:</p>
+<h3 id="pages-first-then-chunks">Pages first, then chunks<a class="anchor" aria-label="anchor" href="#pages-first-then-chunks"></a></h3>
+<p>Chunks keep the page they came from, so that:</p>
 <ul><li>
 <strong>Keeping metadata</strong> (doc ID, URL, page labels) tied to
 the text.<br></li>
 <li>
-<strong>Debugging retrieval</strong> — it’s much easier to
-understand what the model saw if we know which page(s) were used.<br></li>
+<strong>Debugging retrieval</strong> — the page says what the model
+saw.<br></li>
 <li>
 <strong>Cleaning text</strong> before making smaller overlapping
 chunks.<br></li>
@@ -971,9 +947,7 @@ chunks.<br></li>
 <strong>Flexibility later</strong> — once pages are structured, we
 can try different chunk sizes or strategies without re-extracting the
 PDF.</li>
-</ul><p>In short: <strong>pages first → then chunks</strong> keeps the
-workflow cleaner and easier to reason about.</p>
-<div class="codewrapper sourceCode" id="cb10">
+</ul><div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="op">%</span>pip install <span class="op">-</span>q pypdf</span></code></pre>
@@ -1081,8 +1055,7 @@ chunker</strong> that operates on characters:</p>
 (e.g., 200).</li>
 </ul><p>In your own work, you may wish to plug in more sophisticated
 <em>semantic chunking</em> methods (e.g., splitting on headings, section
-titles, or sentence boundaries). For now, we’ll keep the implementation
-explicit and easy to debug.</p>
+titles, or sentence boundaries).</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1233,9 +1206,7 @@ tokens, as before.</p>
 <p>One call per model does all of it. <code>tagged_profile_arn</code> in
 <code>wattbot_rag.py</code> looks for a profile named after your project
 and user name, creates it with the three tags if it is not there, and
-returns its ARN. Open the file if you want to see the forty lines;
-nothing in them is worth memorising. What is worth remembering is the
-sentence above: one tagged profile per model, its ARN in place of the
+returns its ARN. One tagged profile per model, its ARN in place of the
 model ID.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1308,10 +1279,10 @@ duplicates.</p>
 <div id="checking-the-profiles" class="callout-inner">
 <h3 class="callout-title">Checking the profiles</h3>
 <div class="callout-content">
-<ul><li>You can confirm the routing in the Bedrock console under
-<strong>Inference and Assessment → Cross-region inference → Application
-inference profiles</strong>, or with
-<code>bedrock.list_inference_profiles(typeEquals="APPLICATION")</code>.</li>
+<ul><li>You can confirm the routing with
+<code>bedrock.list_inference_profiles(typeEquals="APPLICATION")</code>;
+the console’s inference-profile pages list only the system-defined
+profiles.</li>
 <li>The keys must be the three approved ones, <code>Name</code>,
 <code>Project</code> and <code>Purpose</code>, spelled exactly; any
 other key is ignored by the bill (the S3 episode says why).</li>
@@ -1441,11 +1412,11 @@ so an interrupted run picks up where it stopped.</p>
 <h3 class="callout-title">In a class, use the instructor’s copy</h3>
 <div class="callout-content">
 <p>Bedrock allows this account 300,000 Titan embedding tokens per
-minute, and the quota is not adjustable. This corpus is about 3 million
-tokens, so one notebook alone needs ten minutes at the full quota; a
-room of them shares it, so everyone’s loop slows to a crawl of retries.
-In class, leave <code>use_instructor_embeddings</code> in the next cell
-at <code>True</code>: the cache cell then downloads the matrix your
+minute. This corpus is about 2.4 million tokens, so one notebook alone
+needs ten minutes at the full quota; a room of them shares it, so
+everyone’s loop slows to a crawl of retries. In class, leave
+<code>use_instructor_embeddings</code> in the next cell at
+<code>True</code>: the cache cell then downloads the matrix your
 instructor computed with the same chunks and the same model from the
 shared bucket and skips the calls. Working on your own, set it to
 <code>False</code> and let the loop run; that is the step to
@@ -1616,12 +1587,12 @@ generation, and write a <code>wattbot_solutions_bedrock.csv</code> file
 that is about twenty minutes. For class we score a stratified sample
 instead: <code>sample_questions_by_type</code> draws ten questions from
 each evidence type (Quote, Table, Figure, Math, unanswerable,
-cross-paper, reconcile), about 55 questions after overlaps, so every row
-of the breakdown in the next step has something in it. The first 55 rows
-of the file would be nearly all Quote questions. The seed fixes the
-draw, and the Processing Jobs episode uses the same one, so the two runs
-are compared on the same questions. Set <code>per_type=0</code> to run
-the whole file.</p>
+cross-paper, reconcile), 53 questions after overlaps and the two missing
+papers, so every row of the breakdown in the next step has something in
+it. The first 53 rows of the file would be nearly all Quote questions.
+The seed fixes the draw, and the Processing Jobs episode uses the same
+one, so the two runs are compared on the same questions. Set
+<code>per_type=0</code> to run the whole file.</p>
 <p>The Processing Jobs episode reuses this same loop with self-hosted
 models; the only difference there is that the embedding, answer and
 explanation phases call local models instead of Bedrock-hosted ones.</p>
@@ -1630,7 +1601,7 @@ explanation phases call local models instead of Bedrock-hosted ones.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> sample_questions_by_type</span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1" aria-label="code-block-28-2"></a></span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a>eval_df <span class="op">=</span> sample_questions_by_type(train_df, per_type<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">0</span>)   <span class="co"># per_type=0 for all 245</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a>eval_df <span class="op">=</span> sample_questions_by_type(train_df, per_type<span class="op">=</span><span class="dv">10</span>, seed<span class="op">=</span><span class="dv">0</span>)   <span class="co"># per_type=0 for all 220 remaining questions</span></span>
 <span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a><span class="bu">print</span>(<span class="ss">f"Scoring </span><span class="sc">{</span><span class="bu">len</span>(eval_df)<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(train_df)<span class="sc">}</span><span class="ss"> questions"</span>)</span>
 <span id="cb28-5"><a href="#cb28-5" tabindex="-1" aria-label="code-block-28-5"></a></span>
 <span id="cb28-6"><a href="#cb28-6" tabindex="-1" aria-label="code-block-28-6"></a>results <span class="op">=</span> []</span>
@@ -1696,10 +1667,7 @@ anything: figure and table questions failing while quote questions pass
 points at text extraction, which loses figures and flattens tables, not
 at the model. The wrapper adds a per-row score, joins on
 <code>id</code>, and prints the worst-scoring rows so you can see
-<em>why</em> the pipeline lost points. <code>train_QA.csv</code> has no
-separate “unanswerable” column, so <code>gt_is_na_col="is_blank"</code>
-tells the scorer to derive that flag from
-<code>answer_value == "is_blank"</code> on both sides.</p>
+<em>why</em> the pipeline lost points.</p>
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1723,25 +1691,24 @@ best cosine score was.</p>
 <div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> retrieve_top_k, split_ref_ids</span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a></span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a>worst <span class="op">=</span> scored_df.sort_values(<span class="st">"wattbot_score"</span>).head(<span class="dv">8</span>)</span>
-<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a>by_id <span class="op">=</span> results_df.set_index(<span class="st">"id"</span>)   <span class="co"># the model's answer, explanation and cited passages, keyed by question id</span></span>
-<span id="cb30-5"><a href="#cb30-5" tabindex="-1" aria-label="code-block-30-5"></a></span>
-<span id="cb30-6"><a href="#cb30-6" tabindex="-1" aria-label="code-block-30-6"></a><span class="cf">for</span> _, row <span class="kw">in</span> worst.iterrows():</span>
-<span id="cb30-7"><a href="#cb30-7" tabindex="-1" aria-label="code-block-30-7"></a>    qid <span class="op">=</span> row[<span class="st">"id"</span>]</span>
-<span id="cb30-8"><a href="#cb30-8" tabindex="-1" aria-label="code-block-30-8"></a>    gt_refs <span class="op">=</span> <span class="bu">set</span>(split_ref_ids(row[<span class="st">"ref_id_gt"</span>]))   <span class="co"># train_QA.csv stores the list as a string</span></span>
-<span id="cb30-9"><a href="#cb30-9" tabindex="-1" aria-label="code-block-30-9"></a>    retrieved <span class="op">=</span> retrieve_top_k(embed_query(row[<span class="st">"question_gt"</span>]), chunk_embeddings, chunked_docs, k<span class="op">=</span><span class="dv">8</span>)   <span class="co"># the merge suffixed both sides' columns</span></span>
-<span id="cb30-10"><a href="#cb30-10" tabindex="-1" aria-label="code-block-30-10"></a>    retrieved_docs <span class="op">=</span> [r[<span class="st">"doc_id"</span>] <span class="cf">for</span> r <span class="kw">in</span> retrieved]</span>
-<span id="cb30-11"><a href="#cb30-11" tabindex="-1" aria-label="code-block-30-11"></a>    <span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">96</span>)</span>
-<span id="cb30-12"><a href="#cb30-12" tabindex="-1" aria-label="code-block-30-12"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>qid<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>row[<span class="st">'question_gt'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a>    <span class="bu">print</span>(<span class="ss">f"  expected: </span><span class="sc">{</span>row[<span class="st">'answer_value_gt'</span>]<span class="sc">}</span><span class="ss">  from </span><span class="sc">{</span><span class="bu">sorted</span>(gt_refs)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a>    <span class="bu">print</span>(<span class="ss">f"  predicted: </span><span class="sc">{</span>row[<span class="st">'answer_value_pred'</span>]<span class="sc">}</span><span class="ss">  citing </span><span class="sc">{</span>row[<span class="st">'ref_id_pred'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-15"><a href="#cb30-15" tabindex="-1" aria-label="code-block-30-15"></a>    <span class="bu">print</span>(<span class="ss">f"  retrieval: top cosine </span><span class="sc">{</span>retrieved[<span class="dv">0</span>][<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">; top-8 papers </span><span class="sc">{</span>retrieved_docs<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-16"><a href="#cb30-16" tabindex="-1" aria-label="code-block-30-16"></a>    <span class="bu">print</span>(<span class="ss">f"  ground-truth paper retrieved: </span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> gt_refs <span class="op">&amp;</span> <span class="bu">set</span>(retrieved_docs) <span class="cf">else</span> <span class="st">'NO'</span><span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-17"><a href="#cb30-17" tabindex="-1" aria-label="code-block-30-17"></a>    <span class="cf">if</span> by_id.loc[qid, <span class="st">"explanation"</span>] <span class="op">!=</span> <span class="st">"is_blank"</span>:</span>
-<span id="cb30-18"><a href="#cb30-18" tabindex="-1" aria-label="code-block-30-18"></a>        <span class="bu">print</span>(<span class="ss">f"  model's explanation: </span><span class="sc">{</span>by_id<span class="sc">.</span>loc[qid, <span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb30-19"><a href="#cb30-19" tabindex="-1" aria-label="code-block-30-19"></a>        <span class="bu">print</span>(<span class="ss">f"  passages it cited: </span><span class="sc">{</span><span class="bu">str</span>(by_id.loc[qid, <span class="st">'supporting_materials'</span>])[:<span class="dv">400</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1" aria-label="code-block-30-2"></a>worst <span class="op">=</span> scored_df.sort_values(<span class="st">"wattbot_score"</span>).head(<span class="dv">8</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1" aria-label="code-block-30-3"></a>by_id <span class="op">=</span> results_df.set_index(<span class="st">"id"</span>)   <span class="co"># the model's answer, explanation and cited passages, keyed by question id</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1" aria-label="code-block-30-4"></a></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1" aria-label="code-block-30-5"></a><span class="cf">for</span> _, row <span class="kw">in</span> worst.iterrows():</span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1" aria-label="code-block-30-6"></a>    qid <span class="op">=</span> row[<span class="st">"id"</span>]</span>
+<span id="cb30-7"><a href="#cb30-7" tabindex="-1" aria-label="code-block-30-7"></a>    gt_refs <span class="op">=</span> <span class="bu">set</span>(split_ref_ids(row[<span class="st">"ref_id_gt"</span>]))   <span class="co"># train_QA.csv stores the list as a string</span></span>
+<span id="cb30-8"><a href="#cb30-8" tabindex="-1" aria-label="code-block-30-8"></a>    retrieved <span class="op">=</span> retrieve_top_k(embed_query(row[<span class="st">"question_gt"</span>]), chunk_embeddings, chunked_docs, k<span class="op">=</span><span class="dv">8</span>)   <span class="co"># the merge suffixed both sides' columns</span></span>
+<span id="cb30-9"><a href="#cb30-9" tabindex="-1" aria-label="code-block-30-9"></a>    retrieved_docs <span class="op">=</span> [r[<span class="st">"doc_id"</span>] <span class="cf">for</span> r <span class="kw">in</span> retrieved]</span>
+<span id="cb30-10"><a href="#cb30-10" tabindex="-1" aria-label="code-block-30-10"></a>    <span class="bu">print</span>(<span class="st">"="</span> <span class="op">*</span> <span class="dv">96</span>)</span>
+<span id="cb30-11"><a href="#cb30-11" tabindex="-1" aria-label="code-block-30-11"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>qid<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>row[<span class="st">'question_gt'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-12"><a href="#cb30-12" tabindex="-1" aria-label="code-block-30-12"></a>    <span class="bu">print</span>(<span class="ss">f"  expected: </span><span class="sc">{</span>row[<span class="st">'answer_value_gt'</span>]<span class="sc">}</span><span class="ss">  from </span><span class="sc">{</span><span class="bu">sorted</span>(gt_refs)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" tabindex="-1" aria-label="code-block-30-13"></a>    <span class="bu">print</span>(<span class="ss">f"  predicted: </span><span class="sc">{</span>row[<span class="st">'answer_value_pred'</span>]<span class="sc">}</span><span class="ss">  citing </span><span class="sc">{</span>row[<span class="st">'ref_id_pred'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-14"><a href="#cb30-14" tabindex="-1" aria-label="code-block-30-14"></a>    <span class="bu">print</span>(<span class="ss">f"  retrieval: top cosine </span><span class="sc">{</span>retrieved[<span class="dv">0</span>][<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">; top-8 papers </span><span class="sc">{</span>retrieved_docs<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-15"><a href="#cb30-15" tabindex="-1" aria-label="code-block-30-15"></a>    <span class="bu">print</span>(<span class="ss">f"  ground-truth paper retrieved: </span><span class="sc">{</span><span class="st">'yes'</span> <span class="cf">if</span> gt_refs <span class="op">&amp;</span> <span class="bu">set</span>(retrieved_docs) <span class="cf">else</span> <span class="st">'NO'</span><span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" tabindex="-1" aria-label="code-block-30-16"></a>    <span class="cf">if</span> by_id.loc[qid, <span class="st">"explanation"</span>] <span class="op">!=</span> <span class="st">"is_blank"</span>:</span>
+<span id="cb30-17"><a href="#cb30-17" tabindex="-1" aria-label="code-block-30-17"></a>        <span class="bu">print</span>(<span class="ss">f"  model's explanation: </span><span class="sc">{</span>by_id<span class="sc">.</span>loc[qid, <span class="st">'explanation'</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb30-18"><a href="#cb30-18" tabindex="-1" aria-label="code-block-30-18"></a>        <span class="bu">print</span>(<span class="ss">f"  passages it cited: </span><span class="sc">{</span><span class="bu">str</span>(by_id.loc[qid, <span class="st">'supporting_materials'</span>])[:<span class="dv">400</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Read the two lines at the bottom of each block together.
 “Ground-truth paper retrieved: NO” is a retrieval problem: a different
@@ -1795,7 +1762,7 @@ region you used. The rest sums the usage blocks and prints the cost.</p>
 <div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1" aria-label="code-block-31-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek v3.2 on-demand in us-east-2, October 2026; check the pricing page for your model and region</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" tabindex="-1" aria-label="code-block-31-1"></a>price_in_per_m <span class="op">=</span> <span class="fl">0.62</span>    <span class="co"># $ per million input tokens: DeepSeek V3 on-demand, October 2026; check the pricing page for your model and region</span></span>
 <span id="cb31-2"><a href="#cb31-2" tabindex="-1" aria-label="code-block-31-2"></a>price_out_per_m <span class="op">=</span> <span class="fl">1.85</span>   <span class="co"># $ per million output tokens, same source</span></span>
 <span id="cb31-3"><a href="#cb31-3" tabindex="-1" aria-label="code-block-31-3"></a></span>
 <span id="cb31-4"><a href="#cb31-4" tabindex="-1" aria-label="code-block-31-4"></a>in_tokens <span class="op">=</span> <span class="bu">sum</span>(u[<span class="st">"inputTokens"</span>] <span class="cf">for</span> u <span class="kw">in</span> bedrock_usage)</span>
@@ -1840,14 +1807,14 @@ out.</p>
 the catalog (for example <code>us.amazon.nova-2-lite-v1:0</code>,
 <code>us.meta.llama4-maverick-17b-instruct-v1:0</code>, or a Mistral or
 Claude model if your account has access), wrap it in a tagged profile as
-in Step 7, and rerun the Step 11 loop on the same 55-question sample
+in Step 7, and rerun the Step 11 loop on the same 53-question sample
 with <code>call_bedrock_chat</code> pointed at it. Score it with
 <code>compute_wattbot_score</code> and price it from its
 <code>usage</code> blocks. Which evidence types moved, and what did a
 point of score cost?</li>
 <li>
 <strong>A different embedder.</strong> Retrieval is the other half.
-The Ohio catalog has one other embedding model, Cohere Embed v4
+The Ohio catalog also lists Cohere Embed v4
 (<code>cohere.embed-v4:0</code>), and its request body is different from
 Titan’s: a list of <code>texts</code> and an <code>input_type</code>
 that is <code>search_document</code> for the corpus and
@@ -1976,14 +1943,14 @@ flattened copy.</p>
 <p>A <strong>multimodal embedding model</strong> is one model that maps
 text <em>and</em> images into the same vector space, so a text question
 can be compared with an image directly: the picture of a table lands
-near a sentence about its contents. Bedrock has two: <a href="https://aws.amazon.com/blogs/aws/amazon-nova-multimodal-embeddings-now-available-in-amazon-bedrock/" class="external-link">Amazon
+near a sentence about its contents. Bedrock has two from Amazon: <a href="https://aws.amazon.com/blogs/aws/amazon-nova-multimodal-embeddings-now-available-in-amazon-bedrock/" class="external-link">Amazon
 Nova Multimodal Embeddings</a> (text, images, documents, video and
 audio, released 2025) and the older Titan Multimodal Embeddings G1 (text
 and images). Both are per-call, like Titan Text, and billed per image
 plus per text token; the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 has the rates, on the order of a hundredth of a cent per image. One
-catch: in October 2026 both are offered in <code>us-east-1</code> only
-(check the <a href="https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/model-catalog" class="external-link">model
+catch: in October 2026 Nova Multimodal Embeddings is offered in
+<code>us-east-1</code> and not in Ohio (check the <a href="https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/model-catalog" class="external-link">model
 catalog</a> for that region). A Bedrock call is an HTTPS request and the
 region is a parameter, so from Ohio that is a second client pointed at
 Virginia; it also means the images leave the region, which is the thing
@@ -2024,8 +1991,8 @@ N” or “Figure N” (tables are captioned above, figures below) and widens
 the crop to include that caption, so the image carries the identifier a
 question will use. A caption whose box no detector found falls back to
 the whole page, so nothing the text mentions is missed. Open the
-function; it is sixty lines and every rule in it is a line you can
-change. The detectors are the slow part, a second or two per page on
+function; it is about eighty lines, and every rule in it is a line you
+can change. The detectors are the slow part, a second or two per page on
 this instance, so the cell runs them only on the pages whose text
 carries a caption, under half of the corpus; in class, with
 <code>use_instructor_embeddings</code> set, it downloads the crops your
@@ -2111,7 +2078,7 @@ function handles both.</p>
 </div>
 <p>One call per crop, cached like the text matrix: locally, then in your
 bucket, then computed. The loop runs six calls at a time through a
-thread pool and prints every fifty; a thousand images takes about two
+thread pool and prints every fifty; the 2,213 crops take about four
 minutes. The question side uses the same model with
 <code>purpose="query"</code>.</p>
 <div class="codewrapper sourceCode" id="cb39">
@@ -2269,12 +2236,12 @@ the crops from the pages the top text chunks came from: if the hit-rate
 table says the text index is the better finder, the question is whether
 finding with text and <em>reading</em> with the image is the better
 split. Each run is the same loop as Step 11, so every question costs an
-answer call and an explanation call; the runs with images take about
-five minutes each, because every attached crop is hundreds of input
-tokens. In class, with <code>use_instructor_embeddings</code> set, the
-cell downloads the three result files from your instructor’s run of it
-instead and the next cell scores them; running the loops yourself is for
-after class.</p>
+answer call and an explanation call; our runs took 1.6, 4.0 and 3.0
+minutes, the image runs longer because every attached crop is hundreds
+of input tokens. In class, with <code>use_instructor_embeddings</code>
+set, the cell downloads the three result files from your instructor’s
+run of it instead and the next cell scores them; running the loops
+yourself is for after class.</p>
 <div class="codewrapper sourceCode" id="cb42">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -2408,14 +2375,14 @@ matter of re‑implementing <code>embed_query</code> and
 </section><section><h2 class="section-heading" id="concluding-remarks-bedrock-models-are-one-piece-of-the-rag-puzzle">Concluding remarks: Bedrock models are one piece of the RAG
 puzzle<a class="anchor" aria-label="anchor" href="#concluding-remarks-bedrock-models-are-one-piece-of-the-rag-puzzle"></a></h2>
 <hr class="half-width"><p>In this episode we used Bedrock-hosted models for
-<strong>both</strong> embedding and generation. Larger, higher-quality
-models can definitely help a ton — especially on messy real-world
-questions — but it’s important to remember that they are still just
-<strong>one component</strong> in your RAG system.</p>
+<strong>both</strong> embedding and generation. Larger models help,
+especially on messy real-world questions — but it’s important to
+remember that they are still just <strong>one component</strong> in your
+RAG system.</p>
 <ul><li>
-<strong>Bigger or newer models do not magically fix weak
-retrieval.</strong> If your chunks are poorly aligned with the
-questions, a very strong LLM will still struggle.</li>
+<strong>Bigger or newer models do not fix weak retrieval.</strong>
+If your chunks are poorly aligned with the questions, a very strong LLM
+will still struggle.</li>
 <li>
 <strong>Most of the long‑term accuracy gains in RAG systems come
 from the plumbing around the LLMs</strong>, including:
@@ -2432,8 +2399,8 @@ makes it easier to experiment with that tradeoff by switching models
 without rewriting your pipeline.</li>
 </ul><p>As you adapt this notebook to your own projects, treat the LLM choice
 as <strong>one tunable component</strong> in a larger system. Iterating
-on chunking, indexing, and retrieval policies will almost always give
-you more headroom than swapping between already-good models.</p>
+on chunking, indexing, and retrieval policies usually gain more than
+swapping between already-good models.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
