@@ -912,8 +912,8 @@ corpus is built once and read many times.</p>
 <hr class="half-width"><p>The next unit of work is a list of <strong>page-level
 records</strong>, one per PDF page. The instructor’s staging script
 already built it for this corpus (<code>pages.jsonl</code> in the shared
-bucket), so below we define the function that does the extraction, then
-load the staged result rather than rerun it. Each record stores:</p>
+bucket), so the cell below loads the staged result and falls back to
+extracting only if it is missing. Each record stores:</p>
 <ul><li>
 <code>text</code>: page text (as extracted by
 <code>pypdf</code>).</li>
@@ -952,77 +952,28 @@ PDF.</li>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="op">%</span>pip install <span class="op">-</span>q pypdf</span></code></pre>
 </div>
-<p>Open each PDF listed in the metadata with <code>pypdf</code> and turn
-every page into one record: its text, the document id, title and URL,
-and the page number. The function is the reference for what a page
-record is; on a CPU notebook it takes several minutes over this corpus,
-so the cell after it first looks for <code>pages.jsonl</code>, the same
-records written once when the corpus was staged.</p>
+<p><code>pdfs_to_page_docs</code> in <code>wattbot_rag.py</code> opens
+each PDF listed in the metadata with <code>pypdf</code> and turns every
+page into one record: its text, the document id, title and URL, and the
+page number. It is forty lines of plain Python with nothing AWS in it;
+open the file to read it. On a CPU notebook it takes several minutes
+over this corpus, so the cell first looks for <code>pages.jsonl</code>,
+the same records written once when the corpus was staged, and runs the
+extraction only if that file is not there.</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="im">from</span> pypdf <span class="im">import</span> PdfReader</span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> pdfs_to_page_docs   <span class="co"># the extraction: open each PDF with pypdf, one record per page; in scripts/wattbot_rag.py</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a><span class="kw">def</span> pdfs_to_page_docs(metadata: pd.DataFrame, pdf_dir: <span class="bu">str</span>) <span class="op">-&gt;</span> List[Dict[<span class="bu">str</span>, Any]]:</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a>    <span class="co">"""Load each PDF into a list of page-level dictionaries.</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a><span class="co">    Each dict has keys: text, doc_id, title, url, page_num, page_label, total_pages.</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a><span class="co">    """</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a>    page_docs: List[Dict[<span class="bu">str</span>, Any]] <span class="op">=</span> []</span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a></span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1" aria-label="code-block-11-10"></a>    <span class="cf">for</span> _, row <span class="kw">in</span> metadata.iterrows():</span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1" aria-label="code-block-11-11"></a>        doc_id <span class="op">=</span> <span class="bu">str</span>(row[<span class="st">"id"</span>]).strip()</span>
-<span id="cb11-12"><a href="#cb11-12" tabindex="-1" aria-label="code-block-11-12"></a>        title <span class="op">=</span> <span class="bu">str</span>(row.get(<span class="st">"title"</span>, <span class="st">""</span>)).strip()</span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1" aria-label="code-block-11-13"></a>        url <span class="op">=</span> <span class="bu">str</span>(row.get(<span class="st">"url"</span>, <span class="st">""</span>)).strip()</span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1" aria-label="code-block-11-14"></a></span>
-<span id="cb11-15"><a href="#cb11-15" tabindex="-1" aria-label="code-block-11-15"></a>        pdf_path <span class="op">=</span> os.path.join(pdf_dir, <span class="ss">f"</span><span class="sc">{</span>doc_id<span class="sc">}</span><span class="ss">.pdf"</span>)</span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1" aria-label="code-block-11-16"></a>        <span class="cf">if</span> <span class="kw">not</span> os.path.exists(pdf_path):</span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1" aria-label="code-block-11-17"></a>            <span class="bu">print</span>(<span class="ss">f"Missing PDF for </span><span class="sc">{</span>doc_id<span class="sc">}</span><span class="ss">, skipping."</span>)</span>
-<span id="cb11-18"><a href="#cb11-18" tabindex="-1" aria-label="code-block-11-18"></a>            <span class="cf">continue</span></span>
-<span id="cb11-19"><a href="#cb11-19" tabindex="-1" aria-label="code-block-11-19"></a></span>
-<span id="cb11-20"><a href="#cb11-20" tabindex="-1" aria-label="code-block-11-20"></a>        <span class="cf">try</span>:</span>
-<span id="cb11-21"><a href="#cb11-21" tabindex="-1" aria-label="code-block-11-21"></a>            reader <span class="op">=</span> PdfReader(pdf_path)</span>
-<span id="cb11-22"><a href="#cb11-22" tabindex="-1" aria-label="code-block-11-22"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb11-23"><a href="#cb11-23" tabindex="-1" aria-label="code-block-11-23"></a>            <span class="bu">print</span>(<span class="ss">f"Failed to read </span><span class="sc">{</span>pdf_path<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb11-24"><a href="#cb11-24" tabindex="-1" aria-label="code-block-11-24"></a>            <span class="cf">continue</span></span>
-<span id="cb11-25"><a href="#cb11-25" tabindex="-1" aria-label="code-block-11-25"></a></span>
-<span id="cb11-26"><a href="#cb11-26" tabindex="-1" aria-label="code-block-11-26"></a>        total_pages <span class="op">=</span> <span class="bu">len</span>(reader.pages)</span>
-<span id="cb11-27"><a href="#cb11-27" tabindex="-1" aria-label="code-block-11-27"></a>        <span class="cf">for</span> i, page <span class="kw">in</span> <span class="bu">enumerate</span>(reader.pages):</span>
-<span id="cb11-28"><a href="#cb11-28" tabindex="-1" aria-label="code-block-11-28"></a>            <span class="cf">try</span>:</span>
-<span id="cb11-29"><a href="#cb11-29" tabindex="-1" aria-label="code-block-11-29"></a>                text <span class="op">=</span> page.extract_text() <span class="kw">or</span> <span class="st">""</span></span>
-<span id="cb11-30"><a href="#cb11-30" tabindex="-1" aria-label="code-block-11-30"></a>            <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb11-31"><a href="#cb11-31" tabindex="-1" aria-label="code-block-11-31"></a>                <span class="bu">print</span>(<span class="ss">f"Failed to extract text from </span><span class="sc">{</span>doc_id<span class="sc">}</span><span class="ss"> page </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb11-32"><a href="#cb11-32" tabindex="-1" aria-label="code-block-11-32"></a>                text <span class="op">=</span> <span class="st">""</span></span>
-<span id="cb11-33"><a href="#cb11-33" tabindex="-1" aria-label="code-block-11-33"></a></span>
-<span id="cb11-34"><a href="#cb11-34" tabindex="-1" aria-label="code-block-11-34"></a>            text <span class="op">=</span> text.strip()</span>
-<span id="cb11-35"><a href="#cb11-35" tabindex="-1" aria-label="code-block-11-35"></a>            <span class="cf">if</span> <span class="kw">not</span> text:</span>
-<span id="cb11-36"><a href="#cb11-36" tabindex="-1" aria-label="code-block-11-36"></a>                <span class="co"># Still keep the page so we know it exists, but mark it as empty</span></span>
-<span id="cb11-37"><a href="#cb11-37" tabindex="-1" aria-label="code-block-11-37"></a>                text <span class="op">=</span> <span class="st">"[[EMPTY PAGE TEXT – see original PDF for tables/figures]]"</span></span>
-<span id="cb11-38"><a href="#cb11-38" tabindex="-1" aria-label="code-block-11-38"></a></span>
-<span id="cb11-39"><a href="#cb11-39" tabindex="-1" aria-label="code-block-11-39"></a>            page_docs.append(</span>
-<span id="cb11-40"><a href="#cb11-40" tabindex="-1" aria-label="code-block-11-40"></a>                {</span>
-<span id="cb11-41"><a href="#cb11-41" tabindex="-1" aria-label="code-block-11-41"></a>                    <span class="st">"text"</span>: text,</span>
-<span id="cb11-42"><a href="#cb11-42" tabindex="-1" aria-label="code-block-11-42"></a>                    <span class="st">"doc_id"</span>: doc_id,</span>
-<span id="cb11-43"><a href="#cb11-43" tabindex="-1" aria-label="code-block-11-43"></a>                    <span class="st">"title"</span>: title,</span>
-<span id="cb11-44"><a href="#cb11-44" tabindex="-1" aria-label="code-block-11-44"></a>                    <span class="st">"url"</span>: url,</span>
-<span id="cb11-45"><a href="#cb11-45" tabindex="-1" aria-label="code-block-11-45"></a>                    <span class="st">"page_num"</span>: i,</span>
-<span id="cb11-46"><a href="#cb11-46" tabindex="-1" aria-label="code-block-11-46"></a>                    <span class="st">"page_label"</span>: <span class="bu">str</span>(i <span class="op">+</span> <span class="dv">1</span>),</span>
-<span id="cb11-47"><a href="#cb11-47" tabindex="-1" aria-label="code-block-11-47"></a>                    <span class="st">"total_pages"</span>: total_pages,</span>
-<span id="cb11-48"><a href="#cb11-48" tabindex="-1" aria-label="code-block-11-48"></a>                }</span>
-<span id="cb11-49"><a href="#cb11-49" tabindex="-1" aria-label="code-block-11-49"></a>            )</span>
-<span id="cb11-50"><a href="#cb11-50" tabindex="-1" aria-label="code-block-11-50"></a></span>
-<span id="cb11-51"><a href="#cb11-51" tabindex="-1" aria-label="code-block-11-51"></a>    <span class="cf">return</span> page_docs</span>
-<span id="cb11-52"><a href="#cb11-52" tabindex="-1" aria-label="code-block-11-52"></a></span>
-<span id="cb11-53"><a href="#cb11-53" tabindex="-1" aria-label="code-block-11-53"></a></span>
-<span id="cb11-54"><a href="#cb11-54" tabindex="-1" aria-label="code-block-11-54"></a>start <span class="op">=</span> time.time()</span>
-<span id="cb11-55"><a href="#cb11-55" tabindex="-1" aria-label="code-block-11-55"></a><span class="cf">try</span>:</span>
-<span id="cb11-56"><a href="#cb11-56" tabindex="-1" aria-label="code-block-11-56"></a>    pages_path <span class="op">=</span> download_from_s3(<span class="st">"wattbot/pages.jsonl"</span>, <span class="st">"pages.jsonl"</span>)   <span class="co"># staged next to corpus.zip by the corpus build script</span></span>
-<span id="cb11-57"><a href="#cb11-57" tabindex="-1" aria-label="code-block-11-57"></a>    page_docs <span class="op">=</span> [json.loads(line) <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">open</span>(pages_path)]</span>
-<span id="cb11-58"><a href="#cb11-58" tabindex="-1" aria-label="code-block-11-58"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(page_docs)<span class="sc">}</span><span class="ss"> pre-extracted page records in </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> start<span class="sc">:.1f}</span><span class="ss"> s"</span>)</span>
-<span id="cb11-59"><a href="#cb11-59" tabindex="-1" aria-label="code-block-11-59"></a><span class="cf">except</span> ClientError:</span>
-<span id="cb11-60"><a href="#cb11-60" tabindex="-1" aria-label="code-block-11-60"></a>    page_docs <span class="op">=</span> pdfs_to_page_docs(metadata_df, PDF_DIR)</span>
-<span id="cb11-61"><a href="#cb11-61" tabindex="-1" aria-label="code-block-11-61"></a>    <span class="bu">print</span>(<span class="ss">f"Extracted </span><span class="sc">{</span><span class="bu">len</span>(page_docs)<span class="sc">}</span><span class="ss"> page-level records from </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>(time.time() <span class="op">-</span> start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min"</span>)</span>
-<span id="cb11-62"><a href="#cb11-62" tabindex="-1" aria-label="code-block-11-62"></a>page_docs[<span class="dv">0</span>] <span class="cf">if</span> page_docs <span class="cf">else</span> <span class="va">None</span></span></code></pre>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a><span class="cf">try</span>:</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a>    pages_path <span class="op">=</span> download_from_s3(<span class="st">"wattbot/pages.jsonl"</span>, <span class="st">"pages.jsonl"</span>)   <span class="co"># staged next to corpus.zip by the corpus build script</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a>    page_docs <span class="op">=</span> [json.loads(line) <span class="cf">for</span> line <span class="kw">in</span> <span class="bu">open</span>(pages_path)]</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded </span><span class="sc">{</span><span class="bu">len</span>(page_docs)<span class="sc">}</span><span class="ss"> pre-extracted page records in </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> start<span class="sc">:.1f}</span><span class="ss"> s"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a><span class="cf">except</span> ClientError:</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1" aria-label="code-block-11-9"></a>    page_docs <span class="op">=</span> pdfs_to_page_docs(metadata_df, PDF_DIR)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1" aria-label="code-block-11-10"></a>    <span class="bu">print</span>(<span class="ss">f"Extracted </span><span class="sc">{</span><span class="bu">len</span>(page_docs)<span class="sc">}</span><span class="ss"> page-level records from </span><span class="sc">{</span><span class="bu">len</span>(metadata_df)<span class="sc">}</span><span class="ss"> PDFs in </span><span class="sc">{</span>(time.time() <span class="op">-</span> start) <span class="op">/</span> <span class="dv">60</span><span class="sc">:.1f}</span><span class="ss"> min"</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1" aria-label="code-block-11-11"></a>page_docs[<span class="dv">0</span>] <span class="cf">if</span> page_docs <span class="cf">else</span> <span class="va">None</span></span></code></pre>
 </div>
 <p>A paper whose PDF the corpus build could not download has no pages
 here, and a question that cites it can only score zero, which would
@@ -1245,7 +1196,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1254,7 +1205,7 @@ helper wraps:</p>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

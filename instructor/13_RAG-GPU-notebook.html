@@ -469,9 +469,8 @@ compatible Python environment.</li>
 <li>Reuse the WattBot metadata and questions from the shared bucket, and
 the <code>chunks.jsonl</code> the Bedrock episode cached in your own
 bucket.</li>
-<li>Implement a simple, explicit “from scratch” embedding pipeline with
-a self-hosted embedding model, without relying on FAISS or production
-vector DBs.</li>
+<li>Build the embedding matrix and the retrieval step with a self-hosted
+embedding model, in plain NumPy.</li>
 <li>Build a small retrieval helper that finds the most relevant chunks
 for a question using cosine similarity in embedding space.</li>
 <li>Serve a 27B open-weight generator (Qwen3.8-27B in FP8, via vLLM) on
@@ -985,60 +984,13 @@ one matrix, one row per chunk.</p>
 </div>
 <div class="section level3">
 <h3 id="build-a-simple-retrieval-step-cosine-similarity">4. Build a simple retrieval step (cosine similarity)<a class="anchor" aria-label="anchor" href="#build-a-simple-retrieval-step-cosine-similarity"></a></h3>
-<p>We are <strong>not</strong> using a heavy vector database in this
-episode.</p>
-<p>Instead, we:</p>
-<ol style="list-style-type: decimal"><li>Embed each chunk with <code>thenlper/gte-large</code> (done
-above).</li>
-<li>Embed each question.</li>
-<li>Compute cosine similarity between the question embedding and all
-chunk embeddings.</li>
-<li>Take the top–k most similar chunks as our retrieved context.</li>
-</ol><p>This keeps the retrieval logic in plain view, while matching the
-shape of production systems that use FAISS, Chroma, Weaviate, etc.</p>
-<div class="section level4">
-<h4 id="when-might-faiss-or-a-vector-database-be-worth-exploring">When might FAISS or a vector database be worth exploring?<a class="anchor" aria-label="anchor" href="#when-might-faiss-or-a-vector-database-be-worth-exploring"></a></h4>
-<p>For small–to–medium experiments (a few thousand to maybe tens of
-thousands of chunks), this “plain NumPy + cosine similarity” approach is
-usually enough. You might consider FAISS or a full vector DB when:</p>
-<ul><li><p><strong>Your corpus gets big</strong><br>
-Once you’re in the hundreds of thousands to millions of chunks,
-brute-force similarity search can become slow and memory-hungry. FAISS
-and friends provide <em>approximate nearest neighbor</em> search that
-scales much better.</p></li>
-<li>
-<p><strong>You need low-latency, repeated queries</strong><br>
-If many users (or a web app) will hit your RAG system concurrently,
-you’ll want:</p>
-<ul><li>fast indexing,</li>
-<li>efficient caching, and</li>
-<li>sub-second query latency.<br>
-Vector DBs are designed for this use case.</li>
-</ul></li>
-<li>
-<p><strong>You need rich filtering or metadata search</strong><br>
-Vector DBs often support:</p>
-<ul><li>filtering by metadata (e.g., <code>paper = "chung2025"</code>,
-<code>year &gt; 2021</code>),</li>
-<li>combining keyword + vector search (“hybrid search”),</li>
-<li>role-based access control and multi-tenant setups.</li>
-</ul></li>
-<li><p><strong>You want to share an index across services</strong><br>
-If multiple notebooks, microservices, or teams need to reuse the
-<strong>same embedding index</strong>, a shared FAISS index or hosted
-vector DB is much easier to manage than passing around <code>.npy</code>
-files.</p></li>
-<li><p><strong>You need GPU-accelerated or distributed
-search</strong><br>
-FAISS can use GPUs and sharding to speed up search on very large
-embedding collections. This is overkill for our teaching demo (and the
-Wattbot project in general), but very relevant for production-scale
-systems.</p></li>
-</ul><p>This episode uses a simple in-memory index, so the retrieval step is
-easy to inspect and debug. In your own projects you can <strong>swap out
-the retrieval layer</strong> for FAISS or a vector DB without changing
-the overall RAG architecture: the model still sees “top–k retrieved
-chunks” as context.</p>
+<p>Retrieval here is cosine similarity between the question’s vector and
+every chunk’s vector, with the top <em>k</em> chunks as context, and
+nothing more: for nine thousand chunks that is one matrix multiply. A
+vector database (FAISS, Chroma, Weaviate) is the same step built for
+millions of chunks or many concurrent users, with approximate search,
+metadata filters and a shared index; swapping it in changes nothing else
+in the pipeline.</p>
 <p><code>retrieve_top_k</code> from <code>wattbot_rag.py</code> is that
 search: normalize the query and the matrix, one matrix multiply for the
 cosine similarities, <code>argsort</code> for the top <em>k</em>. Open
@@ -1068,7 +1020,6 @@ the rest of the pipeline expects.</p>
 <span id="cb16-18"><a href="#cb16-18" tabindex="-1" aria-label="code-block-16-18"></a>    <span class="cf">if</span> <span class="bu">len</span>(snippet) <span class="op">&gt;</span> <span class="dv">160</span>:</span>
 <span id="cb16-19"><a href="#cb16-19" tabindex="-1" aria-label="code-block-16-19"></a>        snippet <span class="op">=</span> snippet[:<span class="dv">160</span>] <span class="op">+</span> <span class="st">"..."</span></span>
 <span id="cb16-20"><a href="#cb16-20" tabindex="-1" aria-label="code-block-16-20"></a>    <span class="bu">print</span>(<span class="ss">f"- score=</span><span class="sc">{</span>r[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss"> | doc_id=</span><span class="sc">{</span>r[<span class="st">'doc_id'</span>]<span class="sc">}</span><span class="ss"> | page=</span><span class="sc">{</span>r[<span class="st">'page_label'</span>]<span class="sc">}</span><span class="ss"> | snippet=</span><span class="sc">{</span>snippet<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
-</div>
 </div>
 </div>
 <div class="section level3">
@@ -1382,9 +1333,9 @@ per forgotten weekend, <code>$1,906</code> per forgotten month, plus
 <code>$14</code>/month for the storage volume even when stopped. Stop it
 when you stand up; delete it when the episode is over.</li>
 <li>
-<strong>Local-first RAG</strong>: For teaching (and small corpora),
-we avoid an external vector database and instead perform cosine
-similarity search over in-memory embeddings.</li>
+<strong>Retrieval is a matrix multiply</strong>: cosine similarity
+over the in-memory embedding matrix is enough for a corpus this size; a
+vector database is the same step for a corpus of millions.</li>
 <li>
 <strong>Ground-truth units</strong>: The <code>answer_unit</code>
 column is always copied directly from <code>train_QA.csv</code>, never
@@ -1397,10 +1348,6 @@ explanation tagged with an evidence type.</li>
 <strong>WattBot conventions</strong>: We respect the Kaggle
 competition format, using <code>is_blank</code> for unanswerable
 questions and for missing fields.</li>
-<li>
-<strong>Scalability path</strong>: The same logic can later be
-swapped to FAISS/Chroma and larger models, while preserving the
-interface used here.</li>
 </ul></div>
 </div>
 </div>

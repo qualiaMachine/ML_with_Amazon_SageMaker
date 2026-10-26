@@ -574,9 +574,8 @@ folder needs <code>--allow-unrelated-histories</code>.</li>
 <hr class="half-width">
 <ul>
 <li>
-<strong>Environment initialization</strong>: Setting up a SageMaker
-session, defining roles, and specifying the S3 bucket are essential for
-managing data and running jobs in SageMaker.</li>
+<strong>Setup</strong>: a SageMaker session, the execution role and
+the bucket name are what every job needs from the notebook.</li>
 <li>
 <strong>Local vs. managed training</strong>: Always test your code
 locally (on a smaller scale) before scaling things up. This avoids
@@ -587,9 +586,9 @@ results.</li>
 is AWS’s container running your script, the pattern every later episode
 uses with <code>PyTorch</code> and <code>HuggingFace</code>.</li>
 <li>
-<strong>Training data channels</strong>: Using
-<code>TrainingInput</code> ensures SageMaker manages data
-efficiently.</li>
+<strong>Training data channels</strong>: <code>TrainingInput</code>
+names the S3 data a job copies onto its instance before the script
+runs.</li>
 <li>
 <strong>Cost habit</strong>: Estimate cost before launching (rate x
 minutes + ~3 minutes startup), then read back
@@ -633,8 +632,8 @@ group, shard the rows, wrap the model in DDP.</li>
 <strong>Parallelism pays when the step’s computation is large next
 to the gradient exchange</strong>: big model, big batch, fast link.
 <code>helpers.estimate_parallel_speedup</code> gives the speedup and the
-cost ratio before you rent the devices; on 569 rows of tabular data it
-is 1x speed at 2x cost, measured.</li>
+cost ratio before you rent the devices; on 569 rows of tabular data the
+measured result was 0.85x the speed at 2.4x the cost.</li>
 </ul></section><section id="08_Hyperparameter-tuning"><h2 class="section-heading"><a href="08_Hyperparameter-tuning.html">Hyperparameter Tuning in SageMaker: Neural Network Example</a></h2>
 <hr class="half-width">
 <ul>
@@ -653,9 +652,8 @@ child training job; <code>max_parallel_jobs</code> changes wall-clock
 time and, with the Bayesian strategy, how much each job can learn from
 the ones before it. 2-4 parallel jobs is a good default.</li>
 <li>
-<strong>Tags propagate from the tuner</strong>: Tags on the tuner
-are copied to every child training job, the one case in SageMaker where
-tags are inherited.</li>
+<strong>Tags propagate from the tuner</strong>: tags on the tuner
+are copied to every child training job.</li>
 <li>
 <strong>Read the bill from the child jobs</strong>: SageMaker bills
 per second of <code>BillableTimeInSeconds</code> x instance count on
@@ -774,9 +772,9 @@ per forgotten weekend, <code>$1,906</code> per forgotten month, plus
 <code>$14</code>/month for the storage volume even when stopped. Stop it
 when you stand up; delete it when the episode is over.</li>
 <li>
-<strong>Local-first RAG</strong>: For teaching (and small corpora),
-we avoid an external vector database and instead perform cosine
-similarity search over in-memory embeddings.</li>
+<strong>Retrieval is a matrix multiply</strong>: cosine similarity
+over the in-memory embedding matrix is enough for a corpus this size; a
+vector database is the same step for a corpus of millions.</li>
 <li>
 <strong>Ground-truth units</strong>: The <code>answer_unit</code>
 column is always copied directly from <code>train_QA.csv</code>, never
@@ -789,10 +787,6 @@ explanation tagged with an evidence type.</li>
 <strong>WattBot conventions</strong>: We respect the Kaggle
 competition format, using <code>is_blank</code> for unanswerable
 questions and for missing fields.</li>
-<li>
-<strong>Scalability path</strong>: The same logic can later be
-swapped to FAISS/Chroma and larger models, while preserving the
-interface used here.</li>
 </ul></section><section id="14_CLI-equivalents"><h2 class="section-heading"><a href="14_CLI-equivalents.html">(Optional) The Same Jobs from the Terminal</a></h2>
 <hr class="half-width">
 <ul>
