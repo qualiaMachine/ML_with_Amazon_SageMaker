@@ -128,60 +128,6 @@ Learners reach the account through the console, the SageMaker SDK in notebooks, 
       }
     },
     {
-      "Sid": "NameTagNotBlank",
-      "Effect": "Deny",
-      "Action": [
-        "sagemaker:CreateTrainingJob",
-        "sagemaker:CreateProcessingJob",
-        "sagemaker:CreateHyperParameterTuningJob",
-        "sagemaker:CreateNotebookInstance"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": {
-          "aws:RequestTag/Name": ""
-        }
-      }
-    },
-    {
-      "Sid": "ProjectTagNotBlank",
-      "Effect": "Deny",
-      "Action": [
-        "sagemaker:CreateTrainingJob",
-        "sagemaker:CreateProcessingJob",
-        "sagemaker:CreateHyperParameterTuningJob",
-        "sagemaker:CreateNotebookInstance"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": {
-          "aws:RequestTag/Project": ""
-        }
-      }
-    },
-    {
-      "Sid": "PurposeTagFromTheList",
-      "Effect": "Deny",
-      "Action": [
-        "sagemaker:CreateTrainingJob",
-        "sagemaker:CreateProcessingJob",
-        "sagemaker:CreateHyperParameterTuningJob",
-        "sagemaker:CreateNotebookInstance"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringNotEquals": {
-          "aws:RequestTag/Purpose": [
-            "Storage",
-            "Notebook",
-            "Training",
-            "Tuning",
-            "Inference"
-          ]
-        }
-      }
-    },
-    {
       "Sid": "NoPlaceholderName",
       "Effect": "Deny",
       "Action": [
@@ -230,6 +176,87 @@ Learners reach the account through the console, the SageMaker SDK in notebooks, 
           ]
         }
       }
+    },
+    {
+      "Sid": "NameTagNotBlank",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestTag/Name": "?*"
+        }
+      }
+    },
+    {
+      "Sid": "ProjectTagNotBlank",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestTag/Project": "?*"
+        }
+      }
+    },
+    {
+      "Sid": "PurposeTagFromTheList",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:CreateHyperParameterTuningJob",
+        "sagemaker:CreateNotebookInstance"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:RequestTag/Purpose": [
+            "Storage",
+            "Notebook",
+            "Training",
+            "Tuning",
+            "Inference"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "RuntimeCapAtMost48Hours",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:CreateProcessingJob"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "NumericGreaterThan": {
+          "sagemaker:MaxRuntimeInSeconds": "172800"
+        }
+      }
+    },
+    {
+      "Sid": "ProcessingJobsNeedACap",
+      "Effect": "Deny",
+      "Action": [
+        "sagemaker:CreateProcessingJob"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Null": {
+          "sagemaker:MaxRuntimeInSeconds": "true"
+        }
+      }
     }
   ]
 }
@@ -239,9 +266,116 @@ What each statement does, and what it costs you:
 
 - **NothingThatRunsUntilDeleted** blocks the three resource kinds with no runtime cap. Nothing in the lesson creates any of them, so no episode changes. This is the statement that would have stopped the participant who spent a year's credits from a terminal.
 - **OnlyLessonInstanceTypes** refuses any job or notebook whose instance type is not on the list. The list must match the quota table above exactly, including the capacity fallbacks; a type you forget here fails for every learner at once, from the console too. Keep `ml.g6e.xlarge` on the list only if you want the optional GPU-notebook episode to be possible.
-- **The three tag statements** refuse a job or notebook created without each of the cost-allocation keys. **The three after them** refuse a blank `Name` or `Project` value and any `Purpose` that is not one of the five words the lesson uses, since a tag that is present but empty passes the first check and still bills as nobody's. **The last two** refuse the lesson's own example values, `DoeJohn` and `SinkOrSwim` and the usual variants, so a learner who runs a notebook without replacing them is stopped at the first launch rather than billed under a name that is nobody's; add your own placeholders to the lists, and remember that your own test runs need real values too. Every estimator, processor and tuner in the lesson passes all three, and the console's notebook-instance form has the tags field the S3 and controllers episodes fill in, so nothing in the lesson is affected; a learner who deletes the `tags=` line gets an `AccessDeniedException` instead of an unattributed bill. Tuning-job child jobs are created by the SageMaker service with the tuner's tags propagated, so they pass.
+- **The three tag statements** refuse a job or notebook created without each of the cost-allocation keys. **The three after them** refuse a blank `Name` or `Project` value and any `Purpose` that is not one of the five words the lesson uses, since a tag that is present but empty passes the first check and still bills as nobody's. **The last two** refuse the lesson's own example values, `DoeJohn` and `SinkOrSwim` and the usual variants, so a learner who runs a notebook without replacing them is stopped at the first launch rather than billed under a name that is nobody's; add your own placeholders to the lists, and remember that your own test runs need real values too.
+- **RuntimeCapAtMost48Hours and ProcessingJobsNeedACap** bound what one job can bill. A training job always carries a `StoppingCondition` (the API requires one, and the SDK's default is 24 hours); a Processing job does not, and without one it runs until the script ends. With the instance list above, the most one job can now cost is 48 hours of the dearest type, `ml.g6e.2xlarge` at `$2.80`: about `$135`. Lower the number to tighten it; the credit-request form promises learners 48 hours, so change both together.
+
+Test every statement with the IAM policy simulator before trusting it, from CloudShell; it reports `explicitDeny` and the statement that matched, without launching anything. The blank-value and vocabulary statements went through two forms before the simulator was used, and the first form, `StringEquals` against an empty string, passed blanks in practice:
+
+```bash
+ROLE=arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/ml-sagemaker-use
+sim() {   # sim <Name> <Project> <Purpose> <instance type>
+  aws iam simulate-principal-policy --policy-source-arn $ROLE --action-names sagemaker:CreateTrainingJob \
+    --context-entries "ContextKeyName=aws:RequestTag/Name,ContextKeyValues=$1,ContextKeyType=string" \
+                      "ContextKeyName=aws:RequestTag/Project,ContextKeyValues=$2,ContextKeyType=string" \
+                      "ContextKeyName=aws:RequestTag/Purpose,ContextKeyValues=$3,ContextKeyType=string" \
+                      "ContextKeyName=sagemaker:InstanceTypes,ContextKeyValues=$4,ContextKeyType=stringList" \
+    --query 'EvaluationResults[0].[EvalDecision, MatchedStatements[].SourcePolicyId]' --output text
+}
+sim EndemannChris MLMarathon Training ml.m5.large      # allowed
+sim "" MLMarathon Training ml.m5.large                 # explicitDeny: NameTagNotBlank
+sim EndemannChris MLMarathon Testing ml.m5.large       # explicitDeny: PurposeTagFromTheList
+sim DoeJohn SinkOrSwim Training ml.m5.large            # explicitDeny: the placeholder statements
+sim EndemannChris MLMarathon Training ml.m5.4xlarge    # explicitDeny: OnlyLessonInstanceTypes
+``` Every estimator, processor and tuner in the lesson passes all three, and the console's notebook-instance form has the tags field the S3 and controllers episodes fill in, so nothing in the lesson is affected; a learner who deletes the `tags=` line gets an `AccessDeniedException` instead of an unattributed bill. Tuning-job child jobs are created by the SageMaker service with the tuner's tags propagated, so they pass.
 
 Three cautions. Test the policy with one job of each kind (training, processing, tuning, notebook creation from the console) a week before class, from a learner-level sign-in, not an administrator one. Second, the role the notebook instance assumes (`ml-sagemaker-use`) is a separate identity from the permission set; what the SDK does from inside a notebook is governed by that role's policy, so attach the same denies there, or the guard rail only covers the laptop. On the UW account the policy above, all ten statements, is attached to that role as the inline policy `WorkshopGuardRails` (26 October 2026), with one CloudShell command: `aws iam put-role-policy --role-name ml-sagemaker-use --policy-name WorkshopGuardRails --policy-document file://guardrails.json`, where the file is the JSON above; the same command replaces it after any edit. It was tested from a notebook on that role: an untagged `create_training_job` is refused with `AccessDeniedException ... explicit deny`. The permission set, which governs the console and a laptop CLI, has not been given the policy; that needs the Identity Center administrator in the management account. Third, set the permission set's session duration to the length of a class day (8 hours) so a CLI login does not expire mid-episode; it is on the permission set's **General settings**.
+
+## Overnight safeguards
+
+The guard rails above decide what a launch may be. They do not stop a notebook instance that was left running, a hundred allowed jobs launched in a loop, or a Bedrock loop against an expensive model. Four more measures cover those, in order of how much they prevent for how little they cost. None of them touches an ordinary run at the budgets the Marathon works with.
+
+### 1. Stop every notebook instance nightly
+
+A forgotten `ml.g6e.xlarge` notebook is `$63` a night; a forgotten `ml.t3.medium` is a dollar. A scheduled function that stops every running notebook instance at 11 pm removes the first case for good. Training and Processing jobs are untouched, since they are not notebook instances, and a learner who needs an instance up overnight tags it `KeepRunning=yes`. The whole thing is one Lambda function and one schedule, from an administrative CloudShell:
+
+```bash
+cat > stop_notebooks.py <<'PY'
+import boto3
+
+def handler(event, context):
+    sm = boto3.client("sagemaker")
+    stopped = []
+    for page in sm.get_paginator("list_notebook_instances").paginate(StatusEquals="InService"):
+        for nb in page["NotebookInstances"]:
+            tags = {t["Key"]: t["Value"] for t in sm.list_tags(ResourceArn=nb["NotebookInstanceArn"])["Tags"]}
+            if tags.get("KeepRunning", "").lower() == "yes":
+                continue
+            sm.stop_notebook_instance(NotebookInstanceName=nb["NotebookInstanceName"])
+            stopped.append(nb["NotebookInstanceName"])
+    print("stopped:", stopped)
+    return stopped
+PY
+zip -q stop_notebooks.zip stop_notebooks.py
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+
+aws iam create-role --role-name nightly-notebook-stop \
+  --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
+aws iam put-role-policy --role-name nightly-notebook-stop --policy-name StopNotebooks \
+  --policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["sagemaker:ListNotebookInstances","sagemaker:ListTags","sagemaker:StopNotebookInstance"],"Resource":"*"},{"Effect":"Allow","Action":["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],"Resource":"*"}]}'
+sleep 15   # a new role takes a few seconds to become usable
+aws lambda create-function --function-name nightly-notebook-stop --runtime python3.12 --handler stop_notebooks.handler \
+  --zip-file fileb://stop_notebooks.zip --role arn:aws:iam::$ACCOUNT:role/nightly-notebook-stop --timeout 120
+
+# cron expressions here are UTC: 05:00 UTC is 11 pm Central in winter and midnight in summer
+aws events put-rule --name nightly-notebook-stop --schedule-expression "cron(0 5 * * ? *)"
+aws lambda add-permission --function-name nightly-notebook-stop --statement-id events --action lambda:InvokeFunction \
+  --principal events.amazonaws.com --source-arn arn:aws:events:us-east-2:$ACCOUNT:rule/nightly-notebook-stop
+aws events put-targets --rule nightly-notebook-stop --targets "Id=1,Arn=arn:aws:lambda:us-east-2:$ACCOUNT:function:nightly-notebook-stop"
+```
+
+To test it, run the function once by hand. It stops every running instance that is not tagged `KeepRunning=yes`, your own included, so do it when nothing is running:
+
+```bash
+aws lambda invoke --function-name nightly-notebook-stop out.json && cat out.json
+```
+
+Say in the credit-request form and in class that instances stop at 11 pm, that a running cell is interrupted when they do, and that jobs are not.
+
+### 2. A spend alert per learner, and a brake on the class total
+
+AWS Budgets can watch one cost-allocation tag. One budget per learner on the `Name` tag, at the per-person credit with an alert at 80%, tells you who is about to run over, a day or two late because of Cost Explorer's lag. From CloudShell, with a file `names.txt` holding one `Name` tag value per line:
+
+```bash
+LIMIT=50; EMAIL=endemann@wisc.edu
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+while read -r NAME; do
+  aws budgets create-budget --account-id $ACCOUNT \
+    --budget "{\"BudgetName\":\"mlm-$NAME\",\"BudgetLimit\":{\"Amount\":\"$LIMIT\",\"Unit\":\"USD\"},\"TimeUnit\":\"MONTHLY\",\"BudgetType\":\"COST\",\"CostFilters\":{\"TagKeyValue\":[\"user:Name\$$NAME\"]}}" \
+    --notifications-with-subscribers "[{\"Notification\":{\"NotificationType\":\"ACTUAL\",\"ComparisonOperator\":\"GREATER_THAN\",\"Threshold\":80},\"Subscribers\":[{\"SubscriptionType\":\"EMAIL\",\"Address\":\"$EMAIL\"}]}]"
+done < names.txt
+```
+
+Budgets are free for the first two and about `$0.60` a month each after that. The alert is information, not a block: AWS cannot stop one learner's jobs on a shared role. What it can do is a **budget action** on the class total: in the Budgets console, a budget for the account's SageMaker and Bedrock spend at the class ceiling, with an action that attaches a deny-everything policy to `ml-sagemaker-use` when the ceiling is crossed. That stops every launch for every learner at once, which is the right outcome at that point. Set it up once in the console (Budgets, Create budget, add an action of type IAM policy, target the role) and detach the policy by hand when the term is sorted out.
+
+### 3. Keep the dear Bedrock models out of reach
+
+Bedrock has no spend cap of its own, and what a loop costs depends on the model: DeepSeek V3 is `$1.85` per million output tokens, a frontier model is ten times that. A deny on the expensive families in the `BedrockAccess` policy keeps them out of reach; the lesson's models are untouched. The statement below blocks Anthropic's Opus models by name, directly and through any inference profile; extend the patterns to any family whose price you do not want to meet on the bill.
+
+```json
+{
+  "Sid": "NoFrontierPricedModels",
+  "Effect": "Deny",
+  "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream"],
+  "Resource": [
+    "arn:aws:bedrock:*::foundation-model/anthropic.claude-opus*",
+    "arn:aws:bedrock:*:*:inference-profile/*claude-opus*"
+  ]
+}
+```
+
+### 4. Lower the GPU quotas after class
+
+The quotas in the table at the top are sized for a hundred learners launching at once; a `ml.g5.xlarge` training quota of 100 lets one learner launch a hundred jobs at `$141` an hour. Once the workshop day is over, ask Service Quotas to lower the per-type job quotas to what the Marathon needs, 10 to 20 of each, and leave the account-wide instance ceilings. Decreases apply at once. The credit-request form's "at most three instances" is a rule; the quota is the enforcement, shared across the class.
 
 ## Bedrock
 
