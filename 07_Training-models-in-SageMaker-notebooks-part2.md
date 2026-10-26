@@ -69,7 +69,7 @@ import helpers
 ```
 
 ```python
-notebook_instance_name = 'WattBot2026-DoeJohn' # replace with your notebook instance name
+notebook_instance_name = 'SinkOrSwim-DoeJohn' # replace with your notebook instance name
 
 local_instance_info = helpers.get_notebook_instance_info(notebook_instance_name, region)
 local_instance = local_instance_info['InstanceType']
@@ -179,7 +179,7 @@ As in the XGBoost episode, every training job needs its own tags: a job does not
 
 ```python
 name = "DoeJohn" # replace with your name
-project = "YourChallenge"   # replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI
+project = "SinkOrSwim"   # your challenge: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell or SnapshotWI; SinkOrSwim is the workshop itself
 purpose = "Training"        # one of: Storage, Notebook, Training, Tuning, Inference
 
 job_tags = [
