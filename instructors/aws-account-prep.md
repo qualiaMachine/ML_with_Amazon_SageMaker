@@ -128,34 +128,6 @@ Learners reach the account through the console, the SageMaker SDK in notebooks, 
       }
     },
     {
-      "Sid": "NoPlaceholderName",
-      "Effect": "Deny",
-      "Action": [
-        "sagemaker:CreateTrainingJob",
-        "sagemaker:CreateProcessingJob",
-        "sagemaker:CreateHyperParameterTuningJob",
-        "sagemaker:CreateNotebookInstance"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEqualsIgnoreCase": {
-          "aws:RequestTag/Name": [
-            "DoeJohn",
-            "JohnDoe",
-            "Doe John",
-            "John Doe",
-            "DoeJane",
-            "JaneDoe",
-            "Doe Jane",
-            "Jane Doe",
-            "LastnameFirstname",
-            "YourName",
-            "Name"
-          ]
-        }
-      }
-    },
-    {
       "Sid": "ProjectTagFromTheList",
       "Effect": "Deny",
       "Action": [
@@ -168,6 +140,7 @@ Learners reach the account through the console, the SageMaker SDK in notebooks, 
       "Condition": {
         "StringNotLike": {
           "aws:RequestTag/Project": [
+            "SinkOrSwim",
             "WattBot2026",
             "BadgerScribe",
             "BadgerCode",
@@ -251,7 +224,7 @@ What each statement does, and what it costs you:
 
 - **NothingThatRunsUntilDeleted** blocks the three resource kinds with no runtime cap. Nothing in the lesson creates any of them, so no episode changes. This is the statement that would have stopped the participant who spent a year's credits from a terminal.
 - **OnlyLessonInstanceTypes** refuses any job or notebook whose instance type is not on the list. The list must match the quota table above exactly, including the capacity fallbacks; a type you forget here fails for every learner at once, from the console too. Keep `ml.g6e.xlarge` on the list only if you want the optional GPU-notebook episode to be possible.
-- **The three tag statements** refuse a job or notebook created without each of the cost-allocation keys. **NameTagNotBlank and NoPlaceholderName** refuse a `Name` that is empty, or that is the lesson's example `DoeJohn` or one of the usual variants, since a tag that is present but empty passes the first check and still bills as nobody's, and so does a name nobody has. **ProjectTagFromTheList and PurposeTagFromTheList** refuse any `Project` that is not one of the year's challenge names and any `Purpose` that is not one of the five words the lesson uses. The challenge list is the one thing in the policy that changes every year: edit it with the challenges, and note that it also decides your own test runs, which need a listed project and a real name. A learner who runs a notebook without replacing the placeholders is stopped at the first launch rather than billed under a name and project that are nobody's.
+- **The three tag statements** refuse a job or notebook created without each of the cost-allocation keys. **NameTagNotBlank** refuses a `Name` that is present but empty, which passes the first check and still bills as nobody's. **ProjectTagFromTheList and PurposeTagFromTheList** refuse any `Project` that is not on the list and any `Purpose` that is not one of the five words the lesson uses. The project list is the workshop's own project, `SinkOrSwim`, plus the year's challenge names; it is the one thing in the policy that changes every year, and it also decides your own test runs. The lesson's example values, `DoeJohn` and `SinkOrSwim`, are allowed on purpose, so that a learner who runs a notebook without replacing them is not stopped at the first launch; what they cost is a job on the bill under `DoeJohn`, which Cost Explorer shows and the first episodes tell learners to check.
 - **RuntimeCapAtMost48Hours and ProcessingJobsNeedACap** bound what one job can bill. A training job always carries a `StoppingCondition` (the API requires one, and the SDK's default is 24 hours); a Processing job does not, and without one it runs until the script ends. With the instance list above, the most one job can now cost is 48 hours of the dearest type, `ml.g6e.2xlarge` at `$2.80`: about `$135`. Lower the number to tighten it; the credit-request form promises learners 48 hours, so change both together.
 
 Test every statement with the IAM policy simulator before trusting it, from CloudShell; it reports `explicitDeny` and the statement that matched, without launching anything. The blank-value and vocabulary statements went through two forms before the simulator was used, and the first form, `StringEquals` against an empty string, passed blanks in practice:
@@ -270,11 +243,11 @@ sim EndemannChris WattBot2026 Training ml.m5.large     # allowed
 sim "" WattBot2026 Training ml.m5.large                # explicitDeny: NameTagNotBlank
 sim EndemannChris MyProject Training ml.m5.large       # explicitDeny: ProjectTagFromTheList
 sim EndemannChris WattBot2026 Testing ml.m5.large      # explicitDeny: PurposeTagFromTheList
-sim DoeJohn YourChallenge Training ml.m5.large         # explicitDeny: NoPlaceholderName and ProjectTagFromTheList
+sim DoeJohn SinkOrSwim Training ml.m5.large            # allowed: the lesson's example values are on the lists
 sim EndemannChris WattBot2026 Training ml.m5.4xlarge   # explicitDeny: OnlyLessonInstanceTypes
 ``` Every estimator, processor and tuner in the lesson passes all three, and the console's notebook-instance form has the tags field the S3 and controllers episodes fill in, so nothing in the lesson is affected; a learner who deletes the `tags=` line gets an `AccessDeniedException` instead of an unattributed bill. Tuning-job child jobs are created by the SageMaker service with the tuner's tags propagated, so they pass.
 
-Three cautions. Test the policy with one job of each kind (training, processing, tuning, notebook creation from the console) a week before class, from a learner-level sign-in, not an administrator one. Second, the role the notebook instance assumes (`ml-sagemaker-use`) is a separate identity from the permission set; what the SDK does from inside a notebook is governed by that role's policy, so attach the same denies there, or the guard rail only covers the laptop. On the UW account the policy above, all eleven statements, is attached to that role as the inline policy `WorkshopGuardRails` (26 October 2026, with the 2026 challenge list), with one CloudShell command: `aws iam put-role-policy --role-name ml-sagemaker-use --policy-name WorkshopGuardRails --policy-document file://guardrails.json`, where the file is the JSON above; the same command replaces it after any edit. It was tested from a notebook on that role: an untagged `create_training_job` is refused with `AccessDeniedException ... explicit deny`. The permission set, which governs the console and a laptop CLI, has not been given the policy; that needs the Identity Center administrator in the management account. Third, set the permission set's session duration to the length of a class day (8 hours) so a CLI login does not expire mid-episode; it is on the permission set's **General settings**.
+Three cautions. Test the policy with one job of each kind (training, processing, tuning, notebook creation from the console) a week before class, from a learner-level sign-in, not an administrator one. Second, the role the notebook instance assumes (`ml-sagemaker-use`) is a separate identity from the permission set; what the SDK does from inside a notebook is governed by that role's policy, so attach the same denies there, or the guard rail only covers the laptop. On the UW account the policy above, all ten statements, is attached to that role as the inline policy `WorkshopGuardRails` (26 October 2026, with the 2026 challenge list), with one CloudShell command: `aws iam put-role-policy --role-name ml-sagemaker-use --policy-name WorkshopGuardRails --policy-document file://guardrails.json`, where the file is the JSON above; the same command replaces it after any edit. It was tested from a notebook on that role: an untagged `create_training_job` is refused with `AccessDeniedException ... explicit deny`. The permission set, which governs the console and a laptop CLI, has not been given the policy; that needs the Identity Center administrator in the management account. Third, set the permission set's session duration to the length of a class day (8 hours) so a CLI login does not expire mid-episode; it is on the permission set's **General settings**.
 
 ## Overnight safeguards
 
