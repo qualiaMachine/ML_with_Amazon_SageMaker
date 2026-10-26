@@ -24,7 +24,7 @@ exercises: 10
 
 ### Optional, self-study episode
 
-Everything in this lesson went through the SageMaker Python SDK in a notebook. The same account can be used from a terminal with the AWS CLI: to check on a job from another machine, to stop something when no notebook is open, to copy results out of S3 in bulk, or to script a launch. This episode shows the CLI equivalents of what you already did, in four groups: **look, stop, copy, launch**.
+Everything in this lesson went through the SageMaker Python SDK in a notebook. The same account can be used from a terminal with the AWS CLI: to check on a job from another machine, to stop something when no notebook is open, to copy results out of S3 in bulk, or to script a launch. This episode does five things from a laptop terminal: signs in to the account with Identity Center, lists what is running and reads what a job cost, stops jobs and notebook instances, copies data to and from S3, and launches one training job from a JSON file, the same request `estimator.fit()` sent in the training episodes.
 
 The case for the terminal is the notebook instance. Every job in this lesson was launched from an `ml.t3.medium` that bills while it is on, five cents an hour, a dollar a day, and that someone has to remember to stop. A job launched from a laptop needs no instance at all: the request goes from your terminal to SageMaker, the job runs on a machine rented for it and ends, and the model lands in S3. For a project that launches a job a day and otherwise works locally, that is the notebook's whole cost gone and nothing left running overnight. The training episode's `wait=False` pattern gets most of the way there from a notebook; the CLI gets the rest.
 
@@ -78,7 +78,7 @@ The output names the account ID and an `AWSReservedSSO_...` role. The credential
 
 If you are on the notebook instance's own terminal (JupyterLab, **File → New → Terminal**), skip this step: the instance's role is already the identity, which is the reason the lesson works from one.
 
-## 2. Look: what is running and what did it cost
+## 2. What is running, and what a job cost
 
 The SageMaker SDK calls you used map one-to-one onto `aws sagemaker` subcommands. `--query` is a [JMESPath](https://jmespath.org/) filter that keeps the output to what you asked about.
 
@@ -133,9 +133,9 @@ aws sagemaker list-tags --resource-arn $ARN --query 'Tags[].[Key,Value]' --outpu
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## 3. Stop: the commands worth memorising
+## 3. Stopping jobs and notebook instances
 
-These are the most useful CLI commands to know. Each one stops a charge.
+Each of these stops a charge.
 
 ```bash
 aws sagemaker stop-training-job   --training-job-name   <name>
@@ -150,7 +150,7 @@ A stopped job keeps its logs and whatever it had already written to S3; a stoppe
 aws sagemaker delete-notebook-instance --notebook-instance-name <name>   # only after it reports Stopped
 ```
 
-## 4. Copy: S3 in bulk
+## 4. Copying to and from S3
 
 The S3 episode uploaded through the console and the SDK. For many files, or for pulling a job's outputs down to a laptop, the CLI is the better tool:
 
@@ -163,7 +163,7 @@ aws s3 rm s3://<your-bucket>/scratch/ --recursive                          # del
 
 Downloads to a laptop are a transfer out of AWS (`$0.09` per GB). For anything larger than a few hundred megabytes, keep the data in the region and let a job read it, which is the lesson's pattern.
 
-## 5. Launch: one training job, as JSON
+## 5. Launching a training job from a JSON file
 
 Every `estimator.fit()` in the training episodes assembled a JSON request and sent it to `CreateTrainingJob`. Here is that request. Fill in the five placeholders from your notebook: the image URI (run `print(xgboost_estimator.training_image_uri())` in the training episode's notebook), your role ARN (`print(role)`), your bucket, your tag values, and a job name, which must be unique in the account.
 
