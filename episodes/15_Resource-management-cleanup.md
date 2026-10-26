@@ -31,7 +31,12 @@ Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/15_Resource-management
 
 ```python
 import boto3
+import os
+os.environ["SAGEMAKER_SUPPRESS_V2_WARNING"] = "1"   # the SDK otherwise prints a deprecation notice on import and on every estimator
 import sagemaker
+import logging
+logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
+logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
 import sys
 
 sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")   # the lesson's helper module, cloned in the controllers episode
