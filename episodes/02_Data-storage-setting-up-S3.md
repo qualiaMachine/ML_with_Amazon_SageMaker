@@ -117,6 +117,8 @@ AWS allows tag values of up to 256 characters made of letters, digits, spaces an
 
 `Purpose` takes one of five values, so that the bill can be summed by kind of work rather than by individual job. Which job it was is already in the job's name.
 
+These lists are enforced: the account refuses a job whose tags are missing, blank or off the lists, and the refusal says only `AccessDenied ... explicit deny`, not which tag. The training episode checks the tags in the notebook before each launch and names the problem; [If a Launch Is Refused](../learners/refused-launch.md) is the full list of rules and fixes, for later.
+
 | `Purpose` | Used for |
 |---|---|
 | `Storage` | your bucket |
