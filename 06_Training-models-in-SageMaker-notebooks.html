@@ -599,8 +599,8 @@ hyperparameters or scaling.</li>
 <div class="callout-content">
 <p>Before scaling to multiple or more powerful instances (e.g., training
 on larger/multiple datasets in parallel or tuning hyperparameters in
-parallel), it’s important to run a few quick sanity checks to catch
-potential issues early. <strong>In your group, discuss:</strong></p>
+parallel), run a few quick sanity checks to catch problems early.
+<strong>In your group, discuss:</strong></p>
 <ul><li>Which checks do you think are most critical before scaling up?<br></li>
 <li>What potential issues might we miss if we skip this step?</li>
 </ul><div id="accordionSolution1" class="accordion challenge-accordion accordion-flush">
@@ -768,10 +768,9 @@ scaling things up.</p>
 <span class="callout-header">Callout</span>
 <div class="callout-inner">
 <div class="callout-content">
-<p>While we demonstrate how to download data into the notebook
-environment for testing our code (previously setup for local ML
-pipelines), keep in mind that S3 is the preferred location for dataset
-storage in a scalable ML pipeline.</p>
+<p>We download the data into the notebook to test the code, as a local
+pipeline would. In a pipeline that scales, the data lives in S3 and the
+jobs read it from there.</p>
 </div>
 </div>
 </div>
@@ -891,10 +890,9 @@ resources.</p>
 </div>
 <div class="section level3">
 <h3 id="sanity-check-quick-evaluation-on-test-set">Sanity check: Quick evaluation on test set<a class="anchor" aria-label="anchor" href="#sanity-check-quick-evaluation-on-test-set"></a></h3>
-<p>This next section isn’t SageMaker specific, but it does serve as a
-good sanity check to ensure our model is training properly. Here’s how
-you would apply the outputted model to your test set using your local
-notebook instance.</p>
+<p>This section is not SageMaker specific; it checks that the model
+trained properly by applying it to the test set on the notebook
+instance.</p>
 <p>Score the model you just trained locally on the test set, reusing the
 script’s own <code>preprocess_data</code> so the test rows are
 transformed exactly as the training rows were.</p>
@@ -934,9 +932,9 @@ working correctly.</p>
 </section><section><h2 class="section-heading" id="training-via-sagemaker-your-script-inside-awss-xgboost-container">Training via SageMaker: your script inside AWS’s XGBoost
 container<a class="anchor" aria-label="anchor" href="#training-via-sagemaker-your-script-inside-awss-xgboost-container"></a></h2>
 <hr class="half-width"><p>Unlike “local” training (using this notebook), this next approach
-leverages SageMaker’s managed infrastructure to handle resources,
-parallelism, and scalability. By specifying instance parameters, such as
-instance_count and instance_type, you can control the resources
+runs the job on an instance SageMaker rents for it, which is where
+instance count and type come in. By specifying instance parameters, such
+as instance_count and instance_type, you can control the resources
 allocated for training.</p>
 <div class="section level3">
 <h3 id="which-instance-to-start-with">Which instance to start with?<a class="anchor" aria-label="anchor" href="#which-instance-to-start-with"></a></h3>
@@ -1032,8 +1030,7 @@ SageMaker, Estimator classes streamline the configuration and training
 of models on managed instances. Each Estimator can work with custom
 scripts and be enhanced with additional dependencies by specifying a
 <code>requirements.txt</code> file, which is automatically installed at
-the start of training. Here’s a breakdown of some commonly used
-Estimator classes in SageMaker:</p>
+the start of training. The commonly used Estimator classes:</p>
 <div class="section level4">
 <h4 id="estimator-base-class">1. <strong><code>Estimator</code> (Base Class)</strong>
 <a class="anchor" aria-label="anchor" href="#estimator-base-class"></a></h4>
@@ -1186,8 +1183,8 @@ using pretrained Transformer models.</li>
 as a <code>dependencies</code> argument ensures that additional packages
 are installed before training begins. This approach allows the use of
 specific libraries that may be critical for custom preprocessing,
-feature engineering, or model modifications. Here’s how to include it
-(illustration only; we don’t run this):</p>
+feature engineering, or model modifications. To include it (illustration
+only; we don’t run this):</p>
 <pre class="text"><code>from sagemaker.sklearn.estimator import SKLearn
 sklearn_estimator = SKLearn(
     base_job_name=f"{notebook_instance_name}-xgboost",   # job name = who + which model; SageMaker appends a timestamp
@@ -1222,8 +1219,8 @@ pre-installed packages.</p>
 <h3 id="deploying-to-other-instances">Deploying to other instances<a class="anchor" aria-label="anchor" href="#deploying-to-other-instances"></a></h3>
 <p>For this deployment, we configure the <code>XGBoost</code> estimator
 with a custom training script, <code>train_xgboost.py</code>, and define
-hyperparameters directly within the SageMaker setup. Here’s the full
-code, with some additional explanation following the code.</p>
+hyperparameters directly within the SageMaker setup. The full code is
+below, with explanation after it.</p>
 <div class="section level4">
 <h4 id="cost-tracking">Cost tracking<a class="anchor" aria-label="anchor" href="#cost-tracking"></a></h4>
 <p>When you launch a SageMaker training job from a notebook, SageMaker

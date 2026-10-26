@@ -603,10 +603,8 @@ both <code>X_train</code> and <code>y_train</code>, keeping everything
 related to training data in one place. Similarly,
 <code>val_data.npz</code> organizes validation features and labels,
 simplifying file management.</p></li>
-</ol><p>In summary, saving the data in <code>.npz</code> files ensures a
-smooth workflow from data loading to model training in PyTorch,
-leveraging SageMaker’s infrastructure for a more efficient, structured
-training process.</p>
+</ol><p>Saving the data as <code>.npz</code> files keeps loading fast and the
+arrays in the shape the training script expects.</p>
 </div>
 </div>
 </div>

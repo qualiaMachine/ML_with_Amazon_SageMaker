@@ -475,11 +475,10 @@ jobs.</li>
 <code>/ML_with_AWS_SageMaker/notebooks/08_Hyperparameter-tuning.ipynb</code>.
 Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 </section><section><h2 class="section-heading" id="hyperparameter-tuning-in-sagemaker">Hyperparameter tuning in SageMaker<a class="anchor" aria-label="anchor" href="#hyperparameter-tuning-in-sagemaker"></a></h2>
-<hr class="half-width"><p>To conduct efficient hyperparameter tuning with neural networks (or
-any model) in SageMaker, we’ll leverage SageMaker’s
-<strong>hyperparameter tuning jobs</strong> while carefully managing
-parameter ranges and model count. Here’s an overview of the process,
-with a focus on both efficiency and cost-effectiveness.</p>
+<hr class="half-width"><p>SageMaker’s <strong>hyperparameter tuning jobs</strong> search a
+parameter space for any model; what keeps them cheap is the choice of
+ranges and the number of models trained. This episode walks through one
+tuning job with both in view.</p>
 <div class="section level3">
 <h3 id="key-steps">Key steps<a class="anchor" aria-label="anchor" href="#key-steps"></a></h3>
 <p>The overall process involves these seven below steps.</p>
@@ -926,12 +925,11 @@ while setting <code>max_parallel_jobs=2</code> to manage parallelization
 efficiently. With two jobs running at once, SageMaker will be able to
 explore potential improvements more quickly than in a fully sequential
 setup, while still dynamically selecting promising values as it learns
-from completed jobs. This balance leverages SageMaker’s Bayesian
-optimization, which uses completed trials to inform subsequent ones,
-helping to avoid redundant testing of less promising parameter
-combinations. <strong>Setting <code>max_parallel_jobs</code> higher than
-2-4 reduces tuning efficiency, as SageMaker’s ability to learn from
-completed jobs decreases when too many jobs run
+from completed jobs. SageMaker’s Bayesian optimization uses the
+completed trials to choose the next ones, so it spends fewer jobs on
+unpromising combinations. <strong>Setting <code>max_parallel_jobs</code>
+higher than 2-4 reduces tuning efficiency, as SageMaker’s ability to
+learn from completed jobs decreases when too many jobs run
 simultaneously.</strong></p>
 <p>With this approach, SageMaker is better able to refine configurations
 without overloading resources or risking inefficient exploration, making
@@ -1012,8 +1010,8 @@ concurrently), but it can impact the final results and resource usage
 pattern due to SageMaker’s ability to dynamically select hyperparameter
 values to test to maximize efficiency and improve model performance.
 This adaptability is especially useful for neural networks, which often
-have a large hyperparameter space with complex interactions. Here’s how
-SageMaker’s approach impacts typical neural network training:</p>
+have a large hyperparameter space with complex interactions. What this
+means for neural network training:</p>
 <div class="section level4">
 <h4 id="adaptive-search-strategies">1. Adaptive Search Strategies<a class="anchor" aria-label="anchor" href="#adaptive-search-strategies"></a></h4>
 <ul><li>SageMaker offers <strong>Bayesian optimization</strong> for
@@ -1034,8 +1032,7 @@ the subsequent batch, which may yield better results over time.</li>
 <code>max_parallel_jobs=10</code>), SageMaker can’t learn and adapt
 within a single batch, making this setup more like a traditional grid or
 random search. This approach is still valid, especially for small search
-spaces, but it doesn’t leverage the full potential of adaptive
-tuning.</li>
+spaces, but it gives up the adaptive part.</li>
 </ul></div>
 <div class="section level4">
 <h4 id="practical-impact-on-neural-network-training">3. Practical impact on neural network training<a class="anchor" aria-label="anchor" href="#practical-impact-on-neural-network-training"></a></h4>
@@ -1057,8 +1054,8 @@ jobs by fine-tuning hyperparameters over multiple iterations.</li>
 simultaneous testing.</li>
 <li>
 <strong>For adaptive, refined tuning</strong>: Use a smaller
-<code>max_parallel_jobs</code> (like 2–4) to let SageMaker leverage
-adaptive tuning for optimal configurations.</li>
+<code>max_parallel_jobs</code> (like 2–4) so that later jobs can learn
+from earlier ones.</li>
 </ul><p>This balance between exploration and exploitation is particularly
 impactful in neural network tuning, where training costs can be high and
 parameters interact in complex ways.</p>
@@ -1069,8 +1066,8 @@ parameters interact in complex ways.</p>
 <p>Tuning takes about 10 minutes to complete — not bad for 10 models!
 After SageMaker completes the hyperparameter tuning job, the results,
 including the trained models for each configuration, are stored in an S3
-bucket. Here’s a breakdown of the steps to locate and evaluate the best
-model on test data.</p>
+bucket. The steps to locate and evaluate the best model on test
+data:</p>
 <ol style="list-style-type: decimal"><li>
 <strong>Understanding the folder structure</strong>:
 <ul><li>SageMaker saves each tuning job’s results in the specified S3 bucket
@@ -1280,7 +1277,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul><li>
 <strong>Cost</strong>: higher, not the same. Our all-parallel run
@@ -1328,7 +1325,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
