@@ -800,7 +800,7 @@ string, passed blanks in practice:</p>
 <span id="cb2-18"><a href="#cb2-18" tabindex="-1" aria-label="code-block-2-18"></a></span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1" aria-label="code-block-2-19"></a><span class="st">## Overnight safeguards</span></span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1" aria-label="code-block-2-20"></a></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1" aria-label="code-block-2-21"></a><span class="st">The guard rails above decide what a launch may be. They do not stop a notebook instance that was left running, a hundred allowed jobs launched in a loop, or a Bedrock loop against an expensive model. Four more measures cover those, in order of how much they prevent for how little they cost. None of them touches an ordinary run at the budgets the Marathon works with.</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1" aria-label="code-block-2-21"></a><span class="st">The guard rails above decide what a launch may be. They do not stop a notebook instance that was left running, or a hundred allowed jobs launched in a loop. Three more measures cover those, in order of how much they prevent for how little they cost. None of them touches an ordinary run at the budgets the Marathon works with.</span></span>
 <span id="cb2-22"><a href="#cb2-22" tabindex="-1" aria-label="code-block-2-22"></a></span>
 <span id="cb2-23"><a href="#cb2-23" tabindex="-1" aria-label="code-block-2-23"></a><span class="st">### 1. Stop every notebook instance nightly</span></span>
 <span id="cb2-24"><a href="#cb2-24" tabindex="-1" aria-label="code-block-2-24"></a></span>
@@ -882,31 +882,7 @@ an action of type IAM policy, target the role) and detach the policy by
 hand when the term is sorted out.</p>
 </div>
 <div class="section level3">
-<h3 id="keep-the-dear-bedrock-models-out-of-reach">3. Keep the dear Bedrock models out of reach<a class="anchor" aria-label="anchor" href="#keep-the-dear-bedrock-models-out-of-reach"></a></h3>
-<p>Bedrock has no spend cap of its own, and what a loop costs depends on
-the model: DeepSeek V3 is <code>$1.85</code> per million output tokens,
-a frontier model is ten times that. A deny on the expensive families in
-the <code>BedrockAccess</code> policy keeps them out of reach; the
-lesson’s models are untouched. The statement below blocks Anthropic’s
-Opus models by name, directly and through any inference profile; extend
-the patterns to any family whose price you do not want to meet on the
-bill.</p>
-<div class="codewrapper sourceCode" id="cb5">
-<h3 class="code-label">JSON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode json" tabindex="0"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>  <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"NoFrontierPricedModels"</span><span class="fu">,</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>  <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Deny"</span><span class="fu">,</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a>  <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:InvokeModel"</span><span class="ot">,</span> <span class="st">"bedrock:InvokeModelWithResponseStream"</span><span class="ot">,</span> <span class="st">"bedrock:Converse"</span><span class="ot">,</span> <span class="st">"bedrock:ConverseStream"</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>  <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>    <span class="st">"arn:aws:bedrock:*::foundation-model/anthropic.claude-opus*"</span><span class="ot">,</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a>    <span class="st">"arn:aws:bedrock:*:*:inference-profile/*claude-opus*"</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a>  <span class="ot">]</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1" aria-label="code-block-5-9"></a><span class="fu">}</span></span></code></pre>
-</div>
-</div>
-<div class="section level3">
-<h3 id="lower-the-gpu-quotas-after-class">4. Lower the GPU quotas after class<a class="anchor" aria-label="anchor" href="#lower-the-gpu-quotas-after-class"></a></h3>
+<h3 id="lower-the-gpu-quotas-after-class">3. Lower the GPU quotas after class<a class="anchor" aria-label="anchor" href="#lower-the-gpu-quotas-after-class"></a></h3>
 <p>The quotas in the table at the top are sized for a hundred learners
 launching at once; a <code>ml.g5.xlarge</code> training quota of 100
 lets one learner launch a hundred jobs at <code>$141</code> an hour.
@@ -960,40 +936,40 @@ does it, and a policy change reaches running instances within a minute.
 application inference profile ARN and the underlying foundation-model
 ARN, or calls through the profile are denied;
 <code>DeleteInferenceProfile</code> is for the cleanup episode.</li>
-</ul><div class="codewrapper sourceCode" id="cb6">
+</ul><div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">JSON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode json" tabindex="0"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="fu">{</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a>  <span class="dt">"Version"</span><span class="fu">:</span> <span class="st">"2012-10-17"</span><span class="fu">,</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>  <span class="dt">"Statement"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>    <span class="fu">{</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"BedrockCallModels"</span><span class="fu">,</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:InvokeModel"</span><span class="ot">,</span> <span class="st">"bedrock:InvokeModelWithResponseStream"</span><span class="ot">,</span> <span class="st">"bedrock:Converse"</span><span class="ot">,</span> <span class="st">"bedrock:ConverseStream"</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1" aria-label="code-block-6-8"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1" aria-label="code-block-6-9"></a>        <span class="st">"arn:aws:bedrock:*::foundation-model/*"</span><span class="ot">,</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1" aria-label="code-block-6-10"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:application-inference-profile/*"</span><span class="ot">,</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1" aria-label="code-block-6-11"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:inference-profile/*"</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1" aria-label="code-block-6-12"></a>      <span class="ot">]</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1" aria-label="code-block-6-13"></a>    <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1" aria-label="code-block-6-14"></a>    <span class="fu">{</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1" aria-label="code-block-6-15"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"BedrockTaggedProfiles"</span><span class="fu">,</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1" aria-label="code-block-6-16"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1" aria-label="code-block-6-17"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:CreateInferenceProfile"</span><span class="ot">,</span> <span class="st">"bedrock:GetInferenceProfile"</span><span class="ot">,</span> <span class="st">"bedrock:ListInferenceProfiles"</span><span class="ot">,</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1" aria-label="code-block-6-18"></a>                 <span class="st">"bedrock:DeleteInferenceProfile"</span><span class="ot">,</span> <span class="st">"bedrock:TagResource"</span><span class="ot">,</span> <span class="st">"bedrock:ListTagsForResource"</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1" aria-label="code-block-6-19"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1" aria-label="code-block-6-20"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:application-inference-profile/*"</span><span class="ot">,</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1" aria-label="code-block-6-21"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:inference-profile/*"</span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1" aria-label="code-block-6-22"></a>      <span class="ot">]</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1" aria-label="code-block-6-23"></a>    <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1" aria-label="code-block-6-24"></a>    <span class="fu">{</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1" aria-label="code-block-6-25"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"BedrockCatalog"</span><span class="fu">,</span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1" aria-label="code-block-6-26"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1" aria-label="code-block-6-27"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:GetFoundationModel"</span><span class="ot">,</span> <span class="st">"bedrock:ListFoundationModels"</span><span class="ot">,</span> <span class="st">"bedrock:ListInferenceProfiles"</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1" aria-label="code-block-6-28"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="st">"*"</span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1" aria-label="code-block-6-29"></a>    <span class="fu">}</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1" aria-label="code-block-6-30"></a>  <span class="ot">]</span></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1" aria-label="code-block-6-31"></a><span class="fu">}</span></span></code></pre>
+<pre class="sourceCode json" tabindex="0"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>  <span class="dt">"Version"</span><span class="fu">:</span> <span class="st">"2012-10-17"</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>  <span class="dt">"Statement"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a>    <span class="fu">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"BedrockCallModels"</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:InvokeModel"</span><span class="ot">,</span> <span class="st">"bedrock:InvokeModelWithResponseStream"</span><span class="ot">,</span> <span class="st">"bedrock:Converse"</span><span class="ot">,</span> <span class="st">"bedrock:ConverseStream"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1" aria-label="code-block-5-9"></a>        <span class="st">"arn:aws:bedrock:*::foundation-model/*"</span><span class="ot">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1" aria-label="code-block-5-10"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:application-inference-profile/*"</span><span class="ot">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1" aria-label="code-block-5-11"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:inference-profile/*"</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1" aria-label="code-block-5-12"></a>      <span class="ot">]</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1" aria-label="code-block-5-13"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1" aria-label="code-block-5-14"></a>    <span class="fu">{</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1" aria-label="code-block-5-15"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"BedrockTaggedProfiles"</span><span class="fu">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1" aria-label="code-block-5-16"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1" aria-label="code-block-5-17"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:CreateInferenceProfile"</span><span class="ot">,</span> <span class="st">"bedrock:GetInferenceProfile"</span><span class="ot">,</span> <span class="st">"bedrock:ListInferenceProfiles"</span><span class="ot">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1" aria-label="code-block-5-18"></a>                 <span class="st">"bedrock:DeleteInferenceProfile"</span><span class="ot">,</span> <span class="st">"bedrock:TagResource"</span><span class="ot">,</span> <span class="st">"bedrock:ListTagsForResource"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1" aria-label="code-block-5-19"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1" aria-label="code-block-5-20"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:application-inference-profile/*"</span><span class="ot">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1" aria-label="code-block-5-21"></a>        <span class="st">"arn:aws:bedrock:*:&lt;account-id&gt;:inference-profile/*"</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1" aria-label="code-block-5-22"></a>      <span class="ot">]</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1" aria-label="code-block-5-23"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1" aria-label="code-block-5-24"></a>    <span class="fu">{</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1" aria-label="code-block-5-25"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"BedrockCatalog"</span><span class="fu">,</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1" aria-label="code-block-5-26"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1" aria-label="code-block-5-27"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"bedrock:GetFoundationModel"</span><span class="ot">,</span> <span class="st">"bedrock:ListFoundationModels"</span><span class="ot">,</span> <span class="st">"bedrock:ListInferenceProfiles"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1" aria-label="code-block-5-28"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="st">"*"</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1" aria-label="code-block-5-29"></a>    <span class="fu">}</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1" aria-label="code-block-5-30"></a>  <span class="ot">]</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1" aria-label="code-block-5-31"></a><span class="fu">}</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="cost-allocation-tags">Cost allocation tags<a class="anchor" aria-label="anchor" href="#cost-allocation-tags"></a></h2>
 <hr class="half-width"><ul><li>Confirm with the Public Cloud team that <code>Name</code>,
