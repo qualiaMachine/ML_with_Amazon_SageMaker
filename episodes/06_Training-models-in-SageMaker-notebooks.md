@@ -90,7 +90,7 @@ In this next section, we will learn how to take a model training script that was
 
 ### What tests should we do before scaling?  
 
-Before scaling to multiple or more powerful instances (e.g., training on larger/multiple datasets in parallel or tuning hyperparameters in parallel), it's important to run a few quick sanity checks to catch potential issues early. **In your group, discuss:**  
+Before scaling to multiple or more powerful instances (e.g., training on larger/multiple datasets in parallel or tuning hyperparameters in parallel), run a few quick sanity checks to catch problems early. **In your group, discuss:**  
 
 - Which checks do you think are most critical before scaling up?  
 - What potential issues might we miss if we skip this step?  
@@ -169,7 +169,7 @@ After reviewing, discuss any questions or observations with your group.
 It can be convenient to have a copy of the data (i.e., one that you store in your notebook's instance) to allow us to test our code before scaling things up. 
 
 :::: callout
-While we demonstrate how to download data into the notebook environment for testing our code (previously setup for local ML pipelines), keep in mind that S3 is the preferred location for dataset storage in a scalable ML pipeline. 
+We download the data into the notebook to test the code, as a local pipeline would. In a pipeline that scales, the data lives in S3 and the jobs read it from there. 
 :::::
 
 Run the next code chunk to download data from S3 to notebook environment. You may need to hit refresh on the file explorer panel to the left to see this file. If you get any permission issues...
@@ -260,7 +260,7 @@ Training on this relatively small dataset should take less than a minute, but as
 **Note**: Our code above includes print statements to monitor dataset size, training time, and total runtime, which provides insights into resource usage for model development. We recommend incorporating similar logging to track not only training time but also total runtime, which includes additional steps like data loading, evaluation, and saving results. Tracking both can help you pinpoint bottlenecks and optimize your workflow as projects grow in size and complexity, especially when scaling with SageMaker's distributed resources.
 
 ### Sanity check: Quick evaluation on test set
-This next section isn't SageMaker specific, but it does serve as a good sanity check to ensure our model is training properly. Here's how you would apply the outputted model to your test set using your local notebook instance.
+This section is not SageMaker specific; it checks that the model trained properly by applying it to the test set on the notebook instance.
 
 Score the model you just trained locally on the test set, reusing the script's own `preprocess_data` so the test rows are transformed exactly as the training rows were.
 
@@ -296,7 +296,7 @@ print(f"Test Set Accuracy: {accuracy:.4f}")
 A reasonably high test set accuracy suggests our code/model is working correctly.
 
 ## Training via SageMaker: your script inside AWS's XGBoost container
-Unlike "local" training (using this notebook), this next approach leverages SageMaker's managed infrastructure to handle resources, parallelism, and scalability. By specifying instance parameters, such as instance_count and instance_type, you can control the resources allocated for training.
+Unlike "local" training (using this notebook), this next approach runs the job on an instance SageMaker rents for it, which is where instance count and type come in. By specifying instance parameters, such as instance_count and instance_type, you can control the resources allocated for training.
 
 ### Which instance to start with?
 In this example, we start with one ml.m5.large instance, which is suitable for small- to medium-sized datasets and simpler models. Using a single instance is often cost-effective and sufficient for initial testing, allowing for straightforward scaling up to more powerful instance types or multiple instances if training takes too long. See here for further guidance on selecting an appropriate instance for your data/model: [Instances for ML page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)
@@ -330,7 +330,7 @@ Every training job runs inside a container image, and for XGBoost that image com
 The class names point the wrong way. `XGBoost` is a *framework estimator*: a convenience that looks up AWS's XGBoost image and runs your script in it; `PyTorch`, `SKLearn` and `HuggingFace` are the same idea for other frameworks. The plain `Estimator` takes an image directly, and when that image is one of AWS's built-in algorithms the image's own code does the training. We do the script version first, because it is the one that generalises to every later episode, and the built-in algorithm at the end of this one.
 
 ### Overview of Estimator classes in SageMaker
-To launch this training "job", we'll use the XGBoost Estimator. In SageMaker, Estimator classes streamline the configuration and training of models on managed instances. Each Estimator can work with custom scripts and be enhanced with additional dependencies by specifying a `requirements.txt` file, which is automatically installed at the start of training. Here's a breakdown of some commonly used Estimator classes in SageMaker:
+To launch this training "job", we'll use the XGBoost Estimator. In SageMaker, Estimator classes streamline the configuration and training of models on managed instances. Each Estimator can work with custom scripts and be enhanced with additional dependencies by specifying a `requirements.txt` file, which is automatically installed at the start of training. The commonly used Estimator classes:
 
 #### 1. **`Estimator` (Base Class)**
    - **Purpose**: Runs whatever image you name: one of AWS's built-in algorithms, or a container of your own.
@@ -382,7 +382,7 @@ To launch this training "job", we'll use the XGBoost Estimator. In SageMaker, Es
 ::::::::::::::::::::::::::::::::::::: callout 
 #### Configuring custom environments with `requirements.txt`
 
-For all these Estimators, adding a `requirements.txt` file as a `dependencies` argument ensures that additional packages are installed before training begins. This approach allows the use of specific libraries that may be critical for custom preprocessing, feature engineering, or model modifications. Here's how to include it (illustration only; we don't run this):
+For all these Estimators, adding a `requirements.txt` file as a `dependencies` argument ensures that additional packages are installed before training begins. This approach allows the use of specific libraries that may be critical for custom preprocessing, feature engineering, or model modifications. To include it (illustration only; we don't run this):
 
 ```text
 from sagemaker.sklearn.estimator import SKLearn
@@ -410,7 +410,7 @@ This setup simplifies training, allowing you to maintain custom environments dir
 :::::::::::::::::::::::::::::::::::::::::::::
 
 ### Deploying to other instances
-For this deployment, we configure the `XGBoost` estimator with a custom training script, `train_xgboost.py`, and define hyperparameters directly within the SageMaker setup. Here's the full code, with some additional explanation following the code.
+For this deployment, we configure the `XGBoost` estimator with a custom training script, `train_xgboost.py`, and define hyperparameters directly within the SageMaker setup. The full code is below, with explanation after it.
 
 #### Cost tracking
 When you launch a SageMaker training job from a notebook, SageMaker creates new managed resources (EC2 instances, attached storage, logs) on your behalf. These resources do not automatically inherit the notebook instance's tags. 

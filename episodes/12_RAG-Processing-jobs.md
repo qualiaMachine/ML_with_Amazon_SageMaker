@@ -299,7 +299,7 @@ if run_embedding_job:   # False in class when the instructor's matrix was copied
 
 To view the job running from the AWS Console, you can visit SageMaker AI, and then find the "Data Preparation" dropdown menu on the left side panel. Click that to find "Processing jobs", or open [this link](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs) in the class region (change `us-east-2` in it for another region).
 
-It takes about 10 minutes in total for the job to complete: a couple of provisioning the instance and downloading the embedding model, eight of embedding. This is the downside of launching jobs, but the good news is that we only need to launch one embedding job for our RAG pipeline. This strategy also ensures we're only paying for the GPU while the job runs.
+It takes about 10 minutes in total for the job to complete: a couple of provisioning the instance and downloading the embedding model, eight of embedding. That startup is the cost of a job, paid once: the embedding job runs once per corpus, and the GPU bills only while it runs.
 
 
 ### Sanity-check the embeddings locally

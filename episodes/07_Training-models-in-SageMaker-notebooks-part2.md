@@ -107,7 +107,7 @@ When deploying a PyTorch model on SageMaker, it's helpful to prepare the input d
 5. **Support for multiple data types**:  
    `.npz` files support storage of multiple arrays within a single file. This is helpful for organizing features and labels without additional code. Here, the `train_data.npz` file contains both `X_train` and `y_train`, keeping everything related to training data in one place. Similarly, `val_data.npz` organizes validation features and labels, simplifying file management.
 
-In summary, saving the data in `.npz` files ensures a smooth workflow from data loading to model training in PyTorch, leveraging SageMaker's infrastructure for a more efficient, structured training process.
+Saving the data as `.npz` files keeps loading fast and the arrays in the shape the training script expects.
 :::::::::::::::::::::::::::::::::::::::
 
 Open `ML_with_AWS_SageMaker/scripts/train_nn.py` in the file browser and read it before going on; it is short. Three things to find: `TitanicNet`, a three-layer network with 7 inputs and one output; the training loop in `train()`, which prints `validation:accuracy = ...` once per hundred epochs (the hyperparameter-tuning episode's metric regex reads that line); and the last lines, which save the model to `/opt/ml/model` inside a job and next to the script otherwise, the same trick as `train_xgboost.py`. Questions now are cheaper than questions once it is running on a billed instance.

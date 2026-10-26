@@ -158,7 +158,7 @@ Cost tracking in this workshop relies on three tags — `Name`, `Project`, `Purp
 Three things follow from this:
 
 1. **Each job gets its own tags.** A SageMaker job launched from a tagged notebook does not inherit the notebook's tags. Pass `tags=job_tags` on every estimator, tuner, and processor, exactly as the training, tuning, and Processing‑job episodes do. Vary `Purpose` per job so the bill tells you what the money went to.
-2. **Bedrock is tagged through a profile, not a call.** `invoke_model` and `converse` have no tags parameter. An application inference profile is a free, model‑specific wrapper that carries tags; usage routed through it is attributed to those tags. One profile per base model (so one for the embedding model and one for the generation model). Note that Bedrock's tag format is lowercase `key`/`value`, while SageMaker's is `Key`/`Value`; the tag *names* stay the same.
+2. **Bedrock is tagged through a profile, not a call.** `invoke_model` and `converse` have no tags parameter. An application inference profile is a free, model‑specific wrapper that carries tags; usage routed through it is attributed to those tags. One profile per base model (so one for the embedding model and one for the generation model). Bedrock's tag format is lowercase `key`/`value`, while SageMaker's is `Key`/`Value`; the tag *names* stay the same.
 3. **Only the three approved keys count.** `Name`, `Project` and `Purpose`, spelled exactly; any other key is ignored by the bill, for the reason the S3 episode gives.
 
 ## When Do You Use Which Approach?
