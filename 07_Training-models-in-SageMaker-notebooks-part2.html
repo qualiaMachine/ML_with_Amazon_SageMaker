@@ -724,22 +724,50 @@ it:</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a>n_params <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> TitanicNet().parameters())   <span class="co"># the network's weights and biases: how big the model is</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a>n_examples <span class="op">=</span> <span class="bu">len</span>(np.load(<span class="st">"train_data.npz"</span>)[<span class="st">"X_train"</span>])</span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a>flops <span class="op">=</span> <span class="dv">6</span> <span class="op">*</span> n_params <span class="op">*</span> n_examples <span class="op">*</span> planned_epochs</span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>n_params<span class="sc">:,}</span><span class="ss"> parameters x </span><span class="sc">{</span>n_examples<span class="sc">}</span><span class="ss"> examples x </span><span class="sc">{</span>planned_epochs<span class="sc">}</span><span class="ss"> epochs = </span><span class="sc">{</span>flops<span class="sc">:.1e}</span><span class="ss"> FLOPs"</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a><span class="bu">print</span>(<span class="ss">f"on an A10G at a quarter of 70 TFLOPS: </span><span class="sc">{</span>flops <span class="op">/</span> (<span class="fl">70e12</span> <span class="op">*</span> <span class="fl">0.25</span>)<span class="sc">:.4f}</span><span class="ss"> seconds of arithmetic; the bill is the startup"</span>)</span></code></pre>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a>n_examples <span class="op">=</span> <span class="bu">len</span>(np.load(<span class="st">"train_data.npz"</span>)[<span class="st">"X_train"</span>])          <span class="co"># one example = one passenger, a row of 7 numbers; 569 of them after the validation split</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a>tokens_per_example <span class="op">=</span> <span class="dv">1</span>                                          <span class="co"># the network reads a whole row in one step, so a row is one token</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a>flops <span class="op">=</span> <span class="dv">6</span> <span class="op">*</span> n_params <span class="op">*</span> n_examples <span class="op">*</span> tokens_per_example <span class="op">*</span> planned_epochs</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1" aria-label="code-block-13-5"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>n_params<span class="sc">:,}</span><span class="ss"> parameters x </span><span class="sc">{</span>n_examples<span class="sc">}</span><span class="ss"> examples x </span><span class="sc">{</span>planned_epochs<span class="sc">}</span><span class="ss"> epochs = </span><span class="sc">{</span>flops<span class="sc">:.1e}</span><span class="ss"> FLOPs"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1" aria-label="code-block-13-6"></a><span class="bu">print</span>(<span class="ss">f"on an A10G at a quarter of 70 TFLOPS: </span><span class="sc">{</span>flops <span class="op">/</span> (<span class="fl">70e12</span> <span class="op">*</span> <span class="fl">0.25</span>)<span class="sc">:.4f}</span><span class="ss"> seconds of arithmetic; the bill is the startup"</span>)</span></code></pre>
 </div>
 <p>The same rule, in <code>helpers.estimate_training_cost</code>, picks
 an instance and prints the time, cost and <code>max_run</code> for any
 model size. It only earns its keep from about 1e15 FLOPs up, a few
 million parameters over a few million examples, which is where the
-fine-tuning episode uses it on a 3-billion-parameter model. Here it is
-on a run that does need it: a 125-million-parameter text model, a
-million training examples of 256 tokens, three passes:</p>
+fine-tuning episode uses it on a 3-billion-parameter model. Its four
+inputs are the four numbers in the formula, and what each one is depends
+on the data:</p>
+<ul><li>
+<code>params_billions</code>: every parameter in the model, in
+billions. <code>TitanicNet</code> has 2,625, which is 0.0000026; a
+BERT-base text classifier has 110 million, 0.11.</li>
+<li>
+<code>examples</code>: one example is one training item, whatever
+the model takes in at a time. A passenger’s row here; one tweet, one
+abstract, one document for a text model; one page image in the
+fine-tuning episode.</li>
+<li>
+<code>tokens_per_example</code>: how many units the model processes
+for one item, which is what the arithmetic scales with. A row through
+<code>TitanicNet</code> is one step, so 1. A text model works in tokens,
+about 1.3 per English word: a tweet is 40, an abstract 256, a short
+paper 2,000. An image through a vision transformer is one token per
+patch, 196 for a 224 × 224 image in 16 × 16 patches.</li>
+<li>
+<code>epochs</code>: passes over the whole set.</li>
+</ul><p>The three data numbers multiply to the tokens the model trains on.
+Here it is on a run that does need the rule: a BERT-sized text
+classifier trained from scratch on a million abstracts, three
+passes:</p>
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a>helpers.estimate_training_cost(params_billions<span class="op">=</span><span class="fl">0.125</span>, examples<span class="op">=</span><span class="dv">1_000_000</span>, tokens_per_example<span class="op">=</span><span class="dv">256</span>, epochs<span class="op">=</span><span class="dv">3</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a>helpers.estimate_training_cost(</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a>    params_billions<span class="op">=</span><span class="fl">0.125</span>,      <span class="co"># a BERT-base-sized model: 125 million parameters</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1" aria-label="code-block-14-3"></a>    examples<span class="op">=</span><span class="dv">1_000_000</span>,         <span class="co"># one example = one abstract; a million of them</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1" aria-label="code-block-14-4"></a>    tokens_per_example<span class="op">=</span><span class="dv">256</span>,     <span class="co"># an abstract is about 190 words, 256 tokens</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1" aria-label="code-block-14-5"></a>    epochs<span class="op">=</span><span class="dv">3</span>,                   <span class="co"># three passes over the million abstracts</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1" aria-label="code-block-14-6"></a>)</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -797,7 +825,12 @@ the function only does the arithmetic.</p>
 <div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a>helpers.estimate_training_cost(params_billions<span class="op">=</span><span class="dv">1</span>, examples<span class="op">=</span><span class="dv">1_000_000</span>, tokens_per_example<span class="op">=</span><span class="dv">2000</span>, epochs<span class="op">=</span><span class="dv">1</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a>helpers.estimate_training_cost(</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a>    params_billions<span class="op">=</span><span class="dv">1</span>,          <span class="co"># a 1B model, the size of the smallest open-weight language models</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a>    examples<span class="op">=</span><span class="dv">1_000_000</span>,         <span class="co"># one example = one document, a million of them</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a>    tokens_per_example<span class="op">=</span><span class="dv">2000</span>,    <span class="co"># a short paper: about 1,500 words</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a>    epochs<span class="op">=</span><span class="dv">1</span>,                   <span class="co"># one pass</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a>)</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -812,7 +845,12 @@ set max_run=1191300  (19855 min, about twice the estimate)</code></pre>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a>helpers.estimate_training_cost(params_billions<span class="op">=</span><span class="dv">7</span>, examples<span class="op">=</span><span class="dv">1_000_000</span>, tokens_per_example<span class="op">=</span><span class="dv">2000</span>, epochs<span class="op">=</span><span class="dv">1</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a>helpers.estimate_training_cost(</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a>    params_billions<span class="op">=</span><span class="dv">7</span>,          <span class="co"># a 7B model, the size most "small" open-weight LLMs are</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>    examples<span class="op">=</span><span class="dv">1_000_000</span>,         <span class="co"># the same million documents</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1" aria-label="code-block-18-4"></a>    tokens_per_example<span class="op">=</span><span class="dv">2000</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1" aria-label="code-block-18-5"></a>    epochs<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1" aria-label="code-block-18-6"></a>)</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1250,8 +1288,8 @@ else is the two-instance estimator from the demo.</p>
 <span id="cb25-25"><a href="#cb25-25" tabindex="-1" aria-label="code-block-25-25"></a>desc_ddp <span class="op">=</span> job_cost_report(pytorch_estimator_ddp.latest_training_job.name, prices[<span class="st">"ml.m5.large"</span>])</span></code></pre>
 </div>
 <p>Read the log before the bill. The two CloudWatch streams now say
-different things: each prints <code>training on 446 of 891 rows</code>
-(or 445), and only <code>algo-1</code> prints the epochs and saves the
+different things: each prints <code>training on 285 of 569 rows</code>
+(or 284), and only <code>algo-1</code> prints the epochs and saves the
 model. The final validation loss matches the single-instance run to the
 third decimal, because the averaged gradient is the same gradient; that
 match is the proof that the work was split rather than copied. The
