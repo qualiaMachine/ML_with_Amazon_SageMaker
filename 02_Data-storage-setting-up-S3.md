@@ -212,7 +212,7 @@ S3 bucket storage incurs costs based on data storage, data transfer, and request
 
 ### Data transfer costs
 - **Uploading** data to S3 is free.
-- **Downloading** data out of AWS costs `$0.09`/GB beyond the 100 GB a month every account transfers out free.
+- **Downloading** data out of AWS costs `$0.09`/GB. (AWS waives the first 100 GB a month, but per organization, not per account; a university's organization uses that elsewhere, so count on the full rate.)
 - **In-region transfer** (e.g., S3 to EC2) is free, while cross-region data transfer is charged (`$0.01`/GB between us-east-1 and us-east-2). This is one reason your bucket and your SageMaker resources must be in the same region.
 - **Deleting** objects is free.
 
@@ -284,7 +284,7 @@ Using the S3 Standard rate in us-east-1:
    - **Deletion**: `$0`
    - **Total Cost**: **`$115.71004`**
 
-These costs assume no request charges beyond the `GET`s for training, and ignore the 100 GB a month of free transfer out, which would cover the first three downloads.
+These costs assume no request charges beyond the `GET`s for training.
 
 The `GET` line is the same four-thousandths of a cent at every size: request costs depend on how many objects you touch, not how big they are. The download line is about 80% of the total at every size, since storage and transfer both scale with gigabytes: moving a dataset out of AWS once costs about four times what keeping it there for a month does, so keep large data in the region and bring code to it.
 
