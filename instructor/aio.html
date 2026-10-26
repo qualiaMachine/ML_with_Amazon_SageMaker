@@ -138,6 +138,7 @@
 <hr>
 <li><a class="dropdown-item" href="reference.html">Glossary</a></li>
 <li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li>
+<li><a class="dropdown-item" href="refused-launch.html">If a Launch Is Refused</a></li>
 <li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
           </ul>
 </li>
@@ -478,6 +479,7 @@
 <hr>
 <li><a class="dropdown-item" href="reference.html">Glossary</a></li>
 <li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li>
+<li><a class="dropdown-item" href="refused-launch.html">If a Launch Is Refused</a></li>
 <li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
                     </ul>
 </div>
@@ -510,7 +512,7 @@
         
 <section id="aio-01_SageMaker-overview"><p>Content from <a href="01_SageMaker-overview.html">Overview: ML on AWS</a></p>
 <hr>
-<p>Last updated on 2026-10-20 |
+<p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/01_SageMaker-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 15 minutes</p>
@@ -738,6 +740,46 @@ pipeline as SageMaker Processing jobs with an open-weight model.</li>
 </ol>
 <p>Every job is tagged, capped, estimated before launch and checked
 against the bill after.</p>
+<div id="the-accounts-rules-before-you-launch-anything" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="the-accounts-rules-before-you-launch-anything" class="callout-inner">
+<h3 class="callout-title">The account’s rules, before you launch
+anything</h3>
+<div class="callout-content">
+<p>The workshop account refuses a launch that breaks any of these,
+before it costs anything: a job without the three tags
+<code>Name</code>, <code>Project</code> and <code>Purpose</code>; a
+blank <code>Name</code>; a <code>Project</code> that is not one of the
+year’s challenge names (<code>SinkOrSwim</code> for the workshop
+itself); a <code>Purpose</code> outside <code>Storage</code>,
+<code>Notebook</code>, <code>Training</code>, <code>Tuning</code>,
+<code>Inference</code>; an instance type the lesson does not use; a
+runtime cap over 48 hours; and any endpoint or EC2 instance. The refusal
+is an <code>AccessDeniedException</code> that ends in
+<code>explicit deny</code> and says nothing else, which is the one
+unhelpful message in this lesson: AWS cannot attach an explanation to
+it. So the lesson gives you three ways to get the explanation yourself,
+which work in any notebook on the account, during the workshop and
+after:</p>
+<ul>
+<li>
+<code>helpers.rules()</code> prints the current rules;</li>
+<li>
+<code>helpers.check_launch(tags, instance_type, max_run)</code>
+checks a launch before it is sent and names what to change;</li>
+<li>
+<code>helpers.explain_refusal()</code> reads the refused request
+back from the account’s log and names the rule it broke.</li>
+</ul>
+<p>The <a href="refused-launch.html">If a Launch Is Refused</a> page is
+the same list on one page. Read it before emailing the instructor about
+an <code>AccessDenied</code>.</p>
+</div>
+</div>
+</div>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -1440,7 +1482,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2422,7 +2464,7 @@ bucket per task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2936,7 +2978,7 @@ change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3901,7 +3943,8 @@ and a human-readable name, even after the job has completed.</p>
 <span id="cb12-8"><a href="#cb12-8" tabindex="-1" aria-label="code-block-12-8"></a>    {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
 <span id="cb12-9"><a href="#cb12-9" tabindex="-1" aria-label="code-block-12-9"></a>    {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},</span>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1" aria-label="code-block-12-10"></a>]</span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1" aria-label="code-block-12-11"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1" aria-label="code-block-12-11"></a>helpers.check_launch(job_tags)   <span class="co"># the account's rules, checked here first: AWS's own refusal does not say which rule</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1" aria-label="code-block-12-12"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 </div>
 <div class="section level4">
@@ -3951,40 +3994,42 @@ to look when a value does not seem to arrive.)</p>
 <span id="cb13-16"><a href="#cb13-16" tabindex="-1" aria-label="code-block-13-16"></a>output_folder <span class="op">=</span> <span class="st">'xgboost'</span></span>
 <span id="cb13-17"><a href="#cb13-17" tabindex="-1" aria-label="code-block-13-17"></a>output_path <span class="op">=</span> <span class="ss">f's3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>output_folder<span class="sc">}</span><span class="ss">/'</span>   <span class="co"># S3 prefix (a "folder") where SageMaker uploads the job's outputs</span></span>
 <span id="cb13-18"><a href="#cb13-18" tabindex="-1" aria-label="code-block-13-18"></a></span>
-<span id="cb13-19"><a href="#cb13-19" tabindex="-1" aria-label="code-block-13-19"></a><span class="co"># The XGBoost framework estimator: AWS's XGBoost container, running our script</span></span>
-<span id="cb13-20"><a href="#cb13-20" tabindex="-1" aria-label="code-block-13-20"></a>xgboost_estimator <span class="op">=</span> XGBoost(</span>
-<span id="cb13-21"><a href="#cb13-21" tabindex="-1" aria-label="code-block-13-21"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-xgboost"</span>,   <span class="co"># prefix of the job name: who + which model; SageMaker appends a timestamp to make it unique</span></span>
-<span id="cb13-22"><a href="#cb13-22" tabindex="-1" aria-label="code-block-13-22"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
-<span id="cb13-23"><a href="#cb13-23" tabindex="-1" aria-label="code-block-13-23"></a>    entry_point<span class="op">=</span><span class="st">'train_xgboost.py'</span>,      <span class="co"># the script SageMaker runs inside the container on the training instance</span></span>
-<span id="cb13-24"><a href="#cb13-24" tabindex="-1" aria-label="code-block-13-24"></a>    source_dir<span class="op">=</span><span class="st">'/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts'</span>,  <span class="co"># Directory where your script is located (uploaded to the job with it)</span></span>
-<span id="cb13-25"><a href="#cb13-25" tabindex="-1" aria-label="code-block-13-25"></a>    role<span class="op">=</span>role,                           <span class="co"># the job assumes this role to read its input and write its output in S3</span></span>
-<span id="cb13-26"><a href="#cb13-26" tabindex="-1" aria-label="code-block-13-26"></a>    tags<span class="op">=</span>job_tags,                       <span class="co"># the cost-tracking tags defined above</span></span>
-<span id="cb13-27"><a href="#cb13-27" tabindex="-1" aria-label="code-block-13-27"></a>    instance_count<span class="op">=</span>instance_count,</span>
-<span id="cb13-28"><a href="#cb13-28" tabindex="-1" aria-label="code-block-13-28"></a>    instance_type<span class="op">=</span>instance_type,</span>
-<span id="cb13-29"><a href="#cb13-29" tabindex="-1" aria-label="code-block-13-29"></a>    output_path<span class="op">=</span>output_path,</span>
-<span id="cb13-30"><a href="#cb13-30" tabindex="-1" aria-label="code-block-13-30"></a>    sagemaker_session<span class="op">=</span>session,</span>
-<span id="cb13-31"><a href="#cb13-31" tabindex="-1" aria-label="code-block-13-31"></a>    framework_version<span class="op">=</span><span class="st">"1.7-1"</span>,           <span class="co"># XGBoost container version</span></span>
-<span id="cb13-32"><a href="#cb13-32" tabindex="-1" aria-label="code-block-13-32"></a>    hyperparameters<span class="op">=</span>{                    <span class="co"># passed to the script as command-line arguments: --train ..., --max_depth ...</span></span>
-<span id="cb13-33"><a href="#cb13-33" tabindex="-1" aria-label="code-block-13-33"></a>        <span class="st">'train'</span>: train_file,</span>
-<span id="cb13-34"><a href="#cb13-34" tabindex="-1" aria-label="code-block-13-34"></a>        <span class="st">'max_depth'</span>: max_depth,</span>
-<span id="cb13-35"><a href="#cb13-35" tabindex="-1" aria-label="code-block-13-35"></a>        <span class="st">'eta'</span>: eta,</span>
-<span id="cb13-36"><a href="#cb13-36" tabindex="-1" aria-label="code-block-13-36"></a>        <span class="st">'subsample'</span>: subsample,</span>
-<span id="cb13-37"><a href="#cb13-37" tabindex="-1" aria-label="code-block-13-37"></a>        <span class="st">'colsample_bytree'</span>: colsample_bytree,</span>
-<span id="cb13-38"><a href="#cb13-38" tabindex="-1" aria-label="code-block-13-38"></a>        <span class="st">'num_round'</span>: num_round</span>
-<span id="cb13-39"><a href="#cb13-39" tabindex="-1" aria-label="code-block-13-39"></a>    }</span>
-<span id="cb13-40"><a href="#cb13-40" tabindex="-1" aria-label="code-block-13-40"></a>)</span>
-<span id="cb13-41"><a href="#cb13-41" tabindex="-1" aria-label="code-block-13-41"></a></span>
-<span id="cb13-42"><a href="#cb13-42" tabindex="-1" aria-label="code-block-13-42"></a><span class="co"># Define input data</span></span>
-<span id="cb13-43"><a href="#cb13-43" tabindex="-1" aria-label="code-block-13-43"></a><span class="co"># TrainingInput: where the data is and its format; SageMaker copies it onto the training instance before the script runs</span></span>
-<span id="cb13-44"><a href="#cb13-44" tabindex="-1" aria-label="code-block-13-44"></a>train_input <span class="op">=</span> TrainingInput(train_s3_path, content_type<span class="op">=</span><span class="st">'csv'</span>)</span>
-<span id="cb13-45"><a href="#cb13-45" tabindex="-1" aria-label="code-block-13-45"></a></span>
-<span id="cb13-46"><a href="#cb13-46" tabindex="-1" aria-label="code-block-13-46"></a><span class="co"># Measure and start training time</span></span>
-<span id="cb13-47"><a href="#cb13-47" tabindex="-1" aria-label="code-block-13-47"></a>start <span class="op">=</span> t.time()</span>
-<span id="cb13-48"><a href="#cb13-48" tabindex="-1" aria-label="code-block-13-48"></a><span class="co"># fit() launches the job and blocks until it finishes (wait=False would return at once); the 'train' channel becomes SM_CHANNEL_TRAIN</span></span>
-<span id="cb13-49"><a href="#cb13-49" tabindex="-1" aria-label="code-block-13-49"></a>xgboost_estimator.fit({<span class="st">'train'</span>: train_input})</span>
-<span id="cb13-50"><a href="#cb13-50" tabindex="-1" aria-label="code-block-13-50"></a>end <span class="op">=</span> t.time()</span>
-<span id="cb13-51"><a href="#cb13-51" tabindex="-1" aria-label="code-block-13-51"></a></span>
-<span id="cb13-52"><a href="#cb13-52" tabindex="-1" aria-label="code-block-13-52"></a><span class="bu">print</span>(<span class="ss">f"Runtime for training on SageMaker: </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.2f}</span><span class="ss"> seconds, instance_type: </span><span class="sc">{</span>instance_type<span class="sc">}</span><span class="ss">, instance_count: </span><span class="sc">{</span>instance_count<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1" aria-label="code-block-13-19"></a>helpers.check_launch(job_tags, instance_type, max_run)   <span class="co"># tags, instance type and cap against the account's rules, before anything is sent</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1" aria-label="code-block-13-20"></a></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1" aria-label="code-block-13-21"></a><span class="co"># The XGBoost framework estimator: AWS's XGBoost container, running our script</span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1" aria-label="code-block-13-22"></a>xgboost_estimator <span class="op">=</span> XGBoost(</span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1" aria-label="code-block-13-23"></a>    base_job_name<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>notebook_instance_name<span class="sc">}</span><span class="ss">-xgboost"</span>,   <span class="co"># prefix of the job name: who + which model; SageMaker appends a timestamp to make it unique</span></span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1" aria-label="code-block-13-24"></a>    max_run<span class="op">=</span>max_run, <span class="co"># in seconds; always include (max 48 hours)</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1" aria-label="code-block-13-25"></a>    entry_point<span class="op">=</span><span class="st">'train_xgboost.py'</span>,      <span class="co"># the script SageMaker runs inside the container on the training instance</span></span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1" aria-label="code-block-13-26"></a>    source_dir<span class="op">=</span><span class="st">'/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts'</span>,  <span class="co"># Directory where your script is located (uploaded to the job with it)</span></span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1" aria-label="code-block-13-27"></a>    role<span class="op">=</span>role,                           <span class="co"># the job assumes this role to read its input and write its output in S3</span></span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1" aria-label="code-block-13-28"></a>    tags<span class="op">=</span>job_tags,                       <span class="co"># the cost-tracking tags defined above</span></span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1" aria-label="code-block-13-29"></a>    instance_count<span class="op">=</span>instance_count,</span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1" aria-label="code-block-13-30"></a>    instance_type<span class="op">=</span>instance_type,</span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1" aria-label="code-block-13-31"></a>    output_path<span class="op">=</span>output_path,</span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1" aria-label="code-block-13-32"></a>    sagemaker_session<span class="op">=</span>session,</span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1" aria-label="code-block-13-33"></a>    framework_version<span class="op">=</span><span class="st">"1.7-1"</span>,           <span class="co"># XGBoost container version</span></span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1" aria-label="code-block-13-34"></a>    hyperparameters<span class="op">=</span>{                    <span class="co"># passed to the script as command-line arguments: --train ..., --max_depth ...</span></span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1" aria-label="code-block-13-35"></a>        <span class="st">'train'</span>: train_file,</span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1" aria-label="code-block-13-36"></a>        <span class="st">'max_depth'</span>: max_depth,</span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1" aria-label="code-block-13-37"></a>        <span class="st">'eta'</span>: eta,</span>
+<span id="cb13-38"><a href="#cb13-38" tabindex="-1" aria-label="code-block-13-38"></a>        <span class="st">'subsample'</span>: subsample,</span>
+<span id="cb13-39"><a href="#cb13-39" tabindex="-1" aria-label="code-block-13-39"></a>        <span class="st">'colsample_bytree'</span>: colsample_bytree,</span>
+<span id="cb13-40"><a href="#cb13-40" tabindex="-1" aria-label="code-block-13-40"></a>        <span class="st">'num_round'</span>: num_round</span>
+<span id="cb13-41"><a href="#cb13-41" tabindex="-1" aria-label="code-block-13-41"></a>    }</span>
+<span id="cb13-42"><a href="#cb13-42" tabindex="-1" aria-label="code-block-13-42"></a>)</span>
+<span id="cb13-43"><a href="#cb13-43" tabindex="-1" aria-label="code-block-13-43"></a></span>
+<span id="cb13-44"><a href="#cb13-44" tabindex="-1" aria-label="code-block-13-44"></a><span class="co"># Define input data</span></span>
+<span id="cb13-45"><a href="#cb13-45" tabindex="-1" aria-label="code-block-13-45"></a><span class="co"># TrainingInput: where the data is and its format; SageMaker copies it onto the training instance before the script runs</span></span>
+<span id="cb13-46"><a href="#cb13-46" tabindex="-1" aria-label="code-block-13-46"></a>train_input <span class="op">=</span> TrainingInput(train_s3_path, content_type<span class="op">=</span><span class="st">'csv'</span>)</span>
+<span id="cb13-47"><a href="#cb13-47" tabindex="-1" aria-label="code-block-13-47"></a></span>
+<span id="cb13-48"><a href="#cb13-48" tabindex="-1" aria-label="code-block-13-48"></a><span class="co"># Measure and start training time</span></span>
+<span id="cb13-49"><a href="#cb13-49" tabindex="-1" aria-label="code-block-13-49"></a>start <span class="op">=</span> t.time()</span>
+<span id="cb13-50"><a href="#cb13-50" tabindex="-1" aria-label="code-block-13-50"></a><span class="co"># fit() launches the job and blocks until it finishes (wait=False would return at once); the 'train' channel becomes SM_CHANNEL_TRAIN</span></span>
+<span id="cb13-51"><a href="#cb13-51" tabindex="-1" aria-label="code-block-13-51"></a>xgboost_estimator.fit({<span class="st">'train'</span>: train_input})</span>
+<span id="cb13-52"><a href="#cb13-52" tabindex="-1" aria-label="code-block-13-52"></a>end <span class="op">=</span> t.time()</span>
+<span id="cb13-53"><a href="#cb13-53" tabindex="-1" aria-label="code-block-13-53"></a></span>
+<span id="cb13-54"><a href="#cb13-54" tabindex="-1" aria-label="code-block-13-54"></a><span class="bu">print</span>(<span class="ss">f"Runtime for training on SageMaker: </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.2f}</span><span class="ss"> seconds, instance_type: </span><span class="sc">{</span>instance_type<span class="sc">}</span><span class="ss">, instance_count: </span><span class="sc">{</span>instance_count<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>While a job runs, its status is on the console under <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
 jobs</a>. For a job too long to sit through, see “Launching a job and
@@ -4008,11 +4053,17 @@ BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a
 <code>Purpose</code> that is not Storage, Notebook, Training, Tuning or
 Inference; its instance type is not one the lesson uses; or it is an
 endpoint or an EC2 instance, which the lesson never creates. The message
-does not say which, so check in that order. In this episode that means
-the <code>name</code>, <code>project</code> and <code>purpose</code>
-values, the <code>tags=job_tags</code> line, and
-<code>instance_type</code>. The same check applies to every job in the
-later episodes.</p>
+does not say which. An IAM refusal cannot carry a custom message, so the
+lesson checks the same rules in the notebook first:
+<code>helpers.check_launch(job_tags, instance_type, max_run)</code>
+reads the account’s policy (<code>scripts/guardrails.json</code>, the
+same file the administrator attached) and stops with a message that
+names the problem and the fix. A launch that passes it and is still
+refused means the <code>tags=job_tags</code> line is missing from the
+estimator. The same check runs before every job in the later episodes,
+and the <a href="refused-launch.html">If a Launch Is Refused</a> page
+has the full list of rules and fixes for your own notebooks after the
+workshop.</p>
 </div>
 </div>
 </div>
@@ -4991,7 +5042,8 @@ is anonymous on the bill. Define them once here and pass
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1" aria-label="code-block-10-7"></a>    {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
 <span id="cb10-8"><a href="#cb10-8" tabindex="-1" aria-label="code-block-10-8"></a>    {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},</span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1" aria-label="code-block-10-9"></a>]</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1" aria-label="code-block-10-10"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1" aria-label="code-block-10-10"></a>helpers.check_launch(job_tags)   <span class="co"># the account's rules, checked here first: AWS's own refusal does not say which rule</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1" aria-label="code-block-10-11"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="estimating-a-training-job-before-you-launch-it">Estimating a training job before you launch it<a class="anchor" aria-label="anchor" href="#estimating-a-training-job-before-you-launch-it"></a>
@@ -5787,7 +5839,8 @@ too).</p>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1" aria-label="code-block-3-7"></a>    {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
 <span id="cb3-8"><a href="#cb3-8" tabindex="-1" aria-label="code-block-3-8"></a>    {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},</span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1" aria-label="code-block-3-9"></a>]</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1" aria-label="code-block-3-10"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1" aria-label="code-block-3-10"></a>helpers.check_launch(job_tags)   <span class="co"># the account's rules, checked here first: AWS's own refusal does not say which rule</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1" aria-label="code-block-3-11"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Next, we’ll configure the baseline estimator that we plan to do
 hyperparameter search on.</p>
@@ -7969,11 +8022,13 @@ jobs it launches. Pass them to every estimator.</p>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># your challenge: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell or SnapshotWI; SinkOrSwim is the workshop itself</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>    <span class="cf">return</span> [</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>    <span class="cf">return</span> helpers.check_launch([   <span class="co"># checked against the account's rules first, with a message that names the problem</span></span>
 <span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a>        {<span class="st">"Key"</span>: <span class="st">"Name"</span>, <span class="st">"Value"</span>: name},</span>
 <span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a>        {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
 <span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a>        {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},</span>
-<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a>    ]</span></code></pre>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a>    ])</span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1" aria-label="code-block-21-10"></a></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1" aria-label="code-block-21-11"></a>make_job_tags(<span class="st">"Training"</span>)   <span class="co"># fails here, with the fix, rather than at the launch</span></span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="step-1-launch-the-lora-fine-tune">Step 1: Launch the LoRA fine-tune<a class="anchor" aria-label="anchor" href="#step-1-launch-the-lora-fine-tune"></a>
@@ -12047,14 +12102,18 @@ job from the batch RAG job on the bill.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>         <span class="co"># replace with your name</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># your challenge: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell or SnapshotWI; SinkOrSwim is the workshop itself</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>    <span class="cf">return</span> [</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>        {<span class="st">"Key"</span>: <span class="st">"Name"</span>, <span class="st">"Value"</span>: name},</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a>        {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a>        {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},   <span class="co"># differs per job so the bill tells them apart</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1" aria-label="code-block-5-9"></a>    ]</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1" aria-label="code-block-5-10"></a></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1" aria-label="code-block-5-11"></a><span class="bu">print</span>(<span class="st">"Tags on every job this episode launches:"</span>, make_job_tags(<span class="st">"Inference"</span>))   <span class="co"># check them before launching: a job tagged DoeJohn is on the bill as DoeJohn</span></span></code></pre>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a><span class="im">import</span> sys</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>sys.path.insert(<span class="dv">0</span>, <span class="st">"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a><span class="im">import</span> helpers   <span class="co"># check_launch: the account's rules, with a message that names the problem</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1" aria-label="code-block-5-8"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1" aria-label="code-block-5-9"></a>    <span class="cf">return</span> helpers.check_launch([   <span class="co"># checked against the account's rules first, with a message that names the problem</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1" aria-label="code-block-5-10"></a>        {<span class="st">"Key"</span>: <span class="st">"Name"</span>, <span class="st">"Value"</span>: name},</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1" aria-label="code-block-5-11"></a>        {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1" aria-label="code-block-5-12"></a>        {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},   <span class="co"># differs per job so the bill tells them apart</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1" aria-label="code-block-5-13"></a>    ])</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1" aria-label="code-block-5-14"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1" aria-label="code-block-5-15"></a><span class="bu">print</span>(<span class="st">"Tags on every job this episode launches:"</span>, make_job_tags(<span class="st">"Inference"</span>))   <span class="co"># check them before launching: a job tagged DoeJohn is on the bill as DoeJohn</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -12462,7 +12521,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12525,7 +12584,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -14574,7 +14633,15 @@ refused request gets,
 <code>AccessDeniedException ... with an explicit deny in an identity-based policy</code>,
 does not say which rule matched, so write the rules down where the
 people using the account will find them, as the <em>If the launch is
-refused</em> callout in the first training episode does here.</p>
+refused</em> callout in the first training episode does here. A deny
+cannot carry a custom message either: AWS says
+<code>explicit deny in an identity-based policy</code> and nothing more,
+which is why this lesson keeps a copy of the policy next to its helper
+code and checks every launch against it in the notebook first, with
+<code>helpers.check_launch</code>, so the message that reaches you names
+the rule. The <a href="refused-launch.html">If a Launch Is Refused</a>
+page is the same list in one place, for the day a job of your own is
+refused.</p>
 <p>Habits that need no administrator:</p>
 <ul>
 <li>

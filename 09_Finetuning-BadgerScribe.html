@@ -107,7 +107,7 @@
           <button class="nav-link dropdown-toggle" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             More <i data-feather="chevron-down"></i>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="refused-launch.html">If a Launch Is Refused</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
           </ul></li>
       </ul></div>
     <!--
@@ -396,7 +396,7 @@ submission</a></li>
                 </h2>
                 <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
-                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li><li><a href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
+                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li><li><a href="refused-launch.html">If a Launch Is Refused</a></li><li><a href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
                     </ul></div>
                 </div>
               </div>
@@ -1507,11 +1507,13 @@ jobs it launches. Pass them to every estimator.</p>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># your challenge: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell or SnapshotWI; SinkOrSwim is the workshop itself</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>    <span class="cf">return</span> [</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>    <span class="cf">return</span> helpers.check_launch([   <span class="co"># checked against the account's rules first, with a message that names the problem</span></span>
 <span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a>        {<span class="st">"Key"</span>: <span class="st">"Name"</span>, <span class="st">"Value"</span>: name},</span>
 <span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a>        {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
 <span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a>        {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},</span>
-<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a>    ]</span></code></pre>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a>    ])</span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1" aria-label="code-block-21-10"></a></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1" aria-label="code-block-21-11"></a>make_job_tags(<span class="st">"Training"</span>)   <span class="co"># fails here, with the fix, rather than at the launch</span></span></code></pre>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="step-1-launch-the-lora-fine-tune">Step 1: Launch the LoRA fine-tune<a class="anchor" aria-label="anchor" href="#step-1-launch-the-lora-fine-tune"></a></h2>

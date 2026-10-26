@@ -107,7 +107,7 @@
           <button class="nav-link dropdown-toggle" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             More <i data-feather="chevron-down"></i>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="refused-launch.html">If a Launch Is Refused</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
           </ul></li>
       </ul></div>
     <!--
@@ -394,7 +394,7 @@
                 </h2>
                 <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
-                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li><li><a href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
+                    <ul><li><a href="reference.html">Glossary</a></li><li><a href="instances-for-ML.html">Instances for ML</a></li><li><a href="refused-launch.html">If a Launch Is Refused</a></li><li><a href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
                     </ul></div>
                 </div>
               </div>
@@ -744,7 +744,15 @@ refused request gets,
 <code>AccessDeniedException ... with an explicit deny in an identity-based policy</code>,
 does not say which rule matched, so write the rules down where the
 people using the account will find them, as the <em>If the launch is
-refused</em> callout in the first training episode does here.</p>
+refused</em> callout in the first training episode does here. A deny
+cannot carry a custom message either: AWS says
+<code>explicit deny in an identity-based policy</code> and nothing more,
+which is why this lesson keeps a copy of the policy next to its helper
+code and checks every launch against it in the notebook first, with
+<code>helpers.check_launch</code>, so the message that reaches you names
+the rule. The <a href="refused-launch.html">If a Launch Is Refused</a>
+page is the same list in one place, for the day a job of your own is
+refused.</p>
 <p>Habits that need no administrator:</p>
 <ul><li>
 <strong>Automate the cleanup you do by hand.</strong> The inventory

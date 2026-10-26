@@ -307,6 +307,9 @@
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/reference.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/refused-launch.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/running-from-your-laptop.html</loc>
   </url>
   <url>
@@ -323,6 +326,9 @@
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/refused-launch.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/running-from-your-laptop.html</loc>

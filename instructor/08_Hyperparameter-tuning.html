@@ -107,7 +107,7 @@
           <button class="nav-link dropdown-toggle" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             More <i data-feather="chevron-down"></i>
           </button>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="aws-account-prep.html">Account preparation checklist (quotas, Bedrock, tags)</a></li><li><a class="dropdown-item" href="shared-data-bucket.html">Shared data bucket: staging before each term</a></li><li><a class="dropdown-item" href="badger-scribe-data-release.html">Badger Scribe data: publishing a release</a></li><li><a class="dropdown-item" href="finetuning-episode-cost-estimate.html">Fine-tuning episode: cost, capacity and setup</a></li><hr><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown"><li><a class="dropdown-item" href="aws-account-prep.html">Account preparation checklist (quotas, Bedrock, tags)</a></li><li><a class="dropdown-item" href="shared-data-bucket.html">Shared data bucket: staging before each term</a></li><li><a class="dropdown-item" href="badger-scribe-data-release.html">Badger Scribe data: publishing a release</a></li><li><a class="dropdown-item" href="finetuning-episode-cost-estimate.html">Fine-tuning episode: cost, capacity and setup</a></li><hr><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="refused-launch.html">If a Launch Is Refused</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
           </ul></li>
       </ul></div>
     <!--
@@ -388,7 +388,7 @@
                 </h2>
                 <div id="flush-collapse-resources-toggle" class="accordion-collapse collapse" data-bs-parent="#accordion-resources-toggle">
                   <div class="accordion-body">
-                    <ul><li><a href="aws-account-prep.html">Account preparation checklist (quotas, Bedrock, tags)</a></li><li><a href="shared-data-bucket.html">Shared data bucket: staging before each term</a></li><li><a href="badger-scribe-data-release.html">Badger Scribe data: publishing a release</a></li><li><a href="finetuning-episode-cost-estimate.html">Fine-tuning episode: cost, capacity and setup</a></li><hr><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
+                    <ul><li><a href="aws-account-prep.html">Account preparation checklist (quotas, Bedrock, tags)</a></li><li><a href="shared-data-bucket.html">Shared data bucket: staging before each term</a></li><li><a href="badger-scribe-data-release.html">Badger Scribe data: publishing a release</a></li><li><a href="finetuning-episode-cost-estimate.html">Fine-tuning episode: cost, capacity and setup</a></li><hr><li><a class="dropdown-item" href="reference.html">Glossary</a></li><li><a class="dropdown-item" href="instances-for-ML.html">Instances for ML</a></li><li><a class="dropdown-item" href="refused-launch.html">If a Launch Is Refused</a></li><li><a class="dropdown-item" href="running-from-your-laptop.html">Running this lesson from your own machine</a></li>
                     </ul></div>
                 </div>
               </div>
@@ -589,7 +589,8 @@ too).</p>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1" aria-label="code-block-3-7"></a>    {<span class="st">"Key"</span>: <span class="st">"Project"</span>, <span class="st">"Value"</span>: project},</span>
 <span id="cb3-8"><a href="#cb3-8" tabindex="-1" aria-label="code-block-3-8"></a>    {<span class="st">"Key"</span>: <span class="st">"Purpose"</span>, <span class="st">"Value"</span>: purpose},</span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1" aria-label="code-block-3-9"></a>]</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1" aria-label="code-block-3-10"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1" aria-label="code-block-3-10"></a>helpers.check_launch(job_tags)   <span class="co"># the account's rules, checked here first: AWS's own refusal does not say which rule</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1" aria-label="code-block-3-11"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Next, we’ll configure the baseline estimator that we plan to do
 hyperparameter search on.</p>
