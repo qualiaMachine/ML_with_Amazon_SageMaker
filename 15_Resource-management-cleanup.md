@@ -130,7 +130,7 @@ While S3 storage is relatively inexpensive, cleaning up unused buckets and files
 
 ## Monitoring and stopping active jobs
 
-SageMaker charges for training, tuning and Processing jobs while they run, so make sure to terminate unused jobs. Every job in this lesson was launched with a runtime cap (`max_run` on training and tuning jobs, `max_runtime_in_seconds` on Processing jobs), so a forgotten job ends on its own.
+SageMaker charges for training, tuning and Processing jobs while they run, so stop jobs you no longer need. Every job in this lesson was launched with a runtime cap (`max_run` on training and tuning jobs, `max_runtime_in_seconds` on Processing jobs), so a forgotten job ends on its own.
 
 1. In the SageMaker Console, go to **Training jobs**, **Hyperparameter tuning jobs**, or **Processing jobs**.
 2. Identify any active jobs that you no longer need.
@@ -181,7 +181,7 @@ If you administer an account of your own, a lab's or a project's, the same rules
 | Notebook instances stop at 11 pm | the forgotten GPU notebook, `$60` a night | a ten-line scheduled Lambda function |
 | A budget per person and a brake on the total | a quiet overspend | AWS Budgets on the `Name` tag, with an action that attaches a deny policy at the ceiling |
 
-A deny applies to everyone who uses the role, including you, so your own launches need real tag values and listed instance types too; that is the point. And the error a refused request gets, `AccessDeniedException ... with an explicit deny in an identity-based policy`, does not say which rule matched, so write the rules down where the people using the account will find them, as the *If the launch is refused* callout in the first training episode does here. A deny cannot carry a custom message either: AWS says `explicit deny in an identity-based policy` and nothing more, which is why this lesson keeps a copy of the policy next to its helper code and checks every launch against it in the notebook first, with `helpers.check_launch`, so the message you get names the rule. The [If a Launch Is Refused](../learners/refused-launch.md) page is the same list in one place, for the day a job of your own is refused.
+A deny applies to everyone who uses the role, including you, so your own launches need real tag values and listed instance types too. And the error a refused request gets, `AccessDeniedException ... with an explicit deny in an identity-based policy`, does not say which rule matched, so write the rules down where the people using the account will find them, as the *If the launch is refused* callout in the first training episode does here. A deny cannot carry a custom message either: AWS says `explicit deny in an identity-based policy` and nothing more, which is why this lesson keeps a copy of the policy next to its helper code and checks every launch against it in the notebook first, with `helpers.check_launch`, so the message you get names the rule. The [If a Launch Is Refused](../learners/refused-launch.md) page is the same list in one place, for the day a job of your own is refused.
 
 Habits that need no administrator:
 

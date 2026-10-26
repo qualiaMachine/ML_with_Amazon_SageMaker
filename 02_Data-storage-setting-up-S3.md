@@ -113,11 +113,11 @@ A SageMaker training or processing job reads only from buckets in its own region
 - **Name**: your last and first name run together, e.g. `DoeJohn`
 - **Purpose**: one of five fixed values, here `Storage`
 
-AWS allows tag values of up to 256 characters made of letters, digits, spaces and `+ - = . _ : / @`, and they are case-sensitive. We use capitalised words with no spaces, and the same spelling on every resource: `SinkOrSwim` and `sinkorswim` would be separate rows in Cost Explorer, and only the first is on the account's list.
+AWS allows tag values of up to 256 characters made of letters, digits, spaces and `+ - = . _ : / @`, and they are case-sensitive. We use capitalised words with no spaces, and the same spelling on every resource. `SinkOrSwim` and `sinkorswim` would be separate rows in Cost Explorer, and the account accepts only the first: the `Project` and `Purpose` lists are case-sensitive, so a job tagged `sinkorswim` or `training` is refused. (The bucket name is lowercase because S3 requires it; bucket names are not tags.)
 
 `Purpose` takes one of five values, so that the bill can be summed by kind of work rather than by individual job. Which job it was is already in the job's name.
 
-These lists are enforced: the account refuses a job whose tags are missing, blank or off the lists, and the refusal says only `AccessDenied ... explicit deny`, not which tag. The training episode checks the tags in the notebook before each launch and names the problem; [If a Launch Is Refused](../learners/refused-launch.md) is the full list of rules and fixes, for later.
+These lists are enforced: the account refuses a job whose tags are missing, blank or off the lists, and the refusal says only `AccessDenied ... explicit deny`, not which tag. The training episode checks the tags in the notebook before each launch and names the problem; [If a Launch Is Refused](../learners/refused-launch.md) is the full list of rules and fixes, for later. The rules are not part of SageMaker: the instructor sets them from the account's administrator view, and an instructor running this lesson on a new account sets them up following the [AWS account preparation](../instructors/aws-account-prep.md) page before class.
 
 | `Purpose` | Used for |
 |---|---|
