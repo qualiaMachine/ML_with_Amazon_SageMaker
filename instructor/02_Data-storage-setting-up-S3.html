@@ -642,15 +642,16 @@ everywhere in the lesson. Global keeps the name as you type it.</li>
 <li>
 <strong>Bucket name</strong>:
 <code>challenge-lastnamefirstname</code>, all lowercase,
-e.g. <code>wattbot2026-doejohn</code>: the challenge you are working on
+e.g. <code>sinkorswim-doejohn</code>: the challenge you are working on
 (<code>wattbot2026</code>, <code>badgerscribe</code>,
 <code>badgercode</code>, <code>braindecoding</code>,
-<code>poisonedwell</code> or <code>snapshotwi</code>), a hyphen, then
-your last and first name run together. S3 requires lowercase letters,
-digits and hyphens only, 3 to 63 characters, starting and ending with a
-letter or digit. Buckets are the one place AWS forces lowercase; for the
+<code>poisonedwell</code>, <code>snapshotwi</code>, or
+<code>sinkorswim</code> for the workshop itself), a hyphen, then your
+last and first name run together. S3 requires lowercase letters, digits
+and hyphens only, 3 to 63 characters, starting and ending with a letter
+or digit. Buckets are the one place AWS forces lowercase; for the
 notebook instance and the tags we use the same words with capitals,
-<code>WattBot2026</code> and <code>DoeJohn</code>. <strong>This is the
+<code>SinkOrSwim</code> and <code>DoeJohn</code>. <strong>This is the
 only bucket you will create in the workshop.</strong> Every later
 episode writes its outputs (trained models, embeddings, predictions)
 into this same bucket.</li>
@@ -694,8 +695,10 @@ three keys on every resource you create in this lesson.</p>
 <code>WattBot2026</code>, <code>BadgerScribe</code>,
 <code>BadgerCode</code>, <code>BrainDecoding</code>,
 <code>PoisonedWell</code>, <code>SnapshotWI</code>, spelled exactly like
-that. The account refuses a job tagged with any other Project value, so
-a typo is caught at the first launch rather than on the bill.</li>
+that, or <code>SinkOrSwim</code>, the workshop’s own project, if you are
+not on a challenge yet. The account refuses a job tagged with any other
+Project value, so a typo is caught at the first launch rather than on
+the bill.</li>
 <li>
 <strong>Name</strong>: your last and first name run together,
 e.g. <code>DoeJohn</code>
@@ -707,8 +710,8 @@ e.g. <code>DoeJohn</code>
 </ul><p>AWS allows tag values of up to 256 characters made of letters,
 digits, spaces and <code>+ - = . _ : / @</code>, and they are
 case-sensitive. We use capitalised words with no spaces, and the same
-spelling on every resource: <code>WattBot2026</code> and
-<code>wattbot2026</code> would be separate rows in Cost Explorer, and
+spelling on every resource: <code>SinkOrSwim</code> and
+<code>sinkorswim</code> would be separate rows in Cost Explorer, and
 only the first is on the account’s list.</p>
 <p><code>Purpose</code> takes one of five values, so that the bill can
 be summed by kind of work rather than by individual job. Which job it

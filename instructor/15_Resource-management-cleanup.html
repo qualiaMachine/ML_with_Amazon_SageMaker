@@ -495,7 +495,7 @@ against reality before and after you clean up.</p>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a>region <span class="op">=</span> session.boto_region_name</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a></span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>                              <span class="co"># replace with your name, as used in job names and tags</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with your challenge name as used in the Bedrock profile names (WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI)</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># the Project value used in your Bedrock profile names</span></span>
 <span id="cb1-14"><a href="#cb1-14" tabindex="-1" aria-label="code-block-1-14"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>            <span class="co"># replace with your bucket</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="what-is-still-running-under-your-name">What is still running under your name?<a class="anchor" aria-label="anchor" href="#what-is-still-running-under-your-name"></a></h2>
@@ -694,10 +694,10 @@ remove.</p>
 </section><section><h2 class="section-heading" id="rules-the-account-enforces-and-how-to-set-them-on-your-own">Rules the account enforces, and how to set them on your own<a class="anchor" aria-label="anchor" href="#rules-the-account-enforces-and-how-to-set-them-on-your-own"></a></h2>
 <hr class="half-width"><p>Several things you could have done wrong in this workshop were
 refused before they cost anything: a job launched without the three
-tags, with a blank or placeholder name, with a Project that is not one
-of the challenge names, with an instance type outside the lesson’s list,
-or with no runtime cap, and any endpoint or EC2 instance at all. None of
-that is SageMaker’s own behaviour. It is a set of rules the account
+tags, with a blank name, with a Project that is not on the account’s
+list, with an instance type outside the lesson’s list, or with no
+runtime cap, and any endpoint or EC2 instance at all. None of that is
+SageMaker’s own behaviour. It is a set of rules the account
 administrator attached to the role your notebook runs as, written in the
 same IAM policy language that gave the role its permissions, and each
 one says: refuse this request if it looks like this. An AWS account with
@@ -716,7 +716,7 @@ of what they prevent for what they cost:</p>
 </tr></thead><tbody><tr><td>Every job carries the three cost tags, with real values</td>
 <td>spend nobody can attribute</td>
 <td>an IAM deny on <code>CreateTrainingJob</code> and the like when
-<code>aws:RequestTag/Name</code> is missing, blank or a placeholder, or
+<code>aws:RequestTag/Name</code> is missing or blank, or
 <code>Project</code> and <code>Purpose</code> are missing or not on
 their lists</td>
 </tr><tr><td>Only instance types you have priced</td>
