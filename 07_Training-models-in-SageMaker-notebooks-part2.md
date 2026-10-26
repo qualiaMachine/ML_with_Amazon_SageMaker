@@ -472,46 +472,11 @@ Setting `instance_count=2` on an estimator makes SageMaker start two instances a
 - `train_nn.py` has no distributed code, so each instance trains its own independent copy of the model on all of the data for all 1000 epochs, and each saves a model.
 - SageMaker bills `BillableTimeInSeconds x InstanceCount`.
 
-So without a distribution strategy, two instances means the same job twice, in parallel, at double the cost. Estimate first: about the same 3-4 minutes of wall-clock as the single-instance run, but billed for two instances, so about `$0.01` on `ml.m5.large` (our run: 3.5 minutes of wall-clock, 5.5 billable minutes across the two instances, `$0.010`).
-
-```python
-instance_count = 2   # demonstration: NOT expected to be faster, and expected to cost double
-instance_type = "ml.m5.large"
-
-pytorch_estimator_2x = PyTorch(
-    base_job_name=f"{notebook_instance_name}-nn",
-    max_run=max_run, # in seconds; always include (max 48 hours)
-    entry_point="/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/train_nn.py",
-    role=role,
-    tags=job_tags,
-    instance_type=instance_type,
-    instance_count=instance_count,  # no distribution= argument, so each instance runs the whole script on the whole dataset
-    framework_version="2.3",
-    py_version="py311",
-    output_path=output_path,
-    sagemaker_session=session,
-    hyperparameters={
-        "train": "/opt/ml/input/data/train/train_data.npz",
-        "val": "/opt/ml/input/data/val/val_data.npz",
-        "epochs": epochs,
-        "learning_rate": learning_rate
-    }
-)
-
-start = t.time()
-pytorch_estimator_2x.fit({"train": train_input, "val": val_input})
-end = t.time()
-print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_type: {instance_type}, instance_count: {instance_count}")
-
-desc_2x = job_cost_report(pytorch_estimator_2x.latest_training_job.name, prices[instance_type])
-print(f"Single-instance job billed {desc_cpu['BillableTimeInSeconds']/60:.1f} min; two-instance job billed {desc_2x['BillableTimeInSeconds']*2/60:.1f} min")
-```
-
-Look at the job's log: open [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training), click the job's name, scroll to **Monitor**, click **View logs**. This time CloudWatch lists two streams, `algo-1` and `algo-2`, and each one prints all 1000 epochs. The wall-clock time is about the same as the single-instance run (slightly longer, if anything, because two instances have to be provisioned), and the billable minutes are double.
+So without a distribution strategy, two instances means the same job twice, in parallel, at double the cost. There is nothing to launch to see this; we ran it once while writing the episode, and the record is what the bullets predict: the same 3.5 minutes of wall-clock as the single-instance run, 5.5 billable minutes across the two instances, `$0.010`, two CloudWatch log streams, `algo-1` and `algo-2`, each printing all 1000 epochs, and two identical saved models. Nobody wants that job. The one worth launching is below.
 
 ### Data parallelism, done properly
 
-To split one training run across two instances instead of running it twice, the script needs three things the demo above did not have, and the estimator needs one. `scripts/train_nn_ddp.py` is `train_nn.py` with those three added; open the two side by side, the differences are marked 1, 2 and 3 in the comments.
+To split one training run across two instances instead of running it twice, the script needs three things `train_nn.py` does not have, and the estimator needs one. `scripts/train_nn_ddp.py` is `train_nn.py` with those three added; open the two side by side, the differences are marked 1, 2 and 3 in the comments.
 
 1. **Join the process group.** The launcher starts one copy of the script on each instance. The copies are numbered from zero, and a copy's number is its **rank**: with two instances, one copy is rank 0 and the other rank 1, and the count of copies, 2, is the **world size**. Each copy learns its own rank and the world size from environment variables the launcher sets, and `setup_distributed` reads them and calls `init_process_group`, after which the copies can talk to each other. The rank is the only thing that differs between the copies, and everything below that has to differ between instances keys off it. With no launcher the function returns rank 0 of 1 and the script trains like `train_nn.py`.
 2. **Shard the data.** Each copy keeps the rows whose index, counting from zero, leaves its rank as the remainder when divided by the world size: rank 0 takes rows 0, 2, 4, ... and rank 1 takes rows 1, 3, 5, ..., which is `X_train[rank::world_size]`. Half the training set each, no row seen twice, and the copies agree on the split without talking, because each one knows only its rank.
@@ -557,7 +522,6 @@ Either way, the rule of thumb stands: a bigger single instance first, and multip
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- **Efficient data handling**: The `.npz` format is optimized for efficient loading, reducing I/O overhead and enabling batch compatibility for PyTorch's `DataLoader`.
 - **Startup dominates small jobs**: Every SageMaker training job waits a minute or so for an instance (not billed), then spends one to three minutes on container pull and data download (billed) before the script runs; for a job whose script finishes in seconds, that overhead is the whole bill.
 - **GPU training**: While beneficial for larger models or datasets, GPUs may introduce overhead for smaller tasks; selecting the right instance type is critical for cost-efficiency.
 - **Data parallelism vs. model parallelism**: Data parallelism splits data across instances and synchronizes model weights, suitable for typical neural network tasks. Model parallelism, which divides model layers, is ideal for very large models that exceed memory capacity.
