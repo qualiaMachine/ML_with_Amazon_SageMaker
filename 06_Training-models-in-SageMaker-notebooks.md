@@ -573,14 +573,15 @@ The built-in algorithm will not run our `preprocess_data()` for us, and it expec
 # ^ remove this line to run the cell; the guard keeps Run All from launching the extra job
 from train_xgboost import preprocess_data
 
-# Same preprocessing our script applies: fill missing values, encode Sex/Embarked, drop text columns
-X, y = preprocess_data(pd.read_csv(train_filename))
+# The same titanic_train.csv the script job trained on. The script ran preprocess_data inside the container;
+# the built-in algorithm runs no code of ours, so the same preprocessing is applied here instead
+X, y = preprocess_data(pd.read_csv(train_filename))   # fill missing values, encode Sex/Embarked, drop text columns
 
-# Built-in XGBoost wants: no header, all numeric, label first
+# Same rows, written the way the built-in algorithm requires: no header, all numeric, label first
 builtin_filename = "train_builtin.csv"
 pd.concat([y, X], axis=1).to_csv(builtin_filename, header=False, index=False)
 
-# Upload to a dedicated prefix so it doesn't get confused with the raw CSV
+# Upload under its own prefix so it is not confused with the raw CSV
 builtin_s3_key = f"xgboost/builtin/{builtin_filename}"
 s3.upload_file(builtin_filename, bucket_name, builtin_s3_key)
 builtin_s3_path = f"s3://{bucket_name}/{builtin_s3_key}"
