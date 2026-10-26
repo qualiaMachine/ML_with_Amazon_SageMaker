@@ -16,7 +16,7 @@ exercises: 15
 
 - Verify that our SageMaker notebook instance has a working GPU and compatible Python environment.
 - Reuse the WattBot metadata and questions from the shared bucket, and the `chunks.jsonl` the Bedrock episode cached in your own bucket.
-- Implement a simple, explicit “from scratch” embedding pipeline with a self-hosted embedding model, without relying on FAISS or production vector DBs.
+- Build the embedding matrix and the retrieval step with a self-hosted embedding model, in plain NumPy.
 - Build a small retrieval helper that finds the most relevant chunks for a question using cosine similarity in embedding space.
 - Serve a 27B open-weight generator (Qwen3.8-27B in FP8, via vLLM) on the notebook's GPU and wire it to the retriever to produce WattBot-format answers (including `answer`, `ref_id`, `ref_url`, and `supporting_materials`).
 - Explain why inference uses quantized weights rather than bf16, and what a self-hosted GPU costs per hour, per forgotten weekend, and per forgotten month.
@@ -377,52 +377,7 @@ chunk_embeddings.shape
 
 ### 4. Build a simple retrieval step (cosine similarity)
 
-We are **not** using a heavy vector database in this episode.
-
-Instead, we:
-
-1. Embed each chunk with `thenlper/gte-large` (done above).
-2. Embed each question.
-3. Compute cosine similarity between the question embedding and all chunk embeddings.
-4. Take the top–k most similar chunks as our retrieved context.
-
-This keeps the retrieval logic in plain view, while matching the shape of
-production systems that use FAISS, Chroma, Weaviate, etc.
-
-#### When might FAISS or a vector database be worth exploring?
-
-For small–to–medium experiments (a few thousand to maybe tens of thousands of chunks), this "plain NumPy + cosine
-similarity" approach is usually enough. You might consider FAISS or a full vector DB when:
-
-- **Your corpus gets big**  
-  Once you’re in the hundreds of thousands to millions of chunks, brute-force similarity search can become slow
-  and memory-hungry. FAISS and friends provide *approximate nearest neighbor* search that scales much better.
-
-- **You need low-latency, repeated queries**  
-  If many users (or a web app) will hit your RAG system concurrently, you’ll want:
-  - fast indexing,
-  - efficient caching, and
-  - sub-second query latency.  
-  Vector DBs are designed for this use case.
-
-- **You need rich filtering or metadata search**  
-  Vector DBs often support:
-  - filtering by metadata (e.g., `paper = "chung2025"`, `year > 2021`),
-  - combining keyword + vector search (“hybrid search”),
-  - role-based access control and multi-tenant setups.
-
-- **You want to share an index across services**  
-  If multiple notebooks, microservices, or teams need to reuse the **same embedding index**, a shared FAISS index or
-  hosted vector DB is much easier to manage than passing around `.npy` files.
-
-- **You need GPU-accelerated or distributed search**  
-  FAISS can use GPUs and sharding to speed up search on very large embedding collections. This is overkill for our
-  teaching demo (and the Wattbot project in general), but very relevant for production-scale systems.
-
-This episode uses a simple in-memory index, so the retrieval step is easy to inspect and
-debug. In your own projects you can **swap out the retrieval layer** for FAISS or a vector DB
-without changing the overall RAG architecture: the model still sees “top–k retrieved chunks” as context.
-
+Retrieval here is cosine similarity between the question's vector and every chunk's vector, with the top *k* chunks as context, and nothing more: for nine thousand chunks that is one matrix multiply. A vector database (FAISS, Chroma, Weaviate) is the same step built for millions of chunks or many concurrent users, with approximate search, metadata filters and a shared index; swapping it in changes nothing else in the pipeline.
 
 `retrieve_top_k` from `wattbot_rag.py` is that search: normalize the query and the matrix, one matrix multiply for the cosine similarities, `argsort` for the top *k*. Open the file to see it; it is a dozen lines. `embed_query_with` wraps the embedder as the `embed_query(question)` callable the rest of the pipeline expects.
 
@@ -654,14 +609,11 @@ The Processing Jobs episode does the same work, with the same `wattbot_rag.py`, 
 - **Why self-host at all**: Bedrock's catalog is curated and lags releases; most open-weight models (including Qwen3.8-27B) are not on it. When the model you need is not offered, you rent a GPU and serve it yourself.
 - **Inference uses reduced-precision weights**: no gradients means the weights are the memory cost. FP8 puts a 27B model on one 48 GB GPU (`ml.g6e.xlarge`); bf16 would need 54 GB, an 80 GB GPU or a multi-GPU instance.
 - **The meter never stops on its own**: `ml.g6e.xlarge` is `$2.61`/h, `$167` per forgotten weekend, `$1,906` per forgotten month, plus `$14`/month for the storage volume even when stopped. Stop it when you stand up; delete it when the episode is over.
-- **Local-first RAG**: For teaching (and small corpora), we avoid an external vector database
-  and instead perform cosine similarity search over in-memory embeddings.
+- **Retrieval is a matrix multiply**: cosine similarity over the in-memory embedding matrix is enough for a corpus this size; a vector database is the same step for a corpus of millions.
 - **Ground-truth units**: The `answer_unit` column is always copied directly
   from `train_QA.csv`, never guessed by the LLM.
 - **Two-stage LLM use**: One call focuses on *answering and citing*; a second,
   lighter call produces a short explanation tagged with an evidence type.
 - **WattBot conventions**: We respect the Kaggle competition format,
   using `is_blank` for unanswerable questions and for missing fields.
-- **Scalability path**: The same logic can later be swapped to FAISS/Chroma
-  and larger models, while preserving the interface used here.
 ::::::::::::::::::::::::::::::::::::::::::::::::
