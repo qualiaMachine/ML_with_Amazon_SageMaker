@@ -189,7 +189,7 @@ print(f"estimate: {train_minutes + startup_minutes:.0f} min billed, about ${esti
 
 Expect a couple of minutes of training plus two or three of startup: about a cent. (The `ml.t3.medium` notebook is slower than the `ml.m5.large` the job runs on, so the training part of the estimate is high. Our run billed 2.8 minutes in total, `$0.005`.) If the planned run has ten times the rows, multiply the training minutes by ten; the startup does not change.
 
-**Large models: count the arithmetic.** From a few hundred million parameters up, the training arithmetic takes longer than the job's startup, so compute is the cost, and it can be counted before any instance exists. Training one example through a dense network or a transformer costs about 6 floating-point operations per parameter (2 forward, 4 backward); multiply by parameters, examples and epochs, and divide by what the GPU does per second, about a quarter of its data-sheet peak in practice:
+**Large models: count the arithmetic.** From a few hundred million parameters up, the training arithmetic takes longer than the job's startup, so compute is the cost, and it can be counted before any instance exists. The unit is the floating-point operation, one multiply or add: FLOPs, plural, is a count of them, and FLOPS with a capital S is a rate, operations per second, which is how a GPU's speed is quoted (an A10G does about 70 trillion per second, 70 TFLOPS). Training one example through a dense network or a transformer costs about 6 FLOPs per parameter (2 forward, 4 backward); multiply by parameters, examples and epochs for the count, and divide by the rate the GPU reaches, about a quarter of its data-sheet peak in practice:
 
 ```text
 FLOPs       = 6 × parameters × examples × tokens per example × epochs
@@ -213,7 +213,25 @@ The same rule, in `helpers.estimate_training_cost`, picks an instance and prints
 helpers.estimate_training_cost(params_billions=0.125, examples=1_000_000, tokens_per_example=256, epochs=3)
 ```
 
-About eight GPU-hours and nine dollars on the cheapest instance that fits, eight hours of wall-clock on one GPU; a job you want capped and tagged before it starts.
+```output
+Training from scratch of a 0.125B model: 1,000,000 examples x 256 tokens x 3 passes = 768.0M tokens
+memory:     ~6 GB needed; ml.g6.xlarge has 24 GB (1 x L4)
+compute:    8.64e+17 FLOPs at 25% of the 121 TFLOPS peak = 7.93 GPU-hours
+wall-clock: ~486 min including 10 min startup
+cost:       ~$9.15 per run at $1.13/h; ~$9.15 for 1 run(s)
+set max_run=58200  (970 min, about twice the estimate)
+```
+
+Line by line:
+
+- **tokens**: examples × tokens per example × epochs. 768 million tokens is the amount of work; everything below is derived from it.
+- **memory**: 16 bytes per parameter for full training (weights, gradients and the optimizer's two running averages, in the fine-tuning episode's table) is 2 GB for 125 million parameters, plus 4 GB the helper allows for activations: 6 GB. The cheapest GPU on the lesson's list with that much memory is the `ml.g6.xlarge`, one L4 with 24 GB, so that is the instance the rest of the lines price.
+- **compute**: 6 FLOPs × 0.125e9 parameters × 768e6 tokens is 5.8e17; the helper multiplies by 1.5 because it assumes gradient checkpointing, which recomputes the forward pass during the backward one to save memory, giving 8.6e17. Divided by a quarter of the L4's 121 TFLOPS peak, 30 trillion a second, that is 28,500 seconds: 7.9 GPU-hours.
+- **wall-clock**: the GPU-hours on one GPU, plus the 10 minutes of startup the helper assumes for a job this size.
+- **cost**: the wall-clock hours at the instance's price, `$1.13` an hour, so about `$9` a run. The second figure is the same times the number of runs, one here; the hyperparameter-tuning episode is where that multiplier bites.
+- **max_run**: twice the wall-clock estimate, in seconds, ready to paste into the estimator. A job that runs past this is killed, so a hung run costs at most `$18`, not a week.
+
+The function also returns the same numbers as a dictionary, so a notebook can use `max_run_seconds` and `instance_type` directly rather than copying them from the printout. Eight hours and nine dollars on one GPU is a job you want capped and tagged before it starts.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
