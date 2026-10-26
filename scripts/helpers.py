@@ -474,3 +474,65 @@ def check_launch(tags, instance_type=None, max_run=None):
     if problems:
         raise ValueError("this launch would be refused by the account:\n  - " + "\n  - ".join(problems))
     return tags
+
+
+def rules(path=GUARDRAILS_FILE):
+    """Print the account's launch rules, read from the policy file, in plain words."""
+    r = load_guard_rails(path)
+    print("A job on this account is refused unless:")
+    print("  - it carries the three tags Name, Project and Purpose, and Name is not blank")
+    print(f"  - Project is one of: {', '.join(r['projects'])}")
+    print(f"  - Purpose is one of: {', '.join(r['purposes'])}")
+    print(f"  - its instance type is one of: {', '.join(r['instance_types'])}")
+    print(f"  - its runtime cap is at most {r['max_run_seconds']} s ({r['max_run_seconds'] // 3600} hours); Processing jobs must set one")
+    print("  - it is a job, not an endpoint or an EC2 instance")
+    print("AWS's refusal names none of these; helpers.check_launch(tags, instance_type, max_run) does, before the launch,")
+    print("and helpers.explain_refusal() does afterwards, from the request CloudTrail recorded.")
+
+
+def explain_refusal(minutes=60, region=None):
+    """Find recent refused launches in CloudTrail and say which rule each one broke.
+
+    CloudTrail records every API call on the account, including the ones IAM refused, with the
+    request as sent: tags, instance type and runtime cap. This reads the refusals of the last
+    `minutes` minutes (events appear in CloudTrail 5 to 15 minutes after the call) and applies
+    the account's rules to each, which gives the message the refusal itself could not carry.
+    The role needs cloudtrail:LookupEvents; without it this says so and points at check_launch.
+    """
+    ct = boto3.client("cloudtrail", region_name=region)
+    start = datetime.utcnow() - timedelta(minutes=minutes)
+    try:
+        pages = ct.get_paginator("lookup_events").paginate(
+            LookupAttributes=[{"AttributeKey": "EventSource", "AttributeValue": "sagemaker.amazonaws.com"}],
+            StartTime=start)
+        events = [e for page in pages for e in page["Events"]]
+    except Exception as e:
+        print(f"could not read CloudTrail ({type(e).__name__}): the role needs cloudtrail:LookupEvents.")
+        print("Check the launch before sending it instead: helpers.check_launch(tags, instance_type, max_run)")
+        return []
+    found = []
+    for ev in events:
+        d = _json.loads(ev["CloudTrailEvent"])
+        if "AccessDenied" not in d.get("errorCode", ""):
+            continue
+        params = d.get("requestParameters") or {}
+        tags = [{"Key": t["key"], "Value": t["value"]} for t in params.get("tags", [])]
+        res = params.get("resourceConfig") or (params.get("processingResources") or {}).get("clusterConfig") or {}
+        instance_type = res.get("instanceType")
+        cap = (params.get("stoppingCondition") or {}).get("maxRuntimeInSeconds")
+        when = ev["EventTime"].strftime("%H:%M:%S")
+        print(f"{when}  {d['eventName']}  name={params.get('trainingJobName') or params.get('processingJobName') or params.get('hyperParameterTuningJobName') or '?'}")
+        try:
+            check_launch(tags, instance_type, cap)
+            if d["eventName"] == "CreateProcessingJob" and cap is None:
+                print("    Processing job without a runtime cap: pass max_runtime_in_seconds=")
+            elif d["eventName"] in ("CreateEndpoint", "CreateEndpointConfig", "CreateModel"):
+                print("    endpoints cannot be created on this account: use a job, or Bedrock")
+            else:
+                print("    tags, instance type and cap all pass: check that tags= is on the estimator, and that this is your job")
+        except ValueError as e:
+            print("    " + str(e).replace("\n", "\n    "))
+        found.append(d)
+    if not found:
+        print(f"no refused SageMaker launches in the last {minutes} minutes; CloudTrail can take 15 minutes to show one")
+    return found
