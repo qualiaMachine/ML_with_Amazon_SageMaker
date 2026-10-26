@@ -16,7 +16,7 @@ The lesson has two parts.
    instances and when parallel instances help; then fine-tuning a 3B open-weight
    vision-language model with LoRA as a training job, for handwriting
    transcription, with before/after evaluation on held-out pages.
-2. **Bedrock: retrieval-augmented generation (RAG).** Building a RAG pipeline over a corpus
+2. **Bedrock: inference and retrieval-augmented generation (RAG).** Building a RAG pipeline over a corpus
    of research papers two ways: with Amazon Bedrock (pay per token, nothing left
    running), including multimodal embeddings for the questions that live in
    tables and figures, and with SageMaker Processing jobs serving an open-weight
