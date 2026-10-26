@@ -303,7 +303,7 @@ from sagemaker.xgboost.estimator import XGBoost   # framework estimator: AWS's X
 # Define instance type/count we'll use for training
 instance_type="ml.m5.large"   # the managed machine SageMaker launches for the job, separate from this notebook's instance
 instance_count=1 # always start with 1; the next episode measures what a second instance does
-price_per_hour = 0.115 # ml.m5.large, us-east-1 on-demand (2026-10-16); check the instances page for your region
+price_per_hour = 0.115 # ml.m5.large, us-east-1 on-demand (2026-10-16), from the Instances for ML page; check it for your region
 
 # Define max runtime in seconds to ensure you don't use more compute time than expected. Use a generous threshold (2x expected time but < 2 days) so that work isn't interrupted without any gains.
 max_run = 2*60*60 # 2 hours; SageMaker stops the job and releases the instance when this is reached
