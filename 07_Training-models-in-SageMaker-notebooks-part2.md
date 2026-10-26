@@ -201,16 +201,29 @@ On `TitanicNet` the arithmetic comes out as a fraction of a second, which is why
 
 ```python
 n_params = sum(p.numel() for p in TitanicNet().parameters())   # the network's weights and biases: how big the model is
-n_examples = len(np.load("train_data.npz")["X_train"])
-flops = 6 * n_params * n_examples * planned_epochs
+n_examples = len(np.load("train_data.npz")["X_train"])          # one example = one passenger, a row of 7 numbers; 569 of them after the validation split
+tokens_per_example = 1                                          # the network reads a whole row in one step, so a row is one token
+flops = 6 * n_params * n_examples * tokens_per_example * planned_epochs
 print(f"{n_params:,} parameters x {n_examples} examples x {planned_epochs} epochs = {flops:.1e} FLOPs")
 print(f"on an A10G at a quarter of 70 TFLOPS: {flops / (70e12 * 0.25):.4f} seconds of arithmetic; the bill is the startup")
 ```
 
-The same rule, in `helpers.estimate_training_cost`, picks an instance and prints the time, cost and `max_run` for any model size. It only earns its keep from about 1e15 FLOPs up, a few million parameters over a few million examples, which is where the fine-tuning episode uses it on a 3-billion-parameter model. Here it is on a run that does need it: a 125-million-parameter text model, a million training examples of 256 tokens, three passes:
+The same rule, in `helpers.estimate_training_cost`, picks an instance and prints the time, cost and `max_run` for any model size. It only earns its keep from about 1e15 FLOPs up, a few million parameters over a few million examples, which is where the fine-tuning episode uses it on a 3-billion-parameter model. Its four inputs are the four numbers in the formula, and what each one is depends on the data:
+
+- `params_billions`: every parameter in the model, in billions. `TitanicNet` has 2,625, which is 0.0000026; a BERT-base text classifier has 110 million, 0.11.
+- `examples`: one example is one training item, whatever the model takes in at a time. A passenger's row here; one tweet, one abstract, one document for a text model; one page image in the fine-tuning episode.
+- `tokens_per_example`: how many units the model processes for one item, which is what the arithmetic scales with. A row through `TitanicNet` is one step, so 1. A text model works in tokens, about 1.3 per English word: a tweet is 40, an abstract 256, a short paper 2,000. An image through a vision transformer is one token per patch, 196 for a 224 × 224 image in 16 × 16 patches.
+- `epochs`: passes over the whole set.
+
+The three data numbers multiply to the tokens the model trains on. Here it is on a run that does need the rule: a BERT-sized text classifier trained from scratch on a million abstracts, three passes:
 
 ```python
-helpers.estimate_training_cost(params_billions=0.125, examples=1_000_000, tokens_per_example=256, epochs=3)
+helpers.estimate_training_cost(
+    params_billions=0.125,      # a BERT-base-sized model: 125 million parameters
+    examples=1_000_000,         # one example = one abstract; a million of them
+    tokens_per_example=256,     # an abstract is about 190 words, 256 tokens
+    epochs=3,                   # three passes over the million abstracts
+)
 ```
 
 ```output
@@ -238,7 +251,12 @@ The function also returns the same numbers as a dictionary, so a notebook can us
 Run the same function on two sizes a project might be tempted by: a 1-billion-parameter model and a 7-billion one, each trained from scratch on a million documents of 2,000 tokens, one pass. Nothing is launched; the function only does the arithmetic.
 
 ```python
-helpers.estimate_training_cost(params_billions=1, examples=1_000_000, tokens_per_example=2000, epochs=1)
+helpers.estimate_training_cost(
+    params_billions=1,          # a 1B model, the size of the smallest open-weight language models
+    examples=1_000_000,         # one example = one document, a million of them
+    tokens_per_example=2000,    # a short paper: about 1,500 words
+    epochs=1,                   # one pass
+)
 ```
 
 ```output
@@ -251,7 +269,12 @@ set max_run=1191300  (19855 min, about twice the estimate)
 ```
 
 ```python
-helpers.estimate_training_cost(params_billions=7, examples=1_000_000, tokens_per_example=2000, epochs=1)
+helpers.estimate_training_cost(
+    params_billions=7,          # a 7B model, the size most "small" open-weight LLMs are
+    examples=1_000_000,         # the same million documents
+    tokens_per_example=2000,
+    epochs=1,
+)
 ```
 
 ```output
@@ -512,7 +535,7 @@ print(f"Data-parallel run: {(t.time() - start) / 60:.1f} min wall-clock on 2 x m
 desc_ddp = job_cost_report(pytorch_estimator_ddp.latest_training_job.name, prices["ml.m5.large"])
 ```
 
-Read the log before the bill. The two CloudWatch streams now say different things: each prints `training on 446 of 891 rows` (or 445), and only `algo-1` prints the epochs and saves the model. The final validation loss matches the single-instance run to the third decimal, because the averaged gradient is the same gradient; that match is the proof that the work was split rather than copied. The wall-clock is not shorter. Each step now costs a round of gradient exchange between two machines, which takes longer than the 445 rows it saves, and the bill is still two instances' worth. That is the rule of thumb again, measured: data parallelism pays when the step is big enough that the exchange is a small part of it, which on tabular data of 891 rows it never is.
+Read the log before the bill. The two CloudWatch streams now say different things: each prints `training on 285 of 569 rows` (or 284), and only `algo-1` prints the epochs and saves the model. The final validation loss matches the single-instance run to the third decimal, because the averaged gradient is the same gradient; that match is the proof that the work was split rather than copied. The wall-clock is not shorter. Each step now costs a round of gradient exchange between two machines, which takes longer than the 445 rows it saves, and the bill is still two instances' worth. That is the rule of thumb again, measured: data parallelism pays when the step is big enough that the exchange is a small part of it, which on tabular data of 891 rows it never is.
 
 **Model parallelism** is the other kind, for a model too large for one device's memory, where the layers themselves are spread across devices (`smdistributed.modelparallel`, or PyTorch's FSDP). There is no example here because no model in this lesson needs it: the fine-tuning episode's memory arithmetic shows what does, a model whose weights plus their gradients and optimizer state exceed one GPU, and the usual answer at this scale is a LoRA fine-tune, which shrinks the problem instead of spreading it.
 
