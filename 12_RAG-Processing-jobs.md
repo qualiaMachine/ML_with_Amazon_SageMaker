@@ -206,12 +206,16 @@ Define the tags once and pass `tags=job_tags` to **every** `HuggingFaceProcessor
 name = "DoeJohn"         # replace with your name
 project = "SinkOrSwim"   # your challenge: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell or SnapshotWI; SinkOrSwim is the workshop itself
 
+import sys
+sys.path.insert(0, "/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts")
+import helpers   # check_launch: the account's rules, with a message that names the problem
+
 def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning, Inference
-    return [
+    return helpers.check_launch([   # checked against the account's rules first, with a message that names the problem
         {"Key": "Name", "Value": name},
         {"Key": "Project", "Value": project},
         {"Key": "Purpose", "Value": purpose},   # differs per job so the bill tells them apart
-    ]
+    ])
 
 print("Tags on every job this episode launches:", make_job_tags("Inference"))   # check them before launching: a job tagged DoeJohn is on the bill as DoeJohn
 ```

@@ -428,6 +428,7 @@ job_tags = [
     {"Key": "Project", "Value": project},
     {"Key": "Purpose", "Value": purpose},
 ]
+helpers.check_launch(job_tags)   # the account's rules, checked here first: AWS's own refusal does not say which rule
 print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 ```
 
@@ -454,6 +455,8 @@ train_s3_path = f's3://{bucket_name}/{train_filename}'  # an S3 URI: bucket plus
 # we'll store all results in a subfolder called xgboost on our bucket. This folder will automatically be created if it doesn't exist already.
 output_folder = 'xgboost'
 output_path = f's3://{bucket_name}/{output_folder}/'   # S3 prefix (a "folder") where SageMaker uploads the job's outputs
+
+helpers.check_launch(job_tags, instance_type, max_run)   # tags, instance type and cap against the account's rules, before anything is sent
 
 # The XGBoost framework estimator: AWS's XGBoost container, running our script
 xgboost_estimator = XGBoost(
@@ -497,7 +500,7 @@ While a job runs, its status is on the console under [Training jobs](https://us-
 
 ### If the launch is refused
 
-The class account checks every launch. A job is refused, with an `AccessDeniedException` that ends in `with an explicit deny in an identity-based policy`, when any of these is true: it carries no `Name`, `Project` or `Purpose` tag, or a blank `Name`, or a `Project` that is not on the list (SinkOrSwim, WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a `Purpose` that is not Storage, Notebook, Training, Tuning or Inference; its instance type is not one the lesson uses; or it is an endpoint or an EC2 instance, which the lesson never creates. The message does not say which, so check in that order. In this episode that means the `name`, `project` and `purpose` values, the `tags=job_tags` line, and `instance_type`. The same check applies to every job in the later episodes.
+The class account checks every launch. A job is refused, with an `AccessDeniedException` that ends in `with an explicit deny in an identity-based policy`, when any of these is true: it carries no `Name`, `Project` or `Purpose` tag, or a blank `Name`, or a `Project` that is not on the list (SinkOrSwim, WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a `Purpose` that is not Storage, Notebook, Training, Tuning or Inference; its instance type is not one the lesson uses; or it is an endpoint or an EC2 instance, which the lesson never creates. The message does not say which. An IAM refusal cannot carry a custom message, so the lesson checks the same rules in the notebook first: `helpers.check_launch(job_tags, instance_type, max_run)` reads the account's policy (`scripts/guardrails.json`, the same file the administrator attached) and stops with a message that names the problem and the fix. A launch that passes it and is still refused means the `tags=job_tags` line is missing from the estimator. The same check runs before every job in the later episodes.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
