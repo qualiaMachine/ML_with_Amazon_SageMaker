@@ -493,7 +493,7 @@ against reality before and after you clean up.</p>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a>region <span class="op">=</span> session.boto_region_name</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a></span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>                              <span class="co"># replace with your name, as used in job names and tags</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>                        <span class="co"># replace with your challenge name, as used in the Bedrock profile names</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with your challenge name as used in the Bedrock profile names (WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI)</span></span>
 <span id="cb1-14"><a href="#cb1-14" tabindex="-1" aria-label="code-block-1-14"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>            <span class="co"># replace with your bucket</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="what-is-still-running-under-your-name">What is still running under your name?<a class="anchor" aria-label="anchor" href="#what-is-still-running-under-your-name"></a></h2>
@@ -692,15 +692,15 @@ remove.</p>
 </section><section><h2 class="section-heading" id="rules-the-account-enforces-and-how-to-set-them-on-your-own">Rules the account enforces, and how to set them on your own<a class="anchor" aria-label="anchor" href="#rules-the-account-enforces-and-how-to-set-them-on-your-own"></a></h2>
 <hr class="half-width"><p>Several things you could have done wrong in this workshop were
 refused before they cost anything: a job launched without the three
-tags, with a blank or placeholder tag, with an instance type outside the
-lesson’s list, or with no runtime cap, and any endpoint or EC2 instance
-at all. None of that is SageMaker’s own behaviour. It is a set of rules
-the account administrator attached to the role your notebook runs as,
-written in the same IAM policy language that gave the role its
-permissions, and each one says: refuse this request if it looks like
-this. An AWS account with no such rules lets a tagged job and an
-untagged one through alike, and lets a notebook instance run until
-someone remembers it.</p>
+tags, with a blank or placeholder name, with a Project that is not one
+of the challenge names, with an instance type outside the lesson’s list,
+or with no runtime cap, and any endpoint or EC2 instance at all. None of
+that is SageMaker’s own behaviour. It is a set of rules the account
+administrator attached to the role your notebook runs as, written in the
+same IAM policy language that gave the role its permissions, and each
+one says: refuse this request if it looks like this. An AWS account with
+no such rules lets a tagged job and an untagged one through alike, and
+lets a notebook instance run until someone remembers it.</p>
 <p>If you administer an account of your own, a lab’s or a project’s, the
 same rules are an afternoon’s work and they hold across the console, the
 SDK and the CLI, because all three are the same API. The lesson’s
@@ -714,8 +714,9 @@ of what they prevent for what they cost:</p>
 </tr></thead><tbody><tr><td>Every job carries the three cost tags, with real values</td>
 <td>spend nobody can attribute</td>
 <td>an IAM deny on <code>CreateTrainingJob</code> and the like when
-<code>aws:RequestTag/Name</code>, <code>Project</code> or
-<code>Purpose</code> is missing, blank or a placeholder</td>
+<code>aws:RequestTag/Name</code> is missing, blank or a placeholder, or
+<code>Project</code> and <code>Purpose</code> are missing or not on
+their lists</td>
 </tr><tr><td>Only instance types you have priced</td>
 <td>the <code>$63</code>-an-hour box chosen by accident</td>
 <td>an IAM deny when <code>sagemaker:InstanceTypes</code> is not on your
@@ -783,7 +784,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>

@@ -766,7 +766,7 @@ any links that you are not going to use.
  -->
 </div></section><section id="aio-02_Data-storage-setting-up-S3"><p>Content from <a href="02_Data-storage-setting-up-S3.html">Data Storage: Setting up S3</a></p>
 <hr>
-<p>Last updated on 2026-10-21 |
+<p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/02_Data-storage-setting-up-S3.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 20 minutes</p>
@@ -1006,14 +1006,15 @@ everywhere in the lesson. Global keeps the name as you type it.</li>
 <li>
 <strong>Bucket name</strong>:
 <code>challenge-lastnamefirstname</code>, all lowercase,
-e.g. <code>sinkorswim-doejohn</code>: the challenge you are working on
-(<code>sinkorswim</code>, <code>wattbot2026</code>,
-<code>badgerscribe</code>, <code>badgercode</code>, …), a hyphen, then
+e.g. <code>wattbot2026-doejohn</code>: the challenge you are working on
+(<code>wattbot2026</code>, <code>badgerscribe</code>,
+<code>badgercode</code>, <code>braindecoding</code>,
+<code>poisonedwell</code> or <code>snapshotwi</code>), a hyphen, then
 your last and first name run together. S3 requires lowercase letters,
 digits and hyphens only, 3 to 63 characters, starting and ending with a
 letter or digit. Buckets are the one place AWS forces lowercase; for the
 notebook instance and the tags we use the same words with capitals,
-<code>SinkOrSwim</code> and <code>DoeJohn</code>. <strong>This is the
+<code>WattBot2026</code> and <code>DoeJohn</code>. <strong>This is the
 only bucket you will create in the workshop.</strong> Every later
 episode writes its outputs (trained models, embeddings, predictions)
 into this same bucket.</li>
@@ -1055,11 +1056,12 @@ account’s approved cost-allocation keys, see <a href="https://kb.wisc.edu/7245
 three keys on every resource you create in this lesson.</p>
 <ul>
 <li>
-<strong>Project</strong>: your challenge name
-(<code>SinkOrSwim</code>, <code>WattBot2026</code>,
-<code>BadgerScribe</code>, <code>BadgerCode</code>, …),
-e.g. <code>SinkOrSwim</code>
-</li>
+<strong>Project</strong>: your challenge, one of
+<code>WattBot2026</code>, <code>BadgerScribe</code>,
+<code>BadgerCode</code>, <code>BrainDecoding</code>,
+<code>PoisonedWell</code>, <code>SnapshotWI</code>, spelled exactly like
+that. The account refuses a job tagged with any other Project value, so
+a typo is caught at the first launch rather than on the bill.</li>
 <li>
 <strong>Name</strong>: your last and first name run together,
 e.g. <code>DoeJohn</code>
@@ -1072,8 +1074,9 @@ e.g. <code>DoeJohn</code>
 <p>AWS allows tag values of up to 256 characters made of letters,
 digits, spaces and <code>+ - = . _ : / @</code>, and they are
 case-sensitive. We use capitalised words with no spaces, and the same
-spelling on every resource: <code>SinkOrSwim</code> and
-<code>sinkorswim</code> would be separate rows in Cost Explorer.</p>
+spelling on every resource: <code>WattBot2026</code> and
+<code>wattbot2026</code> would be separate rows in Cost Explorer, and
+only the first is on the account’s list.</p>
 <p><code>Purpose</code> takes one of five values, so that the bill can
 be summed by kind of work rather than by individual job. Which job it
 was is already in the job’s name.</p>
@@ -1615,7 +1618,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-03_SageMaker-notebooks-as-controllers"><p>Content from <a href="03_SageMaker-notebooks-as-controllers.html">Notebooks as Controllers</a></p>
 <hr>
-<p>Last updated on 2026-10-21 |
+<p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/03_SageMaker-notebooks-as-controllers.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 20 minutes</p>
@@ -1746,7 +1749,7 @@ instances</strong>, then click <strong>Create notebook
 instance</strong>.</p></li>
 <li><p><strong>Notebook name</strong>: the same words as your bucket,
 capitalised: <code>Challenge-LastnameFirstname</code>,
-e.g. <code>SinkOrSwim-DoeJohn</code>. One instance serves the whole
+e.g. <code>WattBot2026-DoeJohn</code>. One instance serves the whole
 workshop; the individual <code>.ipynb</code> notebooks inside it are
 where the per-episode work lives. SageMaker allows letters, digits and
 hyphens (no spaces or underscores, up to 63 characters); capitals are
@@ -1823,9 +1826,10 @@ applies here too.</p>
 <tbody>
 <tr>
 <td><code>Project</code></td>
-<td>your challenge name (<code>SinkOrSwim</code>,
-<code>WattBot2026</code>, <code>BadgerScribe</code>,
-<code>BadgerCode</code>, …), e.g. <code>SinkOrSwim</code>
+<td>your challenge, one of <code>WattBot2026</code>,
+<code>BadgerScribe</code>, <code>BadgerCode</code>,
+<code>BrainDecoding</code>, <code>PoisonedWell</code>,
+<code>SnapshotWI</code>
 </td>
 </tr>
 <tr>
@@ -3400,7 +3404,7 @@ cases. We can extract the instance name for this notebook using…</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="co"># Replace with your notebook instance name.</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a><span class="co"># This does NOT refer to specific ipynb files, but to the SageMaker notebook instance.</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>notebook_instance_name <span class="op">=</span> <span class="st">'SinkOrSwim-DoeJohn'</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>notebook_instance_name <span class="op">=</span> <span class="st">'WattBot2026-DoeJohn'</span></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a><span class="co"># Describe the notebook instance (sagemaker_client was created from our session above)</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>response <span class="op">=</span> sagemaker_client.describe_notebook_instance(NotebookInstanceName<span class="op">=</span>notebook_instance_name)</span>
@@ -3885,7 +3889,7 @@ and a human-readable name, even after the job has completed.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span> <span class="co"># replace with your name</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span> <span class="co"># replace with your challenge name</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI</span></span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1" aria-label="code-block-12-3"></a>purpose <span class="op">=</span> <span class="st">"Training"</span>        <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1" aria-label="code-block-12-4"></a></span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1" aria-label="code-block-12-5"></a><span class="co"># Tags: key/value labels attached to the job's resources, so its cost shows up under your name and project on the bill</span></span>
@@ -3995,10 +3999,12 @@ notebook instance.</p>
 <code>AccessDeniedException</code> that ends in
 <code>with an explicit deny in an identity-based policy</code>, when any
 of these is true: it carries no <code>Name</code>, <code>Project</code>
-or <code>Purpose</code> tag, or a blank one, or a <code>Purpose</code>
-that is not Storage, Notebook, Training, Tuning or Inference, or the
-example values <code>DoeJohn</code> and <code>SinkOrSwim</code> left in
-place; its instance type is not one the lesson uses; or it is an
+or <code>Purpose</code> tag, or a blank <code>Name</code>, or the
+example <code>DoeJohn</code> left in place, or a <code>Project</code>
+that is not one of the six challenge names (WattBot2026, BadgerScribe,
+BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a
+<code>Purpose</code> that is not Storage, Notebook, Training, Tuning or
+Inference; its instance type is not one the lesson uses; or it is an
 endpoint or an EC2 instance, which the lesson never creates. The message
 does not say which, so check in that order. In this episode that means
 the <code>name</code>, <code>project</code> and <code>purpose</code>
@@ -4388,7 +4394,7 @@ jobs, which may include jobs from other users in the account.</li>
 <strong>Verify your training Job</strong>
 <ul>
 <li>Identify your job by looking for the specific name format (e.g.,
-<code>SinkOrSwim-DoeJohn-YYYY-MM-DD-HH-MM-SS-XXX</code>) generated when
+<code>WattBot2026-DoeJohn-YYYY-MM-DD-HH-MM-SS-XXX</code>) generated when
 you launched the job. Click on its name to access detailed information.
 Cross-check the job details, such as the <strong>Instance Type</strong>
 and <strong>Input data configuration</strong>, with the parameters you
@@ -4785,7 +4791,7 @@ same location to access helper functions</p>
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a>notebook_instance_name <span class="op">=</span> <span class="st">'SinkOrSwim-DoeJohn'</span> <span class="co"># replace with your notebook instance name</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a>notebook_instance_name <span class="op">=</span> <span class="st">'WattBot2026-DoeJohn'</span> <span class="co"># replace with your notebook instance name</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a>local_instance_info <span class="op">=</span> helpers.get_notebook_instance_info(notebook_instance_name, region)</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1" aria-label="code-block-4-4"></a>local_instance <span class="op">=</span> local_instance_info[<span class="st">'InstanceType'</span>]</span>
@@ -4975,7 +4981,7 @@ is anonymous on the bill. Define them once here and pass
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span> <span class="co"># replace with your name</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span> <span class="co"># replace with your challenge name</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI</span></span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1" aria-label="code-block-10-3"></a>purpose <span class="op">=</span> <span class="st">"Training"</span>        <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1" aria-label="code-block-10-4"></a></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1" aria-label="code-block-10-5"></a>job_tags <span class="op">=</span> [</span>
@@ -5747,7 +5753,7 @@ launched in this episode</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="im">import</span> boto3</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>notebook_instance_name <span class="op">=</span> <span class="st">'SinkOrSwim-DoeJohn'</span> <span class="co"># adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>notebook_instance_name <span class="op">=</span> <span class="st">'WattBot2026-DoeJohn'</span> <span class="co"># adjust to your notebook name. we'll use this variable to name the training jobs launched by the tuner.</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a><span class="co"># the following code just verifies you have the right name for your notebook instance</span></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>region <span class="op">=</span> boto3.Session().region_name  <span class="co"># inherited from the notebook instance; do not hard-code a region</span></span>
@@ -5771,7 +5777,7 @@ too).</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span> <span class="co"># replace with your name</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span> <span class="co"># replace with your challenge name</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a>purpose <span class="op">=</span> <span class="st">"Tuning"</span>        <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1" aria-label="code-block-3-5"></a>job_tags <span class="op">=</span> [</span>
@@ -7958,7 +7964,7 @@ jobs it launches. Pass them to every estimator.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>         <span class="co"># replace with your name</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># replace with your challenge name</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI</span></span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a></span>
 <span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a>    <span class="cf">return</span> [</span>
@@ -10368,7 +10374,7 @@ through the alias shows up with the alias’s tags.</p>
 <tr>
 <td>Your profile</td>
 <td><code>arn:aws:bedrock:us-east-2:&lt;account-id&gt;:application-inference-profile/adewnu8wqxpy</code></td>
-<td><code>Name=DoeJohn, Project=SinkOrSwim, Purpose=Inference</code></td>
+<td><code>Name=DoeJohn, Project=WattBot2026, Purpose=Inference</code></td>
 </tr>
 </tbody>
 </table>
@@ -10390,7 +10396,7 @@ model ID.</p>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a><span class="im">from</span> wattbot_rag <span class="im">import</span> tagged_profile_arn</span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a></span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>         <span class="co"># replace with your name</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># replace with your challenge name</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI</span></span>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a><span class="bu">print</span>(<span class="ss">f"Tags on the profiles, and so on every Bedrock call: Name=</span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project=</span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose=Inference"</span>)   <span class="co"># check them first: a profile tagged DoeJohn bills as DoeJohn</span></span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1" aria-label="code-block-16-6"></a></span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1" aria-label="code-block-16-7"></a><span class="co"># From here on, these ARNs are what we pass as modelId. The base IDs are never sent to the runtime again.</span></span>
@@ -10410,9 +10416,9 @@ helper wraps:</p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">aws</span> bedrock create-inference-profile <span class="at">--inference-profile-name</span> SinkOrSwim-DoeJohn-wattbot-gen <span class="dt">\</span></span>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">aws</span> bedrock create-inference-profile <span class="at">--inference-profile-name</span> WattBot2026-DoeJohn-wattbot-gen <span class="dt">\</span></span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a>  <span class="at">--model-source</span> copyFrom=arn:aws:bedrock:us-east-2::foundation-model/deepseek.v3-v1:0 <span class="dt">\</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=WattBot2026 key=Purpose,value=Inference</span></code></pre>
 </div>
 <p>It prints the profile ARN; pass that as <code>modelId</code>. The
 helper adds only the reuse check, so rerunning does not create
@@ -10465,7 +10471,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10921,7 +10927,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -11001,7 +11007,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -12037,7 +12043,7 @@ job from the batch RAG job on the bill.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>         <span class="co"># replace with your name</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>   <span class="co"># replace with your challenge name</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a></span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a><span class="kw">def</span> make_job_tags(purpose: <span class="bu">str</span>):   <span class="co"># one of: Storage, Notebook, Training, Tuning, Inference</span></span>
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>    <span class="cf">return</span> [</span>
@@ -13803,7 +13809,7 @@ as tabs.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13812,7 +13818,7 @@ as tabs.</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13866,7 +13872,7 @@ download you paid for.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13875,7 +13881,7 @@ download you paid for.</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
+<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13904,7 +13910,7 @@ bill:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13912,7 +13918,7 @@ bill:</p>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
+<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13989,7 +13995,7 @@ the account.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14024,7 +14030,7 @@ the account.</p>
 <span id="cb12-29"><a href="#cb12-29" tabindex="-1" aria-label="code-block-12-29"></a><span class="op">JSON</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
+<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14262,7 +14268,7 @@ against reality before and after you clean up.</p>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a>region <span class="op">=</span> session.boto_region_name</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a></span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a>name <span class="op">=</span> <span class="st">"DoeJohn"</span>                              <span class="co"># replace with your name, as used in job names and tags</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>project <span class="op">=</span> <span class="st">"SinkOrSwim"</span>                        <span class="co"># replace with your challenge name, as used in the Bedrock profile names</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a>project <span class="op">=</span> <span class="st">"YourChallenge"</span>   <span class="co"># replace with your challenge name as used in the Bedrock profile names (WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI)</span></span>
 <span id="cb1-14"><a href="#cb1-14" tabindex="-1" aria-label="code-block-1-14"></a>bucket_name <span class="op">=</span> <span class="st">"sinkorswim-doejohn"</span>            <span class="co"># replace with your bucket</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="what-is-still-running-under-your-name">What is still running under your name?<a class="anchor" aria-label="anchor" href="#what-is-still-running-under-your-name"></a>
@@ -14491,15 +14497,15 @@ remove.</p>
 <hr class="half-width">
 <p>Several things you could have done wrong in this workshop were
 refused before they cost anything: a job launched without the three
-tags, with a blank or placeholder tag, with an instance type outside the
-lesson’s list, or with no runtime cap, and any endpoint or EC2 instance
-at all. None of that is SageMaker’s own behaviour. It is a set of rules
-the account administrator attached to the role your notebook runs as,
-written in the same IAM policy language that gave the role its
-permissions, and each one says: refuse this request if it looks like
-this. An AWS account with no such rules lets a tagged job and an
-untagged one through alike, and lets a notebook instance run until
-someone remembers it.</p>
+tags, with a blank or placeholder name, with a Project that is not one
+of the challenge names, with an instance type outside the lesson’s list,
+or with no runtime cap, and any endpoint or EC2 instance at all. None of
+that is SageMaker’s own behaviour. It is a set of rules the account
+administrator attached to the role your notebook runs as, written in the
+same IAM policy language that gave the role its permissions, and each
+one says: refuse this request if it looks like this. An AWS account with
+no such rules lets a tagged job and an untagged one through alike, and
+lets a notebook instance run until someone remembers it.</p>
 <p>If you administer an account of your own, a lab’s or a project’s, the
 same rules are an afternoon’s work and they hold across the console, the
 SDK and the CLI, because all three are the same API. The lesson’s
@@ -14523,8 +14529,9 @@ of what they prevent for what they cost:</p>
 <td>Every job carries the three cost tags, with real values</td>
 <td>spend nobody can attribute</td>
 <td>an IAM deny on <code>CreateTrainingJob</code> and the like when
-<code>aws:RequestTag/Name</code>, <code>Project</code> or
-<code>Purpose</code> is missing, blank or a placeholder</td>
+<code>aws:RequestTag/Name</code> is missing, blank or a placeholder, or
+<code>Project</code> and <code>Purpose</code> are missing or not on
+their lists</td>
 </tr>
 <tr>
 <td>Only instance types you have priced</td>
@@ -14607,7 +14614,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
