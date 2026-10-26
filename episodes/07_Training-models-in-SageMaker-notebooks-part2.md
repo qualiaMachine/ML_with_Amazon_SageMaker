@@ -173,7 +173,7 @@ print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 
 Every job in this lesson gets an estimate written down before `fit()`. There are two ways to make it, and which one applies depends on the size of the model.
 
-**Small models: time a smoke test and scale it.** For a network like `TitanicNet`, the arithmetic is nothing; the time is Python overhead per epoch plus the job's fixed startup. Each epoch costs the same as the last, so training time scales linearly with epochs, and with rows once the data is bigger than a batch. So measure the 100-epoch run you just did and multiply by the epochs and rows you plan:
+**Small models: time a smoke test and scale it.** For a network like `TitanicNet`, the arithmetic is nothing; the time is Python overhead per epoch plus the job's fixed startup. Each epoch costs the same as the last, so training time scales linearly with epochs, and with rows once the data is bigger than a batch. So measure the 100-epoch run you just did, multiply by the epochs and rows you plan, and add the two or three minutes of startup, which are billed and are most of the bill for a job this small:
 
 ```python
 local_seconds_per_epoch = (t.time() - start_time) / epochs     # from the smoke test above: wall-clock over its 100 epochs
