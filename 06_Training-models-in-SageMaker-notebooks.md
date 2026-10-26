@@ -206,7 +206,7 @@ To compare our local runtime with future experiments, we'll need to know what in
 ```python
 # Replace with your notebook instance name.
 # This does NOT refer to specific ipynb files, but to the SageMaker notebook instance.
-notebook_instance_name = 'SinkOrSwim-DoeJohn'
+notebook_instance_name = 'WattBot2026-DoeJohn'
 
 # Describe the notebook instance (sagemaker_client was created from our session above)
 response = sagemaker_client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
@@ -419,7 +419,7 @@ To avoid this, we explicitly tag each training job at launch time. This ensures 
 
 ```python
 name = "DoeJohn" # replace with your name
-project = "SinkOrSwim" # replace with your challenge name
+project = "YourChallenge"   # replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI
 purpose = "Training"        # one of: Storage, Notebook, Training, Tuning, Inference
 
 # Tags: key/value labels attached to the job's resources, so its cost shows up under your name and project on the bill
@@ -497,7 +497,7 @@ While a job runs, its status is on the console under [Training jobs](https://us-
 
 ### If the launch is refused
 
-The class account checks every launch. A job is refused, with an `AccessDeniedException` that ends in `with an explicit deny in an identity-based policy`, when any of these is true: it carries no `Name`, `Project` or `Purpose` tag, or a blank one, or a `Purpose` that is not Storage, Notebook, Training, Tuning or Inference, or the example values `DoeJohn` and `SinkOrSwim` left in place; its instance type is not one the lesson uses; or it is an endpoint or an EC2 instance, which the lesson never creates. The message does not say which, so check in that order. In this episode that means the `name`, `project` and `purpose` values, the `tags=job_tags` line, and `instance_type`. The same check applies to every job in the later episodes.
+The class account checks every launch. A job is refused, with an `AccessDeniedException` that ends in `with an explicit deny in an identity-based policy`, when any of these is true: it carries no `Name`, `Project` or `Purpose` tag, or a blank `Name`, or the example `DoeJohn` left in place, or a `Project` that is not one of the six challenge names (WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a `Purpose` that is not Storage, Notebook, Training, Tuning or Inference; its instance type is not one the lesson uses; or it is an endpoint or an EC2 instance, which the lesson never creates. The message does not say which, so check in that order. In this episode that means the `name`, `project` and `purpose` values, the `tags=job_tags` line, and `instance_type`. The same check applies to every job in the later episodes.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -712,7 +712,7 @@ To view and monitor your SageMaker training job, follow these steps in the AWS M
    - In the left-hand navigation menu, select **Training jobs** (or open [this link](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training) in the class region). You'll see a list of recent training jobs, which may include jobs from other users in the account.
 
 3. **Verify your training Job**  
-   - Identify your job by looking for the specific name format (e.g., `SinkOrSwim-DoeJohn-YYYY-MM-DD-HH-MM-SS-XXX`) generated when you launched the job.  Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
+   - Identify your job by looking for the specific name format (e.g., `WattBot2026-DoeJohn-YYYY-MM-DD-HH-MM-SS-XXX`) generated when you launched the job.  Click on its name to access detailed information. Cross-check the job details, such as the **Instance Type** and **Input data configuration**, with the parameters you set in your script. 
 
 4. **Monitor the job status**  
    - Once you've verified the correct job, click on its name to access detailed information:

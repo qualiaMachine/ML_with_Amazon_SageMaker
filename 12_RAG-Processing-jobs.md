@@ -204,7 +204,7 @@ Define the tags once and pass `tags=job_tags` to **every** `HuggingFaceProcessor
 
 ```python
 name = "DoeJohn"         # replace with your name
-project = "SinkOrSwim"   # replace with your challenge name
+project = "YourChallenge"   # replace with one of: WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI
 
 def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning, Inference
     return [
