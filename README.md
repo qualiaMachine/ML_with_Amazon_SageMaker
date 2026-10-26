@@ -8,22 +8,24 @@ account.
 
 ## What the lesson covers
 
-This workshop is about running machine learning and AI work on AWS without losing control of the bill: where the data goes, which machine does what, how a job is launched and paid for, and how to find out what it cost. It uses two services. **SageMaker** rents machines by the second, for a notebook you work in and for jobs that run on their own and end; **Bedrock** serves hosted models by the token, with nothing to start or stop. The lesson is in two parts, one per service, each with its own hands-on problems.
+This workshop is about running machine learning and AI work on AWS without losing control of the bill: where the data goes, which machine does what, how a job is launched and paid for, and how to find out what it cost. It is in four parts.
 
-**Part 1, SageMaker: data, training, tuning and fine-tuning.**
+**Part 1, orientation.** What the cloud offers a researcher compared with a laptop or the cluster down the hall, and what it costs. The two services the lesson uses: **SageMaker** rents machines by the second, for a notebook you work in and for jobs that run on their own and end; **Bedrock** serves hosted models by the token, with nothing to start or stop. How the pieces fit together, and the cost habits every later episode follows.
+
+**Part 2, SageMaker: data, training, tuning and fine-tuning.**
 
 - Put the data in an S3 bucket and start a small notebook instance that launches everything else. The notebook is the controller, not the workhorse: the expensive compute runs on instances SageMaker rents for each job and releases when it ends.
 - Train XGBoost and PyTorch models on the Titanic data as training jobs. Estimate the cost before each launch and read the billable seconds after, compare a CPU instance with a GPU, and see what two instances buy and what they do not.
 - Run a hyperparameter tuning job that trains ten models under a budget set up front.
 - Fine-tune a 3B open-weight vision-language model with LoRA, as a training job with checkpoints and a runtime cap, for transcribing handwritten German letters (Badger Scribe), scored on held-out pages before and after.
 
-**Part 2, Bedrock: inference and retrieval-augmented generation.**
+**Part 3, Bedrock: inference and retrieval-augmented generation.**
 
 - Build a RAG pipeline over a corpus of energy research papers (WattBot): embed the papers, retrieve, generate, score. The models are Bedrock's, paid per token through tagged inference profiles so the spend has an owner, and the whole run costs cents.
 - Add multimodal embeddings for the questions whose answers live in tables and figures, and measure what they change.
 - Run the same pipeline with an open-weight model Bedrock does not serve, as SageMaker Processing jobs that rent a GPU for the minutes they need; optionally, the same on a notebook GPU, as the comparison.
 
-The last episodes cover the same jobs from a terminal, and cleanup: what to stop, what to delete, how to read the bill, and the rules the account enforces on every launch.
+**Part 4, resource management and cleanup.** What to stop, what to delete, how to read the bill, and the rules the account enforces on every launch, with how to set the same rules on an account of your own. An optional episode shows the same jobs from a terminal.
 
 | Episodes | What they cover | Hands-on problem |
 |---|---|---|
