@@ -1,26 +1,59 @@
 # Machine Learning with Amazon SageMaker
 
-A Carpentries-style lesson on running machine learning work on AWS without
-losing control of the bill: SageMaker notebooks as controllers, training and
-tuning jobs, retrieval-augmented generation on Bedrock and on rented GPUs, and
-fine-tuning an open-weight vision-language model. Built for the UW–Madison
-ML Marathon and Research Bazaar, usable by anyone with an AWS account.
+A Carpentries-style lesson on machine learning workflows on AWS, developed for
+the UW-Madison ML Marathon and Research Bazaar and usable by anyone with an AWS
+account.
 
 **Rendered lesson:** https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/
 
 ## What the lesson covers
 
-| Part | Episodes | Hands-on problem |
-|---|---|---|
-| SageMaker foundations | Overview, S3 setup, notebooks as controllers, accessing S3, code repos | Titanic survival classifier |
-| Training and tuning | Training jobs (XGBoost, PyTorch), hyperparameter tuning | Titanic, CPU vs GPU, parallel jobs |
-| Fine-tuning | LoRA fine-tune of CHURRO-3B as a training job | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
-| Retrieval-augmented generation | Overview, Bedrock, Processing jobs | [WattBot](https://www.kaggle.com/competitions/WattBot2026) energy-literature Q&A |
-| Wrap-up | Resource management and cleanup, CLI equivalents | |
+The lesson has two parts.
 
-Every episode uses the same cost practices: cost-allocation tags on every
-resource, `max_run` caps on every job, an estimate before each launch compared
-to the bill afterwards, and stopping and deleting notebook instances when done.
+1. **SageMaker: training, tuning and fine-tuning.** Storing data in S3, using a
+   small notebook instance as a *controller*, running training jobs (XGBoost and
+   PyTorch) and hyperparameter tuning, with guidance on choosing CPU vs. GPU
+   instances and when parallel instances help; then fine-tuning a 3B open-weight
+   vision-language model with LoRA as a training job, for handwriting
+   transcription, with before/after evaluation on held-out pages.
+2. **Retrieval-augmented generation (RAG).** Building a RAG pipeline over a corpus
+   of research papers two ways: with Amazon Bedrock (pay per token, nothing left
+   running), including multimodal embeddings for the questions that live in
+   tables and figures, and with SageMaker Processing jobs serving an open-weight
+   model that Bedrock does not offer. An optional episode does the same on a
+   notebook GPU, as the comparison.
+
+| Episodes | What they cover | Hands-on problem |
+|---|---|---|
+| 1 to 5 | Overview, S3, the notebook instance as controller, reading and writing S3, (optional) pushing notebooks to GitHub | Titanic survival data |
+| 6 to 8 | Training jobs with XGBoost and PyTorch, CPU vs. GPU, parallel instances, hyperparameter tuning | Titanic survival classifier |
+| 9 | LoRA fine-tune of CHURRO-3B as a training job, with a cost estimate checked against the bill | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
+| 10 to 13 | RAG on Bedrock, with multimodal embeddings; RAG with Processing jobs; (optional) RAG on a notebook GPU | [WattBot](https://www.kaggle.com/competitions/WattBot2026) energy-literature Q&A |
+| 14 to 15 | (Optional) the same jobs from the terminal; resource management, monitoring and cleanup | |
+
+### Who it is for
+
+Researchers and students who use ML or AI in their work and want to run it on
+AWS. The lesson assumes a basic machine learning background: you know what
+training, hyperparameter tuning, fine-tuning, embeddings and retrieval-augmented
+generation are. It does not teach these concepts. Python and Jupyter are used
+throughout; no prior AWS experience is needed.
+
+### Cost controls
+
+Run as written, the full workshop costs a few dollars per learner. Every episode
+tags its resources, caps job runtime, estimates cost before launching and checks
+the bill after, and cleans up. The final episode covers monitoring and cleanup,
+and the rules a shared account can enforce.
+
+### What it does not cover
+
+- **General ML/AI concepts**: the focus is on moving existing ML and AI work to
+  the cloud, not on teaching training, fine-tuning or RAG themselves.
+- **Deploying models as endpoints**: serving a trained or fine-tuned model behind
+  an always-on API.
+- **Agents and tool use**: LLM applications that call tools or chain multiple
+  model calls (e.g., Bedrock Agents).
 
 ## Repository layout
 
