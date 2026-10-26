@@ -88,7 +88,7 @@ def calculate_accuracy(preds, labels):
 
 
 def train(train_path, val_path, epochs, learning_rate):
-    rank, world_size = setup_distributed()
+    rank, world_size = setup_distributed()   # 1. join the process group (or run alone with no launcher)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_data, val_data = np.load(train_path), np.load(val_path)

@@ -284,19 +284,21 @@ if __name__ == "__main__":
 # ---------------------------------------------------------------------------
 
 # SageMaker training instances the lesson refers to: GPUs per box, GPU memory per GPU (GB),
-# bf16 dense peak per GPU (TFLOPS, from NVIDIA's data sheets), and the us-east-1 on-demand
-# price per instance-hour from the AWS price list of 2026-10-16. The price is for the whole box.
+# bf16 dense peak per GPU (TFLOPS, from NVIDIA's data sheets), the us-east-1 on-demand
+# price per instance-hour from the AWS price list of 2026-10-16 (for the whole box), the
+# instance's network bandwidth (Gbit/s, from the instance's spec sheet) and, on multi-GPU boxes,
+# the GPU-to-GPU link per GPU (GB/s: NVLink on p4d/p5, PCIe on g5/g6e). Links are approximate.
 GPU_INSTANCES = {
-    "ml.g4dn.xlarge":   {"gpus": 1, "gpu": "T4",        "gpu_mem_gb": 16, "tflops_bf16": 65,  "price": 0.74,  "note": "no bf16 support; modern LLM fine-tuning is slow or fails"},
-    "ml.g6.xlarge":     {"gpus": 1, "gpu": "L4",        "gpu_mem_gb": 24, "tflops_bf16": 121, "price": 1.13},
-    "ml.g5.xlarge":     {"gpus": 1, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 1.41},
-    "ml.g5.2xlarge":    {"gpus": 1, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 1.52},
-    "ml.g6e.xlarge":    {"gpus": 1, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 2.61},
-    "ml.g6e.2xlarge":   {"gpus": 1, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 2.80},
-    "ml.g5.12xlarge":   {"gpus": 4, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 7.09},
-    "ml.g6e.12xlarge":  {"gpus": 4, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 13.12},
-    "ml.p4d.24xlarge":  {"gpus": 8, "gpu": "A100 40GB", "gpu_mem_gb": 40, "tflops_bf16": 312, "price": 25.25},
-    "ml.p5.48xlarge":   {"gpus": 8, "gpu": "H100 80GB", "gpu_mem_gb": 80, "tflops_bf16": 989, "price": 63.30},
+    "ml.g4dn.xlarge":   {"gpus": 1, "gpu": "T4",        "gpu_mem_gb": 16, "tflops_bf16": 65,  "price": 0.74, "net_gbps": 25,  "note": "no bf16 support; modern LLM fine-tuning is slow or fails"},
+    "ml.g6.xlarge":     {"gpus": 1, "gpu": "L4",        "gpu_mem_gb": 24, "tflops_bf16": 121, "price": 1.13, "net_gbps": 10},
+    "ml.g5.xlarge":     {"gpus": 1, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 1.41, "net_gbps": 10},
+    "ml.g5.2xlarge":    {"gpus": 1, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 1.52, "net_gbps": 10},
+    "ml.g6e.xlarge":    {"gpus": 1, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 2.61, "net_gbps": 20},
+    "ml.g6e.2xlarge":   {"gpus": 1, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 2.80, "net_gbps": 20},
+    "ml.g5.12xlarge":   {"gpus": 4, "gpu": "A10G",      "gpu_mem_gb": 24, "tflops_bf16": 70,  "price": 7.09, "net_gbps": 40, "gpu_link_gbs": 32},
+    "ml.g6e.12xlarge":  {"gpus": 4, "gpu": "L40S",      "gpu_mem_gb": 48, "tflops_bf16": 362, "price": 13.12, "net_gbps": 400, "gpu_link_gbs": 32},
+    "ml.p4d.24xlarge":  {"gpus": 8, "gpu": "A100 40GB", "gpu_mem_gb": 40, "tflops_bf16": 312, "price": 25.25, "net_gbps": 400, "gpu_link_gbs": 600},
+    "ml.p5.48xlarge":   {"gpus": 8, "gpu": "H100 80GB", "gpu_mem_gb": 80, "tflops_bf16": 989, "price": 63.30, "net_gbps": 3200, "gpu_link_gbs": 900},
 }
 
 # Bytes of GPU memory per model parameter, from the fine-tuning episode's table.
@@ -536,3 +538,41 @@ def explain_refusal(minutes=60, region=None):
     if not found:
         print(f"no refused SageMaker launches in the last {minutes} minutes; CloudTrail can take 15 minutes to show one")
     return found
+
+
+def estimate_parallel_speedup(params_billions, tokens_per_step, instance_type, instance_count=1, method="full",
+                              trainable_fraction=None, utilization=0.25):
+    """Estimate what data parallelism buys for one training step: compute time per device, gradient-exchange
+    time, and the speedup over one device, on `instance_count` boxes of `instance_type` using every GPU in each.
+
+    tokens_per_step: the global batch in tokens (examples per step x tokens per example), split across the devices.
+    The exchange moves the gradient of every trainable parameter once per step (ring all-reduce: about 2 x its bytes
+    per device, 4 bytes per value), over the slowest link in use: the GPU-to-GPU link inside one box, or the
+    network when there is more than one box. Plus one millisecond of latency per step. The exchange is not
+    overlapped with the computation here, so the speedup is a lower bound; real runs overlap part of it.
+    """
+    inst = GPU_INSTANCES[instance_type]
+    n_devices = inst["gpus"] * instance_count
+    if trainable_fraction is None:
+        trainable_fraction = 1.0 if method == "full" else 0.01     # LoRA adapters are about a percent of the model
+    flops_per_token = FLOPS_PER_PARAM_TOKEN[method] * params_billions * 1e9 * 1.5    # x1.5: gradient checkpointing, as the cost estimator assumes
+    compute_one = flops_per_token * tokens_per_step / (inst["tflops_bf16"] * 1e12 * utilization)       # one device does the whole step
+    compute_each = compute_one / n_devices                                                             # each device does its share
+    grad_bytes = params_billions * 1e9 * trainable_fraction * 4
+    if instance_count > 1:
+        link_bytes_s, link = inst["net_gbps"] * 1e9 / 8, f"{inst['net_gbps']} Gb/s network between instances"
+    elif inst["gpus"] > 1:
+        link_bytes_s, link = inst["gpu_link_gbs"] * 1e9, f"{inst['gpu_link_gbs']} GB/s GPU link inside the box"
+    else:
+        link_bytes_s, link = None, "one device, nothing to exchange"
+    exchange = 0.0 if link_bytes_s is None or n_devices == 1 else 2 * grad_bytes * (n_devices - 1) / n_devices / link_bytes_s + 1e-3
+    step = compute_each + exchange
+    speedup = compute_one / step
+    print(f"{n_devices} device(s): {instance_count} x {instance_type} ({inst['gpus']} x {inst['gpu']} each); {link}")
+    fmt = lambda s: (f"{s*1e6:10.1f} us" if s < 1e-3 else f"{s*1e3:10.3f} ms" if s < 0.01 else f"{s*1e3:10.1f} ms")
+    print(f"one device alone:   {fmt(compute_one)} per step of {tokens_per_step:,} tokens")
+    print(f"each of {n_devices}:          {fmt(compute_each)} of computation + {fmt(exchange)} exchanging {grad_bytes/1e9:.3f} GB of gradients")
+    print(f"speedup:            {speedup:10.2f}x on {n_devices} devices (ideal {n_devices}x); exchange is {100*exchange/step:.0f}% of the step")
+    cost_ratio = n_devices / speedup
+    print(f"cost per run:       {cost_ratio:10.2f}x the one-device cost" + ("" if cost_ratio < 1.3 else "  (more devices, same work, a bigger bill)"))
+    return {"devices": n_devices, "compute_ms": compute_each * 1e3, "exchange_ms": exchange * 1e3, "speedup": speedup, "cost_ratio": cost_ratio}

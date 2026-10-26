@@ -17,8 +17,9 @@ the `code_rag/` directory shipped with a Processing job):
   and `compute_wattbot_score`.
 - episodes/12_RAG-Processing-jobs.md: the notebook only imports
   `compute_wattbot_score`; the job itself runs `scripts/wattbot_rag_batch.py`.
-- scripts/wattbot_rag_batch.py: `embed_query` is a sentence-transformer
-  (`embed_query_with`) and `generate` is a vLLM engine serving Qwen3.8-27B.
+- scripts/wattbot_rag_batch.py: `embed_query` is a Hugging Face embedder
+  (`embed_query_with` over `HFEmbedder`) and `generate` is Qwen3-8B through
+  `transformers` (or vLLM with `--engine vllm`).
 - episodes/13_RAG-GPU-notebook.md (optional): same as the batch script, but
   interactively, with `with_evidence_type=True` so each explanation is
   prefixed with the kind of evidence it rests on.
@@ -518,7 +519,7 @@ def run_single_qa(
 
 
 # ---------------------------------------------------------------------------
-# Scoring (WattBot metric: 0.75 answer_value + 0.15 ref_id Jaccard + 0.10 is_NA)
+# Scoring (WattBot 2026 metric: 0.75 answer_value + 0.20 ref_id F1 + 0.05 is_NA)
 # ---------------------------------------------------------------------------
 
 
@@ -530,7 +531,7 @@ def evidence_flags(gt: pd.DataFrame):
 
     The competition's solution file carries Quote/Table/Figure/Math/is_NA flags saying
     what kind of evidence each answer rests on, and Score.py breaks the error rate down
-    by them. The public train_QA.csv has no such columns; its free-text `explanation`
+    by them. The 2026 train_QA.csv has them; an older file without them has a free-text `explanation`
     column says the same thing informally ("Quote", "Table 3", "Figure, Quote", or a
     worked calculation). When the flags are missing, derive them from that column so
     the breakdown still prints. A question can carry several flags.
@@ -662,6 +663,59 @@ def sample_questions_by_type(
 # ---------------------------------------------------------------------------
 
 CAPTION_RE = re.compile(r"^\s*(Table|Fig\.?|Figure)\s*([A-Z]?\d+)", re.IGNORECASE | re.MULTILINE)
+
+
+def pdfs_to_page_docs(metadata: pd.DataFrame, pdf_dir: str) -> List[Dict[str, Any]]:
+    """Load each PDF under pdf_dir into page-level records (the Bedrock episode's Step 5).
+
+    Each dict has keys: text, doc_id, title, url, page_num, page_label, total_pages.
+    Needs pypdf (`pip install pypdf`); the corpus build script writes the same records to pages.jsonl.
+    """
+    from pypdf import PdfReader
+    page_docs: List[Dict[str, Any]] = []
+
+    for _, row in metadata.iterrows():
+        doc_id = str(row["id"]).strip()
+        title = str(row.get("title", "")).strip()
+        url = str(row.get("url", "")).strip()
+
+        pdf_path = os.path.join(pdf_dir, f"{doc_id}.pdf")
+        if not os.path.exists(pdf_path):
+            print(f"Missing PDF for {doc_id}, skipping.")
+            continue
+
+        try:
+            reader = PdfReader(pdf_path)
+        except Exception as e:
+            print(f"Failed to read {pdf_path}: {e}")
+            continue
+
+        total_pages = len(reader.pages)
+        for i, page in enumerate(reader.pages):
+            try:
+                text = page.extract_text() or ""
+            except Exception as e:
+                print(f"Failed to extract text from {doc_id} page {i}: {e}")
+                text = ""
+
+            text = text.strip()
+            if not text:
+                # Still keep the page so we know it exists, but mark it as empty
+                text = "[[EMPTY PAGE TEXT – see original PDF for tables/figures]]"
+
+            page_docs.append(
+                {
+                    "text": text,
+                    "doc_id": doc_id,
+                    "title": title,
+                    "url": url,
+                    "page_num": i,
+                    "page_label": str(i + 1),
+                    "total_pages": total_pages,
+                }
+            )
+
+    return page_docs
 
 
 def find_caption_pages(page_docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
