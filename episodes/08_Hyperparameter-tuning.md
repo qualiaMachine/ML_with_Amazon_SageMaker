@@ -172,7 +172,7 @@ hyperparameter_ranges = {
 }
 ```
 
-\1
+#### 3. Set up HyperparameterTuner object
 In step 3, we set up the `HyperparameterTuner`, which controls the tuning process by specifying the...
 
 - `estimator`: Here, we connect the previously defined `pytorch_estimator` to `tuner`, ensuring that the tuning job will run with our PyTorch model configuration.
@@ -326,7 +326,7 @@ Our run finished in 9.3 minutes of wall-clock and billed 14.1 minutes in total, 
 
 Bayesian optimization chooses each job's values from the results so far. With `max_parallel_jobs` well below `max_jobs`, later jobs learn from earlier ones; with all ten at once, nothing has finished when the values are chosen, and the search is a random one. The *All at once* challenge below measures what that does to the result, the wall-clock and the bill.
 
-\1
+### Extracting and evaluating the best model after tuning
 
 Tuning takes about 10 minutes. After SageMaker completes the hyperparameter tuning job, the results, including the trained models for each configuration, are stored in an S3 bucket. The steps to locate and evaluate the best model on test data:
 
@@ -437,7 +437,9 @@ with torch.no_grad():
     print(f"Test Accuracy: {accuracy:.4f}")
 ```
 
-\1
+::::::::::::::::::::::::::::::::::::: challenge
+
+### All at once
 
 Rerun the 10-job search with `max_parallel_jobs=10` (equal to `max_jobs`). Before you launch it, predict what changes in (a) total cost, (b) wall-clock time, and (c) the quality of the search. Then run it and check (a) and (b) with `tuning_cost_report()` and the runtime print.
 
