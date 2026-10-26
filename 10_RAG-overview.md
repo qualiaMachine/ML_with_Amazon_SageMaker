@@ -41,7 +41,7 @@ RAG combines two steps:
 No model weights are updated. No backprop. No training job.  
 RAG is an inference‑only pattern that layers retrieval logic around an LLM.
 
-This matters for how you should think about compute. The *only* things a RAG pipeline needs from a model are two stateless calls:
+A RAG pipeline needs only two stateless calls from a model:
 
 - "Turn this text into an embedding vector."
 - "Given this prompt (question + retrieved chunks), generate an answer."
@@ -66,7 +66,7 @@ A GPU instance is a rental that keeps the meter running until *you* turn it off.
 
 ### What forgetting actually costs
 
-To make this concrete, here is what a GPU notebook instance costs if it is left running after you close your laptop (on‑demand prices at time of writing; see the [instances page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)):
+A GPU notebook instance left running after you close your laptop costs this much (on‑demand prices at time of writing; see the [instances page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)):
 
 | Instance | GPU | `$`/hour | Forgotten overnight (12 h) | Forgotten over a weekend (64 h) | Forgotten for a month (730 h) |
 |---|---|---|---|---|---|

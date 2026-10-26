@@ -19,7 +19,7 @@ Every launch on the workshop account is checked against a short list of rules be
 
 The message is the same for every row, so check them in order. A launch that passes every row and is still refused is usually the `tags=` argument left off the estimator.
 
-## Let the notebook tell you which rule
+## Checking from the notebook
 
 The lesson's helper module applies the same rules before the request is sent, and its message names the problem. It works in any notebook on your instance, since the lesson repository is cloned there:
 
@@ -44,10 +44,10 @@ ValueError: this launch would be refused by the account:
   - Purpose 'Testing' is not on the list: use one of Storage, Notebook, Training, Tuning, Inference
 ```
 
-The helper reads its lists from `scripts/guardrails.json`, a copy of the policy on the account, so a `git pull` in the lesson folder keeps it current when the list changes. Run the check once in a cell before the launch cell, and the refusal you would have had to decode arrives as a sentence instead. Two companions:
+The helper reads its lists from `scripts/guardrails.json`, a copy of the policy on the account, so a `git pull` in the lesson folder keeps it current when the list changes. Run it in a cell before the launch cell. Two companions:
 
 ```python
-helpers.rules()             # prints the current rules in plain words
+helpers.rules()             # prints the current rules
 helpers.explain_refusal()   # after a refusal: reads the refused requests of the last hour from CloudTrail and names the rule each one broke
 ```
 
