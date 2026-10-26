@@ -40,7 +40,7 @@ The CLI, the SDK and the console are the same API. Nothing here is more powerful
 
 ## 1. Sign in with Identity Center
 
-This episode runs from your own laptop, which is the point of it: a terminal that works when no notebook is open. The AWS CLI is already installed in CloudShell and on every SageMaker notebook instance, where it uses the instance's role and needs no sign-in; a laptop has neither, so install [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) there, then register the account's Identity Center once. It asks for the start URL and region of the sign-in page you used in the browser (for the workshop account they are in your sign-in email), opens a browser to approve the device, lets you pick the account and permission set, and asks for a default region (`us-east-2` for the workshop account) and a profile name.
+This episode runs from your own laptop, which is the point of it: a terminal that works when no notebook is open. The AWS CLI is already installed in CloudShell and on every SageMaker notebook instance, where it uses the instance's role and needs no sign-in; a laptop has neither, so install [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) there, then register the account's Identity Center once. It asks four things. First the start URL and the region of the Identity Center sign-in page, the same ones you used in the browser; for the workshop account both are in the sign-in email from your instructor. It then opens a browser tab for you to approve the device, lets you pick the account and the permission set, and finally asks for a default region, `us-east-2` for the workshop account, and a name for the profile.
 
 ```bash
 aws configure sso
@@ -48,11 +48,27 @@ aws configure sso
 
 From then on, every session starts with a login, and a check that you are who you think you are, in the account you think you are in:
 
+The commands in this episode are the same in Bash (macOS, Linux, Git Bash on Windows) and in PowerShell; where the shell's own syntax differs, variables, line continuation, writing a file, the two are shown as tabs.
+
+::::::::::::::::::::::::::::::::::::: tab
+
+### Bash
+
 ```bash
 aws sso login --profile workshop
-export AWS_PROFILE=workshop          # PowerShell: $env:AWS_PROFILE="workshop"
+export AWS_PROFILE=workshop
 aws sts get-caller-identity
 ```
+
+### PowerShell
+
+```powershell
+aws sso login --profile workshop
+$env:AWS_PROFILE = "workshop"
+aws sts get-caller-identity
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 The output names the account ID and an `AWSReservedSSO_...` role. The credentials expire after a few hours; `aws sso login` again when a command returns `ExpiredToken`. Nothing that would still work next month is written anywhere.
 
@@ -73,18 +89,45 @@ aws sagemaker list-endpoints       # must print an empty list on the workshop ac
 
 `describe-training-job` is the call behind `job_cost_report()` in the training episodes. The same number is there: billable time, which includes the container pull and data download you paid for.
 
+::::::::::::::::::::::::::::::::::::: tab
+
+### Bash
+
 ```bash
 JOB=<a training job name from the list above>
 aws sagemaker describe-training-job --training-job-name $JOB \
-  --query '{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, tags:Tags}'
+  --query '{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds}'
 ```
 
+### PowerShell
+
+```powershell
+$JOB = "<a training job name from the list above>"
+aws sagemaker describe-training-job --training-job-name $JOB `
+  --query '{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds}'
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 Cost is billable seconds × instance count × the hourly rate, exactly as in the notebooks. Tags are returned by a separate call, which is also how you find the untagged job that will show up as "unallocated" on the bill:
+
+::::::::::::::::::::::::::::::::::::: tab
+
+### Bash
 
 ```bash
 ARN=$(aws sagemaker describe-training-job --training-job-name $JOB --query TrainingJobArn --output text)
 aws sagemaker list-tags --resource-arn $ARN --query 'Tags[].[Key,Value]' --output table
 ```
+
+### PowerShell
+
+```powershell
+$ARN = aws sagemaker describe-training-job --training-job-name $JOB --query TrainingJobArn --output text
+aws sagemaker list-tags --resource-arn $ARN --query 'Tags[].[Key,Value]' --output table
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 ## 3. Stop: the commands worth memorising
 
@@ -120,6 +163,12 @@ Downloads to a laptop are a transfer out of AWS (`$0.09` per GB). For anything l
 
 Every `estimator.fit()` in the training episodes assembled a JSON request and sent it to `CreateTrainingJob`. Here is that request. Fill in the five placeholders from your notebook: the image URI (run `print(xgboost_estimator.training_image_uri())` in the training episode's notebook), your role ARN (`print(role)`), your bucket, your tag values, and a job name, which must be unique in the account.
 
+The request is a JSON file. Save it as `train-xgboost.json` with any editor, or from the shell:
+
+::::::::::::::::::::::::::::::::::::: tab
+
+### Bash
+
 ```bash
 cat > train-xgboost.json <<'JSON'
 {
@@ -150,6 +199,47 @@ cat > train-xgboost.json <<'JSON'
   ]
 }
 JSON
+```
+
+### PowerShell
+
+```powershell
+@'
+{
+  "TrainingJobName": "<notebook-instance-name>-cli-xgboost-1",
+  "AlgorithmSpecification": {
+    "TrainingImage": "<xgboost image URI for your region>",
+    "TrainingInputMode": "File"
+  },
+  "RoleArn": "<execution role ARN>",
+  "HyperParameters": { "objective": "binary:logistic", "num_round": "100", "max_depth": "5", "eta": "0.1" },
+  "InputDataConfig": [
+    {
+      "ChannelName": "train",
+      "ContentType": "text/csv",
+      "DataSource": { "S3DataSource": {
+        "S3DataType": "S3Prefix",
+        "S3Uri": "s3://<your-bucket>/xgboost/builtin/train_builtin.csv",
+        "S3DataDistributionType": "FullyReplicated" } }
+    }
+  ],
+  "OutputDataConfig": { "S3OutputPath": "s3://<your-bucket>/xgboost/cli-output/" },
+  "ResourceConfig": { "InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 10 },
+  "StoppingCondition": { "MaxRuntimeInSeconds": 1200 },
+  "Tags": [
+    { "Key": "Project", "Value": "<ChallengeName>" },
+    { "Key": "Name",    "Value": "<LastnameFirstname>" },
+    { "Key": "Purpose", "Value": "Training" }
+  ]
+}
+'@ | Set-Content -Path train-xgboost.json
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+Then send it. This one line is `estimator.fit()`:
+
+```bash
 aws sagemaker create-training-job --cli-input-json file://train-xgboost.json
 ```
 
