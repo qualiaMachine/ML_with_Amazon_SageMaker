@@ -605,7 +605,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li><p><strong>Data Preprocessing</strong>: The script fills missing
 values (<code>Age</code> with median, <code>Embarked</code> with mode),
@@ -849,7 +849,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -1381,7 +1381,7 @@ compared with the first job?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The status is <code>InProgress</code> if you were quick and
 <code>Completed</code> otherwise; <code>attach</code> waits in the first
@@ -1421,7 +1421,7 @@ and compare the bill and the accuracy with the script version.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>The built-in algorithm will not run our
 <code>preprocess_data()</code> for us, and it expects a CSV with no
@@ -1438,18 +1438,19 @@ the expected layout, and upload it to its own prefix in our bucket.</p>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1" aria-label="code-block-19-2"></a><span class="co"># ^ remove this line to run the cell; the guard keeps Run All from launching the extra job</span></span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1" aria-label="code-block-19-3"></a><span class="im">from</span> train_xgboost <span class="im">import</span> preprocess_data</span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1" aria-label="code-block-19-4"></a></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1" aria-label="code-block-19-5"></a><span class="co"># Same preprocessing our script applies: fill missing values, encode Sex/Embarked, drop text columns</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1" aria-label="code-block-19-6"></a>X, y <span class="op">=</span> preprocess_data(pd.read_csv(train_filename))</span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1" aria-label="code-block-19-7"></a></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1" aria-label="code-block-19-8"></a><span class="co"># Built-in XGBoost wants: no header, all numeric, label first</span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1" aria-label="code-block-19-9"></a>builtin_filename <span class="op">=</span> <span class="st">"train_builtin.csv"</span></span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1" aria-label="code-block-19-10"></a>pd.concat([y, X], axis<span class="op">=</span><span class="dv">1</span>).to_csv(builtin_filename, header<span class="op">=</span><span class="va">False</span>, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1" aria-label="code-block-19-11"></a></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1" aria-label="code-block-19-12"></a><span class="co"># Upload to a dedicated prefix so it doesn't get confused with the raw CSV</span></span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1" aria-label="code-block-19-13"></a>builtin_s3_key <span class="op">=</span> <span class="ss">f"xgboost/builtin/</span><span class="sc">{</span>builtin_filename<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1" aria-label="code-block-19-14"></a>s3.upload_file(builtin_filename, bucket_name, builtin_s3_key)</span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1" aria-label="code-block-19-15"></a>builtin_s3_path <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>builtin_s3_key<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1" aria-label="code-block-19-16"></a><span class="bu">print</span>(<span class="st">"Uploaded:"</span>, builtin_s3_path)</span></code></pre>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1" aria-label="code-block-19-5"></a><span class="co"># The same titanic_train.csv the script job trained on. The script ran preprocess_data inside the container;</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1" aria-label="code-block-19-6"></a><span class="co"># the built-in algorithm runs no code of ours, so the same preprocessing is applied here instead</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1" aria-label="code-block-19-7"></a>X, y <span class="op">=</span> preprocess_data(pd.read_csv(train_filename))   <span class="co"># fill missing values, encode Sex/Embarked, drop text columns</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1" aria-label="code-block-19-8"></a></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1" aria-label="code-block-19-9"></a><span class="co"># Same rows, written the way the built-in algorithm requires: no header, all numeric, label first</span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1" aria-label="code-block-19-10"></a>builtin_filename <span class="op">=</span> <span class="st">"train_builtin.csv"</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1" aria-label="code-block-19-11"></a>pd.concat([y, X], axis<span class="op">=</span><span class="dv">1</span>).to_csv(builtin_filename, header<span class="op">=</span><span class="va">False</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1" aria-label="code-block-19-12"></a></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1" aria-label="code-block-19-13"></a><span class="co"># Upload under its own prefix so it is not confused with the raw CSV</span></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1" aria-label="code-block-19-14"></a>builtin_s3_key <span class="op">=</span> <span class="ss">f"xgboost/builtin/</span><span class="sc">{</span>builtin_filename<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb19-15"><a href="#cb19-15" tabindex="-1" aria-label="code-block-19-15"></a>s3.upload_file(builtin_filename, bucket_name, builtin_s3_key)</span>
+<span id="cb19-16"><a href="#cb19-16" tabindex="-1" aria-label="code-block-19-16"></a>builtin_s3_path <span class="op">=</span> <span class="ss">f"s3://</span><span class="sc">{</span>bucket_name<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>builtin_s3_key<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb19-17"><a href="#cb19-17" tabindex="-1" aria-label="code-block-19-17"></a><span class="bu">print</span>(<span class="st">"Uploaded:"</span>, builtin_s3_path)</span></code></pre>
 </div>
 <p>With our script, the data path was just another flag the script read.
 The built-in algorithm has no flags: the data arrives as a
