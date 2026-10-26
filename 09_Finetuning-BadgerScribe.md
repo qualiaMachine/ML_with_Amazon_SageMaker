@@ -103,7 +103,7 @@ GPUs come in fixed boxes. An `ml.g5.xlarge` is one A10G, an `ml.p4d.24xlarge` is
 
 Two of those bars are worth a second look. The CHURRO bar is the model you are about to fine-tune: Stanford spent on the order of 800 H100-hours making it, and you get the benefit for a dollar because you are adapting it rather than retraining it. Starting from a model that already knows most of your task is the biggest saving available, and it is decided before any GPU is involved. The sweep extension is the one that surprises research groups: a first run is rarely the last, so a "`$140` full fine-tune" is usually a `$700` to `$1,400` project.
 
-The habits in this episode are cheap practice at a dollar a run. At `$140` a run they are the difference between a project and a budget incident; at `$6,000` a run, one forgotten `max_run` or one wrong instance type is a grant line.
+This episode's run costs a dollar. The same steps on a `$140` run, or a `$6,000` one, are where a forgotten `max_run` or a wrong instance type costs a grant line, which is why the episode does them on a dollar first.
 
 ### Back of the envelope: will it fit, and how long will it take?
 

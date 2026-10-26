@@ -171,9 +171,9 @@ print(f"Name: {name}, Project: {project}, Purpose: {purpose}")
 
 ## Estimating a training job before you launch it
 
-Every job in this lesson gets an estimate written down before `fit()`, and the habit matters more than the numbers here, which are cents. There are two ways to make the estimate, and which one applies depends on the size of the model.
+Every job in this lesson gets an estimate written down before `fit()`. There are two ways to make it, and which one applies depends on the size of the model.
 
-**Small models: time a smoke test and scale it.** For a network like `TitanicNet`, the arithmetic is nothing; the time is Python overhead per epoch plus the job's fixed startup. So measure the 100-epoch run you just did, scale to the epochs and data you plan, and add the startup:
+**Small models: time a smoke test and scale it.** For a network like `TitanicNet`, the arithmetic is nothing; the time is Python overhead per epoch plus the job's fixed startup. Each epoch costs the same as the last, so training time scales linearly with epochs, and with rows once the data is bigger than a batch. So measure the 100-epoch run you just did, multiply by the epochs and rows you plan, and add the startup:
 
 ```python
 local_seconds_per_epoch = (t.time() - start_time) / epochs     # from the smoke test above: wall-clock over its 100 epochs
@@ -197,7 +197,7 @@ GPU-seconds = FLOPs ÷ (GPU peak FLOPS × 0.25)
 cost        = GPU-hours × instance price per hour + startup
 ```
 
-On `TitanicNet` this says the training is nothing, which is the point of the two regimes:
+On `TitanicNet` the arithmetic comes out as a fraction of a second, which is why the smoke-test method is the one to use for it:
 
 ```python
 n_params = sum(p.numel() for p in TitanicNet().parameters())   # the network's weights and biases: how big the model is
