@@ -424,7 +424,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Hyperparameter Tuning in SageMaker: Neural Network Example</h1>
-        <p>Last updated on 2026-10-21 |
+        <p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/08_Hyperparameter-tuning.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -855,6 +855,11 @@ accuracy.</p>
 <p>Estimate first: one child job is the same ~1 minute of training plus
 ~3 minutes of startup we saw in the previous episode, so about
 <code>$0.01</code>.</p>
+<p>If the launch is refused with an <code>AccessDeniedException</code>
+ending in <code>explicit deny</code>, the account’s checks are the
+cause: a missing tag, an instance type outside the lesson’s list, or a
+resource kind the lesson never creates; the first training episode’s
+callout <em>If the launch is refused</em> says what to look at.</p>
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1468,7 +1473,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/08_Hyperparameter-tuning.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/08_Hyperparameter-tuning.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-21",
+  "dateModified": "2026-10-26",
   "datePublished": "2026-10-26"
 }
 

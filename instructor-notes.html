@@ -513,7 +513,14 @@ on.</p>
 <ul>
 <li>
 <a href="aws-account-prep.html">Account preparation checklist
-(quotas, Bedrock, tags)</a>: before the term.</li>
+(quotas, Bedrock, tags)</a>: before the term. As of October 2026 the
+notebook role <code>ml-sagemaker-use</code> carries two inline policies
+set from CloudShell: <code>BedrockAccess</code>, so any instance can
+call Bedrock, and <code>WorkshopGuardRails</code>, which refuses
+untagged, blank-tagged or placeholder-tagged jobs, instance types
+outside the lesson’s list, endpoints and EC2. Both are on that page with
+the command that applies them; the guard rails are not yet on the
+learner permission set.</li>
 <li>
 <a href="shared-data-bucket.html">Shared data bucket: staging before
 each term</a>: create and fill <code>ml-marathon-shared</code> from

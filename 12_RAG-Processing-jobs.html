@@ -993,10 +993,14 @@ fit a larger model.</p>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1" aria-label="code-block-9-5"></a><span class="bu">print</span>(<span class="st">"train_QA:  "</span>, train_qa_s3)</span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1" aria-label="code-block-9-6"></a><span class="bu">print</span>(<span class="st">"metadata:  "</span>, metadata_s3)</span></code></pre>
 </div>
-<p>If the launch below fails at once with
-<code>ResourceLimitExceeded</code> naming an instance type, nothing in
-the notebook is wrong: the account’s quota for that type is too low, and
-the increase is requested in <a href="https://us-east-2.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas" class="external-link">Service
+<p>If the launch is refused with an <code>AccessDeniedException</code>
+ending in <code>explicit deny</code>, the account’s checks are the
+cause: a missing tag, an instance type outside the lesson’s list, or a
+resource kind the lesson never creates; the first training episode’s
+callout <em>If the launch is refused</em> says what to look at. If the
+launch below fails at once with <code>ResourceLimitExceeded</code>
+naming an instance type, nothing in the notebook is wrong: the account’s
+quota for that type is too low, and the increase is requested in <a href="https://us-east-2.console.aws.amazon.com/servicequotas/home/services/sagemaker/quotas" class="external-link">Service
 Quotas</a> (days, for GPU types). On your own account, request
 <code>ml.g5.xlarge for processing job usage</code> before you start.</p>
 <div class="section level3">
