@@ -488,7 +488,7 @@ If training time continues to be critical, sticking with a CPU instance may be t
 
 ## Distributed Training for Neural Networks in SageMaker
 
-When a run is too slow, the first move is a bigger machine, which is what the GPU exercise above was. The second is more than one machine, which pays only when the dataset no longer fits in one instance's memory (tens of GB or more) or a single-instance run takes longer than about 10 hours. This section measures it, starting with what `instance_count=2` does on its own.
+When a run is too slow, the first move is a bigger machine, which is what the GPU exercise above was. The second is more than one machine, which pays only when the dataset no longer fits in one instance's memory (tens of GB or more) or a single-instance run takes longer than about 10 hours. First, what `instance_count=2` does on its own.
 
 ### What `instance_count=2` does on its own
 

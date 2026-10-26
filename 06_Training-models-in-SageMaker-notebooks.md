@@ -82,7 +82,7 @@ print(f"region = {region}")
 ```
 
 ## Testing train.py on this notebook's instance
-A training job is a script run on a machine SageMaker rents for it. The script has to work before it is worth renting anything, so this section runs it here first, on the notebook instance, on the small Titanic data. A local run finds bugs for free; a job that fails on a data-loading error still bills its startup minutes. The habit carries to every later episode: a few epochs on a subset on the cheapest machine, then the real run.
+A training job is a script run on a machine SageMaker rents for it. The script has to work before it is worth renting anything, so run it here first, on the notebook instance, on the small Titanic data. A local run finds bugs for free; a job that fails on a data-loading error still bills its startup minutes. Every later episode does the same: a few epochs on a subset on the cheapest machine, then the real run.
 
 ::::::::::::::::::::::::::::::::::::::: challenge
 
@@ -215,7 +215,7 @@ print(f"Total local runtime: {t.time() - start_time:.2f} seconds, instance_type 
 The run takes seconds. The script prints its own training time, and the cell prints the total including data loading; both numbers are the baseline the SageMaker runs below are compared with.
 
 ### Sanity check: Quick evaluation on test set
-This section is not SageMaker specific; it checks that the model trained properly by applying it to the test set on the notebook instance.
+Nothing here is SageMaker specific: apply the model to the test set on the notebook instance to check that it trained properly.
 
 Score the model you just trained locally on the test set, reusing the script's own `preprocess_data` so the test rows are transformed exactly as the training rows were.
 
@@ -379,7 +379,7 @@ Additionally, we define a TrainingInput object containing the training data's S3
 #### What did that cost?
 
 ![Timeline of one training job: instance requested (not billed), then container pulled, data downloaded, script runs, outputs uploaded (all billed), instance released](fig/job-billable-time.svg){alt="Timeline of a SageMaker training job showing the unbilled wait for an instance and the billed phases from container pull to model upload"}
-`describe_training_job` returns `BillableTimeInSeconds`: the seconds the instance was yours, from container pull to model upload, per instance. It also returns `TrainingTimeInSeconds`, which on on-demand instances is the same number (it only differs on spot instances), so do not expect it to isolate your script. The minute or so before that, while SageMaker finds an instance, is not billed. SageMaker bills per second, with no rounding, so cost is billable seconds x instance count x hourly rate. We'll wrap this in a small helper and call it after every job in this lesson.
+`describe_training_job` returns `BillableTimeInSeconds`: the seconds the instance was yours, from container pull to model upload, per instance. The minute or so before that, while SageMaker finds an instance, is not billed. (The job's console page also shows a "Training time"; on an on-demand instance it is the same number, and neither one is your script's own training time, which only the script's log has.) SageMaker bills per second, with no rounding, so cost is billable seconds x instance count x hourly rate. We'll wrap this in a small helper and call it after every job in this lesson.
 
 ```python
 def job_cost_report(job_name: str, price_per_hour: float):
