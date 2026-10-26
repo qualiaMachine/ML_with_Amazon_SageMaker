@@ -76,6 +76,20 @@ The rest of the lesson is hands-on, in two parts:
 
 Every job is tagged, capped, estimated before launch and checked against the bill after.
 
+::::::::::::::::::::::::::::::::::::: callout
+
+### The account's rules, before you launch anything
+
+The workshop account refuses a launch that breaks any of these, before it costs anything: a job without the three tags `Name`, `Project` and `Purpose`; a blank `Name`; a `Project` that is not one of the year's challenge names (`SinkOrSwim` for the workshop itself); a `Purpose` outside `Storage`, `Notebook`, `Training`, `Tuning`, `Inference`; an instance type the lesson does not use; a runtime cap over 48 hours; and any endpoint or EC2 instance. The refusal is an `AccessDeniedException` that ends in `explicit deny` and says nothing else, which is the one unhelpful message in this lesson: AWS cannot attach an explanation to it. So the lesson gives you three ways to get the explanation yourself, which work in any notebook on the account, during the workshop and after:
+
+- `helpers.rules()` prints the current rules;
+- `helpers.check_launch(tags, instance_type, max_run)` checks a launch before it is sent and names what to change;
+- `helpers.explain_refusal()` reads the refused request back from the account's log and names the rule it broke.
+
+The [If a Launch Is Refused](../learners/refused-launch.md) page is the same list on one page. Read it before emailing the instructor about an `AccessDenied`.
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - The cloud offers the current GPU generation on demand and bills per second while a job runs; on-prem hardware offers full control and a fixed cost but a fixed generation and a queue.
