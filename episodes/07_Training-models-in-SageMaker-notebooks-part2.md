@@ -392,7 +392,7 @@ For a job this small, almost all of the billable minutes are startup.
 
 ## Deploying PyTorch neural network via SageMaker with a GPU instance
 
-In this section, we'll implement the same procedure as above, but using a GPU-enabled instance for potentially faster training. While GPU instances are more expensive, they can be cost-effective for larger datasets or more complex models that require significant computational power.
+A second job: the same script and the same data, with one change, `instance_type`, from the `ml.m5.large` to a GPU instance. A job runs on one instance type; to compare two, you launch two jobs and read both records, which is what the cell at the end of this section does with the earlier job's `desc_cpu` and this one's `desc_gpu`.
 
 #### Selecting a GPU Instance
 For a small dataset like ours, we don't strictly need a GPU, but for larger datasets or more complex models, a GPU can reduce training time. Here, we'll select an `ml.g4dn.xlarge` instance, which provides a single GPU and costs approximately `$0.74/hour` (check [Instances for ML page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) for detailed pricing).
@@ -454,7 +454,8 @@ print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_t
 
 desc_gpu = job_cost_report(pytorch_estimator_gpu.latest_training_job.name, prices[instance_type])
 
-for label, d, rate in [("CPU ml.m5.large", desc_cpu, prices["ml.m5.large"]), ("GPU ml.g4dn.xlarge", desc_gpu, prices["ml.g4dn.xlarge"])]:
+# The two jobs side by side: the ml.m5.large job from earlier (desc_cpu) and this one (desc_gpu); same script, same data, different instance_type
+for label, d, rate in [("job on ml.m5.large (CPU)", desc_cpu, prices["ml.m5.large"]), ("job on ml.g4dn.xlarge (GPU)", desc_gpu, prices["ml.g4dn.xlarge"])]:
     billable_min = d["BillableTimeInSeconds"] / 60
     print(f"{label}: billable {billable_min:.1f} min x ${rate}/h = ${billable_min/60*rate:.3f}")
 ```
@@ -486,9 +487,15 @@ This performance discrepancy might be due to the following factors:
 If training time continues to be critical, sticking with a CPU instance may be the best approach for smaller datasets. For larger, more complex models and datasets, the GPU's advantages should become more apparent.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Distributed Training for Neural Networks in SageMaker
+## More than one machine
 
-When a run is too slow, the first move is a bigger machine, which is what the GPU exercise above was. The second is more than one machine, which pays only when the dataset no longer fits in one instance's memory (tens of GB or more) or a single-instance run takes longer than about 10 hours. First, what `instance_count=2` does on its own.
+When a run is too slow, the moves are in this order, and each one is tried before the next:
+
+1. **A faster single device.** The GPU exercise above. On the [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page that runs from the T4 through the A10G and L4 to the L40S, a fivefold range of speed at a twofold range of price, with no change to the script.
+2. **More devices in one box.** A multi-GPU instance such as `ml.g5.12xlarge` or `ml.p4d.24xlarge`. The GPUs share a link inside the machine, tens to hundreds of GB/s, so splitting a run across them loses little.
+3. **More than one instance.** The same split across the network between instances, 10 to 400 Gb/s depending on the type, which is ten to a hundred times slower than the link inside a box. This is the last resort, for a run that will not fit one box or would take days on it.
+
+Only the third needs more than a change of `instance_type`, and on the class account it is the only form available, since the instance list stops at one GPU per instance. The rest of this section shows it on two `ml.m5.large` CPU instances, where it costs cents, then does the arithmetic for when it pays and says how to set it up for each kind of job.
 
 ### What `instance_count=2` does on its own
 
@@ -540,22 +547,98 @@ print(f"Data-parallel run: {(t.time() - start) / 60:.1f} min wall-clock on 2 x m
 desc_ddp = job_cost_report(pytorch_estimator_ddp.latest_training_job.name, prices["ml.m5.large"])
 ```
 
-Read the log before the bill. The two CloudWatch streams now say different things: each prints `training on 285 of 569 rows` (or 284), and only `algo-1` prints the epochs and saves the model. The final validation loss matches the single-instance run to the third decimal, because the averaged gradient is the same gradient; that match is the proof that the work was split rather than copied. The wall-clock is not shorter, and the bill is two instances' worth. Each step now ends with a gradient exchange between the two machines, and that exchange has a fixed cost, a network round trip of about a millisecond, plus a cost that grows with the model, the gradient's bytes divided by the link's bandwidth. The computation it saves is the forward and backward pass over the 284 rows the other machine took, which for `TitanicNet` is microseconds. So the exchange is not always slower than the work; it is a per-step cost that is the same whether the step is tiny or huge, and the question is what the step costs beside it. A 7B model's gradient is 28 GB in 32-bit, which is seconds on a 100 Gb/s link between instances and a fraction of a second over NVLink inside one box, against a forward and backward pass of many seconds on a batch of thousands of tokens. There the exchange is a small fraction and two GPUs finish in nearly half the time; here it is the whole step. The rule of thumb at the top of this section, measured: data parallelism pays when the step's computation is large next to the exchange, and that means big models and big batches, not 569 rows of tabular data.
+Read the log before the bill. The two CloudWatch streams say different things: each prints `training on 285 of 569 rows` (or 284), and only `algo-1` prints the epochs and saves the model. That is the proof the work was split rather than copied. The run's final numbers are close to the single-instance run but not identical (our run: validation accuracy 0.818 against 0.804, validation loss 0.96 against 1.05): the two shards are 285 and 284 rows, so the averaged gradient is not exactly the full-batch one, and a thousand Adam steps on a network that is overfitting by epoch 300 turn that into a visible difference.
 
-**Model parallelism** is the other kind, for a model too large for one device's memory, where the layers themselves are spread across devices (`smdistributed.modelparallel`, or PyTorch's FSDP). There is no example here because no model in this lesson needs it: the fine-tuning episode's memory arithmetic shows what does, a model whose weights plus their gradients and optimizer state exceed one GPU, and the usual answer at this scale is a LoRA fine-tune, which shrinks the problem instead of spreading it.
+Now the comparison that matters, wall-clock and bill against the single-instance job:
 
-For the **built-in XGBoost** image from the previous episode the recipe is simpler, because the algorithm already knows how to train across instances: split the training CSV into several S3 objects under one prefix and pass `TrainingInput(prefix, content_type="text/csv", distribution="ShardedByS3Key")`, so each instance receives a different subset of the files. Even then, a dataset of 891 rows will only show overhead.
+```python
+# Same script, same data, same epochs: one ml.m5.large (desc_cpu) against two with data parallelism (desc_ddp)
+for label, d in [("1 x ml.m5.large", desc_cpu), ("2 x ml.m5.large, data parallel", desc_ddp)]:
+    n = d["ResourceConfig"]["InstanceCount"]
+    wall = (d["TrainingEndTime"] - d["CreationTime"]).total_seconds() / 60
+    billable = d["BillableTimeInSeconds"] * n / 60
+    print(f"{label:32s} wall-clock {wall:.1f} min, billable {billable:.1f} min on {n} instance(s), ${billable/60*prices['ml.m5.large']:.3f}")
+```
 
-Either way, the rule of thumb stands: a bigger single instance first, and multiple instances only once data no longer fits in memory or a run exceeds ~10 hours.
+```output
+1 x ml.m5.large                  wall-clock 3.4 min, billable 2.7 min on 1 instance(s), $0.005
+2 x ml.m5.large, data parallel   wall-clock 4.0 min, billable 6.5 min on 2 instance(s), $0.012
+```
+
+Nothing was gained: the two-instance run took longer and cost twice as much. Each step now ends with a gradient exchange between the two machines, and that exchange has a fixed cost, a network round trip of about a millisecond, plus the gradient's bytes divided by the link's bandwidth. What it saves is the forward and backward pass over the 284 rows the other machine took, which for `TitanicNet` is microseconds. The exchange is a per-step cost that is the same whether the step is tiny or huge; here it is the whole step.
+
+### When it pays: the arithmetic
+
+`helpers.estimate_parallel_speedup` puts numbers on that for any model and any box, with the same assumptions as the cost estimator: 6 FLOPs per parameter per token (4 for LoRA) at a quarter of the GPU's peak, and a gradient of 4 bytes per trainable parameter exchanged once per step over the slowest link in use. It does not overlap the exchange with the computation, which real runs partly do, so its speedup is a floor. The 7B model from the cost section, trained with a batch of 16 documents of 2,000 tokens, three ways:
+
+```python
+# Two single-GPU instances over the network: the class-account form of data parallelism
+helpers.estimate_parallel_speedup(params_billions=7, tokens_per_step=16 * 2000, instance_type="ml.g6e.xlarge", instance_count=2)
+```
+
+```output
+2 device(s): 2 x ml.g6e.xlarge (1 x L40S each); 20 Gb/s network between instances
+one device alone:      22276.2 ms per step of 32,000 tokens
+each of 2:             11138.1 ms of computation +  11201.0 ms exchanging 28.000 GB of gradients
+speedup:                  1.00x on 2 devices (ideal 2x); exchange is 50% of the step
+cost per run:             2.01x the one-device cost  (more devices, same work, a bigger bill)
+```
+
+```python
+# Four GPUs in one box, linked by PCIe
+helpers.estimate_parallel_speedup(params_billions=7, tokens_per_step=16 * 2000, instance_type="ml.g6e.12xlarge")
+```
+
+```output
+4 device(s): 1 x ml.g6e.12xlarge (4 x L40S each); 32 GB/s GPU link inside the box
+one device alone:      22276.2 ms per step of 32,000 tokens
+each of 4:              5569.1 ms of computation +   1313.5 ms exchanging 28.000 GB of gradients
+speedup:                  3.24x on 4 devices (ideal 4x); exchange is 19% of the step
+cost per run:             1.24x the one-device cost
+```
+
+```python
+# Eight GPUs in one box, linked by NVLink
+helpers.estimate_parallel_speedup(params_billions=7, tokens_per_step=16 * 2000, instance_type="ml.p4d.24xlarge")
+```
+
+```output
+8 device(s): 1 x ml.p4d.24xlarge (8 x A100 40GB each); 600 GB/s GPU link inside the box
+one device alone:      25846.2 ms per step of 32,000 tokens
+each of 8:              3230.8 ms of computation +     82.7 ms exchanging 28.000 GB of gradients
+speedup:                  7.80x on 8 devices (ideal 8x); exchange is 2% of the step
+cost per run:             1.03x the one-device cost
+```
+
+Read the three together. Two L40S instances over a 20 Gb/s network spend as long exchanging the 28 GB gradient as computing, so two machines finish in the same time as one and bill twice. Four L40S in one box over PCIe get 3.2 of the ideal 4. Eight A100s over NVLink get 7.8 of 8, which is why the big training boxes are built that way. The same arithmetic on a LoRA fine-tune comes out differently again: the exchanged gradient is only the adapter's, a hundredth of the model, so even the slow links barely show.
+
+```python
+# The fine-tuning episode's LoRA run on a four-GPU box: the gradient exchanged is the adapter's, not the model's
+helpers.estimate_parallel_speedup(params_billions=3.75, tokens_per_step=4 * 1600, instance_type="ml.g5.12xlarge", method="lora")
+```
+
+The rule, then: data parallelism pays when each step's computation is large next to the exchange, which means a big model, a big batch and a fast link, in that order of importance; and the exchange is cheap when little is being trained, as with LoRA. Run the function before renting more than one device, and read the cost line: the speedup is what you buy, the cost ratio is what you pay for it.
+
+### How to set it up, for each kind of job
+
+A job has one instance type and one count; the count is how many of that type, and every instance gets the same script. What differs is how the work is split, which depends on what is running:
+
+| Job | On the estimator | In the script | Data |
+|---|---|---|---|
+| Your own PyTorch script (this episode) | `distribution={"torch_distributed": {"enabled": True}}` on GPU instances, which starts one process per GPU; `{"mpi": {"enabled": True, "processes_per_host": 1}}` on CPU instances | the three additions in `train_nn_ddp.py`: join the process group, shard the rows, wrap the model in DDP; with a `DataLoader`, a `DistributedSampler` does the sharding | one `.npz` per channel, `FullyReplicated`: every instance downloads it and takes its shard |
+| Hugging Face `Trainer` (the fine-tuning episode) | `distribution={"torch_distributed": {"enabled": True}}` | nothing: `Trainer` detects the processes and does the three things itself; `per_device_train_batch_size` is then per GPU, so the effective batch is that times the device count | as above |
+| A model too large for one GPU's memory | the same launcher | `fsdp=` in the `TrainingArguments` (or DeepSpeed), which shards the weights, gradients and optimizer state across the GPUs: this is *model* parallelism, for memory rather than speed, and it only works inside one box or over a fast network | as above |
+| Built-in XGBoost (the optional challenge in the previous episode) | `instance_count=N`, no `distribution` | nothing: the algorithm trains across instances itself | the CSV split into several objects under one prefix, passed as `TrainingInput(prefix, distribution="ShardedByS3Key")` so each instance downloads only its share |
+| Hyperparameter tuning | `instance_count=1` on the estimator; parallelism is `max_parallel_jobs` on the tuner | nothing | as for a single job |
+
+Two things the table does not change. `max_run` is per job, so a two-instance job with a 2-hour cap bills at most 4 instance-hours. And the account's rules apply to every instance in the job, so the instance type must be on the list and the tags are the job's tags.
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - **Startup dominates small jobs**: Every SageMaker training job waits a minute or so for an instance (not billed), then spends one to three minutes on container pull and data download (billed) before the script runs; for a job whose script finishes in seconds, that overhead is the whole bill.
-- **GPU training**: While beneficial for larger models or datasets, GPUs may introduce overhead for smaller tasks; selecting the right instance type is critical for cost-efficiency.
-- **Data parallelism vs. model parallelism**: Data parallelism splits data across instances and synchronizes model weights, suitable for typical neural network tasks. Model parallelism, which divides model layers, is ideal for very large models that exceed memory capacity.
-- **`instance_count` alone is not distributed training**: Without `distribution=` on the estimator and distributed code in the script, `instance_count=2` runs the full script on the full data on each instance and bills twice. Data parallelism is three additions to the script (join the process group, shard the rows, wrap the model in `DistributedDataParallel`) and one argument on the estimator; `train_nn_ddp.py` has them, and reaches the single-instance run's loss on half the rows per instance.
-- **SageMaker configuration**: By adjusting instance counts and types, SageMaker supports scalable training setups. Starting with CPU training and scaling as needed with GPUs or distributed setups allows for performance optimization.
-- **Testing locally first**: Before deploying large-scale training in SageMaker, test locally with a smaller setup to ensure code correctness and efficient resource usage.
-- **Estimate before you launch**: for small models, time a smoke test and scale it by epochs and rows, plus about three minutes of startup; for large ones, 6 FLOPs per parameter per example-token, divided by a quarter of the GPU's peak. `helpers.estimate_training_cost` does the second; write the number down and compare it to the bill.
+- **Estimate before you launch**: for small models, time a smoke test and scale it by epochs and rows, plus about three minutes of startup; for large ones, 6 FLOPs per parameter per token, divided by a quarter of the GPU's peak. `helpers.estimate_training_cost` does the second; write the number down and compare it to the bill.
+- **GPU or CPU is a measurement**: the same script on an `ml.g4dn.xlarge` was slower and dearer than on an `ml.m5.large` for this network, because the step is too small to keep a GPU busy; the GPU pays when the model and batch are large.
+- **More than one machine is the last move**: a faster single device first, then more GPUs in one box, then more instances. `instance_count=2` on its own runs the whole job twice and bills twice; data parallelism needs `distribution=` on the estimator and, for your own script, three additions: join the process group, shard the rows, wrap the model in DDP.
+- **Parallelism pays when the step's computation is large next to the gradient exchange**: big model, big batch, fast link. `helpers.estimate_parallel_speedup` gives the speedup and the cost ratio before you rent the devices; on 569 rows of tabular data it is 1x speed at 2x cost, measured.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
