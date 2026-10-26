@@ -292,7 +292,7 @@ Three cautions. Test the policy with one job of each kind (training, processing,
 
 ## Overnight safeguards
 
-The guard rails above decide what a launch may be. They do not stop a notebook instance that was left running, a hundred allowed jobs launched in a loop, or a Bedrock loop against an expensive model. Four more measures cover those, in order of how much they prevent for how little they cost. None of them touches an ordinary run at the budgets the Marathon works with.
+The guard rails above decide what a launch may be. They do not stop a notebook instance that was left running, or a hundred allowed jobs launched in a loop. Three more measures cover those, in order of how much they prevent for how little they cost. None of them touches an ordinary run at the budgets the Marathon works with.
 
 ### 1. Stop every notebook instance nightly
 
@@ -357,23 +357,7 @@ done < names.txt
 
 Budgets are free for the first two and about `$0.60` a month each after that. The alert is information, not a block: AWS cannot stop one learner's jobs on a shared role. What it can do is a **budget action** on the class total: in the Budgets console, a budget for the account's SageMaker and Bedrock spend at the class ceiling, with an action that attaches a deny-everything policy to `ml-sagemaker-use` when the ceiling is crossed. That stops every launch for every learner at once, which is the right outcome at that point. Set it up once in the console (Budgets, Create budget, add an action of type IAM policy, target the role) and detach the policy by hand when the term is sorted out.
 
-### 3. Keep the dear Bedrock models out of reach
-
-Bedrock has no spend cap of its own, and what a loop costs depends on the model: DeepSeek V3 is `$1.85` per million output tokens, a frontier model is ten times that. A deny on the expensive families in the `BedrockAccess` policy keeps them out of reach; the lesson's models are untouched. The statement below blocks Anthropic's Opus models by name, directly and through any inference profile; extend the patterns to any family whose price you do not want to meet on the bill.
-
-```json
-{
-  "Sid": "NoFrontierPricedModels",
-  "Effect": "Deny",
-  "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream"],
-  "Resource": [
-    "arn:aws:bedrock:*::foundation-model/anthropic.claude-opus*",
-    "arn:aws:bedrock:*:*:inference-profile/*claude-opus*"
-  ]
-}
-```
-
-### 4. Lower the GPU quotas after class
+### 3. Lower the GPU quotas after class
 
 The quotas in the table at the top are sized for a hundred learners launching at once; a `ml.g5.xlarge` training quota of 100 lets one learner launch a hundred jobs at `$141` an hour. Once the workshop day is over, ask Service Quotas to lower the per-type job quotas to what the Marathon needs, 10 to 20 of each, and leave the account-wide instance ceilings. Decreases apply at once. The credit-request form's "at most three instances" is a rule; the quota is the enforcement, shared across the class.
 
