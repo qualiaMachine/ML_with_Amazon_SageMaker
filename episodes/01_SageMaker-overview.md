@@ -69,10 +69,13 @@ Everything in the lesson is one of these four boxes. S3 holds your data and ever
 
 ### Lesson outline
 
-The rest of the lesson is hands-on, in two parts:
+The rest of the lesson is hands-on, in two parts, one per service.
 
-1. **SageMaker: training, tuning and fine-tuning.** Set up an S3 bucket and a small notebook instance, launch training jobs (XGBoost and PyTorch) and a hyperparameter tuning job from it, then fine-tune a vision-language model for handwriting transcription as a training job.
-2. **Bedrock: inference and retrieval-augmented generation (RAG).** Build a RAG pipeline over research papers on Amazon Bedrock, then run the same pipeline as SageMaker Processing jobs with an open-weight model.
+**Part 1, SageMaker: data, training, tuning and fine-tuning.** Put the Titanic data in an S3 bucket and start a small notebook instance as the controller. Train XGBoost and PyTorch models as training jobs, estimating the cost before each launch and reading the bill after, on CPU and on GPU, on one instance and on two. Run a tuning job under a budget. Then fine-tune a 3B vision-language model with LoRA, as a training job with checkpoints and a cap, for transcribing handwritten German letters (Badger Scribe).
+
+**Part 2, Bedrock: inference and retrieval-augmented generation.** Build a RAG pipeline over energy research papers (WattBot) on Bedrock's hosted models, paid per token through tagged profiles, for cents a run; add multimodal embeddings for the table and figure questions; then run the same pipeline with an open-weight model Bedrock does not serve, as Processing jobs that rent a GPU for the minutes they need.
+
+The last episodes are the same jobs from a terminal, and cleanup.
 
 Every job is tagged, capped, estimated before launch and checked against the bill after.
 
