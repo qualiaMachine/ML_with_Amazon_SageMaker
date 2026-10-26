@@ -154,7 +154,7 @@ s3.download_file(bucket_name, key, local_file_path)
 #### Check the current size and storage costs of bucket
 It's a good idea to periodically check how much storage you have used in your bucket. You can do this from a Jupyter notebook in SageMaker by using the **Boto3** library, which is the AWS SDK for Python. This will allow you to calculate the total size of objects within a specified bucket. 
 
-The code below will calculate your bucket size for you. Here is a breakdown of the important pieces in the next code section:
+The code below calculates your bucket size. The pieces that matter:
 
 1. **Paginator**: Since S3 buckets can contain many objects, we use a paginator to handle large listings.
 2. **Size calculation**: We sum the `Size` attribute of each object in the bucket.

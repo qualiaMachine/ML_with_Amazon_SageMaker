@@ -182,7 +182,7 @@ Once the bucket is created, the console opens the new bucket's page (a green "Su
 }
 ```
 
-What the policy says, line by line:
+The policy, statement by statement:
 
 - **Principal** is *who* gets access. SageMaker never acts as you; it acts as an IAM **role** attached to your notebook instance and to every job you launch (the *execution role*). In the workshop account there are two: `ml-sagemaker-bedrock-use`, which you will pick when you create your notebook instance in the next episode and which every job inherits, and the older SageMaker-only `ml-sagemaker-use`, listed so that a notebook created with it still reads the bucket. The `<account-id>` is the 12-digit number shown next to the account name at the top right of the console.
 - **Action** is *what* they may do: read objects, write objects, delete objects, list the bucket's contents, and list the parts of a large upload in progress.
@@ -302,7 +302,7 @@ Using the S3 Standard rate in us-east-1:
 
 These costs assume no additional request charges beyond those for storage, the download, and `GET` requests for training.
 
-Two things to notice. The `GET` line is the same four-thousandths of a cent at every size: request costs depend on how many objects you touch, not how big they are. And the download line grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a dataset of any size, moving it out of AWS costs several times more than keeping it there for a month, so plan to keep large data in the region and bring code to it, not the other way round.
+The `GET` line is the same four-thousandths of a cent at every size: request costs depend on how many objects you touch, not how big they are. And the download line grows from 80% of the total at 1 GB to almost all of it at 1 TB: for a dataset of any size, moving it out of AWS costs several times more than keeping it there for a month, so plan to keep large data in the region and bring code to it, not the other way round.
 
 3. **Wrong region, 100 GB**: 100 reads x 100 GB x `$0.02` = **`$200`** of inter-region transfer, on top of the `$11.30` above. The one-time download to a laptop was `$9`; the misplaced bucket costs twenty times that, silently, and keeps costing with every job. This is why the region is the first setting on the create-bucket form and why the warning above tells you to check it before clicking Create.
 

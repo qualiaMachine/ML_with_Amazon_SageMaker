@@ -477,7 +477,7 @@ def check_launch(tags, instance_type=None, max_run=None):
 
 
 def rules(path=GUARDRAILS_FILE):
-    """Print the account's launch rules, read from the policy file, in plain words."""
+    """Print the account's launch rules, read from the policy file."""
     r = load_guard_rails(path)
     print("A job on this account is refused unless:")
     print("  - it carries the three tags Name, Project and Purpose, and Name is not blank")

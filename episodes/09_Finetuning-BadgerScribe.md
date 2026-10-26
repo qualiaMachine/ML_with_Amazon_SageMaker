@@ -436,7 +436,7 @@ print(f"transcription: {len(row.text.split())} words, {len(row.text)} characters
 print(f"tokens the model sees for this page: {n_total}")
 ```
 
-Two things to notice in the output. The image is close to the 1,280-token cap whatever the page's original size, because every scan is larger than a megapixel and gets shrunk to it. And the transcription comes out near two tokens per word, not the 1.3 of the English rule of thumb: German, 1930s spelling and the writer's abbreviations all split into more pieces. That is why the guess in Step 0 is a guess, and why the next cell measures the average instead.
+The image is close to the 1,280-token cap whatever the page's original size, because every scan is larger than a megapixel and gets shrunk to it. And the transcription comes out near two tokens per word, not the 1.3 of the English rule of thumb: German, 1930s spelling and the writer's abbreviations all split into more pieces. That is why the guess in Step 0 is a guess, and why the next cell measures the average instead.
 
 One page is a point, not an average. Text length varies a lot from page to page; image tokens hardly vary, because almost every scan is larger than `max_pixels` and gets resized to the same cap. So count text tokens for every training page with the tokenizer alone, which needs no images and takes seconds, and image tokens over a sample of pages.
 

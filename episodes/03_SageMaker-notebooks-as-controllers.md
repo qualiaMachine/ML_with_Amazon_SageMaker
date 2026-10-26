@@ -66,6 +66,8 @@ We'll follow these steps to create our first "SageMaker notebook instance".
   | `Name` | your name, e.g. `DoeJohn` |
   | `Purpose` | what this resource is for, `Notebook` |
 
+  Same spelling as on the bucket. The `Project` and `Purpose` lists from the S3 episode apply to every job you launch from this instance, and a value off them is refused at the first launch; the training episode shows what that looks like and how to check first.
+
   ![Tag Setup Example](fig/notebook_tags.PNG){alt="Screenshot showing the three required tags on a SageMaker notebook instance"}
 
 - Click **Create notebook instance**.

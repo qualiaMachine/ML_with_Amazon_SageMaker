@@ -500,7 +500,9 @@ While a job runs, its status is on the console under [Training jobs](https://us-
 
 ### If the launch is refused
 
-The class account checks every launch. A job is refused, with an `AccessDeniedException` that ends in `with an explicit deny in an identity-based policy`, when any of these is true: it carries no `Name`, `Project` or `Purpose` tag, or a blank `Name`, or a `Project` that is not on the list (SinkOrSwim, WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI), or a `Purpose` that is not Storage, Notebook, Training, Tuning or Inference; its instance type is not one the lesson uses; or it is an endpoint or an EC2 instance, which the lesson never creates. The message does not say which. An IAM refusal cannot carry a custom message, so the lesson checks the same rules in the notebook first: `helpers.check_launch(job_tags, instance_type, max_run)` reads the account's policy (`scripts/guardrails.json`, the same file the administrator attached) and stops with a message that names the problem and the fix. A launch that passes it and is still refused means the `tags=job_tags` line is missing from the estimator. The same check runs before every job in the later episodes, and the [If a Launch Is Refused](../learners/refused-launch.md) page has the full list of rules and fixes for your own notebooks after the workshop.
+The account checks every launch against a short list of rules, and refuses one that breaks any of them with an `AccessDeniedException` ending in `with an explicit deny in an identity-based policy`. The rules: the three tags `Name`, `Project` and `Purpose` must be present, `Name` must not be blank, `Project` must be one of SinkOrSwim, WattBot2026, BadgerScribe, BadgerCode, BrainDecoding, PoisonedWell, SnapshotWI, `Purpose` must be Storage, Notebook, Training, Tuning or Inference, the instance type must be one the lesson uses, the runtime cap must be 48 hours or less, and endpoints and EC2 instances cannot be created at all.
+
+The error message does not say which rule was broken. AWS does not let an administrator attach an explanation to a refusal, so the lesson's helper module fills the gap. `helpers.check_launch(job_tags, instance_type, max_run)` checks a launch against the same rules before it is sent and says what to change; the tag cell above and every launch in the later episodes call it. `helpers.rules()` prints the rules. `helpers.explain_refusal()` is for afterwards: it reads the refused requests of the last hour from CloudTrail, the account's log of every API call, and says which rule each one broke. All three read the rules from `scripts/guardrails.json`, the same file the administrator attached to the account, so they cannot disagree with it. A launch that passes `check_launch` and is still refused is almost always a missing `tags=job_tags` line on the estimator. The [If a Launch Is Refused](../learners/refused-launch.md) page has all of this on one page for your own notebooks after the workshop.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -739,7 +741,7 @@ The alternative is three steps: launch with `wait=False`, write the job name dow
 ```python
 # Launch and return at once: the cell ends in seconds, and the job runs on its own instance
 xgboost_estimator.fit({'train': train_input}, wait=False)
-job_name = xgboost_estimator.latest_training_job.name   # the one thing you need to come back to this job
+job_name = xgboost_estimator.latest_training_job.name   # what you need to come back to this job
 print("launched:", job_name)
 ```
 
@@ -759,7 +761,7 @@ print("model:", xgboost_estimator.model_data)
 desc = job_cost_report(job_name, price_per_hour)
 ```
 
-One thing to be clear about: interrupting the cell, restarting the kernel and stopping the instance all leave the job running. Only **Stop** on the job's page, or the job's own cap, ends it. A job you launched and forgot bills until one of those happens, which is what the two habits below are for.
+Interrupting the cell, restarting the kernel and stopping the instance all leave the job running. Only **Stop** on the job's page, or the job's own cap, ends it. A job you launched and forgot bills until one of those happens, which is what the two habits below are for.
 
 ### Two habits for any run longer than half an hour
 
