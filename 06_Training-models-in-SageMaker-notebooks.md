@@ -353,7 +353,7 @@ end = t.time()
 print(f"Runtime for training on SageMaker: {end - start:.2f} seconds, instance_type: {instance_type}, instance_count: {instance_count}")
 ```
 
-While a job runs, its status is on the console under [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training). For a job too long to sit through, see "Launching a job and walking away" below: launch with `wait=False` and stop the notebook instance.
+While a job runs, its status is on the console under [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training). For a job too long to sit through, see "Launching a job without waiting for it" below.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
@@ -500,34 +500,26 @@ To view and monitor your SageMaker training job, follow these steps in the AWS M
 
 Following these steps helps ensure you only interact with and modify jobs you own, reducing the risk of impacting other users' training processes.
 
-## Launching a job and walking away
+## Launching a job without waiting for it
 
-Everything after `fit()` returned happened on the job's instance, not this one. The notebook is the launcher: once SageMaker has the request, the job pulls its container, trains, uploads the model to S3 and writes its log to CloudWatch whether or not this notebook is still running. `wait=True`, the default, only makes the cell block and stream the log here. That is right for a four-minute job. For a run of hours it means a notebook instance left running all night, five cents an hour on an `ml.t3.medium` and `$63` on a GPU notebook, so that a cell can watch a log you could read in CloudWatch.
+Everything after `fit()` returned happened on the job's instance, not this one. Once SageMaker has the request, the job pulls its container, trains, uploads the model to S3 and writes its log to CloudWatch, and none of that needs this notebook. `wait=True`, the default, only makes the cell block and stream the log here, which is fine for a four-minute job. For a run of hours it means sitting on a blocked cell, or leaving a notebook instance running all night so that a cell can watch a log you could read in CloudWatch.
 
-The alternative is three steps: launch with `wait=False`, write the job name down, stop the notebook instance. Come back when the job is done, start the instance, and pick the job up by name.
+`wait=False` returns as soon as the job is accepted. Run the next cell, or stop the notebook instance and go home; the job runs the same either way.
 
 ```python
 # Launch and return at once: the cell ends in seconds, and the job runs on its own instance
 xgboost_estimator.fit({'train': train_input}, wait=False)
-job_name = xgboost_estimator.latest_training_job.name   # what you need to come back to this job
+job_name = xgboost_estimator.latest_training_job.name
 print("launched:", job_name)
 ```
 
-Keep the name somewhere outside the kernel: a cell's printed output survives a kernel restart and a stopped instance, a variable does not. If you are leaving, stop the notebook instance from [Notebook instances](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/notebook-instances) (select it, **Actions**, **Stop**). The job keeps running, and its status and log are on its page under [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training) from any browser.
-
-To pick it up again, two calls. `describe_training_job` is the quick look: the status, and the timings once it has finished. `attach` rebuilds the estimator from the job's record: if the job is still running it streams the rest of the log and waits, as `fit()` would have; if it has finished it returns at once. Either way `model_data` then points at the model in S3, so the download-and-evaluate cells above work unchanged.
+While it runs, its status and log are on its page under [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training), from any browser. When it finishes, the model is in S3 under `output_path`, whether or not anything was watching. To read its status and bill from a notebook, the same call as before:
 
 ```python
-from sagemaker.xgboost.estimator import XGBoost
-
-# after a kernel restart or a stopped instance, set job_name = "<the name printed by the launch cell>" first
-status = session.sagemaker_client.describe_training_job(TrainingJobName=job_name)["TrainingJobStatus"]
-print(job_name, status)   # InProgress, Completed, Failed or Stopped
-
-xgboost_estimator = XGBoost.attach(job_name, sagemaker_session=session)   # waits and streams the log if InProgress; returns at once if done
-print("model:", xgboost_estimator.model_data)
-desc = job_cost_report(job_name, price_per_hour)
+desc = job_cost_report(job_name, price_per_hour)   # status InProgress until it ends; billable time and the model path once Completed
 ```
+
+If the notebook instance was stopped in between, the kernel's variables are gone, so set `job_name` from the printed output or from the Training jobs list before running that cell. `XGBoost.attach(job_name, sagemaker_session=session)` rebuilds the estimator from the job's record if you want `model_data` and the evaluate cells above to work as before.
 
 Interrupting the cell, restarting the kernel and stopping the instance all leave the job running. Only **Stop** on the job's page, or the job's own cap, ends it. A job you launched and forgot bills until one of those happens, which is what the two habits below are for.
 
@@ -539,20 +531,20 @@ Interrupting the cell, restarting the kernel and stopping the instance all leave
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
-### Launch, lose the kernel, come back
+### Launch, lose the kernel, read the bill anyway
 
-Do the walk-away sequence once while the job is short, so that it is familiar when the job is long.
+Do this once while the job is short, so that it is familiar when the job is long.
 
 1. Run the `wait=False` launch cell above and note the printed job name.
 2. From the Jupyter menu choose **Kernel**, **Restart**. Every variable is gone, which is what a stopped instance would also do to you, without the minutes of waiting for it to start again.
 3. Rerun the setup cells at the top of the episode (the session, bucket and role) and the cell that defines `job_cost_report` and `price_per_hour`.
-4. Set `job_name` to the name you noted and run the pick-up cell.
+4. Set `job_name` to the name you noted and run the `job_cost_report` cell.
 
 What was the job's status when you looked, and what did it cost compared with the first job?
 
 :::::::::::::::: solution
 
-The status is `InProgress` if you were quick and `Completed` otherwise; `attach` waits in the first case and returns at once in the second. The cost is the same as the first run, since the job did the same work, and it did not care that the kernel it was launched from no longer existed. The only thing that connected the kernel to the job was the name, and if you lose that too, the [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training) list, filtered by your notebook instance name, has it.
+The status is `InProgress` if you were quick and `Completed` otherwise. The cost is the same as the first run, since the job did the same work, and it did not care that the kernel it was launched from no longer existed. The only thing that connected the kernel to the job was the name, and if you lose that too, the [Training jobs](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training) list, filtered by your notebook instance name, has it.
 
 :::::::::::::::::::::::::
 
@@ -655,6 +647,6 @@ The next episode asks what to do when a job takes too long: a bigger instance, a
 - **Estimators**: `XGBoost(entry_point=...)` is AWS's container running your script, the pattern every later episode uses with `PyTorch` and `HuggingFace`.
 - **Training data channels**: Using `TrainingInput` ensures SageMaker manages data efficiently.
 - **Cost habit**: Estimate cost before launching (rate x minutes + ~3 minutes startup), then read back `BillableTimeInSeconds` with `job_cost_report()` after every job and compare.
-- **Long runs**: launch with `wait=False`, note the job name, stop the notebook instance; `attach(job_name)` picks the job up later. Set `max_run` a little above the estimate, and checkpoint to S3 on anything longer than half an hour.
+- **Long runs**: launch with `wait=False` and carry on, or stop the notebook instance; the job runs and finishes without it, and `job_cost_report(job_name, ...)` reads its bill later. Set `max_run` a little above the estimate, and checkpoint to S3 on anything longer than half an hour.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
