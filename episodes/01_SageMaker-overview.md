@@ -61,7 +61,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 **Amazon S3** is where data lives. Buckets hold files of any size, every SageMaker job reads its inputs from a bucket and writes its outputs back to one, and storage costs about two cents per GB per month. In this lesson you create one bucket of your own in the next episode and use it for the rest of the workshop; the larger datasets are in a shared bucket the instructors staged.
 
-### How the pieces fit together
+### The four things you will use
 
 ![S3 holds data and outputs; a small notebook instance launches SageMaker jobs that read from and write to S3 and end on their own; Bedrock is called as an API per token](fig/aws-ml-ecosystem.svg){alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API"}
 
