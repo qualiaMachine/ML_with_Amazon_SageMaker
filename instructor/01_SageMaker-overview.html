@@ -620,18 +620,25 @@ the optional last episode shows the CLI equivalents.</p>
 </div>
 <div class="section level3">
 <h3 id="lesson-outline">Lesson outline<a class="anchor" aria-label="anchor" href="#lesson-outline"></a></h3>
-<p>The rest of the lesson is hands-on, in two parts:</p>
-<ol style="list-style-type: decimal"><li>
-<strong>SageMaker: training, tuning and fine-tuning.</strong> Set up
-an S3 bucket and a small notebook instance, launch training jobs
-(XGBoost and PyTorch) and a hyperparameter tuning job from it, then
-fine-tune a vision-language model for handwriting transcription as a
-training job.</li>
-<li>
-<strong>Retrieval-augmented generation (RAG).</strong> Build a RAG
-pipeline over research papers on Amazon Bedrock, then run the same
-pipeline as SageMaker Processing jobs with an open-weight model.</li>
-</ol><p>Every job is tagged, capped, estimated before launch and checked
+<p>The rest of the lesson is hands-on, in two parts, one per
+service.</p>
+<p><strong>Part 1, SageMaker: data, training, tuning and
+fine-tuning.</strong> Put the Titanic data in an S3 bucket and start a
+small notebook instance as the controller. Train XGBoost and PyTorch
+models as training jobs, estimating the cost before each launch and
+reading the bill after, on CPU and on GPU, on one instance and on two.
+Run a tuning job under a budget. Then fine-tune a 3B vision-language
+model with LoRA, as a training job with checkpoints and a cap, for
+transcribing handwritten German letters (Badger Scribe).</p>
+<p><strong>Part 2, Bedrock: inference and retrieval-augmented
+generation.</strong> Build a RAG pipeline over energy research papers
+(WattBot) on Bedrock’s hosted models, paid per token through tagged
+profiles, for cents a run; add multimodal embeddings for the table and
+figure questions; then run the same pipeline with an open-weight model
+Bedrock does not serve, as Processing jobs that rent a GPU for the
+minutes they need.</p>
+<p>The last episodes are the same jobs from a terminal, and cleanup.</p>
+<p>Every job is tagged, capped, estimated before launch and checked
 against the bill after.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
