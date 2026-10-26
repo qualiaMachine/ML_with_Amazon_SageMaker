@@ -179,7 +179,7 @@ Every job in this lesson gets an estimate written down before `fit()`. There are
 local_seconds_per_epoch = (t.time() - start_time) / epochs     # from the smoke test above: wall-clock over its 100 epochs
 planned_epochs = 1000
 startup_minutes = 3                                            # container pull + data download, billed; the same for every job
-rate = 0.115                                                   # $/hour, ml.m5.large
+rate = 0.115                                                   # $/hour, ml.m5.large, from the Instances for ML page
 
 train_minutes = local_seconds_per_epoch * planned_epochs / 60
 estimate = (train_minutes + startup_minutes) / 60 * rate
@@ -388,7 +388,7 @@ X_train, y_train = X_train.to(device), y_train.to(device)
 
 ### CPU or GPU: predict, then measure
 
-We're about to run the identical job on an `ml.g4dn.xlarge` (one NVIDIA T4 GPU, about `$0.74`/hour) instead of the `ml.m5.large` (`$0.115`/hour). Before you run the cell:
+We're about to run the identical job on an `ml.g4dn.xlarge` (one NVIDIA T4 GPU, about `$0.74`/hour) instead of the `ml.m5.large` (`$0.115`/hour); both rates are from the [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page. Before you run the cell:
 
 1. Predict which instance finishes first (total wall-clock, as `fit()` reports it).
 2. Predict which costs less for this job.

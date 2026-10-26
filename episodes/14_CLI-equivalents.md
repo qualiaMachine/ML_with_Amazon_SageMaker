@@ -254,7 +254,7 @@ Then send it. This one line is `estimator.fit()`:
 aws sagemaker create-training-job --cli-input-json file://train-xgboost.json
 ```
 
-Three fields to notice. `StoppingCondition.MaxRuntimeInSeconds` is the `max_run` you set on every estimator; the SDK would have sent 24 hours if you had not. `Tags` is the `tags=` argument, and without it the request is refused on the workshop account. `ResourceConfig` sets the instance type and count, which determine the cost; nothing in a JSON file prints a price, so check it as carefully as you would in a notebook.
+Three fields to notice. `StoppingCondition.MaxRuntimeInSeconds` is the `max_run` you set on every estimator; the SDK would have sent 24 hours if you had not. `Tags` is the `tags=` argument, and without it the request is refused on the workshop account. `ResourceConfig` sets the instance type and count, which determine the cost; nothing in a JSON file prints a price, so look the type up on the [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page before sending it, as you would in a notebook.
 
 The CLI returns the moment the request is accepted; nothing waits. To follow the job the way `wait=True` did:
 
