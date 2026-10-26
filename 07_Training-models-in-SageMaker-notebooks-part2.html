@@ -273,7 +273,7 @@
     <div id="flush-collapsecurrent" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushcurrent">
       <div class="accordion-body">
         <ul><li><a href="#initial-setup-open-prefilled-.ipynb-notebook">Initial setup: open prefilled .ipynb notebook</a></li>
-<li><a href="#setup-notebook-as-controller">Setup notebook as controller</a></li>
+<li><a href="#setup">Setup</a></li>
 <li><a href="#training-a-neural-network-with-sagemaker">Training a neural network with SageMaker</a></li>
 <li><a href="#testing-on-notebook-instance">Testing on notebook instance</a></li>
 <li><a href="#deploying-pytorch-neural-network-via-sagemaker">Deploying PyTorch neural network via SageMaker</a></li>
@@ -480,9 +480,9 @@ determine when each is appropriate in SageMaker.</li>
 <hr class="half-width"><p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/07_Training-models-in-SageMaker-notebooks-part2.ipynb</code>.
 Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
-</section><section><h2 class="section-heading" id="setup-notebook-as-controller">Setup notebook as controller<a class="anchor" aria-label="anchor" href="#setup-notebook-as-controller"></a></h2>
-<hr class="half-width"><p>Once your notebook is open, we can setup our SageMaker controller as
-usual:</p>
+</section><section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
+<hr class="half-width"><p>The same setup as the previous episode: role, S3 client, bucket,
+filenames.</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -505,10 +505,6 @@ usual:</p>
 <span id="cb1-17"><a href="#cb1-17" tabindex="-1" aria-label="code-block-1-17"></a>train_filename <span class="op">=</span> <span class="st">'titanic_train.csv'</span></span>
 <span id="cb1-18"><a href="#cb1-18" tabindex="-1" aria-label="code-block-1-18"></a>test_filename <span class="op">=</span> <span class="st">'titanic_test.csv'</span></span></code></pre>
 </div>
-<p>Create a SageMaker session to manage interactions with Amazon
-SageMaker, such as training jobs, model deployments, and data
-input/output. As before, the region comes from the notebook
-instance.</p>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -517,9 +513,9 @@ instance.</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>sagemaker_client <span class="op">=</span> session.sagemaker_client  <span class="co"># low-level boto3 client; describe_training_job() below uses it</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="bu">print</span>(<span class="ss">f"region = </span><span class="sc">{</span>region<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
-<p>We should also record our local instance information to report this
-information during testing. First, let’s make sure we’re starting in the
-same location to access helper functions</p>
+<p>Work in the Titanic folder beside the lesson clone, with the helper
+module on the path, and record which instance this notebook runs on so
+that runtimes can be compared.</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -548,64 +544,17 @@ Titanic CSVs from S3 again.</p>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>s3.download_file(bucket_name, test_filename, test_filename)</span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="training-a-neural-network-with-sagemaker">Training a neural network with SageMaker<a class="anchor" aria-label="anchor" href="#training-a-neural-network-with-sagemaker"></a></h2>
-<hr class="half-width"><p>Let’s see how to do a similar experiment, but this time using PyTorch
-neural networks. We will again demonstrate how to test our custom model
-train script (<code>train_nn.py</code>) before deploying to SageMaker,
-and discuss some strategies (e.g., using a GPU) for improving train time
-when needed.</p>
+<hr class="half-width"><p>The same experiment as the previous episode with a PyTorch network in
+place of XGBoost: test the script here, run it as a job, and then, the
+question this episode is for, see what a GPU and a second instance do to
+the time and the bill.</p>
 <div class="section level3">
-<h3 id="preparing-the-data-compressed-npz-files">Preparing the data (compressed npz files)<a class="anchor" aria-label="anchor" href="#preparing-the-data-compressed-npz-files"></a></h3>
-<p>When deploying a PyTorch model on SageMaker, it’s helpful to prepare
-the input data in a format that’s directly accessible and compatible
-with PyTorch’s data handling methods. The next code cell will prep our
-npz files from the existing csv versions.</p>
-<div id="why-are-we-using-this-file-format" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<span class="callout-header">Callout</span>
-<div id="why-are-we-using-this-file-format" class="callout-inner">
-<h3 class="callout-title">Why are we using this file format?</h3>
-<div class="callout-content">
-<ol style="list-style-type: decimal"><li><p><strong>Optimized data loading</strong>:<br>
-The <code>.npz</code> format stores arrays in a compressed, binary
-format, making it efficient for both storage and loading. PyTorch can
-easily handle <code>.npz</code> files, especially in batch processing,
-without requiring complex data transformations during training.</p></li>
-<li><p><strong>Batch compatibility</strong>:<br>
-When training neural networks in PyTorch, it’s common to load data in
-batches. By storing data in an <code>.npz</code> file, we can quickly
-load the entire dataset or specific parts (e.g., <code>X_train</code>,
-<code>y_train</code>) into memory and feed it to the PyTorch
-<code>DataLoader</code>, enabling efficient batched data
-loading.</p></li>
-<li><p><strong>Reduced I/O overhead in SageMaker</strong>:<br>
-Storing data in <code>.npz</code> files minimizes the I/O operations
-during training, reducing time spent on data handling. This is
-especially beneficial in cloud environments like SageMaker, where
-efficient data handling directly impacts training costs and
-performance.</p></li>
-<li><p><strong>Consistency and compatibility</strong>:<br>
-Using <code>.npz</code> files allows us to ensure consistency between
-training and validation datasets. Each file (<code>train_data.npz</code>
-and <code>val_data.npz</code>) stores the arrays in a standardized way
-that can be easily accessed by keys (<code>X_train</code>,
-<code>y_train</code>, <code>X_val</code>, <code>y_val</code>). This
-structure is compatible with PyTorch’s <code>Dataset</code> class,
-making it straightforward to design custom datasets for
-training.</p></li>
-<li><p><strong>Support for multiple data types</strong>:<br><code>.npz</code> files support storage of multiple arrays within a
-single file. This is helpful for organizing features and labels without
-additional code. Here, the <code>train_data.npz</code> file contains
-both <code>X_train</code> and <code>y_train</code>, keeping everything
-related to training data in one place. Similarly,
-<code>val_data.npz</code> organizes validation features and labels,
-simplifying file management.</p></li>
-</ol><p>Saving the data as <code>.npz</code> files keeps loading fast and the
-arrays in the shape the training script expects.</p>
-</div>
-</div>
-</div>
+<h3 id="preparing-the-data">Preparing the data<a class="anchor" aria-label="anchor" href="#preparing-the-data"></a></h3>
+<p>The training script reads NumPy arrays from <code>.npz</code> files
+rather than CSVs: one file holds the training features and labels, one
+the validation ones, already encoded and standardized, so the script
+does no preprocessing of its own. The cells below make those two files
+from the Titanic CSV and upload them.</p>
 <p>Open <code>ML_with_AWS_SageMaker/scripts/train_nn.py</code> in the
 file browser and read it before going on; it is short. Three things to
 find: <code>TitanicNet</code>, a three-layer network with 7 inputs and
@@ -827,7 +776,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -1014,7 +963,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -1078,12 +1027,12 @@ apparent.</p>
 </div>
 </div>
 </section><section><h2 class="section-heading" id="distributed-training-for-neural-networks-in-sagemaker">Distributed Training for Neural Networks in SageMaker<a class="anchor" aria-label="anchor" href="#distributed-training-for-neural-networks-in-sagemaker"></a></h2>
-<hr class="half-width"><p>The previous episode gave the rule of thumb: upgrade the single
-instance first, and consider multiple instances only when the dataset no
-longer fits in one instance’s memory (tens of GB or more) or a
-single-instance run takes longer than about 10 hours. The GPU exercise
-was Option 1. Let’s now look at Option 2, starting with what
-<code>instance_count=2</code> does.</p>
+<hr class="half-width"><p>When a run is too slow, the first move is a bigger machine, which is
+what the GPU exercise above was. The second is more than one machine,
+which pays only when the dataset no longer fits in one instance’s memory
+(tens of GB or more) or a single-instance run takes longer than about 10
+hours. This section measures it, starting with what
+<code>instance_count=2</code> does on its own.</p>
 <div class="section level3">
 <h3 id="what-instance_count2-does-on-its-own">What <code>instance_count=2</code> does on its own<a class="anchor" aria-label="anchor" href="#what-instance_count2-does-on-its-own"></a></h3>
 <figure><img src="fig/instance-count-vs-data-parallel.svg" alt="Two panels comparing instance_count=2 without distribution, where each instance trains on the full data, with data parallelism, where batches are split and gradients synced" class="figure mx-auto d-block"><div class="figcaption">Left: two instances each receive the full
