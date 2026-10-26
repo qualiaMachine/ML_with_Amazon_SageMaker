@@ -351,7 +351,7 @@
 <li><a href="#monitoring-and-stopping-active-jobs">Monitoring and stopping active jobs</a></li>
 <li><a href="#billing-and-cost-monitoring">Billing and cost monitoring</a></li>
 <li><a href="#end-of-workshop-checklist">End-of-workshop checklist</a></li>
-<li><a href="#best-practices-for-resource-management">Best practices for resource management</a></li>
+<li><a href="#rules-the-account-enforces-and-how-to-set-them-on-your-own">Rules the account enforces, and how to set them on your own</a></li>
         </ul></div><!--/div.accordion-body-->
     </div><!--/div.accordion-collapse-->
 
@@ -430,7 +430,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Resource Management and Monitoring</h1>
-        <p>Last updated on 2026-10-21 |
+        <p>Last updated on 2026-10-26 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/15_Resource-management-cleanup.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -691,31 +691,80 @@ the workshop. That sweep deletes notebook instances and the learner
 buckets only, so if you forget those, they will still go. It does not
 touch Bedrock application inference profiles, so those are yours to
 remove.</p>
-</section><section><h2 class="section-heading" id="best-practices-for-resource-management">Best practices for resource management<a class="anchor" aria-label="anchor" href="#best-practices-for-resource-management"></a></h2>
-<hr class="half-width"><p>Efficient resource management can save significant costs and improve
-your workflows. Below are some best practices:</p>
+</section><section><h2 class="section-heading" id="rules-the-account-enforces-and-how-to-set-them-on-your-own">Rules the account enforces, and how to set them on your own<a class="anchor" aria-label="anchor" href="#rules-the-account-enforces-and-how-to-set-them-on-your-own"></a></h2>
+<hr class="half-width"><p>Several things you could have done wrong in this workshop were
+refused before they cost anything: a job launched without the three
+tags, with a blank or placeholder tag, with an instance type outside the
+lesson’s list, or with no runtime cap, and any endpoint or EC2 instance
+at all. None of that is SageMaker’s own behaviour. It is a set of rules
+the account administrator attached to the role your notebook runs as,
+written in the same IAM policy language that gave the role its
+permissions, and each one says: refuse this request if it looks like
+this. An AWS account with no such rules lets a tagged job and an
+untagged one through alike, and lets a notebook instance run until
+someone remembers it.</p>
+<p>If you administer an account of your own, a lab’s or a project’s, the
+same rules are an afternoon’s work and they hold across the console, the
+SDK and the CLI, because all three are the same API. The lesson’s
+<em>Account preparation checklist</em> instructor page has the policy as
+JSON and the one command that attaches it to a role; its <em>Overnight
+safeguards</em> section has the three measures that go with it. In order
+of what they prevent for what they cost:</p>
+<table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Rule</th>
+<th>What it stops</th>
+<th>How it is done</th>
+</tr></thead><tbody><tr><td>Every job carries the three cost tags, with real values</td>
+<td>spend nobody can attribute</td>
+<td>an IAM deny on <code>CreateTrainingJob</code> and the like when
+<code>aws:RequestTag/Name</code>, <code>Project</code> or
+<code>Purpose</code> is missing, blank or a placeholder</td>
+</tr><tr><td>Only instance types you have priced</td>
+<td>the <code>$63</code>-an-hour box chosen by accident</td>
+<td>an IAM deny when <code>sagemaker:InstanceTypes</code> is not on your
+list</td>
+</tr><tr><td>A runtime cap on every job, at most 48 hours</td>
+<td>a hung job billing for a week</td>
+<td>an IAM deny when <code>sagemaker:MaxRuntimeInSeconds</code> is
+missing or too large</td>
+</tr><tr><td>No endpoints, no EC2</td>
+<td>the two resource kinds with no runtime cap at all</td>
+<td>an IAM deny on <code>CreateEndpoint</code> and
+<code>ec2:RunInstances</code>
+</td>
+</tr><tr><td>Notebook instances stop at 11 pm</td>
+<td>the forgotten GPU notebook, <code>$60</code> a night</td>
+<td>a ten-line scheduled Lambda function</td>
+</tr><tr><td>A budget per person and a brake on the total</td>
+<td>a quiet overspend</td>
+<td>AWS Budgets on the <code>Name</code> tag, with an action that
+attaches a deny policy at the ceiling</td>
+</tr></tbody></table><p>Two things to know before copying them. A deny applies to everyone
+who uses the role, including you, so your own launches need real tag
+values and listed instance types too; that is the point. And the error a
+refused request gets,
+<code>AccessDeniedException ... with an explicit deny in an identity-based policy</code>,
+does not say which rule matched, so write the rules down where the
+people using the account will find them, as the <em>If the launch is
+refused</em> callout in the first training episode does here.</p>
+<p>Habits that need no administrator:</p>
 <ul><li>
-<strong>Automate resource cleanup:</strong> Use AWS SDK or CLI
-scripts to automatically shut down instances and clean up S3 buckets
-when not in use. <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html" class="external-link">Learn
-more about automation with AWS CLI</a>.</li>
+<strong>Automate the cleanup you do by hand.</strong> The inventory
+cells at the top of this episode are the SDK calls; a script that runs
+them and stops what it finds is the Lambda in the table above.</li>
 <li>
-<strong>Schedule resource usage:</strong> Schedule instance start
-and stop times using AWS Lambda. <a href="https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events.html" class="external-link">Learn
-how to schedule tasks with AWS Lambda</a>.</li>
+<strong>Test on a slice first.</strong> Every expensive run in this
+lesson was preceded by a small one on the same code: a few epochs, a
+subset of pages, a handful of questions.</li>
 <li>
-<strong>Test workflows locally first:</strong> Before scaling up
-experiments in SageMaker, test them locally to minimize cloud usage and
-costs. <a href="https://sagemaker.readthedocs.io/en/stable/overview.html#local-mode" class="external-link">Learn
-about SageMaker local mode</a>.</li>
+<strong>Estimate, then compare.</strong> Write down what a run
+should cost before launching it, read <code>BillableTimeInSeconds</code>
+afterwards, and find out why when the two disagree, as the fine-tuning
+episode does.</li>
 <li>
-<strong>Use cost tracking tools:</strong> Explore AWS’s cost
-allocation tags and budget tracking features. <a href="https://aws.amazon.com/aws-cost-management/" class="external-link">Learn more about cost
-management in AWS</a>.</li>
-</ul><p>By following these practices and leveraging the additional resources
-provided, you can optimize your use of AWS while keeping costs under
-control.</p>
-<div id="challenge-your-own-cleanup-list" class="callout challenge">
+<strong>Tag everything, yourself, every time.</strong> Cost
+allocation tags are the only way a shared bill becomes individual bills,
+and they never propagate.</li>
+</ul><div id="challenge-your-own-cleanup-list" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
@@ -736,7 +785,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
@@ -807,6 +856,10 @@ charges.</p></li>
 need.</p></li>
 <li><p>Bedrock application inference profiles are not swept by the
 instructors’ aws-nuke run; remove them yourself.</p></li>
+<li><p>The refusals you met in this workshop (untagged jobs, wrong
+instance types, endpoints) are IAM deny rules an administrator attached
+to the role, not SageMaker defaults; on an account you administer, the
+instructor pages have the policy to copy.</p></li>
 <li><p>Regularly clean up unused S3 buckets and objects to save on
 storage costs.</p></li>
 <li><p>Monitor your expenses through the AWS Billing Dashboard and set
@@ -882,7 +935,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/15_Resource-management-cleanup.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/15_Resource-management-cleanup.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-21",
+  "dateModified": "2026-10-26",
   "datePublished": "2026-10-26"
 }
 
