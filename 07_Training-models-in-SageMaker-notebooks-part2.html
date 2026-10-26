@@ -488,22 +488,27 @@ filenames.</p>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="im">import</span> boto3</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a><span class="im">import</span> sagemaker</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a><span class="im">from</span> sagemaker <span class="im">import</span> get_execution_role</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="co"># Initialize the SageMaker role (will reflect notebook instance's policy)</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a>role <span class="op">=</span> sagemaker.get_execution_role()</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a><span class="bu">print</span>(<span class="ss">f'role = </span><span class="sc">{</span>role<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a><span class="co"># Initialize an S3 client to interact with Amazon S3, allowing operations like uploading, downloading, and managing objects and buckets.</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a>s3 <span class="op">=</span> boto3.client(<span class="st">'s3'</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a><span class="co"># Define the S3 bucket that we will load from</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1" aria-label="code-block-1-14"></a>bucket_name <span class="op">=</span> <span class="st">'sinkorswim-doejohn'</span>  <span class="co"># replace with your S3 bucket name</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1" aria-label="code-block-1-15"></a></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1" aria-label="code-block-1-16"></a><span class="co"># Define train/test filenames</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1" aria-label="code-block-1-17"></a>train_filename <span class="op">=</span> <span class="st">'titanic_train.csv'</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1" aria-label="code-block-1-18"></a>test_filename <span class="op">=</span> <span class="st">'titanic_test.csv'</span></span></code></pre>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1" aria-label="code-block-1-3"></a><span class="im">import</span> os</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1" aria-label="code-block-1-4"></a>os.environ[<span class="st">"SAGEMAKER_SUPPRESS_V2_WARNING"</span>] <span class="op">=</span> <span class="st">"1"</span>   <span class="co"># the SDK otherwise prints a deprecation notice on import and on every estimator</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1" aria-label="code-block-1-5"></a><span class="im">import</span> sagemaker</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1" aria-label="code-block-1-6"></a><span class="im">import</span> logging</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1" aria-label="code-block-1-7"></a>logging.getLogger(<span class="st">"sagemaker.telemetry.telemetry_logging"</span>).setLevel(logging.WARNING)   <span class="co"># silence the telemetry notice; the "Creating training-job" line still prints</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1" aria-label="code-block-1-8"></a>logging.getLogger(<span class="st">"sagemaker.image_uris"</span>).setLevel(logging.WARNING)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1" aria-label="code-block-1-9"></a><span class="im">from</span> sagemaker <span class="im">import</span> get_execution_role</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1" aria-label="code-block-1-10"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1" aria-label="code-block-1-11"></a><span class="co"># Initialize the SageMaker role (will reflect notebook instance's policy)</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1" aria-label="code-block-1-12"></a>role <span class="op">=</span> sagemaker.get_execution_role()</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1" aria-label="code-block-1-13"></a><span class="bu">print</span>(<span class="ss">f'role = </span><span class="sc">{</span>role<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1" aria-label="code-block-1-14"></a></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1" aria-label="code-block-1-15"></a><span class="co"># Initialize an S3 client to interact with Amazon S3, allowing operations like uploading, downloading, and managing objects and buckets.</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1" aria-label="code-block-1-16"></a>s3 <span class="op">=</span> boto3.client(<span class="st">'s3'</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1" aria-label="code-block-1-17"></a></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1" aria-label="code-block-1-18"></a><span class="co"># Define the S3 bucket that we will load from</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1" aria-label="code-block-1-19"></a>bucket_name <span class="op">=</span> <span class="st">'sinkorswim-doejohn'</span>  <span class="co"># replace with your S3 bucket name</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1" aria-label="code-block-1-20"></a></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1" aria-label="code-block-1-21"></a><span class="co"># Define train/test filenames</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1" aria-label="code-block-1-22"></a>train_filename <span class="op">=</span> <span class="st">'titanic_train.csv'</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1" aria-label="code-block-1-23"></a>test_filename <span class="op">=</span> <span class="st">'titanic_test.csv'</span></span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1181,8 +1186,7 @@ apparent.</p>
 what the GPU exercise above was. The second is more than one machine,
 which pays only when the dataset no longer fits in one instance’s memory
 (tens of GB or more) or a single-instance run takes longer than about 10
-hours. This section measures it, starting with what
-<code>instance_count=2</code> does on its own.</p>
+hours. First, what <code>instance_count=2</code> does on its own.</p>
 <div class="section level3">
 <h3 id="what-instance_count2-does-on-its-own">What <code>instance_count=2</code> does on its own<a class="anchor" aria-label="anchor" href="#what-instance_count2-does-on-its-own"></a></h3>
 <figure><img src="fig/instance-count-vs-data-parallel.svg" alt="Two panels comparing instance_count=2 without distribution, where each instance trains on the full data, with data parallelism, where batches are split and gradients synced" class="figure mx-auto d-block"><div class="figcaption">Left: two instances each receive the full
@@ -1257,7 +1261,8 @@ instance through MPI, which sets the rank and world-size variables the
 script reads and lets the instances find each other by name.
 (<code>torch_distributed</code>, the <code>torchrun</code> launcher, is
 the same idea for GPU instances; the script handles either.) Everything
-else is the two-instance estimator from the demo.</p>
+else is the single-instance estimator with
+<code>instance_count=2</code>.</p>
 <div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1293,12 +1298,23 @@ different things: each prints <code>training on 285 of 569 rows</code>
 model. The final validation loss matches the single-instance run to the
 third decimal, because the averaged gradient is the same gradient; that
 match is the proof that the work was split rather than copied. The
-wall-clock is not shorter. Each step now costs a round of gradient
-exchange between two machines, which takes longer than the 445 rows it
-saves, and the bill is still two instances’ worth. That is the rule of
-thumb again, measured: data parallelism pays when the step is big enough
-that the exchange is a small part of it, which on tabular data of 891
-rows it never is.</p>
+wall-clock is not shorter, and the bill is two instances’ worth. Each
+step now ends with a gradient exchange between the two machines, and
+that exchange has a fixed cost, a network round trip of about a
+millisecond, plus a cost that grows with the model, the gradient’s bytes
+divided by the link’s bandwidth. The computation it saves is the forward
+and backward pass over the 284 rows the other machine took, which for
+<code>TitanicNet</code> is microseconds. So the exchange is not always
+slower than the work; it is a per-step cost that is the same whether the
+step is tiny or huge, and the question is what the step costs beside it.
+A 7B model’s gradient is 28 GB in 32-bit, which is seconds on a 100 Gb/s
+link between instances and a fraction of a second over NVLink inside one
+box, against a forward and backward pass of many seconds on a batch of
+thousands of tokens. There the exchange is a small fraction and two GPUs
+finish in nearly half the time; here it is the whole step. The rule of
+thumb at the top of this section, measured: data parallelism pays when
+the step’s computation is large next to the exchange, and that means big
+models and big batches, not 569 rows of tabular data.</p>
 <p><strong>Model parallelism</strong> is the other kind, for a model too
 large for one device’s memory, where the layers themselves are spread
 across devices (<code>smdistributed.modelparallel</code>, or PyTorch’s
