@@ -82,7 +82,7 @@ print(f"region = {region}")
 ```
 
 ## Testing train.py on this notebook's instance
-A training job is a script run on a machine SageMaker rents for it. The script has to work before it is worth renting anything, so this section runs it here first, on the notebook instance, on the small Titanic data. A local run finds bugs for free; a job that fails on a data-loading error still bills its startup minutes. The habit carries to every later episode: a few epochs on a subset on the cheapest machine, then the real run.
+A training job is a script run on a machine SageMaker rents for it. The script has to work before it is worth renting anything, so run it here first, on the notebook instance, on the small Titanic data. A local run finds bugs for free; a job that fails on a data-loading error still bills its startup minutes. Every later episode does the same: a few epochs on a subset on the cheapest machine, then the real run.
 
 ::::::::::::::::::::::::::::::::::::::: challenge
 
@@ -215,7 +215,7 @@ print(f"Total local runtime: {t.time() - start_time:.2f} seconds, instance_type 
 The run takes seconds. The script prints its own training time, and the cell prints the total including data loading; both numbers are the baseline the SageMaker runs below are compared with.
 
 ### Sanity check: Quick evaluation on test set
-This section is not SageMaker specific; it checks that the model trained properly by applying it to the test set on the notebook instance.
+Nothing here is SageMaker specific: apply the model to the test set on the notebook instance to check that it trained properly.
 
 Score the model you just trained locally on the test set, reusing the script's own `preprocess_data` so the test rows are transformed exactly as the training rows were.
 
