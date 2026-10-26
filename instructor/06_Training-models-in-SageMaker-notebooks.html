@@ -268,7 +268,7 @@
 <li><a href="#training-via-sagemaker-your-script-inside-awss-xgboost-container">Training via SageMaker: your script inside AWS’s XGBoost
 container</a></li>
 <li><a href="#monitoring-training">Monitoring training</a></li>
-<li><a href="#launching-a-job-and-walking-away">Launching a job and walking away</a></li>
+<li><a href="#launching-a-job-without-waiting-for-it">Launching a job without waiting for it</a></li>
         </ul></div><!--/div.accordion-body-->
     </div><!--/div.accordion-collapse-->
 
@@ -605,7 +605,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li><p><strong>Data Preprocessing</strong>: The script fills missing
 values (<code>Age</code> with median, <code>Embarked</code> with mode),
@@ -849,7 +849,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -997,9 +997,8 @@ to look when a value does not seem to arrive.)</p>
 <span id="cb12-54"><a href="#cb12-54" tabindex="-1" aria-label="code-block-12-54"></a><span class="bu">print</span>(<span class="ss">f"Runtime for training on SageMaker: </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.2f}</span><span class="ss"> seconds, instance_type: </span><span class="sc">{</span>instance_type<span class="sc">}</span><span class="ss">, instance_count: </span><span class="sc">{</span>instance_count<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>While a job runs, its status is on the console under <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
-jobs</a>. For a job too long to sit through, see “Launching a job and
-walking away” below: launch with <code>wait=False</code> and stop the
-notebook instance.</p>
+jobs</a>. For a job too long to sit through, see “Launching a job
+without waiting for it” below.</p>
 <div id="if-the-launch-is-refused" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1275,55 +1274,43 @@ consequences.</li>
 </ol><p>Following these steps helps ensure you only interact with and modify
 jobs you own, reducing the risk of impacting other users’ training
 processes.</p>
-</section><section><h2 class="section-heading" id="launching-a-job-and-walking-away">Launching a job and walking away<a class="anchor" aria-label="anchor" href="#launching-a-job-and-walking-away"></a></h2>
+</section><section><h2 class="section-heading" id="launching-a-job-without-waiting-for-it">Launching a job without waiting for it<a class="anchor" aria-label="anchor" href="#launching-a-job-without-waiting-for-it"></a></h2>
 <hr class="half-width"><p>Everything after <code>fit()</code> returned happened on the job’s
-instance, not this one. The notebook is the launcher: once SageMaker has
-the request, the job pulls its container, trains, uploads the model to
-S3 and writes its log to CloudWatch whether or not this notebook is
-still running. <code>wait=True</code>, the default, only makes the cell
-block and stream the log here. That is right for a four-minute job. For
-a run of hours it means a notebook instance left running all night, five
-cents an hour on an <code>ml.t3.medium</code> and <code>$63</code> on a
-GPU notebook, so that a cell can watch a log you could read in
+instance, not this one. Once SageMaker has the request, the job pulls
+its container, trains, uploads the model to S3 and writes its log to
+CloudWatch, and none of that needs this notebook.
+<code>wait=True</code>, the default, only makes the cell block and
+stream the log here, which is fine for a four-minute job. For a run of
+hours it means sitting on a blocked cell, or leaving a notebook instance
+running all night so that a cell can watch a log you could read in
 CloudWatch.</p>
-<p>The alternative is three steps: launch with <code>wait=False</code>,
-write the job name down, stop the notebook instance. Come back when the
-job is done, start the instance, and pick the job up by name.</p>
+<p><code>wait=False</code> returns as soon as the job is accepted. Run
+the next cell, or stop the notebook instance and go home; the job runs
+the same either way.</p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="co"># Launch and return at once: the cell ends in seconds, and the job runs on its own instance</span></span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a>xgboost_estimator.fit({<span class="st">'train'</span>: train_input}, wait<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>job_name <span class="op">=</span> xgboost_estimator.latest_training_job.name   <span class="co"># what you need to come back to this job</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a>job_name <span class="op">=</span> xgboost_estimator.latest_training_job.name</span>
 <span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a><span class="bu">print</span>(<span class="st">"launched:"</span>, job_name)</span></code></pre>
 </div>
-<p>Keep the name somewhere outside the kernel: a cell’s printed output
-survives a kernel restart and a stopped instance, a variable does not.
-If you are leaving, stop the notebook instance from <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/notebook-instances" class="external-link">Notebook
-instances</a> (select it, <strong>Actions</strong>,
-<strong>Stop</strong>). The job keeps running, and its status and log
-are on its page under <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
-jobs</a> from any browser.</p>
-<p>To pick it up again, two calls. <code>describe_training_job</code> is
-the quick look: the status, and the timings once it has finished.
-<code>attach</code> rebuilds the estimator from the job’s record: if the
-job is still running it streams the rest of the log and waits, as
-<code>fit()</code> would have; if it has finished it returns at once.
-Either way <code>model_data</code> then points at the model in S3, so
-the download-and-evaluate cells above work unchanged.</p>
+<p>While it runs, its status and log are on its page under <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a>, from any browser. When it finishes, the model is in S3 under
+<code>output_path</code>, whether or not anything was watching. To read
+its status and bill from a notebook, the same call as before:</p>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a><span class="im">from</span> sagemaker.xgboost.estimator <span class="im">import</span> XGBoost</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a><span class="co"># after a kernel restart or a stopped instance, set job_name = "&lt;the name printed by the launch cell&gt;" first</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1" aria-label="code-block-18-4"></a>status <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>job_name)[<span class="st">"TrainingJobStatus"</span>]</span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1" aria-label="code-block-18-5"></a><span class="bu">print</span>(job_name, status)   <span class="co"># InProgress, Completed, Failed or Stopped</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1" aria-label="code-block-18-6"></a></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1" aria-label="code-block-18-7"></a>xgboost_estimator <span class="op">=</span> XGBoost.attach(job_name, sagemaker_session<span class="op">=</span>session)   <span class="co"># waits and streams the log if InProgress; returns at once if done</span></span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1" aria-label="code-block-18-8"></a><span class="bu">print</span>(<span class="st">"model:"</span>, xgboost_estimator.model_data)</span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1" aria-label="code-block-18-9"></a>desc <span class="op">=</span> job_cost_report(job_name, price_per_hour)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a>desc <span class="op">=</span> job_cost_report(job_name, price_per_hour)   <span class="co"># status InProgress until it ends; billable time and the model path once Completed</span></span></code></pre>
 </div>
+<p>If the notebook instance was stopped in between, the kernel’s
+variables are gone, so set <code>job_name</code> from the printed output
+or from the Training jobs list before running that cell.
+<code>XGBoost.attach(job_name, sagemaker_session=session)</code>
+rebuilds the estimator from the job’s record if you want
+<code>model_data</code> and the evaluate cells above to work as
+before.</p>
 <p>Interrupting the cell, restarting the kernel and stopping the
 instance all leave the job running. Only <strong>Stop</strong> on the
 job’s page, or the job’s own cap, ends it. A job you launched and forgot
@@ -1350,16 +1337,17 @@ then costs one epoch instead of the run, and a second launch with the
 same <code>checkpoint_s3_uri</code> carries on. It is not worth setting
 up for this one-minute job; the fine-tuning episode’s script does it,
 and its estimator has the two lines to copy.</p>
-<div id="launch-lose-the-kernel-come-back" class="callout challenge">
+<div id="launch-lose-the-kernel-read-the-bill-anyway" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="launch-lose-the-kernel-come-back" class="callout-inner">
-<h3 class="callout-title">Launch, lose the kernel, come back</h3>
+<div id="launch-lose-the-kernel-read-the-bill-anyway" class="callout-inner">
+<h3 class="callout-title">Launch, lose the kernel, read the bill
+anyway</h3>
 <div class="callout-content">
-<p>Do the walk-away sequence once while the job is short, so that it is
-familiar when the job is long.</p>
+<p>Do this once while the job is short, so that it is familiar when the
+job is long.</p>
 <ol style="list-style-type: decimal"><li>Run the <code>wait=False</code> launch cell above and note the
 printed job name.</li>
 <li>From the Jupyter menu choose <strong>Kernel</strong>,
@@ -1369,8 +1357,8 @@ for it to start again.</li>
 <li>Rerun the setup cells at the top of the episode (the session, bucket
 and role) and the cell that defines <code>job_cost_report</code> and
 <code>price_per_hour</code>.</li>
-<li>Set <code>job_name</code> to the name you noted and run the pick-up
-cell.</li>
+<li>Set <code>job_name</code> to the name you noted and run the
+<code>job_cost_report</code> cell.</li>
 </ol><p>What was the job’s status when you looked, and what did it cost
 compared with the first job?</p>
 </div>
@@ -1381,15 +1369,13 @@ compared with the first job?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The status is <code>InProgress</code> if you were quick and
-<code>Completed</code> otherwise; <code>attach</code> waits in the first
-case and returns at once in the second. The cost is the same as the
-first run, since the job did the same work, and it did not care that the
-kernel it was launched from no longer existed. The only thing that
-connected the kernel to the job was the name, and if you lose that too,
-the <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+<code>Completed</code> otherwise. The cost is the same as the first run,
+since the job did the same work, and it did not care that the kernel it
+was launched from no longer existed. The only thing that connected the
+kernel to the job was the name, and if you lose that too, the <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
 jobs</a> list, filtered by your notebook instance name, has it.</p>
 </div>
 </div>
@@ -1421,7 +1407,7 @@ and compare the bill and the accuracy with the script version.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>The built-in algorithm will not run our
 <code>preprocess_data()</code> for us, and it expects a CSV with no
@@ -1557,11 +1543,11 @@ minutes + ~3 minutes startup), then read back
 <code>BillableTimeInSeconds</code> with <code>job_cost_report()</code>
 after every job and compare.</li>
 <li>
-<strong>Long runs</strong>: launch with <code>wait=False</code>,
-note the job name, stop the notebook instance;
-<code>attach(job_name)</code> picks the job up later. Set
-<code>max_run</code> a little above the estimate, and checkpoint to S3
-on anything longer than half an hour.</li>
+<strong>Long runs</strong>: launch with <code>wait=False</code> and
+carry on, or stop the notebook instance; the job runs and finishes
+without it, and <code>job_cost_report(job_name, ...)</code> reads its
+bill later. Set <code>max_run</code> a little above the estimate, and
+checkpoint to S3 on anything longer than half an hour.</li>
 </ul></div>
 </div>
 </div>

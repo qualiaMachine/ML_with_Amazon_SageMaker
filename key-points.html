@@ -595,11 +595,11 @@ minutes + ~3 minutes startup), then read back
 <code>BillableTimeInSeconds</code> with <code>job_cost_report()</code>
 after every job and compare.</li>
 <li>
-<strong>Long runs</strong>: launch with <code>wait=False</code>,
-note the job name, stop the notebook instance;
-<code>attach(job_name)</code> picks the job up later. Set
-<code>max_run</code> a little above the estimate, and checkpoint to S3
-on anything longer than half an hour.</li>
+<strong>Long runs</strong>: launch with <code>wait=False</code> and
+carry on, or stop the notebook instance; the job runs and finishes
+without it, and <code>job_cost_report(job_name, ...)</code> reads its
+bill later. Set <code>max_run</code> a little above the estimate, and
+checkpoint to S3 on anything longer than half an hour.</li>
 </ul></section><section id="07_Training-models-in-SageMaker-notebooks-part2"><h2 class="section-heading"><a href="07_Training-models-in-SageMaker-notebooks-part2.html">Training Models in SageMaker: PyTorch Example</a></h2>
 <hr class="half-width">
 <ul>
