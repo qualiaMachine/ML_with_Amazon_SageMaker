@@ -44,7 +44,14 @@ ValueError: this launch would be refused by the account:
   - Purpose 'Testing' is not on the list: use one of Storage, Notebook, Training, Tuning, Inference
 ```
 
-The helper reads its lists from `scripts/guardrails.json`, a copy of the policy on the account, so a `git pull` in the lesson folder keeps it current when the list changes. Run the check once in a cell before the launch cell, and the refusal you would have had to decode arrives as a sentence instead.
+The helper reads its lists from `scripts/guardrails.json`, a copy of the policy on the account, so a `git pull` in the lesson folder keeps it current when the list changes. Run the check once in a cell before the launch cell, and the refusal you would have had to decode arrives as a sentence instead. Two companions:
+
+```python
+helpers.rules()             # prints the current rules in plain words
+helpers.explain_refusal()   # after a refusal: reads the refused requests of the last hour from CloudTrail and names the rule each one broke
+```
+
+`explain_refusal` works after the fact, on launches made from any code, because AWS logs every API call on the account in CloudTrail, including the refused ones, with the request exactly as it was sent: tags, instance type and cap. The log is 5 to 15 minutes behind, so a refusal made a moment ago may not be there yet. The output lists each refused launch with its job name, so pick out yours by the `Name` tag you sent.
 
 ## Why the rules exist
 
