@@ -416,12 +416,16 @@
 <hr class="half-width"><p>This workshop is about running machine learning and AI work on AWS
 without losing control of the bill: where the data goes, which machine
 does what, how a job is launched and paid for, and how to find out what
-it cost. It uses two services. <strong>SageMaker</strong> rents machines
-by the second, for a notebook you work in and for jobs that run on their
-own and end; <strong>Bedrock</strong> serves hosted models by the token,
-with nothing to start or stop. The lesson is in two parts, one per
-service, each with its own hands-on problems.</p>
-<p><strong>Part 1, SageMaker: data, training, tuning and
+it cost. It is in four parts.</p>
+<p><strong>Part 1, orientation.</strong> What the cloud offers a
+researcher compared with a laptop or the cluster down the hall, and what
+it costs. The two services the lesson uses: <strong>SageMaker</strong>
+rents machines by the second, for a notebook you work in and for jobs
+that run on their own and end; <strong>Bedrock</strong> serves hosted
+models by the token, with nothing to start or stop. The four things
+every episode uses, S3, a notebook instance, jobs and Bedrock, and the
+cost habits every later episode follows.</p>
+<p><strong>Part 2, SageMaker: data, training, tuning and
 fine-tuning.</strong></p>
 <ul><li>Put the data in an S3 bucket and start a small notebook instance
 that launches everything else. The notebook is the controller, not the
@@ -437,7 +441,7 @@ budget set up front.</li>
 training job with checkpoints and a runtime cap, for transcribing
 handwritten German letters (Badger Scribe), scored on held-out pages
 before and after.</li>
-</ul><p><strong>Part 2, Bedrock: inference and retrieval-augmented
+</ul><p><strong>Part 3, Bedrock: inference and retrieval-augmented
 generation.</strong></p>
 <ul><li>Build a RAG pipeline over a corpus of energy research papers
 (WattBot): embed the papers, retrieve, generate, score. The models are
@@ -448,26 +452,32 @@ tables and figures, and measure what they change.</li>
 <li>Run the same pipeline with an open-weight model Bedrock does not
 serve, as SageMaker Processing jobs that rent a GPU for the minutes they
 need; optionally, the same on a notebook GPU, as the comparison.</li>
-</ul><p>The last episodes cover the same jobs from a terminal, and cleanup:
-what to stop, what to delete, how to read the bill, and the rules the
-account enforces on every launch.</p>
+</ul><p><strong>Part 4, resource management and cleanup.</strong> What to
+stop, what to delete, how to read the bill, and the rules the account
+enforces on every launch, with how to set the same rules on an account
+of your own. An optional episode shows the same jobs from a
+terminal.</p>
 <div class="section level3">
 <h3 id="who-this-workshop-is-for">Who this workshop is for<a class="anchor" aria-label="anchor" href="#who-this-workshop-is-for"></a></h3>
-<p>Researchers and students who use ML or AI in their work and want to
-run it on AWS. The lesson assumes a basic machine learning background:
-you know what training, hyperparameter tuning, fine-tuning, embeddings
-and retrieval-augmented generation are. It does not teach these
-concepts; instructors may briefly review some of them depending on the
-audience, but the default schedule does not include that time. Python
-and Jupyter are used throughout; no prior AWS experience is needed.</p>
+<p>Researchers and students who use ML or AI in their work and want or
+need to run it in the cloud. The lesson assumes a basic machine learning
+background: you know what training, hyperparameter tuning, fine-tuning,
+embeddings and retrieval-augmented generation are. It does not teach
+these concepts; instructors may briefly review some of them depending on
+the audience, but the default schedule does not include that time.
+Python and Jupyter are used throughout; no prior AWS experience is
+needed.</p>
 </div>
 <div class="section level3">
 <h3 id="cost-controls">Cost controls<a class="anchor" aria-label="anchor" href="#cost-controls"></a></h3>
-<p>Run as written, the full workshop costs a few dollars per learner.
-Every episode tags its resources, caps job runtime, estimates cost
-before launching and checks the bill after, and cleans up. The final
-episode covers monitoring and cleanup, and the rules a shared account
-can enforce.</p>
+<p>The cloud is often very affordable for research workloads, and this
+lesson shows it: run as written, the whole workshop, training jobs, a
+tuning job, a LoRA fine-tune on a GPU and two RAG pipelines, costs each
+learner a few dollars. What keeps it there is habit rather than
+restraint. Every episode tags its resources, caps job runtime, estimates
+cost before launching and checks the bill after, and cleans up. The
+final episode covers monitoring and cleanup, and the rules a shared
+account can enforce.</p>
 </div>
 <div class="section level3">
 <h3 id="what-this-workshop-does-not-cover">What This Workshop Does Not Cover<a class="anchor" aria-label="anchor" href="#what-this-workshop-does-not-cover"></a></h3>
