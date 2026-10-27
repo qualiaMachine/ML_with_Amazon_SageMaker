@@ -964,7 +964,7 @@ project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: a full fine-tune of a 7B model needs about
 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB =
@@ -1527,7 +1527,7 @@ step. Which, and why are they there?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Only the language model’s <code>q_proj</code>, <code>k_proj</code>,
 <code>v_proj</code>, <code>o_proj</code>, <code>gate_proj</code>,
@@ -2034,7 +2034,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Expect about 32 billed minutes. Scoring is the line most likely to
 surprise: at 17 to 21 seconds a page, the two 15-page evaluations and
@@ -2156,18 +2156,23 @@ folder and the 130-minute cap.</p>
 <span id="cb36-17"><a href="#cb36-17" tabindex="-1" aria-label="code-block-36-17"></a>    hyperparameters<span class="op">=</span>homework_hyperparameters,</span>
 <span id="cb36-18"><a href="#cb36-18" tabindex="-1" aria-label="code-block-36-18"></a>)</span></code></pre>
 </div>
-<p>Launch and come back later; the next cell polls for it.</p>
+<p>With <code>wait=False</code>, the launch cell returns as soon as
+SageMaker accepts the job. The job runs on its own instance for about an
+hour, so stop this notebook instance if you like and come back. The cell
+after it asks SageMaker for the job’s status: run it when you are back,
+and once the status is <code>Completed</code> it reads the bill and the
+location of the adapter the job saved.</p>
 <div class="codewrapper sourceCode" id="cb37">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a><span class="co"># # wait=False: returns at once; poll the job with describe_training_job in the next cell</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a><span class="co"># # wait=False: the cell returns as soon as the job is accepted; the job runs regardless of this notebook</span></span>
 <span id="cb37-2"><a href="#cb37-2" tabindex="-1" aria-label="code-block-37-2"></a><span class="co"># homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)</span></span>
 <span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a><span class="co"># print("launched:", homework_job_name)</span></span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb38">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1" aria-label="code-block-38-1"></a><span class="co"># # Come back later and run this until it says Completed. Everything below needs the adapter this run produces.</span></span>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1" aria-label="code-block-38-1"></a><span class="co"># # Run this when you are back; it prints the job's status. Everything below needs the adapter, so wait for Completed.</span></span>
 <span id="cb38-2"><a href="#cb38-2" tabindex="-1" aria-label="code-block-38-2"></a><span class="co"># desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)</span></span>
 <span id="cb38-3"><a href="#cb38-3" tabindex="-1" aria-label="code-block-38-3"></a><span class="co"># print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))</span></span>
 <span id="cb38-4"><a href="#cb38-4" tabindex="-1" aria-label="code-block-38-4"></a><span class="co"># homework_adapter_s3_uri = None</span></span>
@@ -2394,7 +2399,7 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -2435,7 +2440,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
