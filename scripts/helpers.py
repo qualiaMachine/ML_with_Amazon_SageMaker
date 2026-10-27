@@ -503,6 +503,48 @@ def check_launch(tags, instance_type=None, max_run=None):
     return tags
 
 
+def check_finetune_launch(tags, instance_type, max_run, estimated_minutes, price_per_hour, params_billions,
+                          method="lora", job_name=None, checkpoint_s3_uri=None, hyperparameters=None):
+    """Check a fine-tuning launch before the estimator is built: the account's rules (tags, instance type,
+    cap), then the lesson's own rules for a fine-tune. Raises ValueError naming every problem and the fix;
+    prints a one-line summary of what the launch is allowed to cost when everything passes."""
+    problems = []
+    try:
+        check_launch(tags, instance_type, max_run)
+    except ValueError as e:
+        problems += str(e).split("\n  - ")[1:]
+    if method != "lora":
+        problems.append(f'method="{method}": a full fine-tune updates every weight, needs 16 bytes per parameter, '
+                        "and is not run on the class account; use LoRA")
+    elif params_billions > 7:
+        problems.append(f"{params_billions}B parameters: a LoRA run above 7B does not fit the 24 GB GPU the lesson uses")
+    if max_run is None:
+        problems.append("no max_run: the SDK would send 24 hours, so a hung job bills a day; set it to about twice the estimate")
+    else:
+        cap_minutes = max_run / 60
+        if cap_minutes < estimated_minutes:
+            problems.append(f"max_run is {cap_minutes:.0f} min but the estimate is {estimated_minutes} min: the job would be killed before it finishes")
+        elif cap_minutes > 4 * estimated_minutes:
+            problems.append(f"max_run is {cap_minutes:.0f} min, more than four times the {estimated_minutes} min estimate: "
+                            f"a hung job would bill ${price_per_hour * cap_minutes / 60:.2f}; set it to about twice the estimate")
+        if cap_minutes > 60 and not checkpoint_s3_uri:
+            problems.append("no checkpoint_s3_uri on a run that may exceed an hour: a crash or the cap loses all of it")
+    if not job_name:
+        problems.append("no job_name: the SDK makes one up each time, so running the launch cell twice starts two jobs")
+    hp = hyperparameters or {}
+    if hp.get("epochs", 0) > 10:
+        problems.append(f"epochs={hp['epochs']}: more than ten passes over the data; run a few first and read the curve")
+    if hp.get("max_pixels", 0) > 4 * 1280 * 28 * 28:
+        problems.append(f"max_pixels={hp['max_pixels']}: four times the lesson's page budget, so tokens and cost per page are four times too")
+    if problems:
+        raise ValueError("this launch should not go out:\n  - " + "\n  - ".join(problems))
+    print(f"launch check passed: {method} on a {params_billions}B model, {instance_type} at ${price_per_hour}/h, "
+          f"estimate {estimated_minutes} min (${price_per_hour * estimated_minutes / 60:.2f}), "
+          f"cap {max_run / 60:.0f} min (worst case ${price_per_hour * max_run / 3600:.2f}), "
+          f"checkpoints {'on' if checkpoint_s3_uri else 'off'}, job name {job_name}")
+    return tags
+
+
 def rules(path=GUARDRAILS_FILE):
     """Print the account's launch rules, read from the policy file."""
     r = load_guard_rails(path)

@@ -431,6 +431,8 @@ os.makedirs(proc_dir, exist_ok=True)
 for fname in ["config.json", "preprocessor_config.json", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
               "added_tokens.json", "vocab.json", "merges.txt", "chat_template.json", "video_preprocessor_config.json"]:
     s3_client.download_file(shared_bucket, f"{data_prefix}/model/churro-3B/{fname}", os.path.join(proc_dir, fname))
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")   # the pixel limits are passed the way this transformers version wants; the newer form is a FutureWarning it prints on every call
 processor = AutoProcessor.from_pretrained(proc_dir, min_pixels=bc.DEFAULT_MIN_PIXELS, max_pixels=bc.DEFAULT_MAX_PIXELS)
 ```
 
@@ -488,6 +490,15 @@ helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_ex
 ```
 
 Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is what Exercise 1 changes.
+
+Now the same run as a full fine-tune. The arithmetic goes up by half, 6 FLOPs per parameter per token instead of 4, but that is not what changes the bill:
+
+```python
+helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_example=int(avg_tokens_per_page), epochs=2,
+                               method="full");   # no instance_type: the cheapest that holds it
+```
+
+Memory is what changes. The weights, their gradients and the optimizer's state come to 64 GB against 13, so the run no longer fits a 24 GB GPU, and the cheapest instance that holds it is the four-GPU `ml.g5.12xlarge` at `$7.09` an hour, five times the price. The four GPUs share the work, so the job is shorter, and the run comes to about `$1.87` against `$0.60`. On 251 pages that is a dollar; the same jump at 7B is the Step 0 table's `$140` a run, and the two warnings the function prints are the account's rules: no full fine-tune, no multi-GPU instance.
 
 ### A code folder for the job
 
@@ -556,7 +567,7 @@ def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning
         {"Key": "Purpose", "Value": purpose},
     ])
 
-make_job_tags("Training")   # fails here, with the fix, rather than at the launch
+make_job_tags("Training");   # fails here, with the fix, rather than at the launch; the semicolon keeps Jupyter from also displaying the list
 ```
 
 ## Step 1: Launch the LoRA fine-tune
@@ -600,7 +611,7 @@ hyperparameters = {
     # no model_id: the script reads the base weights from the "model" channel mounted at fit()
     "epochs": 2,                      # two passes over the 251 pages; the per-pass curve below says what each one bought
     "lr": 2e-4,                       # LoRA takes a higher learning rate than a full fine-tune (~1e-5)
-    "lora_r": 16,                     # adapter rank: how many trainable parameters LoRA adds per layer
+    "lora_r": 16,                     # adapter rank. The model has 36 layers with seven projections each; rank 16 on all of them is about 30 million trainable parameters, 0.8% of the 3.75B (the script-reading challenge works it out); rank 32 would double that
     "batch_size": 1,
     "grad_accum": 4,                  # effective batch of 4 pages -> ~125 optimizer steps over 2 passes
     "max_pixels": 1280 * 28 * 28,     # ~1 megapixel per page; tokens per page, and so cost, scale with it
@@ -608,6 +619,17 @@ hyperparameters = {
     "eval_before": 1,
     "curve_pages": 8,                 # of those 15, scored again at the end of every epoch: the CER curve
 }
+```
+
+One check of all of it before the estimator exists, as `check_launch` checked the tags. `check_finetune_launch` applies the account's rules to the tags, the instance type and the cap, and then this lesson's own rules for a fine-tune: LoRA and not a full fine-tune, a model of at most 7B, a cap between the estimate and four times it, checkpoints on any run that may pass an hour, a fixed job name, and sane values for the passes and the pixel budget. It raises with every problem named, or prints what the launch is allowed to cost.
+
+```python
+helpers.check_finetune_launch(
+    tags=make_job_tags("Training"), instance_type=instance_type, max_run=max_run_minutes * 60,
+    estimated_minutes=estimated_minutes, price_per_hour=g5_price,
+    params_billions=3.75, method="lora",
+    job_name=training_job_name, checkpoint_s3_uri=checkpoint_s3_uri, hyperparameters=hyperparameters,
+);
 ```
 
 Then the estimator: which script and folder to ship, which prebuilt container to run it in (the three version numbers pick a Hugging Face image with transformers, PyTorch and Python), which instance, the guard rails from above, and where the output and checkpoints go.
@@ -895,6 +917,16 @@ homework_hyperparameters = {
     "eval_pages": 40,
     "eval_before": 1,
 }
+```
+
+The same check as in class, with the homework's cap and name:
+
+```python
+helpers.check_finetune_launch(
+    tags=make_job_tags("Training"), instance_type="ml.g5.xlarge", max_run=130 * 60,
+    estimated_minutes=65, price_per_hour=g5_price, params_billions=3.75, method="lora",
+    job_name=homework_job_name, checkpoint_s3_uri=homework_checkpoint_s3_uri, hyperparameters=homework_hyperparameters,
+);
 ```
 
 Same estimator as in class, except for the job name, the checkpoint folder and the 130-minute cap.
