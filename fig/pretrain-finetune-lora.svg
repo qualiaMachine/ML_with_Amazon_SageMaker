@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" font-family="Helvetica, Arial, sans-serif" font-size="17">
+<rect width="1200" height="560" fill="#ffffff"/>
+<text x="600" y="38" text-anchor="middle" font-weight="bold" font-size="22">Where a model's weights come from sets the bill</text>
+<rect x="430" y="58" width="20" height="20" fill="#fdae6b" stroke="#444"/><text x="458" y="74" font-size="15">trained</text>
+<rect x="560" y="58" width="20" height="20" fill="#9ecae1" stroke="#444"/><text x="588" y="74" font-size="15">frozen</text>
+<rect x="40" y="96" width="360" height="430" fill="#fafafa" stroke="#bbb" rx="8"/>
+<text x="220" y="128" text-anchor="middle" font-weight="bold" font-size="20">Pretraining</text>
+<rect x="110" y="150" width="220" height="110" fill="#fdae6b" stroke="#444" stroke-width="1.5"/>
+<text x="220" y="212" text-anchor="middle" font-weight="bold" font-size="30">W</text>
+<text x="220" y="300" text-anchor="middle" font-size="15">all weights, from random</text>
+<text x="62" y="338" font-size="15" fill="#555">data</text>
+<text x="140" y="338" font-size="15">trillions of tokens: the public internet</text>
+<text x="62" y="376" font-size="15" fill="#555">hardware</text>
+<text x="140" y="376" font-size="15">thousands of GPUs, for months</text>
+<text x="62" y="414" font-size="15" fill="#555">cost</text>
+<text x="140" y="414" font-size="15">tens of millions of dollars</text>
+<text x="62" y="452" font-size="15" fill="#555">who</text>
+<text x="140" y="452" font-size="15">a handful of companies</text>
+<text x="62" y="490" font-size="15" fill="#555">example</text>
+<text x="140" y="490" font-size="15">Qwen2.5: 18 trillion tokens</text>
+<rect x="425" y="96" width="360" height="430" fill="#fafafa" stroke="#bbb" rx="8"/>
+<text x="605" y="128" text-anchor="middle" font-weight="bold" font-size="20">Full fine-tuning</text>
+<rect x="495" y="150" width="220" height="110" fill="#fdae6b" stroke="#444" stroke-width="1.5"/>
+<text x="605" y="212" text-anchor="middle" font-weight="bold" font-size="30">W</text>
+<text x="605" y="300" text-anchor="middle" font-size="15">all weights, from a pretrained model</text>
+<text x="447" y="338" font-size="15" fill="#555">data</text>
+<text x="525" y="338" font-size="15">thousands of examples and up</text>
+<text x="447" y="376" font-size="15" fill="#555">hardware</text>
+<text x="525" y="376" font-size="15">one multi-GPU box, for hours to days</text>
+<text x="447" y="414" font-size="15" fill="#555">cost</text>
+<text x="525" y="414" font-size="15">hundreds to thousands of dollars</text>
+<text x="447" y="452" font-size="15" fill="#555">who</text>
+<text x="525" y="452" font-size="15">a lab with a GPU budget</text>
+<text x="447" y="490" font-size="15" fill="#555">example</text>
+<text x="525" y="490" font-size="15">CHURRO-3B: 100k pages, 800 GPU-hours</text>
+<rect x="810" y="96" width="360" height="430" fill="#fafafa" stroke="#bbb" rx="8"/>
+<text x="990" y="128" text-anchor="middle" font-weight="bold" font-size="20">LoRA fine-tuning</text>
+<rect x="880" y="150" width="220" height="110" fill="#9ecae1" stroke="#444" stroke-width="1.5"/>
+<rect x="1106" y="150" width="10" height="110" fill="#fdae6b" stroke="#444"/>
+<rect x="880" y="266" width="220" height="10" fill="#fdae6b" stroke="#444"/>
+<text x="990" y="212" text-anchor="middle" font-weight="bold" font-size="30">W</text>
+<text x="990" y="300" text-anchor="middle" font-size="15">weights frozen; an adapter under 1% trained</text>
+<text x="832" y="338" font-size="15" fill="#555">data</text>
+<text x="910" y="338" font-size="15">hundreds to thousands of examples</text>
+<text x="832" y="376" font-size="15" fill="#555">hardware</text>
+<text x="910" y="376" font-size="15">one GPU, for minutes to hours</text>
+<text x="832" y="414" font-size="15" fill="#555">cost</text>
+<text x="910" y="414" font-size="15">under a dollar to tens of dollars</text>
+<text x="832" y="452" font-size="15" fill="#555">who</text>
+<text x="910" y="452" font-size="15">a researcher, on a class account</text>
+<text x="832" y="490" font-size="15" fill="#555">example</text>
+<text x="910" y="490" font-size="15">this episode: 251 pages, 32 min, $0.75</text>
+</svg>
