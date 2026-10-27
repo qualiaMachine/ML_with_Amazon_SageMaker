@@ -2278,7 +2278,7 @@ task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -2766,7 +2766,7 @@ commit it, push with your PAT, and verify the change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -3002,7 +3002,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3256,7 +3256,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -3769,7 +3769,7 @@ compared with the first job?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The status is <code>InProgress</code> if you were quick and
 <code>Completed</code> otherwise. The cost is the same as the first run,
@@ -3807,7 +3807,7 @@ and compare the bill and the accuracy with the script version.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>The built-in algorithm will not run our
 <code>preprocess_data()</code> for us, and it expects a CSV with no
@@ -4444,7 +4444,7 @@ goes next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -4641,7 +4641,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5068,19 +5068,26 @@ Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 from scratch. That works when we have a well-defined problem and enough
 training data, but it isn’t practical for tasks that require the broad
 capabilities of a modern language or vision model. Training one of those
-models from scratch can require thousands of GPUs and enormous
-datasets.</p>
-<p>Fortunately, we don’t have to start from scratch. Pretrained models
-already know how to interpret images, understand language, and generate
-text. Fine-tuning lets us build on those capabilities by training a
-model further on examples from our own task.</p>
+models from scratch can require thousands of GPUs and enormous datasets.
+The PyTorch episode put numbers on that with
+<code>helpers.estimate_training_cost</code>. One pass of a 7B language
+model over a million papers came to about <code>$1,270</code> on a
+four-GPU box, and the models behind ChatGPT are far larger and trained
+on far more.</p>
+<p>Fortunately, we don’t have to start from scratch.
+<strong><em>Pretrained</em></strong> models already know how to
+interpret images, understand language, and generate text.
+<strong><em>Fine-tuning</em></strong> lets us build on those
+capabilities by training a model further on examples from our own
+task.</p>
 <p>Consider historical handwriting recognition. A general-purpose
-vision-language model may be able to transcribe ordinary printed text
-and modern handwriting, yet struggle with nineteenth-century documents,
-unfamiliar letterforms, or the conventions used by a particular archive.
-Giving it better instructions can help, but there are limits to what
-prompting can accomplish when the model has never learned to recognize
-the writing itself.</p>
+vision-language model, such as the open-weight Qwen3.8-27B or a
+commercial one like Gemini, may be able to transcribe ordinary printed
+text and modern handwriting, yet struggle with nineteenth-century
+documents, unfamiliar letterforms, or the conventions used by a
+particular archive. Giving it better instructions can help, but there
+are limits to what prompting can accomplish when the model has never
+learned to recognize the writing itself.</p>
 <p>Fine-tuning offers another approach. Show the model examples of the
 documents alongside their correct transcriptions, and train it to
 produce better results on similar material.</p>
@@ -5119,28 +5126,17 @@ with random weights, we start with weights learned during an earlier,
 much larger training process. Our examples don’t need to teach the model
 everything about language or images. They only need to help it adapt
 what it already knows.</p>
-<p>We could update every parameter in the model, which is called full
-fine-tuning. That’s how CHURRO itself was created. But even a relatively
-small model with 3 billion parameters is expensive to train this way,
-because training requires much more GPU memory than simply running the
-model.</p>
-<p>During inference, we primarily need to store the model’s weights and
-the intermediate values associated with generating an answer. During
-full fine-tuning, we also need gradients that tell us how to change
-those weights, along with the optimizer’s running statistics. Those
-additional values can increase the memory required for the model’s
-parameters from roughly 2 bytes each to 16 bytes each.</p>
-<p>For a 3B model, that’s the difference between about 6 GB and 48 GB
-just for the parameters and their training state, before accounting for
-activations and other overhead. A model that runs comfortably on one GPU
-may therefore require several GPUs to fine-tune.</p>
-<p>For our task, that’s unnecessary. We can get much of the benefit of
-fine-tuning without updating the entire model.</p>
+<p>We could update every parameter in the model, which is called
+<strong><em>full fine-tuning</em></strong>. That’s how CHURRO itself was
+created. But even a relatively small model with 3 billion parameters is
+expensive to train this way, because training requires much more GPU
+memory than simply running the model.</p>
 </div>
 <div class="section level3">
 <h3 id="lora-trains-a-small-part-of-a-large-model">LoRA trains a small part of a large model<a class="anchor" aria-label="anchor" href="#lora-trains-a-small-part-of-a-large-model"></a>
 </h3>
-<p>Low-rank adaptation, or LoRA, reduces the amount of training by
+<p><strong><em>Low-rank adaptation</em></strong>, or
+<strong><em>LoRA</em></strong>, reduces the amount of training by
 keeping the pretrained weights frozen and adding small sets of trainable
 parameters to selected layers. Rather than directly changing a large
 weight matrix, LoRA learns a much smaller adjustment to its output.</p>
@@ -5151,22 +5147,40 @@ whose product is added to its output</div>
 parameters. We still run the original model during training, but we
 don’t need to calculate and store weight updates for most of it. That
 saves enough memory to fine-tune CHURRO on a single GPU with 24 GB of
-memory.</p>
-<p>LoRA also produces a relatively small adapter that we can save
-separately from the original model. To use the fine-tuned model later,
-we load the pretrained weights together with the adapter.</p>
+memory; the next section says how much.</p>
+<p>LoRA also produces a relatively small
+<strong><em>adapter</em></strong> that we can save separately from the
+original model. To use the fine-tuned model later, we load the
+pretrained weights together with the adapter.</p>
 <p>This makes LoRA particularly useful for research groups. We can take
 an existing open-weight model, adapt it to a specialized dataset,
 evaluate whether the adaptation helped, and keep the resulting model
-without the expense of full fine-tuning. The three options sit far apart
-on one scale:</p>
+without the expense of full fine-tuning.</p>
+</div>
+<div class="section level3">
+<h3 id="training-full-fine-tuning-and-lora-on-one-scale">Training, full fine-tuning and LoRA on one scale<a class="anchor" aria-label="anchor" href="#training-full-fine-tuning-and-lora-on-one-scale"></a>
+</h3>
+<p>The GPU-hours put the three on one scale. Training from scratch is at
+the top, the full fine-tune that made CHURRO in the middle, and this
+episode’s LoRA run at the bottom.</p>
 <figure><img src="fig/pretrain-finetune-lora.svg" alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound." class="figure mx-auto d-block"><div class="figcaption">GPU-hours on a log scale for three ways to get a
 3B model that does a task: training Llama 3.2 3B from scratch, 460,000
 GPU-hours, about a thousand H100s for three weeks and some 300 MWh; the
 full fine-tune that made CHURRO-3B, 800 GPU-hours, eight H100s for four
 days and about 500 kWh; this episode’s LoRA run, half a GPU-hour, one
 A10G for 32 minutes and about 0.2 kWh</div>
-</figure>
+</figure><p>Why do the three differ so much? Training from scratch and full
+fine-tuning do the same work per step. Every parameter is updated, which
+means keeping four things in GPU memory for each one, the weight itself,
+its gradient, a 32-bit copy of the weight for the update to land in, and
+the optimizer’s two running averages. That is 16 bytes per parameter, so
+a 3B model needs about 48 GB before activations and other overhead,
+which means several GPUs. What separates those two is how much data they
+go through, trillions of tokens against a hundred thousand pages. LoRA
+cuts the work in a different place. It updates only the adapter and
+leaves the model’s own weights frozen, and a frozen weight costs 2
+bytes, not 16, with nothing else to store for it. That is why the same
+model fits one GPU, and for our task it is all we need.</p>
 </div>
 <div class="section level3">
 <h3 id="our-task-transcribing-historical-german-letters">Our task, transcribing historical German letters<a class="anchor" aria-label="anchor" href="#our-task-transcribing-historical-german-letters"></a>
@@ -5178,10 +5192,11 @@ several kinds of archival material, but we’ll concentrate on letters
 from the Anna Seifert correspondence, held by the Max Kade Institute,
 191 letters and postcards written between 1932 and 1942 by one woman to
 her son, transcribed by the Institute’s Kurrent Transcription Group.</p>
-<p>These letters were written in Kurrent, a historical form of German
-handwriting whose letterforms differ substantially from modern cursive.
-Even a model trained on historical documents can struggle with it,
-making this a useful test of whether additional fine-tuning helps.</p>
+<p>These letters were written in <strong><em>Kurrent</em></strong>, a
+historical form of German handwriting whose letterforms differ
+substantially from modern cursive. Even a model trained on historical
+documents can struggle with it, making this a useful test of whether
+additional fine-tuning helps.</p>
 <p>We have 295 labeled pages from this collection. We’ll reserve
 approximately 15% for evaluation and train on the remaining 251, using
 the corresponding human-produced transcriptions as our targets.</p>
@@ -5215,9 +5230,9 @@ the corresponding human-produced transcriptions as our targets.</p>
 </table>
 <p>Our goal is straightforward. Does fine-tuning CHURRO on these
 examples improve its ability to transcribe previously unseen pages?</p>
-<p>We’ll measure that using character error rate (CER), the same metric
-used by the competition. A lower CER means the transcription contains
-fewer character-level mistakes.</p>
+<p>We’ll measure that using <strong><em>character error rate
+(CER)</em></strong>, the same metric used by the competition. A lower
+CER means the transcription contains fewer character-level mistakes.</p>
 </div>
 <div class="section level3">
 <h3 id="what-well-do-and-what-it-will-cost">What we’ll do, and what it will cost<a class="anchor" aria-label="anchor" href="#what-well-do-and-what-it-will-cost"></a>
@@ -5419,9 +5434,14 @@ minutes. The rule lands on the number.</p>
 <p><code>helpers.estimate_finetune_cost</code> does both calculations
 for any model and any data, picks the cheapest instance that fits (or
 uses the one you name), and prints the memory needed, the GPU-hours, the
-cost per run and per project, and a <code>max_run</code> to set. Its
-inputs are the quantities in the two rules, with the class run as the
-example:</p>
+cost per run and per project, and a <code>max_run</code> to set. It is
+the same function the PyTorch episode used as
+<code>estimate_training_cost</code>, which is this one with every weight
+trained from scratch, so the assumptions are the same there and here.
+Bytes per parameter from the first table, 6 or 4 FLOPs per parameter per
+token, times 1.5 for gradient checkpointing, a quarter of the GPU’s
+peak, and 10 minutes of startup per job. Its inputs are the quantities
+in the two rules, with the class run as the example:</p>
 <ul>
 <li>
 <code>params_billions</code>: every parameter the model holds,
@@ -5752,7 +5772,7 @@ project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5, because a full fine-tune of a 7B model
 needs about 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8
@@ -6355,7 +6375,7 @@ step. Which, and why are they there?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Only the language model’s <code>q_proj</code>, <code>k_proj</code>,
@@ -6938,7 +6958,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -7356,7 +7376,7 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -7397,7 +7417,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -8200,7 +8220,7 @@ and the runtime print.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -8250,7 +8270,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -9791,7 +9811,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10245,7 +10265,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -10325,7 +10345,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -13020,7 +13040,7 @@ are who you think you are, in the account you think you are in:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13029,7 +13049,7 @@ are who you think you are, in the account you think you are in:</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13083,7 +13103,7 @@ download you paid for.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13092,7 +13112,7 @@ download you paid for.</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
+<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13121,7 +13141,7 @@ key”:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13129,7 +13149,7 @@ key”:</p>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
+<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13203,7 +13223,7 @@ the account.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13238,7 +13258,7 @@ the account.</p>
 <span id="cb12-29"><a href="#cb12-29" tabindex="-1" aria-label="code-block-12-29"></a><span class="op">JSON</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
+<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13369,7 +13389,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-5" class="nav nav-tabs" role="tablist">
@@ -13385,14 +13405,14 @@ finds something. Then run them against your own resources.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
+<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
