@@ -681,7 +681,7 @@ print(f"Wall-clock from launch to finish: {(time.time() - start) / 60:.1f} min (
 
 ### Interrupting the cell does not stop the job
 
-The square "interrupt kernel" button stops the *notebook* from watching the job. The GPU instance keeps running and keeps billing until the script finishes or `max_run` expires. To stop a job, use the console (**SageMaker AI → Training → Training jobs → select → Stop**) or:
+The square "interrupt kernel" button stops the *notebook* from watching the job. The GPU instance keeps running and keeps billing until the script finishes or `max_run` expires. To stop a job, open the [Training jobs page](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training) in the console (**SageMaker AI → Training → Training jobs**), select it and click **Stop**, or run:
 
 ```python
 # Only if you need to stop the job: remove the # from the next line and run the cell
@@ -1064,7 +1064,7 @@ base_output_uri = run_transcription_job("base")
 lora_output_uri = run_transcription_job("lora", adapter_uri=homework_adapter_s3_uri)
 ```
 
-Both jobs run in parallel on their own GPU, which doubles the instantaneous spend but halves the wall-clock time; the total cost is the same. Watch them under **SageMaker AI → Data preparation → Processing jobs**, and when both are `Completed`, score the holdout rows with `metric.py`, the exact file that scores the leaderboard.
+Both jobs run in parallel on their own GPU, which doubles the instantaneous spend but halves the wall-clock time; the total cost is the same. Watch them on the [Processing jobs page](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs) (**SageMaker AI → Data preparation → Processing jobs**), and when both are `Completed`, score the holdout rows with `metric.py`, the exact file that scores the leaderboard.
 
 ```python
 %%script false --no-raise-error
