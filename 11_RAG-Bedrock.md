@@ -24,9 +24,9 @@ exercises: 20
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/11_RAG-Bedrock.ipynb`. Select the **`conda_pytorch`** kernel.
-This is the first hands-on RAG episode, and it starts where the overview said to: Amazon Bedrock. We build the whole RAG pipeline for the [WattBot 2026](https://www.kaggle.com/competitions/WattBot2026) challenge from a small CPU-only SageMaker notebook. Nothing here needs a GPU: both the text embeddings and the answer generation run on Bedrock-hosted models, which bill per token and leave nothing running between calls. The two models are **Amazon Titan Text Embeddings V2**, which turns WattBot chunks into vectors, and **DeepSeek V3**, which writes the answers and explanations.
+This is the first hands-on RAG episode, and it uses Amazon Bedrock, the default the overview recommended. We build the whole RAG pipeline for the [WattBot 2026](https://www.kaggle.com/competitions/WattBot2026) challenge from a small CPU-only SageMaker notebook. Nothing here needs a GPU, because both the text embeddings and the answer generation run on Bedrock-hosted models, which bill per token and leave nothing running between calls. The two models are **Amazon Titan Text Embeddings V2**, which turns WattBot chunks into vectors, and **DeepSeek V3**, which writes the answers and explanations.
 
-This episode also prepares the corpus: it unpacks the WattBot PDFs, splits them into pages and overlapping chunks, and caches the chunks in S3. The Processing-jobs episode and the optional GPU-notebook episode reuse those chunks and run the same retrieval, evaluation and scoring on self-hosted models, so cost, latency and effort can be compared directly.
+This episode also prepares the corpus. It unpacks the WattBot PDFs, splits them into pages and overlapping chunks, and caches the chunks in S3. The Processing-jobs episode and the optional GPU-notebook episode reuse those chunks and run the same retrieval, evaluation and scoring on self-hosted models, so cost, latency and effort can be compared directly.
 
 ## Why Bedrock for WattBot?
 
@@ -44,7 +44,7 @@ In this notebook both the embedding step and the answer and explanation steps ru
 Both models are Bedrock-hosted foundation models:
 
 - **Amazon Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`): a general text-embedding model for retrieval, clustering and classification. It returns vectors of 256, 512 or 1,024 dimensions, with presets for retrieval. AWS does not publish its parameter count.
-- **DeepSeek V3** (`deepseek.v3-v1:0`): an open-weight mixture-of-experts model, 671B parameters in total and about 37B active per token, that Bedrock serves on demand, so there is no GPU to manage. Its per-token price is well below the flagship models' (the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) has current rates), which matters when there is one call per question. The same code works for any chat model in the catalog: Bedrock's one chat call, `converse`, takes the same input for every provider, a system prompt and a list of messages, and returns the reply in the same shape, so changing `base_generation_model_id` to a Claude, Llama or Mistral ID changes nothing else.
+- **DeepSeek V3** (`deepseek.v3-v1:0`): an open-weight mixture-of-experts model, 671B parameters in total and about 37B active per token, that Bedrock serves on demand, so there is no GPU to manage. Its per-token price is well below the flagship models' (the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) has current rates), which matters when there is one call per question. The same code works for any chat model in the catalog, because Bedrock's one chat call, `converse`, takes the same input for every provider, a system prompt and a list of messages, and returns the reply in the same shape, so changing `base_generation_model_id` to a Claude, Llama or Mistral ID changes nothing else.
 - **Multimodal models for tables and figures**: Bedrock also serves models that embed or read images. Step 13 uses one, Amazon Nova Multimodal Embeddings, on the table and figure questions.
 
 The [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the Bedrock console lists every model available in the region (Claude variants, Amazon models and partner models), each with a model card and a link to its pricing.
@@ -59,7 +59,7 @@ The catalog tells you what exists and what it costs; it does not tell you what i
 - **Generation models**: [LMArena](https://lmarena.ai/) ranks chat models by blind human preference, and [Artificial Analysis](https://artificialanalysis.ai/) plots quality against price per million tokens, the chart to read for RAG, since the answer is written from retrieved text, so a mid-priced model often reads as well as a flagship at a tenth of the cost.
 - **Your own questions**: the benchmarks rank models on other people's data. `train_QA.csv` has labelled questions for this corpus, and the evaluation at the end of this episode scores a model on them and prices the run from its token counts. Changing `base_generation_model_id` and rerunning is the whole experiment. A model that wins on a leaderboard and loses on your questions has told you something the leaderboard cannot.
 
-The habit is the same as for instances: pick the cheapest candidate that scores well enough, measure it on your data, and move up only when the measurement says to.
+The habit is the same as for instances. Pick the cheapest candidate that scores well enough, measure it on your data, and move up only when the measurement says to.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -120,7 +120,7 @@ role = sagemaker.get_execution_role()
 print("Role:", role)   # the execution role: on the class account it carries the Bedrock permissions; on your own, it must
 ```
 
-**The models.** RAG needs two: an embedding model, which turns a piece of text into a vector so that similar passages land near each other, and a generation model, the chat model that writes the answer from the passages it is given. Both are catalog models on Bedrock, named by a model ID; the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the console lists everything available in the region with its ID; prices are on the pricing page, and the [supported models page](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) in the documentation is the same list as a table. Prices are per million tokens on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/): in October 2026, DeepSeek V3 on demand is `$0.62` in and `$1.85` out, and Titan Text Embeddings V2 is `$0.02` in, which is why the whole WattBot run below costs cents. We write the IDs down now but will not call them by these IDs directly: the cost-tracking step below wraps each one in a tagged inference profile first, because that is the only way Bedrock spend gets attributed to a project.
+**The models.** RAG needs two, an embedding model, which turns a piece of text into a vector so that similar passages land near each other, and a generation model, the chat model that writes the answer from the passages it is given. Both are catalog models on Bedrock, named by a model ID; the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the console lists everything available in the region with its ID; prices are on the pricing page, and the [supported models page](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html) in the documentation is the same list as a table. Prices are per million tokens on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/). In October 2026, DeepSeek V3 on demand is `$0.62` in and `$1.85` out, and Titan Text Embeddings V2 is `$0.02` in, which is why the whole WattBot run below costs cents. We write the IDs down now but will not call them by these IDs directly, because the cost-tracking step below wraps each one in a tagged inference profile first, because that is the only way Bedrock spend gets attributed to a project.
 
 ```python
 # Base model IDs. Any chat model in the Bedrock catalog works as the generator (a Claude or Llama ID, say),
@@ -129,7 +129,7 @@ base_generation_model_id = "deepseek.v3-v1:0"             # writes the answers; 
 base_embedding_model_id = "amazon.titan-embed-text-v2:0"  # turns text into vectors for retrieval; $0.02 per million tokens
 ```
 
-**The files.** The inputs live in the shared bucket: the paper list, the questions with their answers, and the zipped corpus of PDFs. Everything this episode derives from them goes to your own bucket, under the same `wattbot/` prefix: the chunked text, the chunk embeddings, and the answers the pipeline produces.
+**The files.** The inputs in the shared bucket are the paper list, the questions with their answers, and the zipped corpus of PDFs. Everything this episode derives from them goes to your own bucket, under the same `wattbot/` prefix, which will hold the chunked text, the chunk embeddings, and the answers the pipeline produces.
 
 ```python
 !mkdir -p /home/ec2-user/SageMaker/wattbot   # a project folder beside the lesson clone, so data and outputs stay out of the repository
@@ -158,7 +158,7 @@ The inputs, as they sit in the shared bucket. The three files named above are at
 helpers.show_bucket(shared_bucket, "wattbot/")   # every file under the prefix, with its size
 ```
 
-**Two Bedrock clients.** Bedrock has two APIs. `bedrock-runtime` is the one that calls models (`converse`, the chat call, for answers; `invoke_model`, the raw call with a provider-specific body, for embeddings); it is what every answer and every embedding in this episode goes through. `bedrock` is the control plane: listing models, creating the inference profiles that carry our tags. The runtime client gets a retry setting because on-demand Bedrock throughput is rate-limited per model: a loop of a few thousand embedding calls will occasionally be throttled, and the adaptive mode backs off and retries instead of raising.
+**Two Bedrock clients.** Bedrock has two APIs. `bedrock-runtime` is the one that calls models (`converse`, the chat call, for answers; `invoke_model`, the raw call with a provider-specific body, for embeddings); it is what every answer and every embedding in this episode goes through. `bedrock` is the control plane, for listing models and creating the inference profiles that carry our tags. The runtime client gets a retry setting because on-demand Bedrock throughput is rate-limited per model, so a loop of a few thousand embedding calls will occasionally be throttled, and the adaptive mode backs off and retries instead of raising.
 
 ```python
 bedrock_runtime = boto3.client(
@@ -188,11 +188,11 @@ from wattbot_rag import (
 )
 ```
 
-Open `wattbot_rag.py` in the Jupyter file browser as you go: each helper is short.
+Open `wattbot_rag.py` in the Jupyter file browser as you go. Each helper is short.
 
 ## Step 3 – Load the metadata and training questions
 
-Pull the two CSV files from the shared bucket into the notebook and inspect them. Two helpers first: `download_from_s3` copies one object from the shared bucket (or any bucket you name) into the local data folder, and `smart_read_csv` reads a CSV by trying a few encodings in turn, because author names and titles in `metadata.csv` are not always valid UTF-8.
+Pull the two CSV files from the shared bucket into the notebook and inspect them. Two helpers come first. `download_from_s3` copies one object from the shared bucket (or any bucket you name) into the local data folder, and `smart_read_csv` reads a CSV by trying a few encodings in turn, because author names and titles in `metadata.csv` are not always valid UTF-8.
 
 ```python
 import zipfile
@@ -220,7 +220,7 @@ def smart_read_csv(path: str) -> pd.DataFrame:
     raise RuntimeError(f"Unable to read CSV at {path}")
 ```
 
-Now the two files: `train_QA.csv` is the labelled questions and answers we score against, `metadata.csv` is one row per paper with its id, title and URL.
+Now the two files. `train_QA.csv` is the labelled questions and answers we score against, `metadata.csv` is one row per paper with its id, title and URL.
 
 ```python
 train_qa_path = download_from_s3(train_key, "train_QA.csv")      # labelled questions + answers: what we score against
@@ -239,7 +239,7 @@ train_df.head(15)
 
 ## Step 4 – Get the PDF corpus
 
-The corpus is the set of PDFs listed in `metadata.csv`, one per paper, named `<id>.pdf`. Downloading them from the publishers' sites is slow and unreliable when fifty notebooks do it at once, so the instructors did it once with `scripts/build_wattbot_corpus.py` and staged the result as `corpus.zip` in the shared bucket. We download that one file, unpack it, and delete the zip: the instance's volume is 20 GB, and the zip plus the unpacked PDFs are close to 700 MB.
+The corpus is the set of PDFs listed in `metadata.csv`, one per paper, named `<id>.pdf`. Downloading them from the publishers' sites is slow and unreliable when fifty notebooks do it at once, so the instructors did it once with `scripts/build_wattbot_corpus.py` and staged the result as `corpus.zip` in the shared bucket. We download that one file, unpack it, and delete the zip, because the instance's volume is 20 GB, and the zip plus the unpacked PDFs are close to 700 MB.
 
 ```python
 PDF_DIR = os.path.join(local_data_dir, "pdfs")
@@ -258,7 +258,7 @@ print(f"{len(pdf_files)} PDFs in {PDF_DIR}; metadata lists {len(metadata_df)} pa
 
 ### Where the corpus came from
 
-`metadata.csv` has a `url` column pointing at each paper. `scripts/build_wattbot_corpus.py` in the lesson repository walks that column, downloads every PDF, zips them, and then extracts the text of every page into `pages.jsonl`; it reports any URL that failed so the instructor can decide what to do about it. If you are working on your own, run it once and upload both files to your bucket under `wattbot/` (with `shared_bucket = bucket_name`, as in the callout above). That is the whole difference between "the data" and "a copy of the data": the corpus is built once and read many times.
+`metadata.csv` has a `url` column pointing at each paper. `scripts/build_wattbot_corpus.py` in the lesson repository walks that column, downloads every PDF, zips them, and then extracts the text of every page into `pages.jsonl`; it reports any URL that failed so the instructor can decide what to do about it. If you are working on your own, run it once and upload both files to your bucket under `wattbot/` (with `shared_bucket = bucket_name`, as in the callout above). That is the whole difference between "the data" and "a copy of the data". The corpus is built once and read many times.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -277,7 +277,7 @@ Later, we will **chunk these pages** into smaller overlapping segments for embed
 
 ### Why chunks keep their page
 
-Every chunk carries the page it came from: the document id, URL and page label stay attached to the text, a retrieved chunk can be traced to the page the model saw, the text can be cleaned at the page level before chunking, and chunk sizes can be changed later without extracting the PDFs again.
+Every chunk carries the page it came from, so the document id, URL and page label stay attached to the text, a retrieved chunk can be traced to the page the model saw, the text can be cleaned at the page level before chunking, and chunk sizes can be changed later without extracting the PDFs again.
 
 
 
@@ -285,7 +285,7 @@ Every chunk carries the page it came from: the document id, URL and page label s
 %pip install -q pypdf
 ```
 
-`pdfs_to_page_docs` in `wattbot_rag.py` opens each PDF listed in the metadata with `pypdf` and turns every page into one record: its text, the document id, title and URL, and the page number. It is forty lines of plain Python with nothing AWS in it; open the file to read it. On a CPU notebook it takes several minutes over this corpus, so the cell first looks for `pages.jsonl`, the same records written once when the corpus was staged, and runs the extraction only if that file is not there.
+`pdfs_to_page_docs` in `wattbot_rag.py` opens each PDF listed in the metadata with `pypdf` and turns every page into one record holding its text, the document id, title and URL, and the page number. It is forty lines of plain Python with nothing AWS in it; open the file to read it. On a CPU notebook it takes several minutes over this corpus, so the cell first looks for `pages.jsonl`, the same records written once when the corpus was staged, and runs the extraction only if that file is not there.
 
 ```python
 from wattbot_rag import pdfs_to_page_docs   # the extraction: open each PDF with pypdf, one record per page; in scripts/wattbot_rag.py
@@ -428,11 +428,11 @@ print("Upload complete.")
 ```
 
 
-## Step 7 – Cost tracking: Bedrock calls carry no tags unless you route them through a profile
+## Step 7 – Cost tracking through a tagged profile
 
-Every SageMaker job in this lesson is tagged at launch, because tags never propagate from the notebook. Bedrock is stricter still: **an on-demand `invoke_model` or `converse` call has no tags parameter at all.** If you call `deepseek.v3-v1:0` or `amazon.titan-embed-text-v2:0` by its model ID, the usage lands in the account's Bedrock bill as anonymous per-token charges. The notebook's tags, the bucket's tags, and the tags you set on anything else are irrelevant to it. On a shared account that means nobody can tell which team spent what.
+Every SageMaker job in this lesson is tagged at launch, because tags never propagate from the notebook. Bedrock is stricter still. **An on-demand `invoke_model` or `converse` call has no tags parameter at all.** If you call `deepseek.v3-v1:0` or `amazon.titan-embed-text-v2:0` by its model ID, the usage lands in the account's Bedrock bill as anonymous per-token charges. The notebook's tags, the bucket's tags, and the tags you set on anything else are irrelevant to it. On a shared account that means nobody can tell which team spent what.
 
-The fix is not a tag on the call; it is a different thing to call. An **application inference profile** is a small resource you create in your own account: an alias that points at one base model and carries your three tags. It has its own ARN, and that ARN goes wherever a model ID goes. Nothing else changes: same model, same price per token, same answers. The only difference is in the bill, where usage made through the alias shows up with the alias's tags.
+The fix is not a tag on the call; it is a different thing to call. An **application inference profile** is a small resource you create in your own account, an alias that points at one base model and carries your three tags. It has its own ARN, and that ARN goes wherever a model ID goes. Nothing else changes. Same model, same price per token, same answers. The only difference is in the bill, where usage made through the alias shows up with the alias's tags.
 
 Before and after, in the generation call:
 
@@ -441,7 +441,7 @@ Before and after, in the generation call:
 | Raw model ID | `deepseek.v3-v1:0` | nobody: anonymous DeepSeek spend on the account |
 | Your profile | `arn:aws:bedrock:us-east-2:<account-id>:application-inference-profile/adewnu8wqxpy` | `Name=DoeJohn, Project=SinkOrSwim, Purpose=Inference` |
 
-So "cost tracking on Bedrock" is: create the alias once per model (one for DeepSeek, one for Titan, because an alias points at a single model), keep its ARN in a variable, and use that variable as `modelId` from then on. The profile is free; you pay only for tokens, as before.
+So cost tracking on Bedrock comes to three things. Create the alias once per model (one for DeepSeek, one for Titan, because an alias points at a single model), keep its ARN in a variable, and use that variable as `modelId` from then on. The profile is free; you pay only for tokens, as before.
 
 One call per model does all of it. `tagged_profile_arn` in `wattbot_rag.py` looks for a profile named after your project and user name, creates it with the three tags if it is not there, and returns its ARN. One tagged profile per model, its ARN in place of the model ID.
 
@@ -502,7 +502,7 @@ It prints the profile ARN; pass that as `modelId`. The helper adds only the reus
 
 ### Who is paying for these tokens?
 
-List the application inference profiles in the account and find your two. For each, print its name, the model it points at, and its tags (`bedrock.list_tags_for_resource` takes the profile ARN). Then answer: if a teammate skipped this step and called `deepseek.v3-v1:0` by its raw model ID for the rest of the episode, what would Cost Explorer show when the organizers filter the month's Bedrock spend by `Project`?
+List the application inference profiles in the account and find your two. For each, print its name, the model it points at, and its tags (`bedrock.list_tags_for_resource` takes the profile ARN). Then answer this. If a teammate skipped this step and called `deepseek.v3-v1:0` by its raw model ID for the rest of the episode, what would Cost Explorer show when the organizers filter the month's Bedrock spend by `Project`?
 
 :::::::::::::::::::::::: solution
 
@@ -516,7 +516,7 @@ for p in profiles:
         print("   tags:", {t["key"]: t["value"] for t in tags})
 ```
 
-Filtering by `Project` shows **only** the usage that went through a tagged profile. The teammate's calls are still on the bill, under the Bedrock service line for `deepseek.v3-v1:0`, but with no `Project`, `Name` or `Purpose` value: in the grouped view they fall into the "No tag key: Project" bucket, together with every other untagged call in the account. There is no way to attribute them after the fact; tags are applied when the usage is metered, not later. That is why the base model ID is never passed to the runtime in this episode.
+Filtering by `Project` shows **only** the usage that went through a tagged profile. The teammate's calls are still on the bill, under the Bedrock service line for `deepseek.v3-v1:0`, but with no `Project`, `Name` or `Purpose` value, so in the grouped view they fall into the "No tag key: Project" bucket, together with every other untagged call in the account. There is no way to attribute them after the fact; tags are applied when the usage is metered, not later. That is why the base model ID is never passed to the runtime in this episode.
 
 :::::::::::::::::::::::::::::::::
 
@@ -524,7 +524,7 @@ Filtering by `Project` shows **only** the usage that went through a tagged profi
 
 ## Step 8 – Embed the chunks with Titan
 
-Everything the RAG loop needs is now in memory: the chunks, the questions, and a way to resolve a document id to its URL for the `ref_url` column.
+Everything the RAG loop needs is now in memory, the chunks, the questions, and a way to resolve a document id to its URL for the `ref_url` column.
 
 ```python
 print(f"Chunks: {len(chunked_docs)}")
@@ -535,7 +535,7 @@ docid_to_url = build_docid_to_url(metadata_df)   # doc_id -> url, for the ref_ur
 print(f"docid_to_url has {len(docid_to_url)} entries.")
 ```
 
-Titan Text Embeddings V2 takes one string per `invoke_model` call and returns a 1,024-dimensional normalized vector. `embedding_model_id_bedrock` is the ARN of our tagged profile for it, so every call is attributed to our `Project`/`Name`/`Purpose` tags. Three cells: where the result is saved, the call that embeds one string, and the loop that embeds every chunk once and caches the matrix. First the paths.
+Titan Text Embeddings V2 takes one string per `invoke_model` call and returns a 1,024-dimensional normalized vector. `embedding_model_id_bedrock` is the ARN of our tagged profile for it, so every call is attributed to our `Project`/`Name`/`Purpose` tags. The next three cells set where the result is saved, define the call that embeds one string, and run the loop that embeds every chunk once and caches the matrix. First the paths.
 
 ```python
 data_dir = Path(local_data_dir)
@@ -572,7 +572,7 @@ Embedding the corpus, about 9,000 chunks, is ten minutes and a few cents, so do 
 
 ### In a class, use the instructor's copy
 
-Bedrock allows this account 300,000 Titan embedding tokens per minute. This corpus is about 2.4 million tokens, so one notebook alone needs ten minutes at the full quota; a room of them shares it, so everyone's loop slows to a crawl of retries. In class, leave `use_instructor_embeddings` in the next cell at `True`: the cache cell then downloads the matrix your instructor computed with the same chunks and the same model from the shared bucket and skips the calls. Working on your own, set it to `False` and let the loop run; that is the step to practise.
+Bedrock allows this account 300,000 Titan embedding tokens per minute. This corpus is about 2.4 million tokens, so one notebook alone needs ten minutes at the full quota; a room of them shares it, so everyone's loop slows to a crawl of retries. In class, leave `use_instructor_embeddings` in the next cell at `True`. The cache cell then downloads the matrix your instructor computed with the same chunks and the same model from the shared bucket and skips the calls. Working on your own, set it to `False` and let the loop run; that is the step to practise.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -581,7 +581,7 @@ use_instructor_embeddings = True                            # True in class: dow
 shared_embeddings_key = "wattbot/embeddings_bedrock.npy"   # where the instructor staged it in the shared bucket
 ```
 
-One small helper asks S3 whether an object exists, and one checks that a cached matrix belongs to these chunks: a matrix from an earlier corpus has a different number of rows, and using it would pair every question with the wrong passages.
+One small helper asks S3 whether an object exists, and one checks that a cached matrix belongs to these chunks, since a matrix from an earlier corpus has a different number of rows, and using it would pair every question with the wrong passages.
 
 ```python
 def _s3_object_exists(bucket: str, key: str) -> bool:
@@ -637,9 +637,9 @@ assert chunk_embeddings.shape[0] == len(chunked_docs), "embeddings and chunks ar
 print("Embeddings shape:", chunk_embeddings.shape)
 ```
 
-## Step 9 – Retrieve: cosine similarity over the embedding matrix
+## Step 9 – Retrieve with cosine similarity over the embedding matrix
 
-Retrieval is pure NumPy: embed the question with the same model, take the cosine similarity against every chunk, and keep the top *k*. `retrieve_top_k` from `wattbot_rag.py` does that (open the file to see it: it is a normalize-and-matrix-multiply). No vector database is needed for a few thousand chunks; the optional GPU-notebook episode discusses when one becomes worth it.
+Retrieval is pure NumPy. Embed the question with the same model, take the cosine similarity against every chunk, and keep the top *k*. `retrieve_top_k` from `wattbot_rag.py` does that (open the file to see it, a normalize and a matrix multiply). No vector database is needed for a few thousand chunks; the optional GPU-notebook episode discusses when one becomes worth it.
 
 ```python
 first_row = train_df.iloc[0]
@@ -652,9 +652,9 @@ for r in test_retrieved:   # score is the cosine similarity; 1.0 would be an ide
     print(f"- score={r['score']:.3f} | doc_id={r['doc_id']} | page={r['page_label']} | {snippet}...")
 ```
 
-## Step 10 – Generate: DeepSeek V3 through the `converse` API
+## Step 10 – Generate with DeepSeek V3 through the `converse` API
 
-Bedrock has two runtime APIs. `invoke_model` takes a provider-specific request body (which is why the Titan call above builds a `{"inputText": ...}` body by hand). `converse` is provider-neutral: a system prompt, a list of messages, and an `inferenceConfig`, in the same shape for DeepSeek, Claude, Llama and the rest. We use `converse` for generation so the model is a one-line swap. The response carries the generated text and a `usage` block with the input and output token counts, which is what Bedrock bills on; we keep every `usage` block so we can price the run at the end.
+Bedrock has two runtime APIs. `invoke_model` takes a provider-specific request body (which is why the Titan call above builds a `{"inputText": ...}` body by hand). `converse` is provider-neutral. It takes a system prompt, a list of messages and an `inferenceConfig`, in the same shape for DeepSeek, Claude, Llama and the rest. We use `converse` for generation so the model is a one-line swap. The response carries the generated text and a `usage` block with the input and output token counts, which is what Bedrock bills on; we keep every `usage` block so we can price the run at the end.
 
 ```python
 bedrock_usage = []   # one {"inputTokens": ..., "outputTokens": ...} per call
@@ -706,7 +706,7 @@ A question is marked unanswerable (`is_blank` everywhere, as the competition req
 
 Now we can loop over the questions, run retrieval + Bedrock generation, and write a `wattbot_solutions_bedrock.csv` file (locally and to your bucket).
 
-`train_QA.csv` has 245 questions, and at two calls each that is about twenty minutes. For class we score a stratified sample instead: `sample_questions_by_type` draws ten questions from each evidence type (Quote, Table, Figure, Math, unanswerable, cross-paper, reconcile), 53 questions after overlaps and the two missing papers, so every row of the breakdown in the next step has something in it. The first 53 rows of the file would be nearly all Quote questions. The seed fixes the draw, and the Processing Jobs episode uses the same one, so the two runs are compared on the same questions. Set `per_type=0` to run the whole file.
+`train_QA.csv` has 245 questions, and at two calls each that is about twenty minutes. For class we score a stratified sample instead. `sample_questions_by_type` draws ten questions from each evidence type (Quote, Table, Figure, Math, unanswerable, cross-paper, reconcile), 53 questions after overlaps and the two missing papers, so every row of the breakdown in the next step has something in it. The first 53 rows of the file would be nearly all Quote questions. The seed fixes the draw, and the Processing Jobs episode uses the same one, so the two runs are compared on the same questions. Set `per_type=0` to run the whole file.
 
 The Processing Jobs episode reuses this same loop with self-hosted models; the only difference there is that the embedding, answer
 and explanation phases call local models instead of Bedrock-hosted ones.
@@ -756,7 +756,7 @@ results_df.head()
 
 ## Step 12 – Score against the training answers
 
-WattBot scores each prediction with three components: 0.75 for `answer_value` (numeric within ±0.1% relative tolerance, categorical match after normalisation, and zero if you answer a question the corpus cannot answer), 0.20 for the F1 between your `ref_id` set and the ground-truth citations, and 0.05 for refusing cleanly, with every evidence field blank, when the answer is `is_blank`. The number comes from `Score.py`, the competition's own metric file, which `compute_wattbot_score` in `wattbot_rag.py` calls for the headline score so that what you see here is what the leaderboard would report. It also prints the share of correct answers by evidence type, the seven flag columns of `train_QA.csv`: **Quote** (the answer is a sentence in a paper), **Table**, **Figure**, **Math** (a calculation from numbers in the text), **is_NA** (the corpus cannot answer it, and the right response is `is_blank`), **CrossPaper** (numbers from two papers have to be combined) and **Reconcile** (two figures that sound alike but measure different things, such as water withdrawn against water consumed, or a popular claim against a measured value, and the answer is the ratio or the distinction between them; quoting either figure alone is the wrong answer the question is built to catch). A question can carry several. Read that table before changing anything: figure and table questions failing while quote questions pass points at text extraction, which loses figures and flattens tables, not at the model. The wrapper adds a per-row score, joins on `id`, and prints the worst-scoring rows so you can see *why* the pipeline lost points.
+WattBot scores each prediction with three components, 0.75 for `answer_value` (numeric within ±0.1% relative tolerance, categorical match after normalisation, and zero if you answer a question the corpus cannot answer), 0.20 for the F1 between your `ref_id` set and the ground-truth citations, and 0.05 for refusing cleanly, with every evidence field blank, when the answer is `is_blank`. The number comes from `Score.py`, the competition's own metric file, which `compute_wattbot_score` in `wattbot_rag.py` calls for the headline score so that what you see here is what the leaderboard would report. It also prints the share of correct answers by evidence type, the seven flag columns of `train_QA.csv`, which are **Quote** (the answer is a sentence in a paper), **Table**, **Figure**, **Math** (a calculation from numbers in the text), **is_NA** (the corpus cannot answer it, and the right response is `is_blank`), **CrossPaper** (numbers from two papers have to be combined) and **Reconcile** (two figures that sound alike but measure different things, such as water withdrawn against water consumed, or a popular claim against a measured value, and the answer is the ratio or the distinction between them; quoting either figure alone is the wrong answer the question is built to catch). A question can carry several. Read that table before changing anything. Figure and table questions failing while quote questions pass points at text extraction, which loses figures and flattens tables, not at the model. The wrapper adds a per-row score, joins on `id`, and prints the worst-scoring rows so you can see *why* the pipeline lost points.
 
 ```python
 scored_df = compute_wattbot_score(
@@ -768,7 +768,7 @@ scored_df = compute_wattbot_score(
 
 ### Why were the wrong ones wrong?
 
-The score tells you *which* questions failed, not why. Two different failures look the same in that table. Either retrieval never surfaced the right paper, so the model had nothing to work with, or the right passage was in front of it and it still declined or misread it. The cell below separates them for the lowest-scoring rows: it joins the model's own explanation and the passages it cited back onto the score, then reruns retrieval for the question (one embedding call) and reports whether the ground-truth paper was among the top-k chunks and what the best cosine score was.
+The score tells you *which* questions failed, not why. Two different failures look the same in that table. Either retrieval never surfaced the right paper, so the model had nothing to work with, or the right passage was in front of it and it still declined or misread it. The cell below separates them for the lowest-scoring rows. It joins the model's own explanation and the passages it cited back onto the score, then reruns retrieval for the question (one embedding call) and reports whether the ground-truth paper was among the top-k chunks and what the best cosine score was.
 
 ```python
 
@@ -791,13 +791,13 @@ for _, row in worst.iterrows():
         print(f"  passages it cited: {str(by_id.loc[qid, 'supporting_materials'])[:400]}")
 ```
 
-Read the two lines at the bottom of each block together. "Ground-truth paper retrieved: NO" is a retrieval problem: a different chunk size, a reranker, or a better embedding model is the fix, and no generator will help. "Yes" with `is_blank` is the model declining on evidence it had, which the system prompt and the retrieval threshold control. "Yes" with a wrong value is a reading error, and the cited passage usually shows what it latched onto: a nearby number, a different unit, a different model in the same table. And sometimes the explanation shows the model read correctly and the label is the problem: a question asking what inference "can account for" labelled 90 where three papers in the corpus give 60, 70 and 80 to 90 percent, so a range is arguably the better answer, or a fact that appears in several papers with the label naming only one of them. Labels are written by people. When the explanation convinces you, the fix is to the label, and the competition organisers want to hear about it. Each of those is a different lever, and the score alone would have you pulling the wrong one.
+Read the two lines at the bottom of each block together. "Ground-truth paper retrieved: NO" is a retrieval problem, where a different chunk size, a reranker, or a better embedding model is the fix, and no generator will help. "Yes" with `is_blank` is the model declining on evidence it had, which the system prompt and the retrieval threshold control. "Yes" with a wrong value is a reading error, and the cited passage usually shows what it latched onto, a nearby number, a different unit, a different model in the same table. And sometimes the explanation shows the model read correctly and the label is the problem, as with a question asking what inference "can account for" labelled 90 where three papers in the corpus give 60, 70 and 80 to 90 percent, so a range is arguably the better answer, or a fact that appears in several papers with the label naming only one of them. Labels are written by people. When the explanation convinces you, the fix is to the label, and the competition organisers want to hear about it. Each of those is a different lever, and the score alone would have you pulling the wrong one.
 
 ::::::::::::::::::::::::::::::::::::: challenge
 
 ### What did that run cost?
 
-Every `converse` response carried a `usage` block, and `call_bedrock_chat` kept them all in `bedrock_usage`. Sum the input and output tokens over the evaluation run and price them at the current on-demand rates for DeepSeek V3 on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) (fill the two prices in below). Add the embedding step: ~9,000 chunks of 1,200 characters at Titan Text Embeddings V2's `$0.02` per million input tokens. How does the total compare with the overview's estimate for "the whole WattBot pipeline on Bedrock", and with the `ml.g5.xlarge` GPU the Processing Jobs episode rents for the same questions, `$1.41` an hour?
+Every `converse` response carried a `usage` block, and `call_bedrock_chat` kept them all in `bedrock_usage`. Sum the input and output tokens over the evaluation run and price them at the current on-demand rates for DeepSeek V3 on the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) (fill the two prices in below). Add the embedding step, ~9,000 chunks of 1,200 characters at Titan Text Embeddings V2's `$0.02` per million input tokens. How does the total compare with the overview's estimate for "the whole WattBot pipeline on Bedrock", and with the `ml.g5.xlarge` GPU the Processing Jobs episode rents for the same questions, `$1.41` an hour?
 
 :::::::::::::::::::::::: solution
 
@@ -820,7 +820,7 @@ print(f"~{embed_tokens:,.0f} embedding tokens -> ${embed_cost:.3f}")
 print(f"Total ~${gen_cost + embed_cost:.2f}; the Processing Jobs episode rents an ml.g5.xlarge at $1.41 an hour for the same questions")
 ```
 
-With 53 questions, two calls each and ~1,500-token prompts, the run was 140K input and 9K output tokens: ten cents at DeepSeek V3's prices, plus five cents of embeddings for the 2.4 million tokens of corpus. All 245 questions is about half a dollar, which is the overview's estimate for the whole pipeline. The Processing Jobs episode answers the same 53 questions on a rented `ml.g5.xlarge` and bills about `$0.50` of GPU time for them, three times this run, most of it loading a model that Bedrock already has loaded.
+With 53 questions, two calls each and ~1,500-token prompts, the run was 140K input and 9K output tokens, ten cents at DeepSeek V3's prices, plus five cents of embeddings for the 2.4 million tokens of corpus. All 245 questions is about half a dollar, which is the overview's estimate for the whole pipeline. The Processing Jobs episode answers the same 53 questions on a rented `ml.g5.xlarge` and bills about `$0.50` of GPU time for them, three times this run, most of it loading a model that Bedrock already has loaded.
 
 :::::::::::::::::::::::::::::::::
 
@@ -833,7 +833,7 @@ With 53 questions, two calls each and ~1,500-token prompts, the run was 140K inp
 Everything above is two model IDs and two callables. The [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) has dozens of chat models and several embedding models, and "Choosing the two models" at the top of the episode said the leaderboards cannot tell you which one wins on your questions. Find out.
 
 1. **A different generator.** Pick another chat model from the catalog (for example `us.amazon.nova-2-lite-v1:0`, `us.meta.llama4-maverick-17b-instruct-v1:0`, or a Mistral or Claude model if your account has access), wrap it in a tagged profile as in Step 7, and rerun the Step 11 loop on the same 53-question sample with `call_bedrock_chat` pointed at it. Score it with `compute_wattbot_score` and price it from its `usage` blocks. Which evidence types moved, and what did a point of score cost?
-2. **A different embedder.** Retrieval is the other half. The Ohio catalog also lists Cohere Embed v4 (`cohere.embed-v4:0`), and its request body is different from Titan's: a list of `texts` and an `input_type` that is `search_document` for the corpus and `search_query` for the question. Embed the chunks with it under a new file name so the Titan matrix is kept (ten minutes at the quota, so not in class), rerun Step 11 with DeepSeek unchanged, and score.
+2. **A different embedder.** Retrieval is the other half. The Ohio catalog also lists Cohere Embed v4 (`cohere.embed-v4:0`), and its request body is different from Titan's, a list of `texts` and an `input_type` that is `search_document` for the corpus and `search_query` for the question. Embed the chunks with it under a new file name so the Titan matrix is kept (ten minutes at the quota, so not in class), rerun Step 11 with DeepSeek unchanged, and score.
 
 Keep the rest fixed. One change per experiment, or you will not know what moved the score.
 
@@ -875,7 +875,7 @@ for m in bedrock.list_foundation_models(byOutputModality="EMBEDDING")["modelSumm
     print(f"{m['modelId']:<45} {m['providerName']}")
 ```
 
-Cohere's request takes a list of texts and says whether they are documents or a query; its response is a list of vectors, nested under the number type asked for. One wrinkle: the catalog lists `cohere.embed-v4:0` for Ohio, but creating a profile on it fails with "does not support On Demand inference", because in this region the model is served only through the US cross-region profile, `us.cohere.embed-v4:0`. `tagged_profile_arn` catches that error and switches to the `us.` ID itself, which is the same thing that happens for Llama 4 and several other models. Everything else is Step 8 again: a tagged profile, one call per chunk, a cached matrix, and a query function that uses the same model.
+Cohere's request takes a list of texts and says whether they are documents or a query; its response is a list of vectors, nested under the number type asked for. One wrinkle. The catalog lists `cohere.embed-v4:0` for Ohio, but creating a profile on it fails with "does not support On Demand inference", because in this region the model is served only through the US cross-region profile, `us.cohere.embed-v4:0`. `tagged_profile_arn` catches that error and switches to the `us.` ID itself, which is the same thing that happens for Llama 4 and several other models. Everything else is Step 8 again, a tagged profile, one call per chunk, a cached matrix, and a query function that uses the same model.
 
 ```python
 %%script false --no-raise-error
@@ -902,7 +902,7 @@ def embed_query_cohere(question: str) -> np.ndarray:
     return cohere_embed(question, input_type="search_query")
 ```
 
-Then the Step 11 loop with `embed_query=embed_query_cohere` and `chunk_embeddings=cohere_embeddings`, DeepSeek unchanged, and the scorer. The hit-rate cell from Step 13 is the sharper instrument here: compute it for the new matrix before scoring, because an embedder that finds the paper less often cannot be rescued by any generator. A cheaper variant of the same experiment keeps Titan and adds `"dimensions": 256` to its request body in Step 8, which asks whether a four-times smaller index retrieves as well.
+Then the Step 11 loop with `embed_query=embed_query_cohere` and `chunk_embeddings=cohere_embeddings`, DeepSeek unchanged, and the scorer. The hit-rate cell from Step 13 is the sharper instrument here. Compute it for the new matrix before scoring, because an embedder that finds the paper less often cannot be rescued by any generator. A cheaper variant of the same experiment keeps Titan and adds `"dimensions": 256` to its request body in Step 8, which asks whether a four-times smaller index retrieves as well.
 
 :::::::::::::::::::::::::::::::::
 
@@ -910,17 +910,17 @@ Then the Step 11 loop with `embed_query=embed_query_cohere` and `chunk_embedding
 
 ## Step 13 – Multimodal embeddings for the table and figure questions
 
-Look back at the evidence-type table in Step 12. The Table and Figure rows are usually the worst, and the reason is upstream of the model. `pypdf` gives us a page's *text*: a table comes out as a run of numbers with its column headers somewhere else on the page, and a figure comes out as its caption and nothing more. A question whose answer is a bar in a plot has nothing in the chunks to find, and a question whose answer is a cell in a table is being read from a flattened copy.
+Look back at the evidence-type table in Step 12. The Table and Figure rows are usually the worst, and the reason is upstream of the model. `pypdf` gives us a page's *text*, so a table comes out as a run of numbers with its column headers somewhere else on the page, and a figure comes out as its caption and nothing more. A question whose answer is a bar in a plot has nothing in the chunks to find, and a question whose answer is a cell in a table is being read from a flattened copy.
 
-A **multimodal embedding model** is one model that maps text *and* images into the same vector space, so a text question can be compared with an image directly: the picture of a table lands near a sentence about its contents. Bedrock has two from Amazon: [Amazon Nova Multimodal Embeddings](https://aws.amazon.com/blogs/aws/amazon-nova-multimodal-embeddings-now-available-in-amazon-bedrock/) (text, images, documents, video and audio, released 2025) and the older Titan Multimodal Embeddings G1 (text and images). Both are per-call, like Titan Text, and billed per image plus per text token; the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) has the rates, on the order of a hundredth of a cent per image. One catch: in October 2026 Nova Multimodal Embeddings is offered in `us-east-1` and not in Ohio (check the [model catalog](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/model-catalog) for that region). A Bedrock call is an HTTPS request and the region is a parameter, so from Ohio that is a second client pointed at Virginia; it also means the images leave the region, which is the thing to check against your institution's data policy before doing this with documents that are not public papers.
+A **multimodal embedding model** is one model that maps text *and* images into the same vector space, so a text question can be compared with an image directly, and the picture of a table lands near a sentence about its contents. Bedrock has two from Amazon, [Amazon Nova Multimodal Embeddings](https://aws.amazon.com/blogs/aws/amazon-nova-multimodal-embeddings-now-available-in-amazon-bedrock/) (text, images, documents, video and audio, released 2025) and the older Titan Multimodal Embeddings G1 (text and images). Both are per-call, like Titan Text, and billed per image plus per text token; the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) has the rates, on the order of a hundredth of a cent per image. One catch. In October 2026 Nova Multimodal Embeddings is offered in `us-east-1` and not in Ohio (check the [model catalog](https://us-east-1.console.aws.amazon.com/bedrock/home?region=us-east-1#/model-catalog) for that region). A Bedrock call is an HTTPS request and the region is a parameter, so from Ohio that is a second client pointed at Virginia; it also means the images leave the region, which is the thing to check against your institution's data policy before doing this with documents that are not public papers.
 
 This step cuts the tables and figures out of the PDFs as images, builds a second index from them next to the text one, measures whether it finds the right paper for table and figure questions more often, and then hands the images to a model that can look at them. Each cell is short because the plumbing is in `wattbot_rag.py`.
 
 ### Extract the tables and figures
 
-Why cut them out at all, rather than hand the embedding model a whole page, or the PDF itself (Nova accepts documents as input)? For the same reason Step 6 cut the text into chunks instead of embedding each paper whole. An embedding is a fixed-length vector, a thousand numbers, whatever goes in; the more that goes in, the less of each thing survives in it. A page holding two tables, a figure and three paragraphs gets one vector that is a blur of all six, and a question about one of the tables has to match that blur. A crop of the table gets a vector that is about the table. The same holds at generation time: the vision model reads a crop at full resolution for a few hundred tokens, where a page costs a thousand tokens and shows the table at a quarter of the size. We tried whole pages first on this corpus: they helped figure questions a little and tables not at all. The crops, as the callout at the end shows, help both.
+Why cut them out at all, rather than hand the embedding model a whole page, or the PDF itself (Nova accepts documents as input)? For the same reason Step 6 cut the text into chunks instead of embedding each paper whole. An embedding is a fixed-length vector, a thousand numbers, whatever goes in; the more that goes in, the less of each thing survives in it. A page holding two tables, a figure and three paragraphs gets one vector that is a blur of all six, and a question about one of the tables has to match that blur. A crop of the table gets a vector that is about the table. The same holds at generation time. The vision model reads a crop at full resolution for a few hundred tokens, where a page costs a thousand tokens and shows the table at a quarter of the size. We tried whole pages first on this corpus. They helped figure questions a little and tables not at all. The crops, as the callout at the end shows, help both.
 
-A PDF has no table or figure objects to pull out. It stores text runs, raster images, and drawing commands (lines, fills, curves), and a plot is a few thousand of the last. [PyMuPDF](https://pymupdf.readthedocs.io/) ships three detectors that turn those back into boxes: `find_tables` finds tables from their rulings or their text alignment, `get_image_info` lists the embedded raster images, and `cluster_drawings` groups the drawing commands of a vector figure into one bounding box. `extract_figures_and_tables` in `wattbot_rag.py` runs the three on every page, drops page-sized background fills, rules and logos, pairs each box with the nearest caption line starting "Table N" or "Figure N" (tables are captioned above, figures below) and widens the crop to include that caption, so the image carries the identifier a question will use. A caption whose box no detector found falls back to the whole page, so nothing the text mentions is missed. Open the function; it is about eighty lines, and every rule in it is a line you can change. The detectors are the slow part, a second or two per page on this instance, so the cell runs them only on the pages whose text carries a caption, under half of the corpus; in class, with `use_instructor_embeddings` set, it downloads the crops your instructor made instead.
+A PDF has no table or figure objects to pull out. It stores text runs, raster images, and drawing commands (lines, fills, curves), and a plot is a few thousand of the last. [PyMuPDF](https://pymupdf.readthedocs.io/) ships three detectors that turn those back into boxes. `find_tables` finds tables from their rulings or their text alignment, `get_image_info` lists the embedded raster images, and `cluster_drawings` groups the drawing commands of a vector figure into one bounding box. `extract_figures_and_tables` in `wattbot_rag.py` runs the three on every page, drops page-sized background fills, rules and logos, pairs each box with the nearest caption line starting "Table N" or "Figure N" (tables are captioned above, figures below) and widens the crop to include that caption, so the image carries the identifier a question will use. A caption whose box no detector found falls back to the whole page, so nothing the text mentions is missed. Open the function; it is about eighty lines, and every rule in it is a line you can change. The detectors are the slow part, a second or two per page on this instance, so the cell runs them only on the pages whose text carries a caption, under half of the corpus; in class, with `use_instructor_embeddings` set, it downloads the crops your instructor made instead.
 
 ```python
 %pip install -q pymupdf
@@ -962,7 +962,7 @@ print(f"{n_tables} tables and {len(crops) - n_tables} figures; {n_pages} of them
 crops[:3]
 ```
 
-Look at a few before trusting them: a crop that is a logo, a page rule, or half a plot tells you which threshold to change.
+Look at a few before trusting them. A crop that is a logo, a page rule, or half a plot tells you which threshold to change.
 
 ```python
 from IPython.display import Image, display
@@ -974,7 +974,7 @@ for c in [c for c in crops if c["kind"] == "table"][:2] + [c for c in crops if c
 
 ### Embed the crops
 
-The embedding model lives in `us-east-1`, so this is a second runtime client pointed there. One difference from the text models: Bedrock rejects this model's request body when it arrives through an application inference profile, so these calls use the model ID directly and are the one Bedrock spend in this lesson that carries no project tags. `embed_multimodal` builds the model's request body (Nova's says whether a vector is for the index or for a query, and that the image is a document rather than a photo) and returns a unit vector. Set `multimodal_model_id` to `amazon.titan-embed-image-v1` to try the older model; the function handles both.
+The embedding model lives in `us-east-1`, so this is a second runtime client pointed there. One difference from the text models is that Bedrock rejects this model's request body when it arrives through an application inference profile, so these calls use the model ID directly and are the one Bedrock spend in this lesson that carries no project tags. `embed_multimodal` builds the model's request body (Nova's says whether a vector is for the index or for a query, and that the image is a document rather than a photo) and returns a unit vector. Set `multimodal_model_id` to `amazon.titan-embed-image-v1` to try the older model; the function handles both.
 
 ```python
 multimodal_region = "us-east-1"
@@ -987,7 +987,7 @@ v = embed_multimodal(bedrock_runtime_mm, multimodal_model_id, image_png=Path(cro
 print(f"{crops[0]['doc_id']} {crops[0]['caption'][:40]!r} -> vector of {v.shape[0]} dimensions")
 ```
 
-One call per crop, cached like the text matrix: locally, then in your bucket, then computed. The loop runs six calls at a time through a thread pool and prints every fifty; the 2,213 crops take about four minutes. The question side uses the same model with `purpose="query"`.
+One call per crop, cached like the text matrix, locally, then in your bucket, then computed. The loop runs six calls at a time through a thread pool and prints every fifty; the 2,213 crops take about four minutes. The question side uses the same model with `purpose="query"`.
 
 ```python
 crop_emb_path = data_dir / "embeddings_crops_multimodal.npy"
@@ -1029,7 +1029,7 @@ def embed_query_mm(question: str) -> np.ndarray:
 
 ### Does the image index find the right table or figure?
 
-Retrieval is the same `retrieve_top_k` as Step 9, over the crop matrix instead of the chunk matrix. Two measures, both **hit rates**, higher is better, 1.00 meaning every question had it. The first is coarse: is a ground-truth *paper* among the top results? `train_QA.csv` names the paper for every question. The second is the one that matters for this step: is the *table or figure the answer sits in* among the crops the model would be shown? Most table and figure questions name it in `supporting_materials` ("Table 3", "Fig. 5, upper panel"), and `cited_captions` pulls that identifier out; `crop_matches` checks a crop's caption against it. For the text index, the crops it "shows" are those on the pages its top chunks came from, which is what the third vision run below attaches. Quote-only questions are the control for the paper measure, where the image index should have no advantage.
+Retrieval is the same `retrieve_top_k` as Step 9, over the crop matrix instead of the chunk matrix. Two measures, both **hit rates**, higher is better, 1.00 meaning every question had it. The first is coarse. Is a ground-truth *paper* among the top results? `train_QA.csv` names the paper for every question. The second is the one that matters for this step. Is the *table or figure the answer sits in* among the crops the model would be shown? Most table and figure questions name it in `supporting_materials` ("Table 3", "Fig. 5, upper panel"), and `cited_captions` pulls that identifier out; `crop_matches` checks a crop's caption against it. For the text index, the crops it "shows" are those on the pages its top chunks came from, which is what the third vision run below attaches. Quote-only questions are the control for the paper measure, where the image index should have no advantage.
 
 ```python
 from wattbot_rag import cited_captions, crop_matches
@@ -1066,11 +1066,11 @@ for label, qs in groups.items():
     print(f"{label:<12}{len(qs):>4}{paper_text:>14.2f}{paper_image:>14.2f}{crop_cols}")
 ```
 
-Read the paper columns first: both indexes find the paper for nearly every table and figure question, so at that level there is nothing to win, and the image index is behind. The crop columns are the real comparison. They say whether the text route, chunks and the crops on their pages, or the image route, the crops themselves, more often puts the exact table or figure in front of the model. If the image column is higher there while the paper column is lower, the image index is doing a different job than the text index, finding the object rather than the document, and the next cells show whether the model can use it. If both crop columns are low, the fix is upstream, in the extraction: a table the detector missed became a whole-page fallback, and a page is a weak key.
+Read the paper columns first. Both indexes find the paper for nearly every table and figure question, so at that level there is nothing to win, and the image index is behind. The crop columns are the real comparison. They say whether the text route, chunks and the crops on their pages, or the image route, the crops themselves, more often puts the exact table or figure in front of the model. If the image column is higher there while the paper column is lower, the image index is doing a different job than the text index, finding the object rather than the document, and the next cells show whether the model can use it. If both crop columns are low, the fix is upstream, in the extraction, where a table the detector missed became a whole-page fallback, and a page is a weak key.
 
 ### Let the model see the table or figure
 
-Finding the table is half of it; DeepSeek V3 reads text only, so a figure retrieved as an image is no use to it. `converse` accepts image blocks in a user message for models that can see, and the swap is the model ID: Amazon Nova 2 Lite reads images and documents and is in the catalog for Ohio through the cross-region profile below (check the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog); `us.amazon.nova-lite-v1:0` is the cheaper, weaker alternative). `call_vision_chat` is `call_bedrock_chat` with an `images` argument: for each attached crop it adds a text label naming the paper and the caption, then the image, so the model can cite what it reads.
+Finding the table is half of it; DeepSeek V3 reads text only, so a figure retrieved as an image is no use to it. `converse` accepts image blocks in a user message for models that can see, and the swap is the model ID. Amazon Nova 2 Lite reads images and documents and is in the catalog for Ohio through the cross-region profile below (check the [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog); `us.amazon.nova-lite-v1:0` is the cheaper, weaker alternative). `call_vision_chat` is `call_bedrock_chat` with an `images` argument. For each attached crop it adds a text label naming the paper and the caption, then the image, so the model can cite what it reads.
 
 ```python
 base_vision_model_id = "us.amazon.nova-2-lite-v1:0"
@@ -1099,7 +1099,7 @@ print(call_vision_chat("You are a concise assistant.", "What is in the attached 
                        images=[(crop_label(crops[0]), Path(crops[0]["png_path"]).read_bytes())]))
 ```
 
-Three runs over the Table and Figure questions, all through the vision model, so that the only thing changing between them is what the model is shown. The first is the control: text chunks only. The second attaches the top three crops from the image index. The third attaches the crops from the pages the top text chunks came from: if the hit-rate table says the text index is the better finder, the question is whether finding with text and *reading* with the image is the better split. Each run is the same loop as Step 11, so every question costs an answer call and an explanation call; our runs took 1.6, 4.0 and 3.0 minutes, the image runs longer because every attached crop is hundreds of input tokens. In class, with `use_instructor_embeddings` set, the cell downloads the three result files from your instructor's run of it instead and the next cell scores them; running the loops yourself is for after class.
+Three runs over the Table and Figure questions, all through the vision model, so that the only thing changing between them is what the model is shown. The first is the control, text chunks only. The second attaches the top three crops from the image index. The third attaches the crops from the pages the top text chunks came from. If the hit-rate table says the text index is the better finder, the question is whether finding with text and *reading* with the image is the better split. Each run is the same loop as Step 11, so every question costs an answer call and an explanation call; our runs took 1.6, 4.0 and 3.0 minutes, the image runs longer because every attached crop is hundreds of input tokens. In class, with `use_instructor_embeddings` set, the cell downloads the three result files from your instructor's run of it instead and the next cell scores them; running the loops yourself is for after class.
 
 ```python
 tf_df = train_df[(train_df["Table"] == 1) | (train_df["Figure"] == 1)]
@@ -1158,23 +1158,23 @@ for label, images_from in vision_runs.items():
 
 ### What to expect, and what it cost
 
-Measured once on this corpus, 50 table and figure questions, Nova 2 Lite throughout. At the paper level the text index wins: a ground-truth paper is in its top 8 for 94% of table questions and 94% of figure questions, against 77% and 71% for the image index, and for 82% against 55% of quote-only questions, where a picture has nothing to offer. At the crop level the two routes are even: the crop the answer sits in is among those shown for 55% of table questions by the text route and 52% by the image index, and for 57% against 50% of figure questions. Then reading. Text chunks alone scored 0.64, with 57% of table answers and 59% of figure answers correct. Chunks plus the image index's top three crops scored 0.75, with 69% of tables and 71% of figures correct and citation F1 up from 0.85 to 0.93. Chunks plus the crops on the pages behind the top text chunks, the route the paper-level hit rate seemed to favour, scored 0.67. Two readings. Showing the model the table or figure is worth about ten points on the questions that depend on one, tables included, which whole pages at 100 dpi had not managed. And the crop-level hit rates say where the image index's lead does not come from: it finds the answer's own crop no more often than the text route does. The difference is in what else the model is shown, three crops chosen by their similarity to the question against every crop on the pages behind the top chunks. Fifty questions is a small sample, so read the direction, not the decimals. For the bill, every crop is a few hundred input tokens at Nova 2 Lite's rate on the [pricing page](https://aws.amazon.com/bedrock/pricing/), so a run with images costs two to three times the control and takes three to four times as long: 1.6, 4.0 and 3.0 minutes for the three runs here. `vision_usage` holds all three runs' usage blocks, and the embedding of the 2,213 crops is the per-image rate times that count, a few cents.
+Measured once on this corpus, 50 table and figure questions, Nova 2 Lite throughout. At the paper level the text index wins. A ground-truth paper is in its top 8 for 94% of table questions and 94% of figure questions, against 77% and 71% for the image index, and for 82% against 55% of quote-only questions, where a picture has nothing to offer. At the crop level the two routes are even. The crop the answer sits in is among those shown for 55% of table questions by the text route and 52% by the image index, and for 57% against 50% of figure questions. Then reading. Text chunks alone scored 0.64, with 57% of table answers and 59% of figure answers correct. Chunks plus the image index's top three crops scored 0.75, with 69% of tables and 71% of figures correct and citation F1 up from 0.85 to 0.93. Chunks plus the crops on the pages behind the top text chunks, the route the paper-level hit rate seemed to favour, scored 0.67. Two readings. Showing the model the table or figure is worth about ten points on the questions that depend on one, tables included, which whole pages at 100 dpi had not managed. And the crop-level hit rates say where the image index's lead does not come from. It finds the answer's own crop no more often than the text route does. The difference is in what else the model is shown, three crops chosen by their similarity to the question against every crop on the pages behind the top chunks. Fifty questions is a small sample, so read the direction, not the decimals. For the bill, every crop is a few hundred input tokens at Nova 2 Lite's rate on the [pricing page](https://aws.amazon.com/bedrock/pricing/), so a run with images costs two to three times the control and takes three to four times as long, 1.6, 4.0 and 3.0 minutes for the three runs here. `vision_usage` holds all three runs' usage blocks, and the embedding of the 2,213 crops is the per-image rate times that count, a few cents.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-## Wrap-up: Bedrock against the GPU routes
+## Wrap-up
 
-You now have a complete WattBot evaluation on Bedrock, billed per token, with nothing left running. The Processing-jobs episode reruns it on a self-hosted model, and the optional GPU-notebook episode once more by hand, so by the end there are three versions of the same pipeline to compare: Bedrock, a Processing job and a notebook GPU. The code they share is the retrieval, prompting and scoring in `wattbot_rag.py`; what each one implements is the two callables, `embed_query` and `generate`.
+You now have a complete WattBot evaluation on Bedrock, billed per token, with nothing left running. The Processing-jobs episode reruns it on a self-hosted model, and the optional GPU-notebook episode once more by hand, so by the end there are three versions of the same pipeline to compare, Bedrock, a Processing job and a notebook GPU. The code they share is the retrieval, prompting and scoring in `wattbot_rag.py`; what each one implements is the two callables, `embed_query` and `generate`.
 
 Use Bedrock or another hosted API when a catalog model will do, when the number of questions is modest or you are still prototyping, and when you would rather pay per token than manage a GPU. Use a self-hosted model on a GPU when the work needs a model the catalog does not carry, when you will run large batches repeatedly, when you need control over the exact checkpoint, or when you already have GPUs you are not paying for by the hour.
 
-The model is one part of a RAG system, and not the part where most of the accuracy is won. A bigger or newer model does not fix weak retrieval: if the chunks do not match the questions, a strong model still has nothing to read. The gains over time come from the work around the model, chunking, metadata and filtering, reranking, post-processing, and the score breakdown by evidence type in Step 12 says which of them to work on. A bigger model or a longer prompt raises the bill per question as well as the score, and Bedrock lets you measure that trade by changing one model ID.
+The model is one part of a RAG system, and not the part where most of the accuracy is won. A bigger or newer model does not fix weak retrieval. If the chunks do not match the questions, a strong model still has nothing to read. The gains over time come from the work around the model, chunking, metadata and filtering, reranking, post-processing, and the score breakdown by evidence type in Step 12 says which of them to work on. A bigger model or a longer prompt raises the bill per question as well as the score, and Bedrock lets you measure that trade by changing one model ID.
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints
 
-- A complete RAG pipeline on AWS needs no GPU: a CPU notebook plus Bedrock-hosted embedding and generation models is enough.
+- A complete RAG pipeline on AWS needs no GPU. A CPU notebook plus Bedrock-hosted embedding and generation models is enough.
 - Corpus preparation (unpacking the staged PDFs, page extraction, chunking) is cheap CPU work; cache `chunks.jsonl` on S3 so later episodes and runs can reuse it.
 - Bedrock calls carry no tags; route them through a tagged application inference profile or the spend is anonymous on the bill.
 - `converse` is the provider-neutral way to call a chat model on Bedrock; its `usage` block is what you are billed on. DeepSeek V3 is the generator here, and any catalog model is a one-line swap.

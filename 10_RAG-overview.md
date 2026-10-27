@@ -6,9 +6,7 @@ exercises: 0
 
 ## Retrieval-Augmented Generation (RAG) on AWS
 
-**Inference** is running a trained model to get an output from it: a prediction, an embedding, a generated answer. No weight changes, no gradients, no training job; the model is used, not changed. Everything in the first half of the lesson was training; everything in this part is inference.
-
-Retrieval-Augmented Generation (RAG) is a pattern where you **retrieve** relevant passages from your own documents and then **generate** an answer from them. A standard RAG workflow does not train or fine-tune a model: it is retrieval plus inference.
+Retrieval-Augmented Generation (RAG) is a pattern where you **retrieve** relevant passages from your own documents and then **generate** an answer from them. The model is used, not changed. No weights are updated and no training job runs. Using a trained model to get an output from it, a prediction, an embedding or an answer, is called **inference**, and everything in this part of the lesson is inference, where everything in the training episodes was training.
 
 This episode names the four ways to run inference on AWS, says why Bedrock is the one to start with, and sets up the three episodes that build the same RAG pipeline three ways.
 
@@ -42,7 +40,7 @@ RAG is two steps:
 
 No weights are updated and no training job runs. RAG is retrieval logic around two model calls.
 
-The two models are used in two ways. An embedding model maps a piece of text to a vector; it is called once per chunk when the corpus is indexed and once per question. A generation model is given the question and the retrieved chunks and writes the answer. Both are inference with no state between calls, so neither needs a GPU of your own: a managed inference API serves calls like these.
+The two models are used in two ways. An embedding model maps a piece of text to a vector; it is called once per chunk when the corpus is indexed and once per question. A generation model is given the question and the retrieved chunks and writes the answer. Both are inference with no state between calls, so neither needs a GPU of your own. A managed inference API serves calls like these.
 
 ## Bedrock is the default for inference
 
@@ -58,7 +56,7 @@ The reason is billing:
 | **Model updates** | AWS and the provider | You: containers, CUDA, GPU memory |
 | **Model choice** | A curated catalog, proprietary models included | Any open-weight model you can load |
 
-A GPU instance is a rental whose meter runs until you turn it off, and forgetting to is the most common way a research team spends its cloud budget on nothing. Bedrock has no such failure: stop calling it and you stop paying.
+A GPU instance is a rental whose meter runs until you turn it off, and forgetting to is the most common way a research team spends its cloud budget on nothing. Bedrock has no such failure. Stop calling it and you stop paying.
 
 ### What forgetting costs
 
@@ -101,21 +99,21 @@ In the order to try them.
 
 ![Four columns, Bedrock API, Processing job, GPU notebook and Inference endpoint, compared on where the model runs, what runs between calls, billing unit, latency, model choice, what you must remember, a cost example and which episode covers it; Bedrock is marked as the default and Processing jobs as the safe way to use a GPU](fig/rag-approaches.svg){alt="Comparison table of four ways to run inference on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)."}
 
-### 1. Amazon Bedrock: managed embedding and generation APIs (the default)
+### 1. Amazon Bedrock, the default
 
 Call the embedding and generation models from your pipeline. You keep the retrieval logic; AWS keeps the models. You pay per token, nothing runs between calls, and there is nothing to shut down. Bedrock is also where proprietary models such as Claude are available without a separate contract.
 
-**Use it for:** any RAG system where a catalog model will do: prototypes, research tools, course projects and production chatbots alike.
+**Use it for:** any RAG system where a catalog model will do, from prototypes and course projects to research tools and production chatbots.
 
-### 2. SageMaker Processing jobs: short-lived batch GPU compute
+### 2. SageMaker Processing jobs
 
 For a large corpus, or for an open-weight model Bedrock does not carry, run the embedding and the batch generation as jobs rather than against a live model. A Hugging Face Processing job starts a GPU instance, loads the model, works through all the chunks or questions, writes the results to S3 and ends. The GPU exists only while the job runs, so you get a self-managed model without the risk of forgetting to stop it. This is the safest way to use a GPU on SageMaker.
 
-The cost is latency: a job takes several minutes to start, so this is for work done once and used many times, not for answering one question at a time.
+The cost is latency. A job takes several minutes to start, so this is for work done once and used many times, not for answering one question at a time.
 
 **Use it for:** embedding a large corpus with an open model, periodic batch regeneration, or research that needs a model Bedrock does not offer.
 
-### 3. A GPU notebook instance: learning and debugging
+### 3. A GPU notebook instance
 
 For models up to about 70B you can choose a GPU instance (an [ml.g5.xlarge](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html), say), load the embedding and generation models in the notebook, and run RAG end to end there. It is the simplest setup to follow, and the best way to learn what happens inside a RAG pipeline, because every step is a line of Python you can inspect.
 
@@ -128,15 +126,15 @@ It is also the most expensive way to run RAG and the easiest to get wrong. The G
 
 **Use it for:** walking through RAG step by step, debugging a model before packaging it as a job, or short experiments where you stay at the keyboard.
 
-### 4. SageMaker inference endpoints: self-hosted interactive serving
+### 4. SageMaker inference endpoints
 
 For an application that needs interactive, low-latency answers (an API, a chatbot, a dashboard) from a model you host yourself, deploy the embedding and generation models as SageMaker inference endpoints and call them from your retrieval service. You control the model, the scaling and the hardware.
 
-It is also the most expensive option when traffic is low or bursty, because you pay for capacity that stays up when nobody is asking: the always-on problem of a notebook GPU, now by design and without end. Before choosing it, ask whether Bedrock already serves a model that will do; it gives the same interactive latency with no idle cost. Endpoints are the answer only when the model itself is why Bedrock will not work.
+It is also the most expensive option when traffic is low or bursty, because you pay for capacity that stays up when nobody is asking, the same always-on problem as a notebook GPU, now by design and without end. Before choosing it, ask whether Bedrock already serves a model that will do; it gives the same interactive latency with no idle cost. Endpoints are the answer only when the model itself is why Bedrock will not work.
 
 **Use it for:** production systems with steady traffic that need a custom or open-weight model. The lesson does not build one.
 
-## Tagging: every billable resource needs its own tags
+## Every billable resource needs its own tags
 
 Cost tracking in this workshop relies on three tags, `Name`, `Project` and `Purpose`, so that Cost Explorer can split the shared bill by challenge. **Tags never propagate.** Tagging your notebook instance tags the notebook instance and nothing else. Every other resource you create is a separate line on the bill, anonymous unless you tag it when you create it.
 
@@ -171,7 +169,7 @@ If in doubt, Bedrock. Its worst case is a somewhat higher per-token bill; the wo
 
 ### The order of the hands-on episodes
 
-The next two episodes build RAG on **Bedrock** first, then on **Processing jobs**. The Bedrock episode is the one to start from: it builds the whole WattBot pipeline, chunking the corpus included, from a cheap CPU notebook with nothing left running afterward. The Processing-jobs episode reruns the same pipeline on an open-weight model Bedrock does not carry, as jobs that end on their own, which shows what Bedrock does for you and what it costs to do yourself. An optional self-study episode runs the same self-hosted pipeline interactively on a GPU notebook instance, for the case where you need to work on a self-hosted model by hand, and only if you will remember to stop the instance. All three share one module of pipeline code, `scripts/wattbot_rag.py` in the lesson repository.
+The next two episodes build RAG on **Bedrock** first, then on **Processing jobs**. The Bedrock episode is the one to start from. It builds the whole WattBot pipeline, chunking the corpus included, from a cheap CPU notebook with nothing left running afterward. The Processing-jobs episode reruns the same pipeline on an open-weight model Bedrock does not carry, as jobs that end on their own, which shows what Bedrock does for you and what it costs to do yourself. An optional self-study episode runs the same self-hosted pipeline interactively on a GPU notebook instance, for the case where you need to work on a self-hosted model by hand, and only if you will remember to stop the instance. All three share one module of pipeline code, `scripts/wattbot_rag.py` in the lesson repository.
 
 When you build your own RAG system afterward, start from the Bedrock episode.
 
@@ -179,12 +177,12 @@ When you build your own RAG system afterward, start from the Bedrock episode.
 
 :::::::::::::::::::::::::::::::::::::: keypoints
 
-- RAG is inference only: nothing is trained or fine-tuned, so running one does not need a GPU of your own.
+- RAG is inference only. Nothing is trained or fine-tuned, so running one does not need a GPU of your own.
 - **Bedrock is the default for inference**: you pay per token, nothing runs between calls, and there is nothing to forget to shut down.
 - Self-managed GPU compute (Processing jobs, notebook GPUs, inference endpoints) is for a model Bedrock does not offer, or for batch volumes so large that per-token pricing loses; it is not a starting point.
 - Of the GPU options, Processing jobs are the safest, because the instance ends itself; notebook GPUs and endpoints bill by the hour until you stop them.
 - A forgotten GPU instance costs tens of dollars overnight and hundreds to thousands over a month; a full WattBot run on Bedrock costs under a dollar.
-- Tags never propagate: tag every job at launch and route Bedrock calls through a tagged application inference profile, or the spend cannot be traced.
+- Tags never propagate. Tag every job at launch and route Bedrock calls through a tagged application inference profile, or the spend cannot be traced.
 - The hands-on episodes start with Bedrock, then the same pipeline on Processing jobs; the notebook-GPU version is optional self-study.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
