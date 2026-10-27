@@ -20,7 +20,7 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::::::::::::
 
 
-This episode compares cloud compute with the compute researchers usually already have, then introduces the three AWS services the lesson uses, S3, SageMaker and Bedrock, and the notebook instance you work from.
+This episode compares cloud compute with the compute researchers usually already have, then introduces the four things every later episode uses, S3, the notebook instance, SageMaker jobs and Bedrock.
 
 ### Cloud vs. the cluster down the hall
 
@@ -32,7 +32,15 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 [^pools]: Research computing has done this for years. UW-Madison's [Center for High Throughput Computing](https://chtc.cs.wisc.edu/) (CHTC) pools campus machines and fills their idle time with other groups' jobs, and the [OSPool](https://osg-htc.org/services/open_science_pool.html) it operates for the NSF does the same across institutions. The [National Research Platform](https://nationalresearchplatform.org/) (NRP) shares GPUs across universities the same way. These are the public counterparts of what the cloud does, and often free for a research group.
 
-### SageMaker, Bedrock, S3 and the notebook instance
+### S3, the notebook instance, SageMaker and Bedrock
+
+![S3 holds data and outputs; a small notebook instance launches SageMaker jobs that read from and write to S3 and end on their own; Bedrock is called as an API per token](fig/aws-ml-ecosystem.svg){alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API"}
+
+Everything in the lesson is one of the four boxes in the diagram. S3 holds your data and every job's outputs. The notebook instance is where you work, and it is small because it only launches things. SageMaker jobs are where the compute happens, on an instance that exists only for the job. Bedrock is an API, with no instance at all. Each of the four in turn.
+
+**Amazon S3** is where data lives. Buckets hold files of any size, every SageMaker job reads its inputs from a bucket and writes its outputs back to one, and storage costs about two cents per GB per month. In this lesson you create one bucket of your own in the next episode and use it for the rest of the workshop; the larger datasets are in a shared bucket the instructors staged.
+
+**A SageMaker notebook instance** is where you work. It is a small machine running JupyterLab that you start at the beginning of the workshop and stop at the end, and every notebook in the lesson runs on it. It is small on purpose, an `ml.t3.medium` at about five cents an hour, because it does not do the heavy work. It tests scripts on small data, launches jobs on bigger instances, and reads the results back. The *Notebooks as controllers* episode creates it, and the two after that connect it to S3 and to a copy of the lesson's code.
 
 **Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. The features that matter for research work:
 
@@ -52,7 +60,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 - **Cost tracking**: every training job reports its billable seconds, and every resource can be tagged so that the bill can be broken down by project. For many common research workloads SageMaker is cheap. For example, training roughly 100 small to medium-sized models (e.g., logistic regression, random forests, or lightweight deep learning models with a few million parameters) on a small dataset (under 10GB) can cost under `$20`.
 
-**Amazon Bedrock** is the other AWS service this lesson uses. Instead of running your script on a machine, Bedrock serves models that AWS hosts through an API. In practice that means:
+**Amazon Bedrock** serves models that AWS hosts through an API, instead of running your script on a machine. In practice that means:
 
 - **Nothing to start or stop**: you call the API and pay per token; when you stop calling it, you stop paying. There is no instance to size, launch, or forget.
 - **A catalog of hosted models**: DeepSeek, Claude, Amazon's own models and others, for generation and for embeddings, each selectable by model ID with no download or GPU.
@@ -60,15 +68,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 - **Only the catalog**: if the model you need is not on it, Bedrock cannot serve it. That is the one case where the lesson moves RAG onto SageMaker.
 - **Cost tracking by inference profile**: Bedrock calls carry no tags by default; the lesson routes them through tagged application inference profiles so they show up on the bill like everything else.
 
-**Amazon S3** is where data lives. Buckets hold files of any size, every SageMaker job reads its inputs from a bucket and writes its outputs back to one, and storage costs about two cents per GB per month. In this lesson you create one bucket of your own in the next episode and use it for the rest of the workshop; the larger datasets are in a shared bucket the instructors staged.
-
-**A SageMaker notebook instance** is where you work. It is a small machine running JupyterLab that you start at the beginning of the workshop and stop at the end, and every notebook in the lesson runs on it. It is small on purpose, an `ml.t3.medium` at about five cents an hour, because it does not do the heavy work. It tests scripts on small data, launches jobs on bigger instances, and reads the results back. The *Notebooks as controllers* episode creates it, and the two after that connect it to S3 and to a copy of the lesson's code.
-
-### The four things you will use
-
-![S3 holds data and outputs; a small notebook instance launches SageMaker jobs that read from and write to S3 and end on their own; Bedrock is called as an API per token](fig/aws-ml-ecosystem.svg){alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API"}
-
-Everything in the lesson is one of these four boxes. S3 holds your data and every job's outputs. The notebook instance is where you work; it is small because it only launches things. SageMaker jobs are where compute happens, on an instance that exists only for the job. Bedrock is an API: no instance at all. Everything the notebook does here can also be done from the AWS command line or from Python on your own machine; the optional episode *The Same Jobs from the Terminal* shows the CLI equivalents.
+Everything the notebook does here can also be done from the AWS command line or from Python on your own machine; the optional episode *The Same Jobs from the Terminal* shows the CLI equivalents.
 
 ### Lesson outline
 
