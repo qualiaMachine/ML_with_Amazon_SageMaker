@@ -180,7 +180,11 @@ step0_estimate = helpers.estimate_finetune_cost(
 )
 ```
 
-It says about 27 minutes and `$0.64`, 17 minutes of training plus the 10 minutes of startup it assumes. The 17 is more than the 12 of the hand calculation because the estimator multiplies the FLOPs by 1.5 when gradient checkpointing is on, as it is in our script. To save memory, the forward pass is thrown away and recomputed during the backward pass, which is half the arithmetic again. In the measured run the 126 optimizer steps took about 12 minutes, so the rule without the factor landed on the number and the rule with it is a third high. The quarter-of-peak utilization is the loosest assumption in the rule, and a miss of that size is what it is good for. Hold on to `step0_estimate`; Step 2 compares it to the job's own bill.
+The function says about 27 minutes and `$0.64`. That is 17 minutes of training plus the 10 minutes of startup it assumes for every job.
+
+The 17 minutes is more than the 12 from the hand calculation above, and the difference is one factor. Our script turns on gradient checkpointing, which saves memory by throwing away the forward pass and recomputing it during the backward pass. That recomputation is half the arithmetic again, so the estimator multiplies the FLOPs by 1.5. In the measured run the training took about 12 minutes, so the hand calculation landed on the number and the estimator was a third high. A miss of that size is normal. The loosest assumption in the rule is that the GPU reaches a quarter of its peak, and the real figure is a little above or below that on every run.
+
+The job you launch in Step 1 bills about 32 minutes, not 27, and the gap is not the rule's error. The job also scores holdout pages before training and after it, about 14 minutes of GPU time that the estimator does not count, because it estimates training alone. Keep `step0_estimate`. Step 2 puts it next to the job's own bill.
 
 The same call for the kind of run a marathon team might weigh, a 7B model on 5,000 documents of about 600 words (800 tokens) each, three passes, with the eight attempts a project takes:
 
