@@ -34,7 +34,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 ### SageMaker and Bedrock
 
-**Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. In practice that means:
+**Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. The features that matter for research work:
 
 - **High-performance compute only when needed**: SageMaker lets you develop interactively in lightweight, inexpensive notebook environments (or your own laptop) and then launch training, tuning, or inference jobs on more powerful [instance types](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html#cloud-compute-essentials) only when necessary. You pay for expensive compute only while a job runs.
   
@@ -56,7 +56,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 - **Nothing to start or stop**: you call the API and pay per token; when you stop calling it, you stop paying. There is no instance to size, launch, or forget.
 - **A catalog of hosted models**: DeepSeek, Claude, Amazon's own models and others, for generation and for embeddings, each selectable by model ID with no download or GPU.
-- **Cheap at research scale**: embedding a few thousand document chunks and answering a few dozen questions costs cents, which is why the RAG part of the lesson starts here.
+- **Cheap at research scale**: embedding a few thousand document chunks and answering a few dozen questions costs cents. The RAG episodes build the pipeline on Bedrock first.
 - **Only the catalog**: if the model you need is not on it, Bedrock cannot serve it. That is the one case where the lesson moves RAG onto SageMaker.
 - **Cost tracking by inference profile**: Bedrock calls carry no tags by default; the lesson routes them through tagged application inference profiles so they show up on the bill like everything else.
 
