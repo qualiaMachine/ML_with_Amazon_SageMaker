@@ -1061,10 +1061,13 @@ from container pull to model upload, per instance. The minute or so
 before that, while SageMaker finds an instance, is not billed. (The
 job’s console page also shows a “Training time”; on an on-demand
 instance it is the same number, and neither one is your script’s own
-training time, which only the script’s log has.) SageMaker bills per
-second, with no rounding, so cost is billable seconds x instance count x
-hourly rate. We’ll wrap this in a small helper and call it after every
-job in this lesson.</p>
+training time, which only the script’s log has. The two lines the SDK
+prints when <code>fit()</code> returns, <code>Training seconds</code>
+and <code>Billable seconds</code>, are the same pair: they differ only
+on spot instances, which this lesson does not use, so read either one.)
+SageMaker bills per second, with no rounding, so cost is billable
+seconds x instance count x hourly rate. We’ll wrap this in a small
+helper and call it after every job in this lesson.</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
