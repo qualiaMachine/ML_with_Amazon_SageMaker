@@ -351,6 +351,12 @@ local_data_dir = "./data"
 os.makedirs(local_data_dir, exist_ok=True)
 ```
 
+What the jobs will read, before downloading any of it: the page lists and metadata at the top level, the scanned pages under `images/`, and the staged CHURRO-3B weights under `model/`.
+
+```python
+helpers.show_bucket(shared_bucket, f"{data_prefix}/")   # the shared bucket's folder for this episode: files, and each sub-folder's count and size
+```
+
 Download the four small files (the two page lists, the metadata and the competition's scoring script) and look at how the training pages split by category and by who transcribed them.
 
 ```python
