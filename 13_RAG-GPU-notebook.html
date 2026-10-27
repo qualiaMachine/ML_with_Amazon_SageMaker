@@ -430,7 +430,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>(Optional) RAG with a Notebook GPU</h1>
-        <p>Last updated on 2026-10-26 |
+        <p>Last updated on 2026-10-27 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/13_RAG-GPU-notebook.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -697,7 +697,7 @@ those two resources are the only things being billed.</p>
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1" aria-label="code-block-1-1"></a><span class="co"># nvidia-smi lists the GPU, its memory and the driver; it fails when the instance has no GPU</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="op">!</span>nvidia<span class="op">-</span>smi <span class="op">||</span> echo <span class="st">"No GPU detected – please switch to a GPU-backed instance (ml.g6e.xlarge) before running this notebook."</span></span></code></pre>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1" aria-label="code-block-1-2"></a><span class="op">!</span>nvidia<span class="op">-</span>smi <span class="op">||</span> echo <span class="st">"No GPU detected; the next cell stops the notebook"</span></span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -706,8 +706,15 @@ those two resources are the only things being billed.</p>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="im">import</span> os</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>os.environ[<span class="st">"HF_HOME"</span>] <span class="op">=</span> <span class="st">"/home/ec2-user/SageMaker/hf_cache"</span>   <span class="co"># before any Hugging Face import: every model download goes to the volume, not the small root disk</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="im">import</span> torch</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a><span class="bu">print</span>(<span class="st">"torch cuda available:"</span>, torch.cuda.is_available())   <span class="co"># False means PyTorch cannot use the GPU even if nvidia-smi sees it</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a><span class="bu">print</span>(<span class="st">"num gpus:"</span>, torch.cuda.device_count())</span></code></pre>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a><span class="co"># Stop here, and so stop a Run All, unless this instance has a GPU big enough for the 27B model:</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a><span class="co"># the install below is several gigabytes and the weights are 27 GB, neither worth downloading onto the wrong machine</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a><span class="cf">if</span> <span class="kw">not</span> torch.cuda.is_available():</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"No GPU: this notebook needs an ml.g6e.xlarge notebook instance. Stop this instance and create one as described above."</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>gpu_memory_gb <span class="op">=</span> torch.cuda.get_device_properties(<span class="dv">0</span>).total_memory <span class="op">/</span> <span class="fl">1e9</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a><span class="cf">if</span> gpu_memory_gb <span class="op">&lt;</span> <span class="dv">40</span>:</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="ss">f"GPU has </span><span class="sc">{</span>gpu_memory_gb<span class="sc">:.0f}</span><span class="ss"> GB; the FP8 27B model needs a 48 GB GPU (ml.g6e.xlarge). Stop this instance and create one as described above."</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1" aria-label="code-block-2-13"></a><span class="bu">print</span>(<span class="ss">f"GPU: </span><span class="sc">{</span>torch<span class="sc">.</span>cuda<span class="sc">.</span>get_device_name(<span class="dv">0</span>)<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>gpu_memory_gb<span class="sc">:.0f}</span><span class="ss"> GB"</span>)</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -1414,8 +1421,8 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/13_RAG-GPU-notebook.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/13_RAG-GPU-notebook.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-26",
-  "datePublished": "2026-10-26"
+  "dateModified": "2026-10-27",
+  "datePublished": "2026-10-27"
 }
 
   </script><script>
