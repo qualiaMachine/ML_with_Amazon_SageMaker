@@ -528,7 +528,7 @@ print(os.listdir("code"))
 Open `code/finetune_churro_lora.py` in the Jupyter file browser. It is about 400 lines and you are about to launch it on a GPU. Find the answers in the file:
 
 1. Which layers get LoRA weights, and which part of the model gets none? What would the regular expression in `target_modules` also match without its `(?!.*visual)` part?
-2. Roughly how many parameters will train? Work it out from `r=16` and the shapes of the language model's projections (36 layers; `q_proj` and `o_proj` are 2048 × 2048, `k_proj` and `v_proj` are 2048 × 256, and `gate_proj`, `up_proj` and `down_proj` are 2048 × 11008), then compare with the `trainable params:` line in the job's log once it runs.
+2. Roughly how many parameters will train? Work it out from `r=16` and the shapes of the language model's projections, which the cell before the hyperparameters read from `config.json` (36 layers; `q_proj` and `o_proj` are 2048 × 2048, `k_proj` and `v_proj` are 2048 × 256, and `gate_proj`, `up_proj` and `down_proj` are 2048 × 11008), then compare with the `trainable params:` line in the job's log once it runs.
 3. Which tokens does the loss count? Find every place `labels` are set to `-100`.
 4. The script stops itself in two situations before training a single step. Which, and why are they there?
 
@@ -606,12 +606,30 @@ print(f"tags:         {make_job_tags('Training')}")
 
 Next, what the script will be told to do. These hyperparameters reach the script as command-line flags (`--epochs 2 --lr 0.0002 ...`), and they are what the Step 0 estimate was built from. Three of them set the cost: the number of pages, the number of passes, and `max_pixels`. The rest shape the training: a LoRA learning rate, the adapter rank, an effective batch of four pages through gradient accumulation, and which holdout pages get scored when.
 
+One of them, `lora_r`, decides how many parameters train, and the model's own `config.json`, staged next to the weights, has what you need to work that out: the number of layers and the width of each projection LoRA attaches to. An adapter on a matrix of shape in × out adds r × (in + out) parameters.
+
+```python
+s3_client.download_file(shared_bucket, f"{data_prefix}/model/churro-3B/config.json", "config.json")   # the model's architecture, from the model card
+with open("config.json") as f:
+    cfg = json.load(f)
+text = cfg.get("text_config", cfg)            # newer configs keep the language model's sizes under text_config, older ones at the top level
+layers, hidden, inter = text["num_hidden_layers"], text["hidden_size"], text["intermediate_size"]
+kv = hidden * text["num_key_value_heads"] // text["num_attention_heads"]   # k_proj and v_proj are narrower: one head group shares a key and a value
+total_params = 3.75e9
+print(f"{layers} layers; q_proj and o_proj {hidden} x {hidden}, k_proj and v_proj {hidden} x {kv}, gate/up/down_proj {hidden} x {inter}")
+for lora_r in (8, 16, 32):
+    per_layer = lora_r * (2 * (hidden + hidden) + 2 * (hidden + kv) + 3 * (hidden + inter))   # r x (in + out), summed over the seven projections
+    print(f"rank {lora_r:>2}: {per_layer * layers / 1e6:5.1f}M trainable parameters, {100 * per_layer * layers / total_params:.2f}% of the model")
+```
+
+Rank 16 is the lesson's choice: about 30 million parameters, under 1% of the model, which the job's log confirms in its `trainable params:` line.
+
 ```python
 hyperparameters = {
     # no model_id: the script reads the base weights from the "model" channel mounted at fit()
     "epochs": 2,                      # two passes over the 251 pages; the per-pass curve below says what each one bought
     "lr": 2e-4,                       # LoRA takes a higher learning rate than a full fine-tune (~1e-5)
-    "lora_r": 16,                     # adapter rank. The model has 36 layers with seven projections each; rank 16 on all of them is about 30 million trainable parameters, 0.8% of the 3.75B (the script-reading challenge works it out); rank 32 would double that
+    "lora_r": 16,                     # adapter rank: about 30 million trainable parameters, from the cell above; 32 would double that
     "batch_size": 1,
     "grad_accum": 4,                  # effective batch of 4 pages -> ~125 optimizer steps over 2 passes
     "max_pixels": 1280 * 28 * 28,     # ~1 megapixel per page; tokens per page, and so cost, scale with it
