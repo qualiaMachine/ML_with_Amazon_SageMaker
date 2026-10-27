@@ -45,7 +45,7 @@ A RAG pipeline needs two models, and each is used in one way: an embedding model
 
 ## Bedrock is the default for inference
 
-**For most RAG pipelines, and for inference in general, Amazon Bedrock is the place to start on AWS.** Bedrock exposes embedding and generation models (Amazon Titan, Anthropic Claude, DeepSeek, Meta Llama, and others) as pay‑per‑token APIs. Your retrieval code — chunking, indexing, similarity search, reranking, evaluation — stays entirely under your control and can run on a cheap CPU notebook or your laptop. Only the two model calls above are sent to Bedrock.
+**For most RAG pipelines, and for inference in general, Amazon Bedrock is the fastest and most cost-effective starting point on AWS.** Bedrock exposes embedding and generation models (Amazon Titan, Anthropic Claude, DeepSeek, Meta Llama, and others) as pay‑per‑token APIs. Your retrieval code — chunking, indexing, similarity search, reranking, evaluation — stays entirely under your control and can run on a cheap CPU notebook or your laptop. Only the two model calls above are sent to Bedrock.
 
 The reason this is the default comes down to **how you are billed**:
 
