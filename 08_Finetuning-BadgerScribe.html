@@ -552,7 +552,7 @@ expensive to train this way, because training requires much more GPU
 memory than simply running the model.</p>
 </div>
 <div class="section level3">
-<h3 id="lora-trains-a-small-part-of-a-large-model">LoRA trains a small part of a large model<a class="anchor" aria-label="anchor" href="#lora-trains-a-small-part-of-a-large-model"></a></h3>
+<h3 id="lora-adds-new-small-weights-beside-the-frozen-model">LoRA adds new small weights beside the frozen model<a class="anchor" aria-label="anchor" href="#lora-adds-new-small-weights-beside-the-frozen-model"></a></h3>
 <p><strong><em>Low-rank adaptation</em></strong>, or
 <strong><em>LoRA</em></strong>, reduces the amount of training by
 keeping the pretrained weights frozen and adding small sets of trainable
@@ -561,11 +561,12 @@ weight matrix, LoRA learns a much smaller adjustment to its output.</p>
 <figure><img src="fig/lora.svg" alt="Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x." class="figure mx-auto d-block"><div class="figcaption">Full fine-tuning updates every entry of a d × d
 weight matrix; LoRA freezes it and trains two thin matrices of rank r
 whose product is added to its output</div>
-</figure><p>The result is that we train only a fraction of the model’s
-parameters. We still run the original model during training, but we
-don’t need to calculate and store weight updates for most of it. That
-saves enough memory to fine-tune CHURRO on a single GPU with 24 GB of
-memory; the next section says how much.</p>
+</figure><p>Nothing in the original model is trained. The trained parameters are
+the new matrices, and they are a small fraction of the model’s size,
+under one percent in this episode. We still run the whole model during
+training, but we only calculate and store weight updates for the new
+matrices. That saves enough memory to fine-tune CHURRO on a single GPU
+with 24 GB of memory; the next section says how much.</p>
 <p>LoRA also produces a relatively small
 <strong><em>adapter</em></strong> that we can save separately from the
 original model. To use the fine-tuned model later, we load the
@@ -1928,9 +1929,10 @@ launched yesterday fails overnight.</p>
 <code>pages: 295 total -&gt; 251 train / 44 holdout</code>: the
 split.</li>
 <li>
-<code>trainable params: ...</code>: how many of the 3.75B parameters
-LoRA trains, about 30 million. The <code>safeguards:</code> line after
-it means the script’s two checks passed.</li>
+<code>trainable params: ...</code>: how many parameters LoRA trains,
+about 30 million in the adapter, against the 3.75B it leaves frozen. The
+<code>safeguards:</code> line after it means the script’s two checks
+passed.</li>
 <li>
 <code>[eval before] 15 holdout pages in ...s (... s/page) -&gt; macro CER ...</code>:
 the base model’s score, and the time per page one at a time; the
