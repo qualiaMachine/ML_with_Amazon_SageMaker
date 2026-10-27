@@ -70,8 +70,6 @@ Everything in the lesson is one of the four boxes in the diagram. S3 holds your 
 
 Everything the notebook does here can also be done from the AWS command line or from Python on your own machine; the optional episode *The Same Jobs from the Terminal* shows the CLI equivalents.
 
-The [lesson home page](../index.md) has the outline of the four parts and the episodes in each. Every job in the lesson is tagged, capped, estimated before launch and checked against the bill after.
-
 ::::::::::::::::::::::::::::::::::::: keypoints
 
 - The cloud offers the current GPU generation on demand and bills per second while a job runs; on-prem hardware offers full control and a fixed cost but a fixed generation and a queue.
