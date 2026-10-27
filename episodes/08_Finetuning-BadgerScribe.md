@@ -33,7 +33,7 @@ Fortunately, we don't have to start from scratch. Pretrained models already know
 
 Consider historical handwriting recognition. A general-purpose vision-language model may be able to transcribe ordinary printed text and modern handwriting, yet struggle with nineteenth-century documents, unfamiliar letterforms, or the conventions used by a particular archive. Giving it better instructions can help, but there are limits to what prompting can accomplish when the model has never learned to recognize the writing itself.
 
-Fine-tuning offers another approach: show the model examples of the documents alongside their correct transcriptions, and train it to produce better results on similar material.
+Fine-tuning offers another approach. Show the model examples of the documents alongside their correct transcriptions, and train it to produce better results on similar material.
 
 This can be surprisingly effective. [CHURRO](https://github.com/stanford-oval/Churro) is a 3-billion-parameter vision-language model developed for historical text recognition. Its researchers fine-tuned an existing Qwen model on roughly 100,000 historical document pages and reported better transcription accuracy than Gemini 2.5 Pro at substantially lower inference cost ([paper](https://arxiv.org/abs/2509.19768)). Rather than using an increasingly large general-purpose model, they trained a smaller one to become particularly good at the task they cared about. The same pattern shows up in other fields:
 
@@ -57,7 +57,7 @@ For a 3B model, that's the difference between about 6 GB and 48 GB just for the 
 
 For our task, that's unnecessary. We can get much of the benefit of fine-tuning without updating the entire model.
 
-### LoRA: training a small part of a large model
+### LoRA trains a small part of a large model
 
 Low-rank adaptation, or LoRA, reduces the amount of training by keeping the pretrained weights frozen and adding small sets of trainable parameters to selected layers. Rather than directly changing a large weight matrix, LoRA learns a much smaller adjustment to its output.
 
@@ -71,9 +71,9 @@ This makes LoRA particularly useful for research groups. We can take an existing
 
 ![GPU-hours on a log scale for three ways to get a 3B model that does a task: training Llama 3.2 3B from scratch, 460,000 GPU-hours, about a thousand H100s for three weeks and some 300 MWh; the full fine-tune that made CHURRO-3B, 800 GPU-hours, eight H100s for four days and about 500 kWh; this episode's LoRA run, half a GPU-hour, one A10G for 32 minutes and about 0.2 kWh](fig/pretrain-finetune-lora.svg){alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound."}
 
-### Our task: transcribing historical German letters
+### Our task, transcribing historical German letters
 
-For this exercise, we'll use the [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) challenge, which asks participants to produce faithful transcriptions of scanned historical documents. The competition includes several kinds of archival material, but we'll concentrate on letters from the Anna Seifert correspondence, held by the Max Kade Institute: 191 letters and postcards written between 1932 and 1942 by one woman to her son, transcribed by the Institute's Kurrent Transcription Group.
+For this exercise, we'll use the [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) challenge, which asks participants to produce faithful transcriptions of scanned historical documents. The competition includes several kinds of archival material, but we'll concentrate on letters from the Anna Seifert correspondence, held by the Max Kade Institute, 191 letters and postcards written between 1932 and 1942 by one woman to her son, transcribed by the Institute's Kurrent Transcription Group.
 
 These letters were written in Kurrent, a historical form of German handwriting whose letterforms differ substantially from modern cursive. Even a model trained on historical documents can struggle with it, making this a useful test of whether additional fine-tuning helps.
 
@@ -84,7 +84,7 @@ We have 295 labeled pages from this collection. We'll reserve approximately 15% 
 | train | 295 | 4 letter bundles | all human-transcribed, ~620 characters per page |
 | test | 141 | 5 other letter bundles | labels held by Kaggle |
 
-Our goal is straightforward: does fine-tuning CHURRO on these examples improve its ability to transcribe previously unseen pages?
+Our goal is straightforward. Does fine-tuning CHURRO on these examples improve its ability to transcribe previously unseen pages?
 
 We'll measure that using character error rate (CER), the same metric used by the competition. A lower CER means the transcription contains fewer character-level mistakes.
 
@@ -106,7 +106,7 @@ Do not fully fine-tune anything in this workshop, and do not LoRA fine-tune a mo
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Step 0: Estimate the cost before you launch anything
+## Step 0. Estimate the cost before you launch anything
 
 Before launching a fine-tune, write down what it should cost. If the bill comes in at three times your number, something is wrong, and you want to find that out on the first run, not the fiftieth. Two questions decide the cost of any training run. Will the model fit on the GPU, and how long will it run? Both can be answered on paper, to within a factor of two, before anything is rented.
 
@@ -246,11 +246,11 @@ The number of passes is a choice. Two passes for the class run is a budget decis
 
 ### Estimate a run you have not launched
 
-A lab wants to **fully fine-tune a 7B model** on 50,000 documents for 3 epochs. Each document is about 2,000 tokens (roughly 1,500 words), so one pass is 100 million tokens and three passes are 300 million. They are choosing between `ml.p4d.24xlarge` (8 × A100 40 GB, `$25.25`/h, about 312 TFLOPS bf16 per GPU) and a single `ml.g5.xlarge`; the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has both, with what each box holds and how its price covers all of its GPUs. Using the two rules: does it fit on the g5? How many GPU-hours on the p4d, and what does one run cost? What does a project cost?
+A lab wants to **fully fine-tune a 7B model** on 50,000 documents for 3 epochs. Each document is about 2,000 tokens (roughly 1,500 words), so one pass is 100 million tokens and three passes are 300 million. They are choosing between `ml.p4d.24xlarge` (8 × A100 40 GB, `$25.25`/h, about 312 TFLOPS bf16 per GPU) and a single `ml.g5.xlarge`; the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has both, with what each box holds and how its price covers all of its GPUs. Using the two rules, does it fit on the g5? How many GPU-hours on the p4d, and what does one run cost? What does a project cost?
 
 :::::::::::::::::::::::: solution
 
-It does not fit on the g5: a full fine-tune of a 7B model needs about 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB = 320 GB holds it with the model sharded across the GPUs.
+It does not fit on the g5, because a full fine-tune of a 7B model needs about 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB = 320 GB holds it with the model sharded across the GPUs.
 
 Tokens: 50,000 × 2,000 × 3 = 3 × 10^8. FLOPs: 6 × 7 × 10^9 × 3 × 10^8 ≈ 1.26 × 10^19. A quarter of an A100's 312 TFLOPS is 78 TFLOPS: 1.26 × 10^19 / 7.8 × 10^13 ≈ 1.6 × 10^5 GPU-seconds ≈ 45 GPU-hours, about 6 hours of wall-clock on 8 GPUs, about `$140` for one run (the "7B full fine-tune" row in the table above). The estimator gives the same answer:
 
@@ -260,7 +260,7 @@ helpers.estimate_finetune_cost(params_billions=7, examples=50_000, tokens_per_ex
                                gradient_checkpointing=False, runs=10);
 ```
 
-A project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data: five to ten runs, `$700` to `$1,400`, before anyone touches a hyperparameter sweep. That is the number for the proposal. The cap, the small first run, the written estimate and the checkpoints are the same at this size; the bill for skipping them is not.
+A project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data. That is five to ten runs, `$700` to `$1,400`, before anyone touches a hyperparameter sweep. That is the number for the proposal. The cap, the small first run, the written estimate and the checkpoints are the same at this size; the bill for skipping them is not.
 
 :::::::::::::::::::::::::::::::::
 
@@ -301,7 +301,7 @@ Compare the classic mistake, doing all of this interactively on an `ml.g5.xlarge
 ### Before any fine-tuning run
 
 - Set `max_run` on every job, and stop any notebook GPU instance when you stand up.
-- Make the first launch of a training script a small one: a slice of the data and a short cap. The in-class run below is that small run; the homework scales it up after it has been seen to work.
+- Make the first launch of a training script a small one, a slice of the data and a short cap. The in-class run below is that small run; the homework scales it up after it has been seen to work.
 - Write the cost estimate down before launching. Afterwards, read `BillableTimeInSeconds` from the job description and compare.
 - Save checkpoints to S3 as the job runs, so a killed or crashed run costs one epoch, not the whole bill.
 
