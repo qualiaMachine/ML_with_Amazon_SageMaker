@@ -690,7 +690,7 @@ test data.</li>
 </ul></section><section id="10_RAG-overview"><h2 class="section-heading"><a href="10_RAG-overview.html">Overview of RAG Workflows on AWS</a></h2>
 <hr class="half-width">
 <ul>
-<li>RAG is inference only: nothing is trained or fine-tuned, so running
+<li>RAG is inference only. Nothing is trained or fine-tuned, so running
 one does not need a GPU of your own.</li>
 <li>
 <strong>Bedrock is the default for inference</strong>: you pay per
@@ -705,7 +705,7 @@ you stop them.</li>
 <li>A forgotten GPU instance costs tens of dollars overnight and
 hundreds to thousands over a month; a full WattBot run on Bedrock costs
 under a dollar.</li>
-<li>Tags never propagate: tag every job at launch and route Bedrock
+<li>Tags never propagate. Tag every job at launch and route Bedrock
 calls through a tagged application inference profile, or the spend
 cannot be traced.</li>
 <li>The hands-on episodes start with Bedrock, then the same pipeline on
@@ -713,7 +713,7 @@ Processing jobs; the notebook-GPU version is optional self-study.</li>
 </ul></section><section id="11_RAG-Bedrock"><h2 class="section-heading"><a href="11_RAG-Bedrock.html">RAG with Bedrock</a></h2>
 <hr class="half-width">
 <ul>
-<li>A complete RAG pipeline on AWS needs no GPU: a CPU notebook plus
+<li>A complete RAG pipeline on AWS needs no GPU. A CPU notebook plus
 Bedrock-hosted embedding and generation models is enough.</li>
 <li>Corpus preparation (unpacking the staged PDFs, page extraction,
 chunking) is cheap CPU work; cache <code>chunks.jsonl</code> on S3 so
@@ -735,10 +735,10 @@ chunking, retrieval, and post-processing.</li>
 <li>Bedrock’s catalog is curated and lags releases; when you need a
 specific open-weight model you rent a GPU and serve it yourself.</li>
 <li>Of the ways to rent a GPU, a Processing job is the one that cannot
-be forgotten: it bills while the script runs and ends on its own, with
+be forgotten. It bills while the script runs and ends on its own, with
 <code>max_runtime_in_seconds</code> as the backstop. Use it for batch
 work; use Bedrock or an endpoint when you need answers in seconds.</li>
-<li>Inference needs only the weights: Qwen3-8B in bf16 is ~16 GB and
+<li>Inference needs only the weights. Qwen3-8B in bf16 is ~16 GB and
 fits one 24 GB GPU, with the rest for the prompts’ attention cache; how
 many prompts decode together is bounded by that remainder.</li>
 <li>A job’s inputs and outputs are S3 prefixes mounted into the
@@ -747,7 +747,7 @@ a cheap CPU instance.</li>
 <li>The pipeline logic (<code>wattbot_rag.py</code>) ships with the job
 unchanged from the Bedrock episode; only the two model callables
 differ.</li>
-<li>Tags do not propagate from the notebook: every job gets its own
+<li>Tags do not propagate from the notebook. Every job gets its own
 <code>tags=</code>.</li>
 </ul></section><section id="13_RAG-GPU-notebook"><h2 class="section-heading"><a href="13_RAG-GPU-notebook.html">(Optional) RAG with a Notebook GPU</a></h2>
 <hr class="half-width">
