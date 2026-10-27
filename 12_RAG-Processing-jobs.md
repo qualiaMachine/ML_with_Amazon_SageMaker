@@ -507,7 +507,7 @@ Expect the embedding job to bill about 8 minutes (about `$0.20`) and the RAG job
 
 ### What a shorter runtime cap would have done
 
-Both processors set `max_runtime_in_seconds=2 * 60 * 60`. Predict what would happen if the RAG job were launched with `max_runtime_in_seconds=600` instead: what does the job status become, what is in the output prefix, and what did it cost? Then compute the most a hung job can bill under each job's actual cap, and compare it with the cost of an `ml.g6e.xlarge` notebook instance left running over a weekend (64 hours).
+Both processors set `max_runtime_in_seconds=2 * 60 * 60`. Predict what would happen if the RAG job were launched with `max_runtime_in_seconds=600` instead: what does the job status become, what is in the output prefix, and what did it cost? Then compute the most a hung job can bill under the cap each job set, and compare it with the cost of an `ml.g6e.xlarge` notebook instance left running over a weekend (64 hours).
 
 :::::::::::::::::::::::: solution
 
