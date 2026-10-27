@@ -482,7 +482,7 @@ print(f"image tokens per page, {len(image_tokens)} sampled pages: mean {avg_imag
 print(f"average tokens per page: {avg_image:.0f} image + {n_instructions} instruction prompt + {avg_text:.0f} transcription = {avg_tokens_per_page:.0f}")
 ```
 
-That average is the `tokens_per_example` the estimate should have used. Re-run the estimator with it and compare with the 1,600 guess:
+That average is the `tokens_per_example` the estimate should have used. Step 0 of this episode ran `helpers.estimate_finetune_cost` with a guess of 1,600 tokens per page; run it again with the measured average and compare:
 
 ```python
 helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_example=int(avg_tokens_per_page), epochs=2,
