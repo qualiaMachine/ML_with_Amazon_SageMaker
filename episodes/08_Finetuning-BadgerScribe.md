@@ -186,7 +186,7 @@ The 17 minutes is more than the 12 from the hand calculation above, and the diff
 
 The job you launch in Step 1 bills about 32 minutes, not 27, and the gap is not the rule's error. The job also scores holdout pages before training and after it, about 14 minutes of GPU time that the estimator does not count, because it estimates training alone. Keep `step0_estimate`. Step 2 puts it next to the job's own bill.
 
-The same call for the kind of run a marathon team might weigh, a 7B model on 5,000 documents of about 600 words (800 tokens) each, three passes, with the eight attempts a project takes:
+The same call for a 7B model on 5,000 documents of about 600 words (800 tokens) each, three passes, with the eight attempts a project takes:
 
 ```python
 helpers.estimate_finetune_cost(
