@@ -230,7 +230,7 @@ helpers.estimate_training_cost(   # the semicolon at the end keeps Jupyter from 
     params_billions=0.125,      # a BERT-base-sized model, 125 million parameters
     examples=1_000_000,         # a million abstracts
     tokens_per_example=256,     # 190 words per abstract, about 256 tokens
-    epochs=3,                   # three passes over the abstracts
+    epochs=3,                   # three full training passes over all abstracts
 );
 ```
 
@@ -254,7 +254,7 @@ helpers.estimate_training_cost(
     params_billions=1,          # a 1B model, the size of the smallest open-weight language models
     examples=1_000_000,         # a million papers
     tokens_per_example=2000,    # 1,500 words per paper, about 2,000 tokens
-    epochs=1,                   # one pass over the papers
+    epochs=1,                   # one full training pass over all papers
 );
 ```
 
@@ -263,7 +263,7 @@ helpers.estimate_training_cost(
     params_billions=7,          # a 7B model, the size most "small" open-weight LLMs are
     examples=1_000_000,         # the same million papers
     tokens_per_example=2000,    # 1,500 words per paper, about 2,000 tokens
-    epochs=1,                   # one pass
+    epochs=1,                   # one full training pass over all papers
 );
 ```
 
