@@ -107,6 +107,8 @@ import sagemaker
 import logging
 logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
 logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
+logging.getLogger("sagemaker.config").setLevel(logging.WARNING)   # and the two "Not applying SDK defaults" lines
+logging.getLogger("sagemaker.estimator").setLevel(logging.ERROR)   # tuner.fit reads estimator.model_data before any job exists and logs a harmless "No finished training job found" warning
 # range types for the search: ContinuousParameter (float range), IntegerParameter (whole-number range), CategoricalParameter (explicit list)
 from sagemaker.tuner import HyperparameterTuner, IntegerParameter, ContinuousParameter, CategoricalParameter
 from sagemaker.pytorch import PyTorch
@@ -255,7 +257,7 @@ def job_cost_report(job_name: str, price_per_hour: float):
     return desc
 
 def tuning_cost_report(tuner, price_per_hour):
-    """Call job_cost_report on every training job the tuner launched; return the total cost in dollars."""
+    """Call job_cost_report on every training job the tuner launched and print the total."""
     jobs_df = tuner.analytics().dataframe()  # one row per child training job: its hyperparameters, FinalObjectiveValue and TrainingJobName
     total_billable = 0
     for job_name in jobs_df["TrainingJobName"]:
@@ -263,7 +265,6 @@ def tuning_cost_report(tuner, price_per_hour):
         total_billable += desc["BillableTimeInSeconds"] * desc["ResourceConfig"]["InstanceCount"]
     total_cost = total_billable / 3600 * price_per_hour
     print(f"Tuning job {tuner.latest_tuning_job.name}: {len(jobs_df)} training jobs, {total_billable/60:.1f} billable min, ${total_cost:.2f} total")
-    return total_cost
 
 tuning_cost_report(tuner, price_per_hour)
 ```
@@ -355,7 +356,7 @@ print("Best training job name:", best_job_name)
 
 # 2. Use describe_training_job to retrieve full details, including hyperparameters...
 best_job_desc = session.sagemaker_client.describe_training_job(TrainingJobName=best_job_name)
-best_hyperparameters = best_job_desc["HyperParameters"]
+best_hyperparameters = {k: v for k, v in best_job_desc["HyperParameters"].items() if k in hyperparameter_ranges}   # the record also carries the SDK's own sagemaker_* entries
 print("Best hyperparameters:", best_hyperparameters)
 
 # ...  and model URI (location on S3)

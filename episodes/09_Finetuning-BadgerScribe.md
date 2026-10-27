@@ -181,7 +181,7 @@ The same call for the kind of run a marathon team might weigh, a 7B model on 5,0
 helpers.estimate_finetune_cost(
     params_billions=7, examples=5000, tokens_per_example=800, epochs=3,
     method="lora", runs=8,       # no instance_type: the cheapest that fits
-)
+);
 ```
 
 Batch size is not an input, and does not need to be. It changes two things the estimator already has knobs for: a bigger batch keeps the GPU busier, which is the `utilization` argument (0.25 by default; a well-fed GPU reaches 0.35 or so), and it needs more memory for activations, which is `activations_gb`.
@@ -203,7 +203,7 @@ Tokens: 50,000 × 2,000 × 3 = 3 × 10^8. FLOPs: 6 × 7 × 10^9 × 3 × 10^8 ≈
 ```python
 helpers.estimate_finetune_cost(params_billions=7, examples=50_000, tokens_per_example=2000, epochs=3,
                                method="full", instance_type="ml.p4d.24xlarge",
-                               gradient_checkpointing=False, runs=10)
+                               gradient_checkpointing=False, runs=10);
 ```
 
 A project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data: five to ten runs, `$700` to `$1,400`, before anyone touches a hyperparameter sweep. That is the number for the proposal. The cap, the small first run, the written estimate and the checkpoints are the same at this size; the bill for skipping them is not.
@@ -231,6 +231,16 @@ Multi-GPU instances are for jobs that do not fit on one GPU: a full fine-tune of
 ### Scaling the same job to more GPUs
 
 The training script uses Hugging Face `Trainer`, which runs data-parallel across every GPU of a multi-GPU instance when the estimator sets `distribution={"torch_distributed": {"enabled": True}}`; the PyTorch episode's table of setups per kind of job has the details, including sharding the model with `fsdp=` when it does not fit one GPU. **Do not launch a multi-GPU job on the class account.**
+
+The PyTorch episode's rule for when data parallelism pays, a big model, a big batch and a fast link, has a LoRA-specific twist. What the GPUs exchange after every step is the gradient, 4 bytes per *trainable* parameter, and in a LoRA run that is the adapter alone, under 1% of the model. The exchange that made two machines pointless for a full 7B fine-tune is cheap here, so a LoRA run splits well even over slow links. `helpers.estimate_parallel_speedup` takes `method="lora"` for this; the class run on a four-GPU box, as an estimate only:
+
+```python
+# The class run on a 4 × A10G instance: the gradient exchanged is the adapter's, not the model's.
+# An estimate, not a launch: a 12-minute job does not need four GPUs, and the box costs 5x the single one.
+helpers.estimate_parallel_speedup(params_billions=3.75, tokens_per_step=4 * 1600, instance_type="ml.g5.12xlarge", method="lora");
+```
+
+Near 4x on 4 GPUs at about the same total cost, which is the case for a multi-GPU box: a LoRA run on the full Badger Scribe train set, or on a million pages, that has to finish by a deadline. It is not a reason to rent one for a run that finishes in twelve minutes.
 
 **The cost controls do not change with size, but the stakes do.** An `ml.p4d.24xlarge` bills **`$25.25` an hour** and an `ml.p5.48xlarge` **`$63.30` an hour** from the moment the job starts, and a `max_run` of six hours is a **`$150` to `$380`** ceiling on a single launch. Estimate GPU-hours from the Step 0 rules, set `max_run` to about twice that estimate, tag the job, and run a slice of the data on one GPU first so that a bug costs a dollar rather than a few hundred. **Do not launch a multi-GPU job on the class account.**
 
@@ -319,6 +329,7 @@ import sagemaker
 import logging
 logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
 logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
+logging.getLogger("sagemaker.config").setLevel(logging.WARNING)   # and the two "Not applying SDK defaults" lines
 from sagemaker import get_execution_role
 
 import sys
@@ -473,7 +484,7 @@ That average is the `tokens_per_example` the estimate should have used. Re-run t
 
 ```python
 helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_example=int(avg_tokens_per_page), epochs=2,
-                               method="lora", instance_type="ml.g5.xlarge")
+                               method="lora", instance_type="ml.g5.xlarge");
 ```
 
 Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is what Exercise 1 changes.
