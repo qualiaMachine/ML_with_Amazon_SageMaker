@@ -32,7 +32,7 @@
 <text x="447" y="452" font-size="15" fill="#555">who</text>
 <text x="525" y="452" font-size="15">a lab with a GPU budget</text>
 <text x="447" y="490" font-size="15" fill="#555">example</text>
-<text x="525" y="490" font-size="15">CHURRO-3B: 100k pages, 800 GPU-hours</text>
+<text x="525" y="490" font-size="15">CHURRO: 100k pages, 800 GPU-hours</text>
 <rect x="810" y="96" width="360" height="430" fill="#fafafa" stroke="#bbb" rx="8"/>
 <text x="990" y="128" text-anchor="middle" font-weight="bold" font-size="20">LoRA fine-tuning</text>
 <rect x="880" y="150" width="220" height="110" fill="#9ecae1" stroke="#444" stroke-width="1.5"/>
