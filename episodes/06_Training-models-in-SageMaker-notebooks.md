@@ -128,7 +128,9 @@ After reviewing, discuss any questions or observations with your group.
 For this test we download copies of the Titanic files from S3 onto the notebook instance. The managed job later reads its own input from S3 and never uses these local copies.
 
 :::: callout
-We download the data into the notebook to test the code, as a local pipeline would. In a pipeline that scales, the data lives in S3 and the jobs read it from there. 
+We download the data into the notebook to test the code, as a local pipeline would. In a pipeline that scales, the data lives in S3 and the jobs read it from there.
+
+The download costs nothing beyond a fraction of a cent in requests. The notebook instance and the bucket are in the same region, and transfer between AWS services inside a region is free. Pulling the same files to a laptop with the AWS CLI is a transfer out of AWS at `$0.09` per GB, which the optional *Same Jobs from the Terminal* episode covers.
 :::::
 
 Run the following cells to download the training and test CSVs. If the files do not appear in the Jupyter file browser, refresh it. A permissions error usually means the notebook role or the bucket policy does not allow the requested S3 operation.
