@@ -477,7 +477,7 @@ Before and after, in the generation call:
 | Raw model ID | `deepseek.v3-v1:0` | nobody: anonymous DeepSeek spend on the account |
 | Your profile | `arn:aws:bedrock:us-east-2:<account-id>:application-inference-profile/adewnu8wqxpy` | `Name=DoeJohn, Project=SinkOrSwim, Purpose=Inference` |
 
-So "cost tracking on Bedrock" is: create the alias once per model (one for DeepSeek, one for Titan, because an alias points at exactly one model), keep its ARN in a variable, and use that variable as `modelId` from then on. The profile is free; you pay only for tokens, as before.
+So "cost tracking on Bedrock" is: create the alias once per model (one for DeepSeek, one for Titan, because an alias points at a single model), keep its ARN in a variable, and use that variable as `modelId` from then on. The profile is free; you pay only for tokens, as before.
 
 One call per model does all of it. `tagged_profile_arn` in `wattbot_rag.py` looks for a profile named after your project and user name, creates it with the three tags if it is not there, and returns its ARN. One tagged profile per model, its ARN in place of the model ID.
 
@@ -529,8 +529,8 @@ It prints the profile ARN; pass that as `modelId`. The helper adds only the reus
 ### Checking the profiles
 
 - You can confirm the routing with `bedrock.list_inference_profiles(typeEquals="APPLICATION")`; the console's inference-profile pages list only the system-defined profiles.
-- The keys must be the three approved ones, `Name`, `Project` and `Purpose`, spelled exactly; any other key is ignored by the bill (the S3 episode says why).
-- The profile itself has no hourly or storage charge. You only pay per token, exactly as before.
+- The keys must be the three approved ones, `Name`, `Project` and `Purpose`, with that spelling and capitalisation; any other key is ignored by the bill (the S3 episode says why).
+- The profile itself has no hourly or storage charge. You only pay per token, as before.
 
 :::::::::::::::::::::::::::::::::::::::::::::::::
 

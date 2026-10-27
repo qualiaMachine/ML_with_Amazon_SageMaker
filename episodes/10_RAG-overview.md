@@ -41,14 +41,9 @@ RAG combines two steps:
 No model weights are updated. No backprop. No training job.  
 RAG is an inference‑only pattern that layers retrieval logic around an LLM.
 
-A RAG pipeline needs only two stateless calls from a model:
+A RAG pipeline needs two models, and each is used in one way: an embedding model, which maps a piece of text to a vector, called once per chunk and once per question; and a generation model, which is given the question and the retrieved chunks and writes the answer. Both are inference, with no state between calls, so neither requires you to own a GPU. A managed inference API serves calls like these.
 
-- "Turn this text into an embedding vector."
-- "Given this prompt (question + retrieved chunks), generate an answer."
-
-Neither of those requires you to own a GPU. They are exactly the kind of calls that a managed inference API is built to serve.
-
-## Start Here: Bedrock Is the Default
+## Bedrock is the default for inference
 
 **For standard RAG inference, use Amazon Bedrock.** Bedrock exposes embedding and generation models (Amazon Titan, Anthropic Claude, DeepSeek, Meta Llama, and others) as pay‑per‑token APIs. Your retrieval code — chunking, indexing, similarity search, reranking, evaluation — stays entirely under your control and can run on a cheap CPU notebook or your laptop. Only the two model calls above are sent to Bedrock.
 
@@ -157,9 +152,9 @@ Cost tracking in this workshop relies on three tags — `Name`, `Project`, `Purp
 
 Three things follow from this:
 
-1. **Each job gets its own tags.** A SageMaker job launched from a tagged notebook does not inherit the notebook's tags. Pass `tags=job_tags` on every estimator, tuner, and processor, exactly as the training, tuning, and Processing‑job episodes do. Vary `Purpose` per job so the bill tells you what the money went to.
+1. **Each job gets its own tags.** A SageMaker job launched from a tagged notebook does not inherit the notebook's tags. Pass `tags=job_tags` on every estimator, tuner, and processor, as the training, tuning, and Processing‑job episodes do. Vary `Purpose` per job so the bill tells you what the money went to.
 2. **Bedrock is tagged through a profile, not a call.** `invoke_model` and `converse` have no tags parameter. An application inference profile is a free, model‑specific wrapper that carries tags; usage routed through it is attributed to those tags. One profile per base model (so one for the embedding model and one for the generation model). Bedrock's tag format is lowercase `key`/`value`, while SageMaker's is `Key`/`Value`; the tag *names* stay the same.
-3. **Only the three approved keys count.** `Name`, `Project` and `Purpose`, spelled exactly; any other key is ignored by the bill, for the reason the S3 episode gives.
+3. **Only the three approved keys count.** `Name`, `Project` and `Purpose`, with that spelling and capitalisation; any other key is ignored by the bill, for the reason the S3 episode gives.
 
 ## When Do You Use Which Approach?
 
