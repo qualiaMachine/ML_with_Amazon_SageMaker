@@ -51,6 +51,10 @@ The difference is where we begin. Rather than initializing the model with random
 
 We could update every parameter in the model, which is called ***full fine-tuning***. That's how CHURRO itself was created. But even a relatively small model with 3 billion parameters is expensive to train this way, because training requires much more GPU memory than simply running the model.
 
+The GPU-hours put the options on one scale. Training from scratch is at the top, the full fine-tune that made CHURRO in the middle, and at the bottom the method this episode uses, explained in the next section.
+
+![GPU-hours on a log scale for three ways to get a 3B model that does a task: training Llama 3.2 3B from scratch, 460,000 GPU-hours, about a thousand H100s for three weeks and some 300 MWh; the full fine-tune that made CHURRO-3B, 800 GPU-hours, eight H100s for four days and about 500 kWh; this episode's LoRA run, half a GPU-hour, one A10G for 32 minutes and about 0.2 kWh](fig/pretrain-finetune-lora.svg){alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound."}
+
 During ***inference***, we primarily need to store the model's weights and the intermediate values associated with generating an answer. During full fine-tuning, we also need gradients that tell us how to change those weights, along with the optimizer's running statistics. Those additional values can increase the memory required for the model's parameters from roughly 2 bytes each to 16 bytes each.
 
 For a 3B model, that's the difference between about 6 GB and 48 GB just for the parameters and their training state, before accounting for activations and other overhead. A model that runs comfortably on one GPU may therefore require several GPUs to fine-tune.
@@ -67,9 +71,7 @@ The result is that we train only a fraction of the model's parameters. We still 
 
 LoRA also produces a relatively small ***adapter*** that we can save separately from the original model. To use the fine-tuned model later, we load the pretrained weights together with the adapter.
 
-This makes LoRA particularly useful for research groups. We can take an existing open-weight model, adapt it to a specialized dataset, evaluate whether the adaptation helped, and keep the resulting model without the expense of full fine-tuning. The three options sit far apart on one scale:
-
-![GPU-hours on a log scale for three ways to get a 3B model that does a task: training Llama 3.2 3B from scratch, 460,000 GPU-hours, about a thousand H100s for three weeks and some 300 MWh; the full fine-tune that made CHURRO-3B, 800 GPU-hours, eight H100s for four days and about 500 kWh; this episode's LoRA run, half a GPU-hour, one A10G for 32 minutes and about 0.2 kWh](fig/pretrain-finetune-lora.svg){alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound."}
+This makes LoRA particularly useful for research groups. We can take an existing open-weight model, adapt it to a specialized dataset, evaluate whether the adaptation helped, and keep the resulting model without the expense of full fine-tuning.
 
 ### Our task, transcribing historical German letters
 
