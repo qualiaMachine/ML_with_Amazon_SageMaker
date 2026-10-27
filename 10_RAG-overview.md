@@ -6,14 +6,16 @@ exercises: 0
 
 ## Retrieval-Augmented Generation (RAG) on AWS
 
-Retrieval-Augmented Generation (RAG) is a pattern where you **retrieve** relevant context from your data and then **generate** an answer using that context. Unlike model training, a standard RAG workflow does **not** fine‑tune or train a model — it combines retrieval + inference only.
+**Inference** is running a trained model to get an output from it: a prediction, an embedding, a generated answer. No weight changes, no gradients, no training job; the model is used, not changed. Everything in the first half of the lesson was training; everything in this part is inference.
 
-This episode introduces the major ways to build RAG systems on AWS, explains why **Amazon Bedrock should be your default**, and prepares us for later episodes where we experiment with each approach.
+Retrieval-Augmented Generation (RAG) is a pattern where you **retrieve** relevant context from your data and then **generate** an answer using that context. A standard RAG workflow does **not** fine‑tune or train a model: it is retrieval plus inference.
+
+This episode introduces the four ways to run inference on AWS, explains why **Amazon Bedrock should be your default**, and prepares us for later episodes where we try each approach that the lesson builds.
 
 :::::::::::::::::::::::::::::::::::::: questions
 
 - What is Retrieval‑Augmented Generation (RAG)?
-- What are the main architectural options for running RAG on AWS?
+- What are the four ways to run inference on AWS, and which does a RAG pipeline need?
 - Why is Bedrock the recommended default, and when should you reach for SageMaker instead?
 - How do the billing models differ, and what does it cost if you forget to shut something down?
 
@@ -22,9 +24,9 @@ This episode introduces the major ways to build RAG systems on AWS, explains why
 :::::::::::::::::::::::::::::::::::::: objectives
 
 - Understand that RAG does *not* require training or fine‑tuning a model.
-- Recognize the major architectural patterns for RAG systems on AWS.
+- Name the four ways to run inference on AWS and what each one bills for.
 - Explain why pay‑per‑token Bedrock inference is the safe default for most research RAG work.
-- Identify the specific situations where self‑managed GPU compute (Processing Jobs, notebook GPUs, or endpoints) is actually worth it.
+- Identify the specific situations where self‑managed GPU compute (Processing Jobs, notebook GPUs, or endpoints) is worth it.
 - Understand the core cost and control trade‑offs that drive which approach to use.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
@@ -59,7 +61,7 @@ The reason this is the default comes down to **how you are billed**:
 
 A GPU instance is a rental that keeps the meter running until *you* turn it off. Forgetting to do so is the single most common way research teams burn through cloud budgets. Bedrock has no equivalent failure mode: if you stop calling it, you stop paying.
 
-### What forgetting actually costs
+### What forgetting costs
 
 A GPU notebook instance left running after you close your laptop costs this much (on‑demand prices at time of writing; see the [instances page](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html)):
 
@@ -96,11 +98,11 @@ Bedrock's limits:
 
 :::::::::::::::::::::::::::::::::::::::::::::::::
 
-## Approaches to Running RAG on AWS
+## Four ways to run inference on AWS
 
-The main patterns, ordered from "reach for this first" to "only when you really need it."
+Four ways, in the order to try them.
 
-![Four columns, Bedrock API, Processing job, GPU notebook and Inference endpoint, compared on where the model runs, what runs between calls, billing unit, latency, model choice, what you must remember, a cost example and which episode covers it; Bedrock is marked as the default and Processing jobs as the safe way to use a GPU](fig/rag-approaches.svg){alt="Comparison table of four ways to run RAG on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)."}
+![Four columns, Bedrock API, Processing job, GPU notebook and Inference endpoint, compared on where the model runs, what runs between calls, billing unit, latency, model choice, what you must remember, a cost example and which episode covers it; Bedrock is marked as the default and Processing jobs as the safe way to use a GPU](fig/rag-approaches.svg){alt="Comparison table of four ways to run inference on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)."}
 
 ### 1. Amazon Bedrock — managed embedding and generation APIs (default)
 
