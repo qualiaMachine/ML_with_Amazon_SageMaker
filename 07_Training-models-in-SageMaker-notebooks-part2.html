@@ -1016,9 +1016,13 @@ for ML page</a> for detailed pricing).</p>
 <p><code>train_nn.py</code> already picks the GPU when there is one and
 moves the model and the tensors to it, which is why the same file runs
 on both instance types:</p>
-<pre class="text"><code>device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = TitanicNet().to(device)
-X_train, y_train = X_train.to(device), y_train.to(device)</code></pre>
+<div class="codewrapper sourceCode" id="cb20">
+<h3 class="code-label">PY<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode py" tabindex="0"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a>model <span class="op">=</span> TitanicNet().to(device)</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a>X_train, y_train <span class="op">=</span> X_train.to(device), y_train.to(device)</span></code></pre>
+</div>
 <div id="cpu-or-gpu-predict-then-measure" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
