@@ -28,7 +28,12 @@ This workshop is about running machine learning and AI work on AWS without losin
 - Add multimodal embeddings for the questions whose answers live in tables and figures, and measure what they change.
 - Run the same pipeline with an open-weight model Bedrock does not serve, as SageMaker Processing jobs that rent a GPU for the minutes they need; optionally, the same on a notebook GPU, as the comparison.
 
-**Part 4, resource management and cleanup.** What to stop, what to delete, how to read the bill, and the rules the account enforces on every launch, with how to set the same rules on an account of your own. An optional episode shows the same jobs from a terminal.
+**Part 4, resource management and cleanup.** What is still billing when the work is done, and how to make sure nothing is.
+
+- List what is running and stored under your name, then stop the notebook instance, delete the bucket, and remove the Bedrock profiles.
+- Read the bill in Cost Explorer by the tags every resource carried.
+- The rules the account enforced on every launch, and how to set the same rules on an account of your own.
+- Optionally, the same jobs and cleanup from a terminal with the AWS CLI.
 
 | Episodes | What they cover | Hands-on problem |
 |---|---|---|
