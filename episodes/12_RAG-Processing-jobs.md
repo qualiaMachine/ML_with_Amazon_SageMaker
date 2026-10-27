@@ -115,6 +115,7 @@ import sagemaker
 import logging
 logging.getLogger("sagemaker.telemetry.telemetry_logging").setLevel(logging.WARNING)   # silence the telemetry notice; the "Creating training-job" line still prints
 logging.getLogger("sagemaker.image_uris").setLevel(logging.WARNING)
+logging.getLogger("sagemaker.config").setLevel(logging.WARNING)   # and the two "Not applying SDK defaults" lines
 from sagemaker import get_execution_role
 from sagemaker.huggingface import HuggingFaceProcessor         # launches a job in the prebuilt Hugging Face container
 from sagemaker.processing import ProcessingInput, ProcessingOutput   # S3 <-> container path mappings for a job
