@@ -28,6 +28,8 @@ In the earlier episodes we used the notebook to prepare data and work with S3. F
 
 We start with XGBoost on the Titanic data. First we run the training script on the notebook to check that it handles the data and the arguments. Then we launch the same script as a SageMaker training job, with the training data supplied from S3, and look at how the job receives its inputs, where it writes its model, how to estimate its cost before launching and how to read the billable time afterwards. The PyTorch and tuning episodes build on all of it.
 
+The Titanic data is a toy. It trains in a second on the notebook, and nothing about it needs the cloud. The pattern is the point. Test on a small sample or subset first and vet the code, then scale up to a bigger instance when the data or the model calls for one. The fine-tuning episode is where that payoff arrives, with a 3B model on a GPU, and it follows the same two steps as this one.
+
 ## Initial setup
 
 ### Open the lesson notebook
