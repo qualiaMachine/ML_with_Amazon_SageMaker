@@ -6,7 +6,7 @@ exercises: 0
 
 ## Retrieval-Augmented Generation (RAG) on AWS
 
-Retrieval-Augmented Generation (RAG) is a pattern where you **retrieve** relevant passages from your own documents and then **generate** an answer from them. The model is used, not changed. No weights are updated and no training job runs. Using a trained model to get an output from it, a prediction, an embedding or an answer, is called **inference**, and everything in this part of the lesson is inference, where everything in the training episodes was training.
+Retrieval-Augmented Generation (RAG) is a pattern where you **retrieve** relevant passages from your own documents and then **generate** an answer from them. The model is used, not changed. No weights are updated and no training job runs. Using a trained model to get an output from it, a prediction, an embedding or an answer, is called **inference**, and everything in this part of the lesson is inference.
 
 This episode names the four ways to run inference on AWS, says why Bedrock is the one to start with, and sets up the three episodes that build the same RAG pipeline three ways.
 
