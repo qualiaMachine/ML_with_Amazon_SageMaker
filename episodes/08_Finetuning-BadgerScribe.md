@@ -55,11 +55,9 @@ The GPU-hours put the options on one scale. Training from scratch is at the top,
 
 ![GPU-hours on a log scale for three ways to get a 3B model that does a task: training Llama 3.2 3B from scratch, 460,000 GPU-hours, about a thousand H100s for three weeks and some 300 MWh; the full fine-tune that made CHURRO-3B, 800 GPU-hours, eight H100s for four days and about 500 kWh; this episode's LoRA run, half a GPU-hour, one A10G for 32 minutes and about 0.2 kWh](fig/pretrain-finetune-lora.svg){alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound."}
 
-Running the model, which is ***inference***, needs only the weights and the intermediate values of the answer being generated. Full fine-tuning also needs gradients that tell us how to change those weights, along with the optimizer's running statistics. Those additional values can increase the memory required for the model's parameters from roughly 2 bytes each to 16 bytes each.
+Full fine-tuning keeps four things in GPU memory for every parameter. The weight itself, its gradient, which says which way to change it, a 32-bit copy of the weight for the update to land in, and the optimizer's two running averages. That is 16 bytes per parameter, so a 3B model needs about 48 GB for its parameters and their training state before activations and other overhead, which means several GPUs.
 
-For a 3B model, that's the difference between about 6 GB and 48 GB just for the parameters and their training state, before accounting for activations and other overhead. A model that runs comfortably on one GPU may therefore require several GPUs to fine-tune.
-
-For our task, that's unnecessary. We can get much of the benefit of fine-tuning without updating the entire model.
+For our task, that's unnecessary. We can get much of the benefit of fine-tuning without updating the entire model, and a weight that is not being updated costs 2 bytes, not 16.
 
 ### LoRA trains a small part of a large model
 
