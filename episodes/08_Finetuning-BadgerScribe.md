@@ -53,7 +53,7 @@ We could update every parameter in the model, which is called ***full fine-tunin
 
 ### LoRA adds new small weights beside the frozen model
 
-***Low-rank adaptation***, or ***LoRA***, reduces the amount of training by keeping the pretrained weights frozen and adding small sets of trainable parameters to selected layers. Rather than directly changing a large weight matrix, LoRA learns a much smaller adjustment to its output.
+The alternative to full fine-tuning is ***parameter-efficient fine-tuning***, or ***PEFT***, a family of methods that leave the pretrained weights frozen and train a small number of new parameters instead. ***Low-rank adaptation***, or ***LoRA***, is the most widely used form of PEFT. It keeps the pretrained weights frozen and adds small sets of trainable parameters to selected layers. Rather than directly changing a large weight matrix, LoRA learns a much smaller adjustment to its output.
 
 ![Full fine-tuning updates every entry of a d × d weight matrix; LoRA freezes it and trains two thin matrices of rank r whose product is added to its output](fig/lora.svg){alt="Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x."}
 
@@ -556,7 +556,7 @@ for f in ["badger_common.py", "finetune_churro_lora.py", "churro_transcribe_batc
     shutil.copy(f"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/{f}", f"code/{f}")
 
 with open("code/requirements.txt", "w") as f:  # pip-installed inside the container before the script starts
-    f.write("\n".join(["peft>=0.14", "accelerate", "pillow", "pandas"]))
+    f.write("\n".join(["peft>=0.14", "accelerate", "pillow", "pandas"]))   # peft is Hugging Face's library of PEFT methods; it is where get_peft_model and LoraConfig come from
 
 print(os.listdir("code"))
 ```
