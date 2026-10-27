@@ -153,7 +153,7 @@ For the class run, 251 pages at about 1,600 tokens each for 2 passes is 803,000 
 
 ### The same arithmetic as a function
 
-`helpers.estimate_finetune_cost` does both calculations for any model and any data, picks the cheapest instance that fits (or uses the one you name), and prints the memory needed, the GPU-hours, the cost per run and per project, and a `max_run` to set. Its inputs are the quantities in the two rules, with the class run as the example:
+`helpers.estimate_finetune_cost` does both calculations for any model and any data, picks the cheapest instance that fits (or uses the one you name), and prints the memory needed, the GPU-hours, the cost per run and per project, and a `max_run` to set. It is the same function the PyTorch episode used as `estimate_training_cost`, which is this one with every weight trained from scratch, so the assumptions are the same there and here. Bytes per parameter from the first table, 6 or 4 FLOPs per parameter per token, times 1.5 for gradient checkpointing, a quarter of the GPU's peak, and 10 minutes of startup per job. Its inputs are the quantities in the two rules, with the class run as the example:
 
 - `params_billions`: every parameter the model holds, including parts you are not training. CHURRO is a 3B language model plus a vision tower, 3.75B in all.
 - `examples`: one example is one training item, whatever the model is given one at a time. Here it is one page image with its transcription, and there are 251 of them. For a text model it would be one document; for a speech model, one recording.
