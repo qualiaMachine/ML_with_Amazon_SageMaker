@@ -24,56 +24,30 @@ exercises: 20
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/11_RAG-Bedrock.ipynb`. Select the **`conda_pytorch`** kernel.
-This is the first hands-on RAG episode, and it starts where the overview told you to start: **Amazon Bedrock**. We build a complete RAG pipeline for the [WattBot 2026](https://www.kaggle.com/competitions/WattBot2026) challenge from a small, CPU-only SageMaker notebook. Nothing in this episode needs a GPU: the core model work — **both text embeddings and answer generation** — runs on Bedrock-hosted models that bill per token and leave nothing running between calls. We'll use:
+This is the first hands-on RAG episode, and it starts where the overview said to: Amazon Bedrock. We build the whole RAG pipeline for the [WattBot 2026](https://www.kaggle.com/competitions/WattBot2026) challenge from a small CPU-only SageMaker notebook. Nothing here needs a GPU: both the text embeddings and the answer generation run on Bedrock-hosted models, which bill per token and leave nothing running between calls. The two models are **Amazon Titan Text Embeddings V2**, which turns WattBot chunks into vectors, and **DeepSeek V3**, which writes the answers and explanations.
 
-- an **Amazon Titan Text Embeddings V2** model to turn WattBot chunks into vectors, and  
-- a **DeepSeek V3** model hosted on Bedrock to generate answers and explanations.
-
-We also do the corpus preparation here: unpack the WattBot PDF corpus, split it into pages and overlapping
-chunks, and cache the chunks on S3. The Processing Jobs episode (and the optional GPU-notebook episode) reuse those chunks and run the same
-retrieval, evaluation, and scoring logic on self-hosted models, so you can compare cost, latency, and
-complexity directly.
+This episode also prepares the corpus: it unpacks the WattBot PDFs, splits them into pages and overlapping chunks, and caches the chunks in S3. The Processing-jobs episode and the optional GPU-notebook episode reuse those chunks and run the same retrieval, evaluation and scoring on self-hosted models, so cost, latency and effort can be compared directly.
 
 ## Why Bedrock for WattBot?
 
-When you self-host models (as the Processing Jobs episode does next), you are responsible for picking a model,
-managing versions, and making sure your instance has enough VRAM. That works for experiments,
-but it can get painful once multiple teams or challenges want to reuse the same pipeline.
+With a self-hosted model, as in the Processing-jobs episode, you choose the model, keep its version, and make sure the instance has the GPU memory for it. That is fine for an experiment and a burden once several teams want the same pipeline. Running the embedding and generation steps on Bedrock means:
 
-Running your **embedding + generation** steps on Amazon Bedrock gives you:
+- **Managed models.** Models from Anthropic, Amazon, DeepSeek and others, with no container images or CUDA versions of your own.
+- **Paying per token.** Instead of a GPU instance that may sit idle, you pay for the input and output tokens of each call. For most workloads that is cheaper; for a large offline batch with a small model, a GPU job can still win.
+- **One set of models for a group.** A lab or a course can agree on a few Bedrock models more easily than on a fleet of GPU instances.
 
-- **Managed, up-to-date models.** You can use high‑quality models from Anthropic, Amazon, DeepSeek, and
-  others without worrying about container images or CUDA versions.
-- **Pay for what you use (in tokens).** Instead of paying for a GPU instance that might sit
-  idle, you pay per token (input + output) when you call the model. For some workloads this
-  is cheaper; for large offline batches with smaller models, a dedicated GPU can still win.
-- **Easier sharing and governance.** A team can standardize on a small set of Bedrock
-  models across courses, hackathons, or labs than to manage many separate GPU instances.
-
-In this notebook, both the **embedding** and **answer/explanation** steps run on
-Bedrock-hosted models. The embeddings are saved as `embeddings_bedrock.npy` so you can compare them
-against the self-hosted run in the Processing Jobs episode.
+In this notebook both the embedding step and the answer and explanation steps run on Bedrock. The embeddings are saved as `embeddings_bedrock.npy`, so they can be compared with the self-hosted run in the Processing-jobs episode.
 
 
 ### Models used in this episode
 
-We’ll work with **Amazon Bedrock–hosted foundation models** for both embedding and generation:
+Both models are Bedrock-hosted foundation models:
 
-- **Amazon Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`)
+- **Amazon Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`): a general text-embedding model for retrieval, clustering and classification. It returns vectors of 256, 512 or 1,024 dimensions, with presets for retrieval. AWS does not publish its parameter count.
+- **DeepSeek V3** (`deepseek.v3-v1:0`): an open-weight mixture-of-experts model, 671B parameters in total and about 37B active per token, that Bedrock serves on demand, so there is no GPU to manage. Its per-token price is well below the flagship models' (the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) has current rates), which matters when there is one call per question. The same code works for any chat model in the catalog: Bedrock's one chat call, `converse`, takes the same input for every provider, a system prompt and a list of messages, and returns the reply in the same shape, so changing `base_generation_model_id` to a Claude, Llama or Mistral ID changes nothing else.
+- **Multimodal models for tables and figures**: Bedrock also serves models that embed or read images. Step 13 uses one, Amazon Nova Multimodal Embeddings, on the table and figure questions.
 
-  - General‑purpose text‑embedding model for semantic search, retrieval, clustering, and classification.
-  - Supports configurable embedding dimensions (256, 512, or 1,024) and has presets tuned for retrieval or binary indexing.
-  - AWS does not publish the exact number of parameters for Titan models; 
-
-- **DeepSeek V3** (`deepseek.v3-v1:0` via Bedrock)
-
-  - An open‑weight mixture‑of‑experts model (671B parameters in total, about 37B active per token) that Bedrock serves on‑demand, so there is no GPU to manage.
-  - Particularly useful when you want many calls (e.g., one per question) and care about low latency and lower per‑token pricing compared to flagship models (check the [Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) for current rates).
-  - The same code works for any chat model in the catalog. Bedrock has one chat call, `converse`, that takes the same input for every provider (a system prompt and a list of user and assistant messages) and returns the reply in the same shape, so switching `base_generation_model_id` to a Claude, Llama, or Mistral model ID changes nothing else.
-
-- **Multimodal models for tables and figures**: Bedrock also serves models that embed or read images. Step 13 of this episode uses one, Amazon Nova Multimodal Embeddings, on the table and figure questions.
-
-For the full list of available models (Claude variants, Amazon models, and partner models), open the [Model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the Amazon Bedrock console. Each entry has a model card with capabilities and typical use cases, and a link to the pricing page, for exploring alternatives for your own RAG system.
+The [model catalog](https://us-east-2.console.aws.amazon.com/bedrock/home?region=us-east-2#/model-catalog) in the Bedrock console lists every model available in the region (Claude variants, Amazon models and partner models), each with a model card and a link to its pricing.
 
 ::::::::::::::::::::::::::::::::::::: callout
 
@@ -303,12 +277,7 @@ Later, we will **chunk these pages** into smaller overlapping segments for embed
 
 ### Why chunks keep their page
 
-Chunks keep the page they came from, so that:
-
-- **Keeping metadata** (doc ID, URL, page labels) tied to the text.  
-- **Debugging retrieval** — the page says what the model saw.  
-- **Cleaning text** before making smaller overlapping chunks.  
-- **Flexibility later** — once pages are structured, we can try different chunk sizes or strategies without re-extracting the PDF.
+Every chunk carries the page it came from: the document id, URL and page label stay attached to the text, a retrieved chunk can be traced to the page the model saw, the text can be cleaned at the page level before chunking, and chunk sizes can be changed later without extracting the PDFs again.
 
 
 
@@ -343,17 +312,12 @@ print(f"{len(train_df)} questions can be answered from this corpus")
 
 ## Step 6 – Text chunking
 
-RAG systems typically break documents into **chunks** so that:
+Pages are split into **chunks** because a page is the wrong size for retrieval: too long, and one vector has to stand for several topics at once; too short, and a chunk carries no context. The chunker here is a sliding window over characters:
 
-- Each chunk is long enough to carry meaningful context.
-- No chunk is so long that it blows up the embedding/LLM context window.
+- `chunk_size_chars`: the most characters in a chunk (1,000 to 1,500 is usual).
+- `chunk_overlap_chars`: how many characters consecutive chunks share (200 here), so a sentence cut by a boundary is whole in one of them.
 
-For this workshop we will implement a **simple sliding-window chunker** that operates on characters:
-
-- `chunk_size_chars`: maximum characters per chunk (e.g., 1,000–1,500).
-- `chunk_overlap_chars`: overlap between consecutive chunks (e.g., 200).
-
-In your own work, you may wish to plug in more sophisticated *semantic chunking* methods (e.g., splitting on headings, section titles, or sentence boundaries).
+In your own work, splitting on headings, sections or sentence boundaries, called semantic chunking, is the usual next step.
 
 ```python
 def split_text_into_chunks(
@@ -1199,57 +1163,13 @@ Measured once on this corpus, 50 table and figure questions, Nova 2 Lite through
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-## Wrap‑up: Bedrock versus GPU‑based runs
+## Wrap-up: Bedrock against the GPU routes
 
-You now have a complete WattBot evaluation running on Bedrock, with per‑token billing and nothing left running. The Processing Jobs episode reruns the same evaluation on a self‑hosted model, and the optional GPU-notebook episode does it once more interactively, so by the end you will have three versions to compare:
+You now have a complete WattBot evaluation on Bedrock, billed per token, with nothing left running. The Processing-jobs episode reruns it on a self-hosted model, and the optional GPU-notebook episode once more by hand, so by the end there are three versions of the same pipeline to compare: Bedrock, a Processing job and a notebook GPU. The code they share is the retrieval, prompting and scoring in `wattbot_rag.py`; what each one implements is the two callables, `embed_query` and `generate`.
 
-1. **Bedrock** (this episode) using hosted embedding and generation models with per‑token billing.
-2. **SageMaker Processing job** running an open‑source model in batch with on-demand compute.
-3. **Notebook GPU instance** (optional) using the same locally loaded open‑source model.
+Use Bedrock or another hosted API when a catalog model will do, when the number of questions is modest or you are still prototyping, and when you would rather pay per token than manage a GPU. Use a self-hosted model on a GPU when the work needs a model the catalog does not carry, when you will run large batches repeatedly, when you need control over the exact checkpoint, or when you already have GPUs you are not paying for by the hour.
 
-When deciding between these options in practice:
-
-- Use **Bedrock or other hosted APIs** when:
-  - You want to try the latest frontier models quickly.  
-  - You only need to run a modest number of questions, or you are still prototyping.  
-  - You prefer a simple, token‑based cost model and don’t want to manage GPU capacity.
-
-- Use **self‑hosted models on GPU instances** when:
-  - You need a specific open-weight model that the catalog does not carry.  
-  - You expect to run large batches repeatedly (e.g., many thousands of questions).  
-  - You want tight control over which architectures/checkpoints you run or fine‑tune.  
-  - You already have institutional access to cost‑effective on‑prem or cloud GPUs.
-
-The RAG evaluation logic is the same in all three episodes:
-once you have a clean retrieval + normalization pipeline (like WattBot’s, in `wattbot_rag.py`), swapping out the generator
-is mostly a matter of re‑implementing `embed_query` and `generate`
-for each compute option you care about.
-
-
-## Concluding remarks: Bedrock models are one piece of the RAG puzzle
-
-In this episode we used Bedrock-hosted models for **both** embedding and
-generation. Larger models help, especially on
-messy real-world questions — but it's important to remember that they are still just
-**one component** in your RAG system.
-
-- **Bigger or newer models do not fix weak retrieval.** If your chunks
-  are poorly aligned with the questions, a very strong LLM will still struggle.
-- **Most of the long‑term accuracy gains in RAG systems come from the plumbing
-  around the LLMs**, including:
-  - smarter / semantic chunking strategies
-  - good metadata and filtering
-  - reranking or multi‑stage retrieval
-  - domain‑specific heuristics and post‑processing
-- **Cost and latency live in tension with quality.** Larger models (or higher
-  token budgets) often improve answers, but at the cost of more inference time
-  and higher per‑request spend. Bedrock makes it easier to experiment with that
-  tradeoff by switching models without rewriting your pipeline.
-
-As you adapt this notebook to your own projects, treat the LLM choice as **one
-tunable component** in a larger system. Iterating on chunking, indexing, and
-retrieval policies usually gain more than swapping
-between already-good models.
+The model is one part of a RAG system, and not the part where most of the accuracy is won. A bigger or newer model does not fix weak retrieval: if the chunks do not match the questions, a strong model still has nothing to read. The gains over time come from the work around the model, chunking, metadata and filtering, reranking, post-processing, and the score breakdown by evidence type in Step 12 says which of them to work on. A bigger model or a longer prompt raises the bill per question as well as the score, and Bedrock lets you measure that trade by changing one model ID.
 
 
 ::::::::::::::::::::::::::::::::::::: keypoints

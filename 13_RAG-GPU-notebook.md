@@ -30,7 +30,7 @@ exercises: 15
 
 ### Optional, self-study episode
 
-This episode is not taught in the workshop. **The Bedrock and Processing Jobs episodes are the default ways to run RAG; this one is for the case where you need to poke at a self-hosted model interactively, and only if you will remember to stop the instance.** **Do not run this notebook on the controller instance from the other episodes. Create a new GPU notebook instance for it (Setup below). On a CPU instance the vLLM install and the 27 GB model load will exhaust memory and freeze your JupyterLab.** It runs the same pipeline as the Processing Jobs episode on a GPU notebook instance, which is the right tool for prototyping alone at a keyboard and the wrong one for a room of a hundred people with meters running. Work through it on your own when you want to see model loading, GPU memory and generation as plain Python. Read the cost callout first.
+This episode is not taught in the workshop. **The Bedrock and Processing Jobs episodes are the default ways to run RAG; this one is for the case where you need to work on a self-hosted model by hand, and only if you will remember to stop the instance.** **Do not run this notebook on the controller instance from the other episodes. Create a new GPU notebook instance for it (Setup below). On a CPU instance the vLLM install and the 27 GB model load will exhaust memory and freeze your JupyterLab.** It runs the same pipeline as the Processing Jobs episode on a GPU notebook instance, which is the right tool for prototyping alone at a keyboard and the wrong one for a room of a hundred people with meters running. Work through it on your own when you want to see model loading, GPU memory and generation as plain Python. Read the cost callout first.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -69,11 +69,7 @@ What keeps this safe:
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
-Self-hosting on a notebook GPU is the simplest form of it:
-
-- Easy to understand on the AWS side (pick a GPU instance, pick a model, go)
-- Ideal for learning what retrieval and generation do, step by step
-- The fastest loop for experimenting with prompts and models that Bedrock does not carry
+Self-hosting on a notebook GPU is the simplest form of it: choose a GPU instance and a model, and every step of retrieval and generation is a cell you can run and change. That makes it the quickest way to learn what each step does and to try prompts and models Bedrock does not carry.
 
 The Processing Jobs episode runs this same pipeline as short-lived jobs, so the GPU only bills while it is embedding or generating; that is the pattern to use for real work.
 
@@ -333,7 +329,7 @@ We will:
 2. Encode all chunks in batches.
 3. Store the resulting matrix as a `torch.Tensor` or `numpy.ndarray` along with the original `chunked_docs` list.
 
-Later, we’ll implement a small retrieval helper that does cosine-similarity search over this matrix—no additional indexing library required.
+Later, we’ll implement a small retrieval helper that does cosine-similarity search over this matrix, with no indexing library.
 
 
 
@@ -576,9 +572,9 @@ In this episode, we:
 - Used an LLM to generate answers from retrieved context and wrote results out to a CSV for later scoring and analysis.
 - Handled unanswerable questions with an `is_blank` flag so the system can explicitly say “I don’t know” when the evidence isn’t there.
 
-This is just a first pass at a RAG pipeline: some next steps:
+This is a first pass at a RAG pipeline. Next steps, in rough order of what they usually gain:
 
-- **Increase the size/quality of models used for embedding and generation**: Try stronger embedding models (e.g., larger sentence-transformers or domain-tuned embeddings) and more capable LLMs for answer generation, especially if you have GPU budget.
+- **Stronger models**: a larger or domain-tuned embedding model, or a more capable generator, if the GPU budget allows.
 
 - **Add a reranking step**: Instead of sending the top-k raw nearest neighbors directly to the LLM, use a cross-encoder or reranker model to re-score those candidates and send only the best ones.
 
@@ -591,9 +587,7 @@ This is just a first pass at a RAG pipeline: some next steps:
   - Filter or boost chunks by metadata at retrieval time.
   - Use metadata in the prompt so the LLM knows where evidence is coming from.
 
-- **Look for LLMs tuned for scientific literature**: Experiment with models that are explicitly trained or finetuned on scientific text (e.g., arXiv / PubMed) so they:
-  - Parse equations and technical language more reliably.
-  - Are less likely to hallucinate when reading dense scientific prose.
+- **Models tuned on scientific text** (arXiv, PubMed): they read equations and technical language more reliably and invent less when the prose is dense.
 
 Models, retrieval and preprocessing can each be swapped without changing the rest of the pipeline.
 
@@ -618,10 +612,7 @@ The Processing Jobs episode does the same work, with the same `wattbot_rag.py`, 
 - **Inference uses reduced-precision weights**: no gradients means the weights are the memory cost. FP8 puts a 27B model on one 48 GB GPU (`ml.g6e.xlarge`); bf16 would need 54 GB, an 80 GB GPU or a multi-GPU instance.
 - **The meter never stops on its own**: `ml.g6e.xlarge` is `$2.61`/h, `$167` per forgotten weekend, `$1,906` per forgotten month, plus `$14`/month for the storage volume even when stopped. Stop it when you stand up; delete it when the episode is over.
 - **Retrieval is a matrix multiply**: cosine similarity over the in-memory embedding matrix is enough for a corpus this size; a vector database is the same step for a corpus of millions.
-- **Ground-truth units**: The `answer_unit` column is always copied directly
-  from `train_QA.csv`, never guessed by the LLM.
-- **Two-stage LLM use**: One call focuses on *answering and citing*; a second,
-  lighter call produces a short explanation tagged with an evidence type.
-- **WattBot conventions**: We respect the Kaggle competition format,
-  using `is_blank` for unanswerable questions and for missing fields.
+- **Units come from the data**: `answer_unit` is copied from `train_QA.csv`, never guessed by the model.
+- **Two calls per question**: one answers and cites; a second, shorter one writes the explanation and names the evidence type.
+- **The competition's format**: `is_blank` marks unanswerable questions and missing fields, as the scorer expects.
 ::::::::::::::::::::::::::::::::::::::::::::::::
