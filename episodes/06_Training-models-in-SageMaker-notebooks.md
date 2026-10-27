@@ -22,6 +22,12 @@ exercises: 20
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+## Test locally, then scale to the cloud
+
+In the earlier episodes we used the notebook to prepare data and work with S3. From here on it has two jobs. It is the place to test code "locally", on its own small CPU, before anything is scaled up, and it is the controller that launches training jobs on separate instances SageMaker rents for them and releases when they finish. A script that fails on a data-loading error costs nothing on the notebook and bills its startup minutes as a job, so every episode from here tests first and launches second.
+
+We start with XGBoost on the Titanic data. First we run the training script on the notebook to check that it handles the data and the arguments. Then we launch the same script as a SageMaker training job, with the training data supplied from S3, and look at how the job receives its inputs, where it writes its model, how to estimate its cost before launching and how to read the billable time afterwards. The PyTorch and tuning episodes build on all of it.
+
 ## Initial setup
 
 ### Open the lesson notebook
