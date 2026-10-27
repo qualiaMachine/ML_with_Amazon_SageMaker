@@ -53,6 +53,8 @@ from badger_common import (
     user_messages,
 )
 
+MAX_TRAINABLE_FRACTION = 0.05   # a LoRA adapter is well under this; more means the base weights are not frozen
+
 
 def parse_args():
     """Every knob the notebook can set reaches the script as a command-line flag;
@@ -269,6 +271,20 @@ def main():
     model = get_peft_model(model, lora)
     model.enable_input_require_grads()  # needed for gradient checkpointing with frozen embeddings
     model.print_trainable_parameters()
+
+    # Two checks before anything trains. A LoRA run is what was estimated and
+    # paid for; if the adapter landed on the vision tower, or if most of the
+    # model is trainable, this is a different (and far more expensive) job.
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total = sum(p.numel() for p in model.parameters())
+    in_vision = [n for n, p in model.named_parameters() if p.requires_grad and "visual" in n]
+    if in_vision:
+        raise RuntimeError(f"{len(in_vision)} trainable tensors are in the vision tower (e.g. {in_vision[0]}); "
+                           "target_modules should exclude 'visual'")
+    if trainable / total > MAX_TRAINABLE_FRACTION:
+        raise RuntimeError(f"{100 * trainable / total:.1f}% of the model is trainable; a LoRA run should be a few "
+                           f"percent at most (cap {100 * MAX_TRAINABLE_FRACTION:.0f}%). Check target_modules and --lora_r")
+    print(f"safeguards: adapter is {trainable:,} of {total:,} parameters ({100 * trainable / total:.2f}%), vision tower frozen")
 
     # --- checkpoints: where they go, and whether we are resuming ---
     ckpt_dir = args.checkpoint_dir if os.path.isdir(args.checkpoint_dir) \
