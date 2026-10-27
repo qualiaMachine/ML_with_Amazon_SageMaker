@@ -280,7 +280,7 @@ with open("Notes2.txt", "w") as f:
 s3.upload_file("Notes2.txt", bucket_name, "docs/Notes2.txt")
 
 size_after = helpers.get_s3_bucket_size(bucket_name)
-print(f"grew by {(size_after['size_mb'] - size_before['size_mb']) * 1024:.1f} KB")   # the helper returns a dict with size_mb and size_gb
+print(f"before {size_before['size_mb'] * 1024:,.1f} KB, after {size_after['size_mb'] * 1024:,.1f} KB: grew by {(size_after['size_mb'] - size_before['size_mb']) * 1024:.1f} KB")   # the helper returns a dict with size_mb and size_gb; 0.0 on a rerun, since the same file is overwritten
 ```
 
 The bucket grows by the size of the file (a few hundred bytes here), and at `$0.023` per GB-month that is well under a thousandth of a cent per month. The same two lines, run before and after a training job, tell you what the job wrote and whether something is accumulating that you should clean up.

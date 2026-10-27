@@ -406,7 +406,8 @@ For a small dataset like ours, we don't strictly need a GPU, but for larger data
 #### Nothing changes in the script
 `train_nn.py` already picks the GPU when there is one and moves the model and the tensors to it, which is why the same file runs on both instance types:
 
-\1("cuda" if torch.cuda.is_available() else "cpu")
+```text
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = TitanicNet().to(device)
 X_train, y_train = X_train.to(device), y_train.to(device)
 ```
