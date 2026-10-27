@@ -34,7 +34,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 ### SageMaker and Bedrock
 
-**Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. In practice that means:
+**Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. The features that matter for research work:
 
 - **High-performance compute only when needed**: SageMaker lets you develop interactively in lightweight, inexpensive notebook environments (or your own laptop) and then launch training, tuning, or inference jobs on more powerful [instance types](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/reference.html#cloud-compute-essentials) only when necessary. You pay for expensive compute only while a job runs.
   
