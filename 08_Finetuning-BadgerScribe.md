@@ -51,13 +51,13 @@ The difference is where we begin. Rather than initializing the model with random
 
 We could update every parameter in the model, which is called ***full fine-tuning***. That's how CHURRO itself was created. But even a relatively small model with 3 billion parameters is expensive to train this way, because training requires much more GPU memory than simply running the model.
 
-### LoRA trains a small part of a large model
+### LoRA adds new small weights beside the frozen model
 
 ***Low-rank adaptation***, or ***LoRA***, reduces the amount of training by keeping the pretrained weights frozen and adding small sets of trainable parameters to selected layers. Rather than directly changing a large weight matrix, LoRA learns a much smaller adjustment to its output.
 
 ![Full fine-tuning updates every entry of a d × d weight matrix; LoRA freezes it and trains two thin matrices of rank r whose product is added to its output](fig/lora.svg){alt="Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x."}
 
-The result is that we train only a fraction of the model's parameters. We still run the original model during training, but we don't need to calculate and store weight updates for most of it. That saves enough memory to fine-tune CHURRO on a single GPU with 24 GB of memory; the next section says how much.
+Nothing in the original model is trained. The trained parameters are the new matrices, and they are a small fraction of the model's size, under one percent in this episode. We still run the whole model during training, but we only calculate and store weight updates for the new matrices. That saves enough memory to fine-tune CHURRO on a single GPU with 24 GB of memory; the next section says how much.
 
 LoRA also produces a relatively small ***adapter*** that we can save separately from the original model. To use the fine-tuned model later, we load the pretrained weights together with the adapter.
 
@@ -759,7 +759,7 @@ Open a second browser tab on the SageMaker console: **SageMaker AI → Training 
 Things to find in the log while you wait:
 
 - `pages: 295 total -> 251 train / 44 holdout`: the split.
-- `trainable params: ...`: how many of the 3.75B parameters LoRA trains, about 30 million. The `safeguards:` line after it means the script's two checks passed.
+- `trainable params: ...`: how many parameters LoRA trains, about 30 million in the adapter, against the 3.75B it leaves frozen. The `safeguards:` line after it means the script's two checks passed.
 - `[eval before] 15 holdout pages in ...s (... s/page) -> macro CER ...`: the base model's score, and the time per page one at a time; the homework's inference jobs batch pages and are faster per page.
 - The Trainer's loss lines every 5 steps, and `[eval epoch1] ...` at the end of each epoch: the points of the curve you plot in Step 2.
 
