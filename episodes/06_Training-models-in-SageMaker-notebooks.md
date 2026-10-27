@@ -22,6 +22,8 @@ exercises: 20
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
+Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`**; every notebook from here to the end of the lesson uses it. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
+
 ## Test on a small sample first, then scale up
 
 The Titanic data trains in a second on the notebook, and nothing about it needs the cloud. We use it because the pattern matters more than the example. Test the code on a small sample first, where a bug costs nothing, and once it works, scale up to a more powerful instance when the data or the model calls for one. A SageMaker training job is that scale-up step. The notebook describes the job and launches it, and SageMaker rents the instance, runs the script on it and releases it when the script ends. The fine-tuning episode follows the same two steps with a 3B model on a GPU, where the cloud earns its keep.
@@ -30,8 +32,6 @@ This episode walks through both steps once with XGBoost. First the script runs o
 
 ## Initial setup
 
-### Open the lesson notebook
-Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/06_Training-models-in-SageMaker-notebooks.ipynb`. When asked for a kernel, pick **`conda_pytorch`**; every notebook from here to the end of the lesson uses it. The `conda_python3` kernel has no PyTorch, and on current instances no scikit-learn either.
 
 ### Set up the project folder
 Work from the Titanic project folder the S3 episode created, and make the lesson repository's `scripts/` importable. The training scripts for this episode (`train_xgboost.py`) and the next (`train_nn.py`) are in that folder.
