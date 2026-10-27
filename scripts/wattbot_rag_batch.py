@@ -78,7 +78,7 @@ def call_hf_chat_batch(pairs, generator, max_new_tokens: int = 512):
     """`call_hf_chat` for several (system, user) pairs at once: one `generate` call, one answer per pair.
 
     The prompts are padded on the left to the same length so that every sequence
-    ends where generation starts; the pad tokens are masked out. Decoding eight
+    ends where generation starts; the pad tokens are masked out. Decoding several
     prompts together costs little more than decoding one, which is where the
     speed comes from.
     """
@@ -94,8 +94,20 @@ def call_hf_chat_batch(pairs, generator, max_new_tokens: int = 512):
         for s, u in pairs
     ]
     inputs = tokenizer(texts, return_tensors="pt", padding=True).to(model.device)
-    with torch.no_grad():
-        out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False, pad_token_id=tokenizer.pad_token_id)
+    try:
+        with torch.no_grad():
+            out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False, pad_token_id=tokenizer.pad_token_id)
+    except torch.OutOfMemoryError:
+        # The KV cache and the prefill activations grow with batch size x prompt length. A batch of long
+        # prompts can exceed the 24 GB card that holds the 16 GB model; halve the batch and retry rather
+        # than let twenty minutes of setup die on one batch. A single prompt that does not fit is a real error.
+        if len(pairs) == 1:
+            raise
+        del inputs
+        torch.cuda.empty_cache()
+        half = len(pairs) // 2
+        print(f"batch of {len(pairs)} did not fit the GPU; retrying as {half} + {len(pairs) - half}", flush=True)
+        return call_hf_chat_batch(pairs[:half], generator, max_new_tokens) + call_hf_chat_batch(pairs[half:], generator, max_new_tokens)
     prompt_len = inputs["input_ids"].shape[1]
     return [tokenizer.decode(seq[prompt_len:], skip_special_tokens=True).strip() for seq in out]
 
@@ -190,7 +202,7 @@ def main():
     )
     parser.add_argument("--max_questions", type=int, default=0, help="answer only the first N questions (0 = all); the scorer compares the rows it finds")
     parser.add_argument("--per_type", type=int, default=0, help="answer a stratified sample: up to N questions per evidence type, seed 0 (0 = all). The Bedrock episode uses the same draw, so the two runs are scored on the same questions")
-    parser.add_argument("--batch_size", type=int, default=8, help="prompts decoded together on the GPU (transformers engine); 1 reproduces one-at-a-time")
+    parser.add_argument("--batch_size", type=int, default=4, help="prompts decoded together on the GPU (transformers engine); 1 reproduces one-at-a-time. A batch that does not fit is halved and retried")
     parser.add_argument("--engine", choices=["transformers", "vllm"], default="transformers",
                         help="transformers: nothing to install, prompts decoded in batches. vllm: needs vllm in requirements.txt; for FP8 weights or many requests.")
     args = parser.parse_args()
