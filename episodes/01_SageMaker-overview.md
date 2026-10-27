@@ -20,7 +20,7 @@ exercises: 0
 ::::::::::::::::::::::::::::::::::::::::::::::
 
 
-This episode compares cloud compute with the compute researchers usually already have, then introduces the three AWS services the lesson uses: S3, SageMaker and Bedrock.
+This episode compares cloud compute with the compute researchers usually already have, then introduces the three AWS services the lesson uses, S3, SageMaker and Bedrock, and the notebook instance you work from.
 
 ### Cloud vs. the cluster down the hall
 
@@ -32,7 +32,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 [^pools]: Research computing has done this for years. UW-Madison's [Center for High Throughput Computing](https://chtc.cs.wisc.edu/) (CHTC) pools campus machines and fills their idle time with other groups' jobs, and the [OSPool](https://osg-htc.org/services/open_science_pool.html) it operates for the NSF does the same across institutions. The [National Research Platform](https://nationalresearchplatform.org/) (NRP) shares GPUs across universities the same way. These are the public counterparts of what the cloud does, and often free for a research group.
 
-### SageMaker, Bedrock and S3
+### SageMaker, Bedrock, S3 and the notebook instance
 
 **Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. The features that matter for research work:
 
@@ -62,6 +62,8 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 **Amazon S3** is where data lives. Buckets hold files of any size, every SageMaker job reads its inputs from a bucket and writes its outputs back to one, and storage costs about two cents per GB per month. In this lesson you create one bucket of your own in the next episode and use it for the rest of the workshop; the larger datasets are in a shared bucket the instructors staged.
 
+**A SageMaker notebook instance** is where you work. It is a small machine running JupyterLab that you start at the beginning of the workshop and stop at the end, and every notebook in the lesson runs on it. It is small on purpose, an `ml.t3.medium` at about five cents an hour, because it does not do the heavy work. It tests scripts on small data, launches jobs on bigger instances, and reads the results back. The *Notebooks as controllers* episode creates it, and the two after that connect it to S3 and to a copy of the lesson's code.
+
 ### The four things you will use
 
 ![S3 holds data and outputs; a small notebook instance launches SageMaker jobs that read from and write to S3 and end on their own; Bedrock is called as an API per token](fig/aws-ml-ecosystem.svg){alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API"}
@@ -70,9 +72,11 @@ Everything in the lesson is one of these four boxes. S3 holds your data and ever
 
 ### Lesson outline
 
-This episode is part 1 of four: the orientation. The rest is hands-on.
+The lesson is in four parts. This episode and the four after it are part 1.
 
-**Part 2, SageMaker: data, training, tuning and fine-tuning.** Put the Titanic data in an S3 bucket and start a small notebook instance as the controller. Train XGBoost and PyTorch models as training jobs, estimating the cost before each launch and reading the bill after, on CPU and on GPU, on one instance and on two. Run a tuning job under a budget. Then fine-tune a 3B vision-language model with LoRA, as a training job with checkpoints and a cap, for transcribing handwritten German letters (Badger Scribe).
+**Part 1, orientation.** What the cloud offers next to the compute you already have, what it costs, and the setup every later episode builds on. Put the Titanic data in an S3 bucket, start a small notebook instance that launches everything else, read and write the bucket from it, and optionally put your notebooks under version control.
+
+**Part 2, SageMaker: training, fine-tuning and tuning.** Train XGBoost and PyTorch models on the Titanic data as training jobs, estimating the cost before each launch and reading the bill after, on CPU and on GPU, on one instance and on two. Fine-tune a 3B vision-language model with LoRA, as a training job with checkpoints and a cap, for transcribing handwritten German letters (Badger Scribe). Then run a tuning job that trains ten models under a budget.
 
 **Part 3, Bedrock: inference and retrieval-augmented generation.** Build a RAG pipeline over energy research papers (WattBot) on Bedrock's hosted models, paid per token through tagged profiles, for cents a run; add multimodal embeddings for the table and figure questions; then run the same pipeline with an open-weight model Bedrock does not serve, as Processing jobs that rent a GPU for the minutes they need.
 
