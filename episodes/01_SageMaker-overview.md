@@ -32,7 +32,7 @@ Most researchers already have somewhere to run ML, such as a campus HPC cluster,
 
 [^pools]: Research computing has done this for years. UW-Madison's [Center for High Throughput Computing](https://chtc.cs.wisc.edu/) (CHTC) pools campus machines and fills their idle time with other groups' jobs, and the [OSPool](https://osg-htc.org/services/open_science_pool.html) it operates for the NSF does the same across institutions. The [National Research Platform](https://nationalresearchplatform.org/) (NRP) shares GPUs across universities the same way. These are the public counterparts of what the cloud does, and often free for a research group.
 
-### SageMaker and Bedrock
+### SageMaker, Bedrock and S3
 
 **Amazon SageMaker** is AWS's managed service for machine learning. You write the training or inference script and pick a machine type; SageMaker runs the script on that machine as a *job*, with the ML frameworks already installed, and shuts the machine down when the job finishes. The features that matter for research work:
 
