@@ -177,22 +177,23 @@ step0_estimate = helpers.estimate_finetune_cost(
     epochs=2,                    # passes over the 251 pages
     method="lora",
     instance_type="ml.g5.xlarge",
+    runs=1,                      # one run today; the printout's last cost line is this times runs
 )
 ```
 
-The function says about 27 minutes and `$0.64`. That is 17 minutes of training plus the 10 minutes of startup it assumes for every job.
+The function says about 27 minutes and `$0.64`, 17 minutes of training plus 10 of startup. The hand calculation said 12 minutes of training, and the measured run took 12. The estimator is high because it adds half again for gradient checkpointing, which our script uses to save memory by recomputing the forward pass during the backward one. A third either way is normal for this rule. The job you launch in Step 1 bills about 32 minutes, because it also scores holdout pages before and after training, about 14 minutes the estimator does not count. Keep `step0_estimate`. Step 2 puts it next to the job's own bill.
 
-The 17 minutes is more than the 12 from the hand calculation above, and the difference is one factor. Our script turns on gradient checkpointing, which saves memory by throwing away the forward pass and recomputing it during the backward pass. That recomputation is half the arithmetic again, so the estimator multiplies the FLOPs by 1.5. In the measured run the training took about 12 minutes, so the hand calculation landed on the number and the estimator was a third high. A miss of that size is normal. The loosest assumption in the rule is that the GPU reaches a quarter of its peak, and the real figure is a little above or below that on every run.
-
-The job you launch in Step 1 bills about 32 minutes, not 27, and the gap is not the rule's error. The job also scores holdout pages before training and after it, about 14 minutes of GPU time that the estimator does not count, because it estimates training alone. Keep `step0_estimate`. Step 2 puts it next to the job's own bill.
-
-The same call for the kind of run a marathon team might weigh, a 7B model on 5,000 documents of about 600 words (800 tokens) each, three passes, with the eight attempts a project takes:
+The same call for a 7B model on 5,000 documents of about 600 words (800 tokens) each, three passes. Two arguments change besides the size. `runs` goes from 1 to 8, because a project reruns a fine-tune as it fixes data and tries settings, and the printout's last line prices all eight. `instance_type` is left out, so the function picks the cheapest instance the model fits on.
 
 ```python
 helpers.estimate_finetune_cost(
-    params_billions=7, examples=5000, tokens_per_example=800, epochs=3,
-    method="lora", runs=8,       # no instance_type: the cheapest that fits
-);
+    params_billions=7,           # a 7B model, LoRA on top
+    examples=5000,               # 5,000 documents
+    tokens_per_example=800,      # about 600 words each
+    epochs=3,                    # three passes over the documents
+    method="lora",
+    runs=8,                      # the eight attempts a project takes; the last cost line is for all of them
+);                               # no instance_type: the cheapest that fits is chosen
 ```
 
 Batch size is not an input, and does not need to be. A bigger batch keeps the GPU busier, which is the `utilization` argument (0.25 by default; a well-fed GPU reaches 0.35 or so), and it needs more memory for activations, which is `activations_gb`.
