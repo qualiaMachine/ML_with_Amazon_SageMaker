@@ -94,6 +94,31 @@ def list_S3_objects(bucket_name):
     # If the bucket is empty, return an empty list
     return file_list
     
+def show_bucket(bucket_name, prefix="", max_files=15):
+    """Print what is under s3://bucket_name/prefix: each sub-folder with its object count
+    and size, then the files at this level (up to max_files). Read-only: one list call per folder."""
+    s3 = boto3.client("s3")
+    paginator = s3.get_paginator("list_objects_v2")
+    folders, files = [], []
+    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix, Delimiter="/"):   # Delimiter="/" groups keys into "folders"
+        folders += [cp["Prefix"] for cp in page.get("CommonPrefixes", [])]
+        files += [obj for obj in page.get("Contents", []) if obj["Key"] != prefix]
+    print(f"s3://{bucket_name}/{prefix}")
+    for folder in folders:
+        n, size = 0, 0
+        for page in paginator.paginate(Bucket=bucket_name, Prefix=folder):   # everything under the folder, recursively
+            for obj in page.get("Contents", []):
+                n += 1
+                size += obj["Size"]
+        print(f"  {folder.removeprefix(prefix):<40} {n:>6} objects  {size / 1024**2:>10,.1f} MB")
+    for obj in files[:max_files]:
+        print(f"  {obj['Key'].removeprefix(prefix):<40}         {obj['Size'] / 1024**2:>10,.1f} MB")
+    if len(files) > max_files:
+        print(f"  ... and {len(files) - max_files} more files at this level")
+    if not folders and not files:
+        print("  (nothing here, or no permission to list it)")
+
+
 def get_instance_cost(instance_type, days=1):
     """
     Fetches the cost for a specific instance type over a specified number of days.
