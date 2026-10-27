@@ -110,7 +110,7 @@ Do not fully fine-tune anything in this workshop, and do not LoRA fine-tune a mo
 
 Before launching a fine-tune, write down what it should cost. If the bill comes in at three times your number, something is wrong, and you want to find that out on the first run, not the fiftieth. Two questions decide the cost of any training run. Will the model fit on the GPU, and how long will it run? Both can be answered on paper, to within a factor of two, before anything is rented.
 
-### Will it fit?
+### How much GPU memory it needs
 
 Every parameter in the model takes up GPU memory, and how much depends on what you are doing with it. Running the model needs only the weight. A full fine-tune needs the weight, its gradient, a 32-bit copy of the weight, and the two running averages Adam keeps for it, the four numbers per weight from the *How fine-tuning works* section above. A LoRA fine-tune keeps the weights frozen in 16-bit and adds a small adapter that carries its own gradients and optimizer state.
 
@@ -248,7 +248,7 @@ The number of passes is a choice. Two passes for the class run is a budget decis
 
 ### Estimate a run you have not launched
 
-A lab wants to **fully fine-tune a 7B model** on 50,000 documents for 3 epochs. Each document is about 2,000 tokens (roughly 1,500 words), so one pass is 100 million tokens and three passes are 300 million. They are choosing between `ml.p4d.24xlarge` (8 × A100 40 GB, `$25.25`/h, about 312 TFLOPS bf16 per GPU) and a single `ml.g5.xlarge`; the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has both, with what each box holds and how its price covers all of its GPUs. Using the two rules, does it fit on the g5? How many GPU-hours on the p4d, and what does one run cost? What does a project cost?
+A lab wants to **fully fine-tune a 7B model** on 50,000 documents for 3 epochs. Each document is about 2,000 tokens (roughly 1,500 words), so one pass is 100 million tokens and three passes are 300 million. They are choosing between `ml.p4d.24xlarge` (8 × A100 40 GB, `$25.25`/h, about 312 TFLOPS bf16 per GPU) and a single `ml.g5.xlarge`; the supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has both, with what each box holds and how its price covers all of its GPUs. Using the two rules, does it fit in the memory of the g5? How many GPU-hours on the p4d, and what does one run cost? What does a project cost?
 
 :::::::::::::::::::::::: solution
 
