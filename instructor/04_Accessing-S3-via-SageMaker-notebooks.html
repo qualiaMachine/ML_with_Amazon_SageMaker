@@ -499,12 +499,13 @@ one; the fine-tuning and RAG episodes make their own.</p>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a><span class="im">import</span> logging</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a>logging.getLogger(<span class="st">"sagemaker.telemetry.telemetry_logging"</span>).setLevel(logging.WARNING)   <span class="co"># silence the telemetry notice; the "Creating training-job" line still prints</span></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>logging.getLogger(<span class="st">"sagemaker.image_uris"</span>).setLevel(logging.WARNING)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a><span class="im">from</span> sagemaker <span class="im">import</span> get_execution_role</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>role <span class="op">=</span> sagemaker.get_execution_role() <span class="co"># the IAM role attached to this notebook instance; every call below acts as this role</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>session <span class="op">=</span> sagemaker.Session()         <span class="co"># tracks the region, default bucket and SageMaker client for this notebook</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a><span class="bu">print</span>(<span class="ss">f"Execution Role: </span><span class="sc">{</span>role<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a><span class="bu">print</span>(<span class="ss">f"AWS Region: </span><span class="sc">{</span>session<span class="sc">.</span>boto_region_name<span class="sc">}</span><span class="ss">"</span>)  <span class="co"># The region of the notebook instance; your bucket must be in this same region</span></span></code></pre>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a>logging.getLogger(<span class="st">"sagemaker.config"</span>).setLevel(logging.WARNING)   <span class="co"># and the two "Not applying SDK defaults" lines</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a><span class="im">from</span> sagemaker <span class="im">import</span> get_execution_role</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>role <span class="op">=</span> sagemaker.get_execution_role() <span class="co"># the IAM role attached to this notebook instance; every call below acts as this role</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a>session <span class="op">=</span> sagemaker.Session()         <span class="co"># tracks the region, default bucket and SageMaker client for this notebook</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a><span class="bu">print</span>(<span class="ss">f"Execution Role: </span><span class="sc">{</span>role<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1" aria-label="code-block-2-13"></a><span class="bu">print</span>(<span class="ss">f"AWS Region: </span><span class="sc">{</span>session<span class="sc">.</span>boto_region_name<span class="sc">}</span><span class="ss">"</span>)  <span class="co"># The region of the notebook instance; your bucket must be in this same region</span></span></code></pre>
 </div>
 <div id="warnings-this-cell-prints" class="callout">
 <div class="callout-square">
