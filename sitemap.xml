@@ -46,10 +46,16 @@
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/07_Training-models-in-SageMaker-notebooks-part2.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/08_Finetuning-BadgerScribe.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/08_Hyperparameter-tuning.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Hyperparameter-tuning.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/10_RAG-overview.html</loc>
@@ -193,10 +199,16 @@
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/07_Training-models-in-SageMaker-notebooks-part2.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/08_Finetuning-BadgerScribe.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/08_Hyperparameter-tuning.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/09_Finetuning-BadgerScribe.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/09_Hyperparameter-tuning.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/10_RAG-overview.html</loc>
