@@ -146,7 +146,7 @@ Peak FLOPS is on the GPU's data sheet: about 70 trillion per second for an A10G,
 
 For the class run: 251 pages × 1,600 tokens × 2 passes = 803,000 tokens. LoRA on 3.75B parameters: 4 × 3.75e9 × 8.03e5 ≈ 1.2e16 FLOPs. A quarter of an A10G's 70 TFLOPS is 17 TFLOPS, so about 700 seconds, call it 12 minutes. Measured, the same instance trains at 1.45 seconds per page-pass, so 502 page-passes take about 12 minutes. The rule lands on the number.
 
-### The estimator and what its inputs mean
+### Estimating the class run with `helpers.estimate_finetune_cost`
 
 `helpers.estimate_finetune_cost` does the same two calculations for any model and any data, picks the cheapest instance that fits (or uses the one you name), and prints the memory needed, the GPU-hours, the cost per run and per project, and a `max_run` to set. Its inputs are the quantities in the rules above, so it is worth being precise about them, with the class run as the example:
 
@@ -265,7 +265,7 @@ Training time grows linearly with pages × epochs, and roughly linearly with ima
 
 We set `max_run` to about twice the estimate. If a run goes past that, SageMaker kills it and we lose at most a dollar, not a weekend.
 
-### The whole episode
+### What the whole episode costs
 
 | What | Instance | Time | Cost |
 |---|---|---|---|
@@ -489,7 +489,7 @@ helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_ex
 
 Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is what Exercise 1 changes.
 
-### The scripts
+### Copy the training scripts into a code folder
 
 Jobs run in containers, so the code they execute has to be shipped with the job. Copy the scripts from the lesson repository into a `code/` directory:
 
