@@ -4,7 +4,7 @@ site: sandpaper::sandpaper_site
 
 ## Workshop Overview
 
-This workshop is about running machine learning and AI work on AWS without losing control of the bill: where the data goes, which machine does what, how a job is launched and paid for, and how to find out what it cost. It is in four parts.
+This workshop teaches how to run machine learning and AI work on AWS and keep the cost under control. It covers where the data goes, which machine does what, how a job is launched and paid for, and how to find out what it cost. It is in four parts.
 
 **Part 1, orientation.** What the cloud offers a researcher compared with a laptop or the cluster down the hall, what it costs, and the setup every later episode builds on.
 
