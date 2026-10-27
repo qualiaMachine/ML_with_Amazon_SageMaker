@@ -6415,7 +6415,9 @@ page-pass, so 502 page-passes take about 12 minutes. The rule lands on
 the number.</p>
 </div>
 <div class="section level3">
-<h3 id="the-estimator-and-what-its-inputs-mean">The estimator and what its inputs mean<a class="anchor" aria-label="anchor" href="#the-estimator-and-what-its-inputs-mean"></a>
+<h3 id="estimating-the-class-run-with-helpers-estimate_finetune_cost">Estimating the class run with
+<code>helpers.estimate_finetune_cost</code>
+<a class="anchor" aria-label="anchor" href="#estimating-the-class-run-with-helpers-estimate_finetune_cost"></a>
 </h3>
 <p><code>helpers.estimate_finetune_cost</code> does the same two
 calculations for any model and any data, picks the cheapest instance
@@ -6538,7 +6540,7 @@ project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5: a full fine-tune of a 7B model needs about
 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8 × 40 GB =
@@ -6768,7 +6770,7 @@ goes past that, SageMaker kills it and we lose at most a dollar, not a
 weekend.</p>
 </div>
 <div class="section level3">
-<h3 id="the-whole-episode">The whole episode<a class="anchor" aria-label="anchor" href="#the-whole-episode"></a>
+<h3 id="what-the-whole-episode-costs">What the whole episode costs<a class="anchor" aria-label="anchor" href="#what-the-whole-episode-costs"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -6848,7 +6850,7 @@ costs one epoch, not the whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; four things have to be
 in place before the session. Each is written out in the instructor
@@ -7158,11 +7160,19 @@ cost table. Halve <code>max_pixels</code> and the image count halves
 with it; that is what Exercise 1 changes.</p>
 </div>
 <div class="section level3">
-<h3 id="the-scripts">The scripts<a class="anchor" aria-label="anchor" href="#the-scripts"></a>
+<h3 id="a-code-folder-for-the-job">A code folder for the job<a class="anchor" aria-label="anchor" href="#a-code-folder-for-the-job"></a>
 </h3>
-<p>Jobs run in containers, so the code they execute has to be shipped
-with the job. Copy the scripts from the lesson repository into a
-<code>code/</code> directory:</p>
+<p>The three scripts the job needs are already on this instance, in the
+lesson clone. The job cannot use them from there: it runs in a container
+on another machine, and the only code it gets is the one directory named
+by <code>source_dir=</code> on the estimator, uploaded whole. That
+directory should hold what the job imports and a
+<code>requirements.txt</code> listing what the container has to install,
+and nothing else. So make a small <code>code/</code> folder here with
+copies of the three files, rather than pointing <code>source_dir</code>
+at the lesson’s <code>scripts/</code> directory, which would upload
+every script in the lesson and need a requirements file written into the
+repository:</p>
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -7228,7 +7238,7 @@ step. Which, and why are they there?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Only the language model’s <code>q_proj</code>, <code>k_proj</code>,
@@ -7475,7 +7485,8 @@ Stop</strong>) or:</p>
 <div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" tabindex="-1" aria-label="code-block-26-1"></a><span class="co"># session.sagemaker_client.stop_training_job(TrainingJobName=training_job_name)</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" tabindex="-1" aria-label="code-block-26-1"></a><span class="co"># Only if you need to stop the job: remove the # from the next line and run the cell</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1" aria-label="code-block-26-2"></a><span class="co"># session.sagemaker_client.stop_training_job(TrainingJobName=training_job_name)</span></span></code></pre>
 </div>
 <p>Billing stops within a minute or two. If you launched with the wrong
 instance, the wrong data or the wrong number of epochs, stop it
@@ -7757,7 +7768,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -7822,18 +7833,32 @@ submission<a class="anchor" aria-label="anchor" href="#homework-a-four-pass-lora
 <code>$1.50</code> for the LoRA fine-tune and <code>$0.80</code> for
 inference, roughly two hours of wall-clock time that you do not need to
 sit through. Launch, go do something else, come back.</p>
-<p>The cells that launch jobs or read their output are commented out, so
-that <strong>Run All</strong> in class does not start two hours of GPU
-work. When you do the homework, uncomment them one at a time.</p>
+<div id="the-homework-cells-are-switched-off" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="the-homework-cells-are-switched-off" class="callout-inner">
+<h3 class="callout-title">The homework cells are switched off</h3>
+<div class="callout-content">
+<p>Every cell below that launches a job or needs a job’s output starts
+with the line <code>%%script false --no-raise-error</code>, which makes
+Jupyter skip the cell, so <strong>Run All</strong> in class does not
+start two hours of GPU work. When you do the homework, delete that first
+line from a cell and run it. Do the cells in order: each one needs the
+one before it to have finished.</p>
+</div>
+</div>
+</div>
 <div class="section level3">
 <h3 id="the-four-pass-lora-run">The four-pass LoRA run<a class="anchor" aria-label="anchor" href="#the-four-pass-lora-run"></a>
 </h3>
 <p>Same estimator and the same 251 pages, four passes instead of two, 40
 evaluation pages instead of 15, and a 130-minute cap. Write your
 estimate down first (Step 2’s challenge). Launch with
-<code>wait=False</code> here only because you will not be watching: it
-returns immediately and you poll later. The explicit job name still
-protects you from a double launch.</p>
+<code>wait=False</code> here because you will not be watching: the cell
+returns immediately, and a later cell checks on the job. The explicit
+job name still protects you from a double launch.</p>
 <p>The same guard rails first: a new job name, its own checkpoint
 folder, and the cap written down with its worst case.</p>
 <div class="codewrapper sourceCode" id="cb34">
@@ -7895,20 +7920,24 @@ location of the adapter the job saved.</p>
 <div class="codewrapper sourceCode" id="cb37">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a><span class="co"># # wait=False: the cell returns as soon as the job is accepted; the job runs regardless of this notebook</span></span>
-<span id="cb37-2"><a href="#cb37-2" tabindex="-1" aria-label="code-block-37-2"></a><span class="co"># homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)</span></span>
-<span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a><span class="co"># print("launched:", homework_job_name)</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" tabindex="-1" aria-label="code-block-37-1"></a><span class="op">%%</span>script false <span class="op">--</span>no<span class="op">-</span><span class="cf">raise</span><span class="op">-</span>error</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1" aria-label="code-block-37-2"></a><span class="co"># homework cell, switched off by the line above: delete that line to run it</span></span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1" aria-label="code-block-37-3"></a><span class="co"># wait=False: the cell returns as soon as the job is accepted; the job runs regardless of this notebook</span></span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1" aria-label="code-block-37-4"></a>homework_estimator.fit({<span class="st">"train"</span>: train_s3_uri, <span class="st">"model"</span>: model_s3_uri}, job_name<span class="op">=</span>homework_job_name, wait<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1" aria-label="code-block-37-5"></a><span class="bu">print</span>(<span class="st">"launched:"</span>, homework_job_name)</span></code></pre>
 </div>
 <div class="codewrapper sourceCode" id="cb38">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1" aria-label="code-block-38-1"></a><span class="co"># # Run this when you are back; it prints the job's status. Everything below needs the adapter, so wait for Completed.</span></span>
-<span id="cb38-2"><a href="#cb38-2" tabindex="-1" aria-label="code-block-38-2"></a><span class="co"># desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)</span></span>
-<span id="cb38-3"><a href="#cb38-3" tabindex="-1" aria-label="code-block-38-3"></a><span class="co"># print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))</span></span>
-<span id="cb38-4"><a href="#cb38-4" tabindex="-1" aria-label="code-block-38-4"></a><span class="co"># homework_adapter_s3_uri = None</span></span>
-<span id="cb38-5"><a href="#cb38-5" tabindex="-1" aria-label="code-block-38-5"></a><span class="co"># if desc["TrainingJobStatus"] == "Completed":</span></span>
-<span id="cb38-6"><a href="#cb38-6" tabindex="-1" aria-label="code-block-38-6"></a><span class="co">#     desc = job_cost_report(homework_job_name, g5_price)</span></span>
-<span id="cb38-7"><a href="#cb38-7" tabindex="-1" aria-label="code-block-38-7"></a><span class="co">#     homework_adapter_s3_uri = desc["ModelArtifacts"]["S3ModelArtifacts"]</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" tabindex="-1" aria-label="code-block-38-1"></a><span class="op">%%</span>script false <span class="op">--</span>no<span class="op">-</span><span class="cf">raise</span><span class="op">-</span>error</span>
+<span id="cb38-2"><a href="#cb38-2" tabindex="-1" aria-label="code-block-38-2"></a><span class="co"># homework cell, switched off by the line above: delete that line to run it</span></span>
+<span id="cb38-3"><a href="#cb38-3" tabindex="-1" aria-label="code-block-38-3"></a><span class="co"># Run this when you are back; it prints the job's status. Everything below needs the adapter, so wait for Completed.</span></span>
+<span id="cb38-4"><a href="#cb38-4" tabindex="-1" aria-label="code-block-38-4"></a>desc <span class="op">=</span> session.sagemaker_client.describe_training_job(TrainingJobName<span class="op">=</span>homework_job_name)</span>
+<span id="cb38-5"><a href="#cb38-5" tabindex="-1" aria-label="code-block-38-5"></a><span class="bu">print</span>(desc[<span class="st">"TrainingJobStatus"</span>], <span class="st">"-"</span>, desc.get(<span class="st">"SecondaryStatus"</span>))</span>
+<span id="cb38-6"><a href="#cb38-6" tabindex="-1" aria-label="code-block-38-6"></a>homework_adapter_s3_uri <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb38-7"><a href="#cb38-7" tabindex="-1" aria-label="code-block-38-7"></a><span class="cf">if</span> desc[<span class="st">"TrainingJobStatus"</span>] <span class="op">==</span> <span class="st">"Completed"</span>:</span>
+<span id="cb38-8"><a href="#cb38-8" tabindex="-1" aria-label="code-block-38-8"></a>    desc <span class="op">=</span> job_cost_report(homework_job_name, g5_price)</span>
+<span id="cb38-9"><a href="#cb38-9" tabindex="-1" aria-label="code-block-38-9"></a>    homework_adapter_s3_uri <span class="op">=</span> desc[<span class="st">"ModelArtifacts"</span>][<span class="st">"S3ModelArtifacts"</span>]</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -8027,9 +8056,11 @@ the first line checks.</p>
 <div class="codewrapper sourceCode" id="cb42">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" tabindex="-1" aria-label="code-block-42-1"></a><span class="co"># assert homework_adapter_s3_uri, "the four-pass run has not finished; rerun the poll cell above until it says Completed"</span></span>
-<span id="cb42-2"><a href="#cb42-2" tabindex="-1" aria-label="code-block-42-2"></a><span class="co"># base_output_uri = run_transcription_job("base")</span></span>
-<span id="cb42-3"><a href="#cb42-3" tabindex="-1" aria-label="code-block-42-3"></a><span class="co"># lora_output_uri = run_transcription_job("lora", adapter_uri=homework_adapter_s3_uri)</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" tabindex="-1" aria-label="code-block-42-1"></a><span class="op">%%</span>script false <span class="op">--</span>no<span class="op">-</span><span class="cf">raise</span><span class="op">-</span>error</span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1" aria-label="code-block-42-2"></a><span class="co"># homework cell, switched off by the line above: delete that line to run it</span></span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1" aria-label="code-block-42-3"></a><span class="cf">assert</span> homework_adapter_s3_uri, <span class="st">"the four-pass run has not finished; rerun the status cell above until it says Completed"</span></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1" aria-label="code-block-42-4"></a>base_output_uri <span class="op">=</span> run_transcription_job(<span class="st">"base"</span>)</span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1" aria-label="code-block-42-5"></a>lora_output_uri <span class="op">=</span> run_transcription_job(<span class="st">"lora"</span>, adapter_uri<span class="op">=</span>homework_adapter_s3_uri)</span></code></pre>
 </div>
 <p>Both jobs run in parallel on their own GPU, which doubles the
 instantaneous spend but halves the wall-clock time; the total cost is
@@ -8040,15 +8071,17 @@ scores the leaderboard.</p>
 <div class="codewrapper sourceCode" id="cb43">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" tabindex="-1" aria-label="code-block-43-1"></a><span class="co"># import subprocess</span></span>
-<span id="cb43-2"><a href="#cb43-2" tabindex="-1" aria-label="code-block-43-2"></a><span class="co">#</span></span>
-<span id="cb43-3"><a href="#cb43-3" tabindex="-1" aria-label="code-block-43-3"></a><span class="co"># def fetch_predictions(output_uri: str, label: str) -&gt; pd.DataFrame:</span></span>
-<span id="cb43-4"><a href="#cb43-4" tabindex="-1" aria-label="code-block-43-4"></a><span class="co">#     bucket, key = output_uri.replace("s3://", "").split("/", 1)</span></span>
-<span id="cb43-5"><a href="#cb43-5" tabindex="-1" aria-label="code-block-43-5"></a><span class="co">#     local = os.path.join(local_data_dir, f"predictions_{label}.csv")</span></span>
-<span id="cb43-6"><a href="#cb43-6" tabindex="-1" aria-label="code-block-43-6"></a><span class="co">#     s3_client.download_file(bucket, key + "predictions.csv", local)</span></span>
-<span id="cb43-7"><a href="#cb43-7" tabindex="-1" aria-label="code-block-43-7"></a><span class="co">#     return pd.read_csv(local, keep_default_na=False)</span></span>
-<span id="cb43-8"><a href="#cb43-8" tabindex="-1" aria-label="code-block-43-8"></a><span class="co">#</span></span>
-<span id="cb43-9"><a href="#cb43-9" tabindex="-1" aria-label="code-block-43-9"></a><span class="co"># preds = {label: fetch_predictions(uri, label) for label, uri in [("base", base_output_uri), ("lora", lora_output_uri)]}</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" tabindex="-1" aria-label="code-block-43-1"></a><span class="op">%%</span>script false <span class="op">--</span>no<span class="op">-</span><span class="cf">raise</span><span class="op">-</span>error</span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1" aria-label="code-block-43-2"></a><span class="co"># homework cell, switched off by the line above: delete that line to run it</span></span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1" aria-label="code-block-43-3"></a><span class="im">import</span> subprocess</span>
+<span id="cb43-4"><a href="#cb43-4" tabindex="-1" aria-label="code-block-43-4"></a></span>
+<span id="cb43-5"><a href="#cb43-5" tabindex="-1" aria-label="code-block-43-5"></a><span class="kw">def</span> fetch_predictions(output_uri: <span class="bu">str</span>, label: <span class="bu">str</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb43-6"><a href="#cb43-6" tabindex="-1" aria-label="code-block-43-6"></a>    bucket, key <span class="op">=</span> output_uri.replace(<span class="st">"s3://"</span>, <span class="st">""</span>).split(<span class="st">"/"</span>, <span class="dv">1</span>)</span>
+<span id="cb43-7"><a href="#cb43-7" tabindex="-1" aria-label="code-block-43-7"></a>    local <span class="op">=</span> os.path.join(local_data_dir, <span class="ss">f"predictions_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">.csv"</span>)</span>
+<span id="cb43-8"><a href="#cb43-8" tabindex="-1" aria-label="code-block-43-8"></a>    s3_client.download_file(bucket, key <span class="op">+</span> <span class="st">"predictions.csv"</span>, local)</span>
+<span id="cb43-9"><a href="#cb43-9" tabindex="-1" aria-label="code-block-43-9"></a>    <span class="cf">return</span> pd.read_csv(local, keep_default_na<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb43-10"><a href="#cb43-10" tabindex="-1" aria-label="code-block-43-10"></a></span>
+<span id="cb43-11"><a href="#cb43-11" tabindex="-1" aria-label="code-block-43-11"></a>preds <span class="op">=</span> {label: fetch_predictions(uri, label) <span class="cf">for</span> label, uri <span class="kw">in</span> [(<span class="st">"base"</span>, base_output_uri), (<span class="st">"lora"</span>, lora_output_uri)]}</span></code></pre>
 </div>
 <p>Write the holdout answers to a file, keep only the holdout rows of
 each prediction file, and run <code>metric.py</code> on each pair the
@@ -8056,17 +8089,19 @@ way Kaggle runs it on a submission.</p>
 <div class="codewrapper sourceCode" id="cb44">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" tabindex="-1" aria-label="code-block-44-1"></a><span class="co"># holdout_solution = train_df[train_df.page_id.isin(holdout_df.page_id)][["page_id", "text", "category"]]</span></span>
-<span id="cb44-2"><a href="#cb44-2" tabindex="-1" aria-label="code-block-44-2"></a><span class="co"># holdout_solution.to_csv(os.path.join(local_data_dir, "holdout_solution.csv"), index=False)</span></span>
-<span id="cb44-3"><a href="#cb44-3" tabindex="-1" aria-label="code-block-44-3"></a><span class="co">#</span></span>
-<span id="cb44-4"><a href="#cb44-4" tabindex="-1" aria-label="code-block-44-4"></a><span class="co"># for label, df in preds.items():</span></span>
-<span id="cb44-5"><a href="#cb44-5" tabindex="-1" aria-label="code-block-44-5"></a><span class="co">#     df[df.page_id.isin(holdout_solution.page_id)].to_csv(os.path.join(local_data_dir, f"holdout_pred_{label}.csv"), index=False)</span></span>
-<span id="cb44-6"><a href="#cb44-6" tabindex="-1" aria-label="code-block-44-6"></a><span class="co">#     print(f"\n=== {label} ===")</span></span>
-<span id="cb44-7"><a href="#cb44-7" tabindex="-1" aria-label="code-block-44-7"></a><span class="co">#     print(subprocess.run(</span></span>
-<span id="cb44-8"><a href="#cb44-8" tabindex="-1" aria-label="code-block-44-8"></a><span class="co">#         ["python", os.path.join(local_data_dir, "metric.py"),</span></span>
-<span id="cb44-9"><a href="#cb44-9" tabindex="-1" aria-label="code-block-44-9"></a><span class="co">#          "--solution", os.path.join(local_data_dir, "holdout_solution.csv"),</span></span>
-<span id="cb44-10"><a href="#cb44-10" tabindex="-1" aria-label="code-block-44-10"></a><span class="co">#          "--submission", os.path.join(local_data_dir, f"holdout_pred_{label}.csv")],</span></span>
-<span id="cb44-11"><a href="#cb44-11" tabindex="-1" aria-label="code-block-44-11"></a><span class="co">#         capture_output=True, text=True).stdout)</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" tabindex="-1" aria-label="code-block-44-1"></a><span class="op">%%</span>script false <span class="op">--</span>no<span class="op">-</span><span class="cf">raise</span><span class="op">-</span>error</span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1" aria-label="code-block-44-2"></a><span class="co"># homework cell, switched off by the line above: delete that line to run it</span></span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1" aria-label="code-block-44-3"></a>holdout_solution <span class="op">=</span> train_df[train_df.page_id.isin(holdout_df.page_id)][[<span class="st">"page_id"</span>, <span class="st">"text"</span>, <span class="st">"category"</span>]]</span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1" aria-label="code-block-44-4"></a>holdout_solution.to_csv(os.path.join(local_data_dir, <span class="st">"holdout_solution.csv"</span>), index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1" aria-label="code-block-44-5"></a></span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1" aria-label="code-block-44-6"></a><span class="cf">for</span> label, df <span class="kw">in</span> preds.items():</span>
+<span id="cb44-7"><a href="#cb44-7" tabindex="-1" aria-label="code-block-44-7"></a>    df[df.page_id.isin(holdout_solution.page_id)].to_csv(os.path.join(local_data_dir, <span class="ss">f"holdout_pred_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">.csv"</span>), index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb44-8"><a href="#cb44-8" tabindex="-1" aria-label="code-block-44-8"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">=== </span><span class="sc">{</span>label<span class="sc">}</span><span class="ss"> ==="</span>)</span>
+<span id="cb44-9"><a href="#cb44-9" tabindex="-1" aria-label="code-block-44-9"></a>    <span class="bu">print</span>(subprocess.run(</span>
+<span id="cb44-10"><a href="#cb44-10" tabindex="-1" aria-label="code-block-44-10"></a>        [<span class="st">"python"</span>, os.path.join(local_data_dir, <span class="st">"metric.py"</span>),</span>
+<span id="cb44-11"><a href="#cb44-11" tabindex="-1" aria-label="code-block-44-11"></a>         <span class="st">"--solution"</span>, os.path.join(local_data_dir, <span class="st">"holdout_solution.csv"</span>),</span>
+<span id="cb44-12"><a href="#cb44-12" tabindex="-1" aria-label="code-block-44-12"></a>         <span class="st">"--submission"</span>, os.path.join(local_data_dir, <span class="ss">f"holdout_pred_</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">.csv"</span>)],</span>
+<span id="cb44-13"><a href="#cb44-13" tabindex="-1" aria-label="code-block-44-13"></a>        capture_output<span class="op">=</span><span class="va">True</span>, text<span class="op">=</span><span class="va">True</span>).stdout)</span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -8081,13 +8116,15 @@ and it is optional).</p>
 <div class="codewrapper sourceCode" id="cb45">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" tabindex="-1" aria-label="code-block-45-1"></a><span class="co"># submission = test_df[["page_id"]].merge(preds["lora"], on="page_id", how="left").fillna({"text": ""})</span></span>
-<span id="cb45-2"><a href="#cb45-2" tabindex="-1" aria-label="code-block-45-2"></a><span class="co"># assert len(submission) == len(test_df) and submission.text.str.len().gt(0).all(), "every test page needs a prediction"</span></span>
-<span id="cb45-3"><a href="#cb45-3" tabindex="-1" aria-label="code-block-45-3"></a><span class="co">#</span></span>
-<span id="cb45-4"><a href="#cb45-4" tabindex="-1" aria-label="code-block-45-4"></a><span class="co"># submission_path = os.path.join(local_data_dir, "submission_churro_lora.csv")</span></span>
-<span id="cb45-5"><a href="#cb45-5" tabindex="-1" aria-label="code-block-45-5"></a><span class="co"># submission.to_csv(submission_path, index=False)</span></span>
-<span id="cb45-6"><a href="#cb45-6" tabindex="-1" aria-label="code-block-45-6"></a><span class="co"># s3_client.upload_file(submission_path, bucket_name, f"{data_prefix}/submissions/submission_churro_lora.csv")</span></span>
-<span id="cb45-7"><a href="#cb45-7" tabindex="-1" aria-label="code-block-45-7"></a><span class="co"># print("wrote", submission_path, len(submission), "rows")</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" tabindex="-1" aria-label="code-block-45-1"></a><span class="op">%%</span>script false <span class="op">--</span>no<span class="op">-</span><span class="cf">raise</span><span class="op">-</span>error</span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1" aria-label="code-block-45-2"></a><span class="co"># homework cell, switched off by the line above: delete that line to run it</span></span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1" aria-label="code-block-45-3"></a>submission <span class="op">=</span> test_df[[<span class="st">"page_id"</span>]].merge(preds[<span class="st">"lora"</span>], on<span class="op">=</span><span class="st">"page_id"</span>, how<span class="op">=</span><span class="st">"left"</span>).fillna({<span class="st">"text"</span>: <span class="st">""</span>})</span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1" aria-label="code-block-45-4"></a><span class="cf">assert</span> <span class="bu">len</span>(submission) <span class="op">==</span> <span class="bu">len</span>(test_df) <span class="kw">and</span> submission.text.<span class="bu">str</span>.<span class="bu">len</span>().gt(<span class="dv">0</span>).<span class="bu">all</span>(), <span class="st">"every test page needs a prediction"</span></span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1" aria-label="code-block-45-5"></a></span>
+<span id="cb45-6"><a href="#cb45-6" tabindex="-1" aria-label="code-block-45-6"></a>submission_path <span class="op">=</span> os.path.join(local_data_dir, <span class="st">"submission_churro_lora.csv"</span>)</span>
+<span id="cb45-7"><a href="#cb45-7" tabindex="-1" aria-label="code-block-45-7"></a>submission.to_csv(submission_path, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb45-8"><a href="#cb45-8" tabindex="-1" aria-label="code-block-45-8"></a>s3_client.upload_file(submission_path, bucket_name, <span class="ss">f"</span><span class="sc">{</span>data_prefix<span class="sc">}</span><span class="ss">/submissions/submission_churro_lora.csv"</span>)</span>
+<span id="cb45-9"><a href="#cb45-9" tabindex="-1" aria-label="code-block-45-9"></a><span class="bu">print</span>(<span class="st">"wrote"</span>, submission_path, <span class="bu">len</span>(submission), <span class="st">"rows"</span>)</span></code></pre>
 </div>
 <p>Finally, rerun Step 3 and compare the total with the estimate you
 wrote down before the four-pass run.</p>
@@ -8138,7 +8175,7 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8179,7 +8216,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -9754,7 +9791,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10206,7 +10243,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -10286,7 +10323,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -11133,12 +11170,16 @@ sample as the Bedrock episode.</li>
 </h2>
 <hr class="half-width">
 <div class="section level3">
-<h3 id="the-scripts">The scripts<a class="anchor" aria-label="anchor" href="#the-scripts"></a>
+<h3 id="a-code-folder-for-each-job">A code folder for each job<a class="anchor" aria-label="anchor" href="#a-code-folder-for-each-job"></a>
 </h3>
-<p>Jobs run in containers, so the code they execute has to be shipped
-with the job: a Processing job cannot import functions defined in this
-notebook. The lesson clone has the four files we need as standalone
-scripts. Copy them:</p>
+<p>The four scripts the jobs need are already on this instance, in the
+lesson clone, but a job cannot use them from there: it runs in a
+container on another machine, cannot import anything from this notebook,
+and the only code it gets is the one directory named by
+<code>source_dir=</code>, uploaded whole. So each job gets a small
+folder holding just the files it imports, copied out of the clone,
+rather than <code>source_dir</code> pointing at the lesson’s whole
+<code>scripts/</code> directory. The four files:</p>
 <ul>
 <li>
 <code>scripts/embedding_inference.py</code>: generic embedding
@@ -11786,13 +11827,14 @@ justified here because the model is not in the catalog.</p>
 </div>
 </div>
 </div>
-<div id="the-runtime-cap" class="callout challenge">
+<div id="what-a-shorter-runtime-cap-would-have-done" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="the-runtime-cap" class="callout-inner">
-<h3 class="callout-title">The runtime cap</h3>
+<div id="what-a-shorter-runtime-cap-would-have-done" class="callout-inner">
+<h3 class="callout-title">What a shorter runtime cap would have
+done</h3>
 <div class="callout-content">
 <p>Both processors set <code>max_runtime_in_seconds=2 * 60 * 60</code>.
 Predict what would happen if the RAG job were launched with
@@ -13037,7 +13079,7 @@ are who you think you are, in the account you think you are in:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13046,7 +13088,7 @@ are who you think you are, in the account you think you are in:</p>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13100,7 +13142,7 @@ download you paid for.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13109,7 +13151,7 @@ download you paid for.</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
+<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13138,7 +13180,7 @@ key”:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13146,7 +13188,7 @@ key”:</p>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
+<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13220,7 +13262,7 @@ the account.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13255,7 +13297,7 @@ the account.</p>
 <span id="cb12-29"><a href="#cb12-29" tabindex="-1" aria-label="code-block-12-29"></a><span class="op">JSON</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
+<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13386,7 +13428,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-5" class="nav nav-tabs" role="tablist">
@@ -13402,14 +13444,14 @@ finds something. Then run them against your own resources.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
+<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

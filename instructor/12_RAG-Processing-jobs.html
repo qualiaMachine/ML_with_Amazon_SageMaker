@@ -606,11 +606,15 @@ sample as the Bedrock episode.</li>
 <li>Score the result and compare it with the Bedrock run.</li>
 </ul><section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a></h2>
 <hr class="half-width"><div class="section level3">
-<h3 id="the-scripts">The scripts<a class="anchor" aria-label="anchor" href="#the-scripts"></a></h3>
-<p>Jobs run in containers, so the code they execute has to be shipped
-with the job: a Processing job cannot import functions defined in this
-notebook. The lesson clone has the four files we need as standalone
-scripts. Copy them:</p>
+<h3 id="a-code-folder-for-each-job">A code folder for each job<a class="anchor" aria-label="anchor" href="#a-code-folder-for-each-job"></a></h3>
+<p>The four scripts the jobs need are already on this instance, in the
+lesson clone, but a job cannot use them from there: it runs in a
+container on another machine, cannot import anything from this notebook,
+and the only code it gets is the one directory named by
+<code>source_dir=</code>, uploaded whole. So each job gets a small
+folder holding just the files it imports, copied out of the clone,
+rather than <code>source_dir</code> pointing at the lesson’s whole
+<code>scripts/</code> directory. The four files:</p>
 <ul><li>
 <code>scripts/embedding_inference.py</code>: generic embedding
 script (JSONL with a <code>text</code> field in,
@@ -1236,13 +1240,14 @@ justified here because the model is not in the catalog.</p>
 </div>
 </div>
 </div>
-<div id="the-runtime-cap" class="callout challenge">
+<div id="what-a-shorter-runtime-cap-would-have-done" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="the-runtime-cap" class="callout-inner">
-<h3 class="callout-title">The runtime cap</h3>
+<div id="what-a-shorter-runtime-cap-would-have-done" class="callout-inner">
+<h3 class="callout-title">What a shorter runtime cap would have
+done</h3>
 <div class="callout-content">
 <p>Both processors set <code>max_runtime_in_seconds=2 * 60 * 60</code>.
 Predict what would happen if the RAG job were launched with
