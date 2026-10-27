@@ -428,7 +428,7 @@ container</a></li>
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Training Models in SageMaker: Intro</h1>
-        <p>Last updated on 2026-10-26 |
+        <p>Last updated on 2026-10-27 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/06_Training-models-in-SageMaker-notebooks.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -1270,10 +1270,10 @@ before.</p>
 <p>Interrupting the cell, restarting the kernel and stopping the
 instance all leave the job running. Only <strong>Stop</strong> on the
 job’s page, or the job’s own cap, ends it. A job you launched and forgot
-bills until one of those happens, which is what the two habits below are
-for.</p>
+bills until one of those happens. Two estimator settings limit what that
+can cost.</p>
 <div class="section level3">
-<h3 id="two-habits-for-any-run-longer-than-half-an-hour">Two habits for any run longer than half an hour<a class="anchor" aria-label="anchor" href="#two-habits-for-any-run-longer-than-half-an-hour"></a></h3>
+<h3 id="for-any-run-longer-than-half-an-hour">For any run longer than half an hour<a class="anchor" aria-label="anchor" href="#for-any-run-longer-than-half-an-hour"></a></h3>
 <p><strong>A cap you chose.</strong> <code>max_run</code> is the most a
 job can bill, in seconds, and every estimator in this lesson sets it.
 Put it a little above your estimate, twice the estimate is a fair
@@ -1493,11 +1493,9 @@ uses with <code>PyTorch</code> and <code>HuggingFace</code>.</li>
 <strong>Training data channels</strong>: <code>TrainingInput</code>
 names the S3 data a job copies onto its instance before the script
 runs.</li>
-<li>
-<strong>Cost habit</strong>: Estimate cost before launching (rate x
-minutes + ~3 minutes startup), then read back
-<code>BillableTimeInSeconds</code> with <code>job_cost_report()</code>
-after every job and compare.</li>
+<li>Estimate the cost before launching (rate × minutes, startup
+included), then read back <code>BillableTimeInSeconds</code> with
+<code>job_cost_report()</code> after every job and compare.</li>
 <li>
 <strong>Long runs</strong>: launch with <code>wait=False</code> and
 carry on, or stop the notebook instance; the job runs and finishes
@@ -1572,7 +1570,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/06_Training-models-in-SageMaker-notebooks.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/06_Training-models-in-SageMaker-notebooks.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-26",
+  "dateModified": "2026-10-27",
   "datePublished": "2026-10-27"
 }
 
