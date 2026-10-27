@@ -913,16 +913,16 @@ homework_estimator = HuggingFace(
 )
 ```
 
-Launch and come back later; the next cell polls for it.
+With `wait=False`, the launch cell returns as soon as SageMaker accepts the job. The job runs on its own instance for about an hour, so stop this notebook instance if you like and come back. The cell after it asks SageMaker for the job's status: run it when you are back, and once the status is `Completed` it reads the bill and the location of the adapter the job saved.
 
 ```python
-# # wait=False: returns at once; poll the job with describe_training_job in the next cell
+# # wait=False: the cell returns as soon as the job is accepted; the job runs regardless of this notebook
 # homework_estimator.fit({"train": train_s3_uri, "model": model_s3_uri}, job_name=homework_job_name, wait=False)
 # print("launched:", homework_job_name)
 ```
 
 ```python
-# # Come back later and run this until it says Completed. Everything below needs the adapter this run produces.
+# # Run this when you are back; it prints the job's status. Everything below needs the adapter, so wait for Completed.
 # desc = session.sagemaker_client.describe_training_job(TrainingJobName=homework_job_name)
 # print(desc["TrainingJobStatus"], "-", desc.get("SecondaryStatus"))
 # homework_adapter_s3_uri = None
