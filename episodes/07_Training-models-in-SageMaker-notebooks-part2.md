@@ -227,10 +227,10 @@ The three data numbers multiply to the tokens the model trains on. Here it is on
 
 ```python
 helpers.estimate_training_cost(   # the semicolon at the end keeps Jupyter from also displaying the dictionary the function returns
-    params_billions=0.125,      # a BERT-base-sized model: 125 million parameters
-    examples=1_000_000,         # a million abstracts; each abstract is one training example
-    tokens_per_example=256,     # an abstract is about 190 words, 256 tokens
-    epochs=3,                   # three passes over the million abstracts
+    params_billions=0.125,      # a BERT-base-sized model, 125 million parameters,
+    examples=1_000_000,         # trained on a million abstracts, one training example each,
+    tokens_per_example=256,     # each abstract about 190 words, 256 tokens,
+    epochs=3,                   # each abstract seen three times
 );
 ```
 
@@ -251,19 +251,19 @@ Run the same function on two sizes a project might be tempted by: a 1-billion-pa
 
 ```python
 helpers.estimate_training_cost(
-    params_billions=1,          # a 1B model, the size of the smallest open-weight language models
-    examples=1_000_000,         # a million documents; each document is one training example
-    tokens_per_example=2000,    # a short paper: about 1,500 words
-    epochs=1,                   # one pass
+    params_billions=1,          # a 1B model, the size of the smallest open-weight language models,
+    examples=1_000_000,         # trained on a million documents, one training example each,
+    tokens_per_example=2000,    # each document a short paper, about 1,500 words or 2,000 tokens,
+    epochs=1,                   # each document seen once
 );
 ```
 
 ```python
 helpers.estimate_training_cost(
-    params_billions=7,          # a 7B model, the size most "small" open-weight LLMs are
-    examples=1_000_000,         # the same million documents
-    tokens_per_example=2000,
-    epochs=1,
+    params_billions=7,          # a 7B model, the size most "small" open-weight LLMs are,
+    examples=1_000_000,         # trained on the same million documents,
+    tokens_per_example=2000,    # of 2,000 tokens each,
+    epochs=1,                   # each seen once
 );
 ```
 
