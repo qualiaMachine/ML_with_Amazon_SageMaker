@@ -6,7 +6,7 @@ exercises: 20
 
 :::::::::::::::::::::::::::::::::::::: questions
 
-- When does a RAG pipeline need a self-hosted, open-weight model instead of Bedrock, and what is the safest way to rent the GPU for it?
+- When does a RAG pipeline need a self-hosted, open-weight model instead of Bedrock?
 - How do we run the embedding and generation steps of the WattBot pipeline as SageMaker Processing jobs that end on their own?
 - How do we pass data in and out of a job through S3, and tag the job so its cost is traceable?
 

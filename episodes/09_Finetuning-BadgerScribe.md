@@ -7,15 +7,15 @@ exercises: 75
 :::::::::::::::::::::::::::::::::::::: questions
 
 - When is fine-tuning worth it?
-- Why does fine-tuning cost anywhere from a dollar to tens of thousands, and how do I estimate where my run falls *before* I launch it?
-- How do I run a GPU fine-tune as a SageMaker training job so the meter stops the moment it finishes?
-- How do I measure whether the fine-tune helped?
+- What does a fine-tuning run cost, and how do I estimate that before launching it?
+- How do I fine-tune a model as a SageMaker training job?
+- How do I tell whether the fine-tune helped?
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Explain what drives the cost of a fine-tuning run (model size × tokens × epochs × number of attempts) and why the same four habits apply at `$1` and at `$10,000`: a time cap, a small first run, checkpoints, and an estimate written down before launch.
+- Explain what drives the cost of a fine-tuning run (model size × tokens × epochs × number of attempts) and the four habits that hold at any size: a time cap, a small first run, checkpoints, and an estimate written down before launch.
 - Launch a LoRA fine-tune of a 3B vision-language model (CHURRO-3B) as a `HuggingFace` training job on a single 24 GB GPU, with tags, a unique job name and a `max_run` cap.
 - Read a job's billable time and compare it to the estimate.
 - Compare the base model and the fine-tuned model on held-out pages using the competition's own character error rate (CER).
