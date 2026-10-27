@@ -499,17 +499,17 @@ combination.</li>
 <div class="callout-content">
 <p>This episode is not taught in the workshop. <strong>The Bedrock and
 Processing Jobs episodes are the default ways to run RAG; this one is
-for the case where you need to poke at a self-hosted model
-interactively, and only if you will remember to stop the
-instance.</strong> <strong>Do not run this notebook on the controller
-instance from the other episodes. Create a new GPU notebook instance for
-it (Setup below). On a CPU instance the vLLM install and the 27 GB model
-load will exhaust memory and freeze your JupyterLab.</strong> It runs
-the same pipeline as the Processing Jobs episode on a GPU notebook
-instance, which is the right tool for prototyping alone at a keyboard
-and the wrong one for a room of a hundred people with meters running.
-Work through it on your own when you want to see model loading, GPU
-memory and generation as plain Python. Read the cost callout first.</p>
+for the case where you need to work on a self-hosted model by hand, and
+only if you will remember to stop the instance.</strong> <strong>Do not
+run this notebook on the controller instance from the other episodes.
+Create a new GPU notebook instance for it (Setup below). On a CPU
+instance the vLLM install and the 27 GB model load will exhaust memory
+and freeze your JupyterLab.</strong> It runs the same pipeline as the
+Processing Jobs episode on a GPU notebook instance, which is the right
+tool for prototyping alone at a keyboard and the wrong one for a room of
+a hundred people with meters running. Work through it on your own when
+you want to see model loading, GPU memory and generation as plain
+Python. Read the cost callout first.</p>
 </div>
 </div>
 </div>
@@ -604,14 +604,12 @@ on a training job) guarantees it.</li>
 </ol></div>
 </div>
 </div>
-<p>Self-hosting on a notebook GPU is the simplest form of it:</p>
-<ul><li>Easy to understand on the AWS side (pick a GPU instance, pick a
-model, go)</li>
-<li>Ideal for learning what retrieval and generation do, step by
-step</li>
-<li>The fastest loop for experimenting with prompts and models that
-Bedrock does not carry</li>
-</ul><p>The Processing Jobs episode runs this same pipeline as short-lived
+<p>Self-hosting on a notebook GPU is the simplest form of it: choose a
+GPU instance and a model, and every step of retrieval and generation is
+a cell you can run and change. That makes it the quickest way to learn
+what each step does and to try prompts and models Bedrock does not
+carry.</p>
+<p>The Processing Jobs episode runs this same pipeline as short-lived
 jobs, so the GPU only bills while it is embedding or generating; that is
 the pattern to use for real work.</p>
 </section><section><h2 class="section-heading" id="overview-wattbot-rag-on-a-single-notebook-gpu">Overview: WattBot RAG on a single notebook GPU<a class="anchor" aria-label="anchor" href="#overview-wattbot-rag-on-a-single-notebook-gpu"></a></h2>
@@ -943,8 +941,7 @@ on this GPU.</p>
 <code>numpy.ndarray</code> along with the original
 <code>chunked_docs</code> list.</li>
 </ol><p>Later, we’ll implement a small retrieval helper that does
-cosine-similarity search over this matrix—no additional indexing library
-required.</p>
+cosine-similarity search over this matrix, with no indexing library.</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1262,11 +1259,11 @@ results out to a CSV for later scoring and analysis.</li>
 <li>Handled unanswerable questions with an <code>is_blank</code> flag so
 the system can explicitly say “I don’t know” when the evidence isn’t
 there.</li>
-</ul><p>This is just a first pass at a RAG pipeline: some next steps:</p>
-<ul><li><p><strong>Increase the size/quality of models used for embedding
-and generation</strong>: Try stronger embedding models (e.g., larger
-sentence-transformers or domain-tuned embeddings) and more capable LLMs
-for answer generation, especially if you have GPU budget.</p></li>
+</ul><p>This is a first pass at a RAG pipeline. Next steps, in rough order of
+what they usually gain:</p>
+<ul><li><p><strong>Stronger models</strong>: a larger or domain-tuned
+embedding model, or a more capable generator, if the GPU budget
+allows.</p></li>
 <li><p><strong>Add a reranking step</strong>: Instead of sending the
 top-k raw nearest neighbors directly to the LLM, use a cross-encoder or
 reranker model to re-score those candidates and send only the best
@@ -1289,14 +1286,9 @@ ID, year, or paragraph type. You can:</p>
 <li>Use metadata in the prompt so the LLM knows where evidence is coming
 from.</li>
 </ul></li>
-<li>
-<p><strong>Look for LLMs tuned for scientific literature</strong>:
-Experiment with models that are explicitly trained or finetuned on
-scientific text (e.g., arXiv / PubMed) so they:</p>
-<ul><li>Parse equations and technical language more reliably.</li>
-<li>Are less likely to hallucinate when reading dense scientific
-prose.</li>
-</ul></li>
+<li><p><strong>Models tuned on scientific text</strong> (arXiv, PubMed):
+they read equations and technical language more reliably and invent less
+when the prose is dense.</p></li>
 </ul><p>Models, retrieval and preprocessing can each be swapped without
 changing the rest of the pipeline.</p>
 <div class="section level3">
@@ -1345,17 +1337,17 @@ when you stand up; delete it when the episode is over.</li>
 over the in-memory embedding matrix is enough for a corpus this size; a
 vector database is the same step for a corpus of millions.</li>
 <li>
-<strong>Ground-truth units</strong>: The <code>answer_unit</code>
-column is always copied directly from <code>train_QA.csv</code>, never
-guessed by the LLM.</li>
+<strong>Units come from the data</strong>: <code>answer_unit</code>
+is copied from <code>train_QA.csv</code>, never guessed by the
+model.</li>
 <li>
-<strong>Two-stage LLM use</strong>: One call focuses on
-<em>answering and citing</em>; a second, lighter call produces a short
-explanation tagged with an evidence type.</li>
+<strong>Two calls per question</strong>: one answers and cites; a
+second, shorter one writes the explanation and names the evidence
+type.</li>
 <li>
-<strong>WattBot conventions</strong>: We respect the Kaggle
-competition format, using <code>is_blank</code> for unanswerable
-questions and for missing fields.</li>
+<strong>The competition’s format</strong>: <code>is_blank</code>
+marks unanswerable questions and missing fields, as the scorer
+expects.</li>
 </ul></div>
 </div>
 </div>

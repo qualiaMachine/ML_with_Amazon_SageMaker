@@ -492,7 +492,7 @@ The one you want (the newest release, a specific size, a fine-tune for
 scientific text, a model a paper just published) is usually not on
 Bedrock, and often never will be.</p>
 <p>When that happens you host the model yourself on a GPU you rent, and
-the question becomes <em>how</em>. There are three ways to rent a GPU on
+the question is how. There are three ways to rent a GPU on
 SageMaker:</p>
 <table class="table"><colgroup><col width="25%"><col width="25%"><col width="25%"><col width="25%"></colgroup><thead><tr><th></th>
 <th>Bills</th>
@@ -639,10 +639,10 @@ embedding job and <code>code_rag/</code> for the RAG job. The split
 follows from how a job gets its code. <code>run(source_dir=...)</code>
 uploads that whole directory into the container, the same way the
 training estimator’s <code>source_dir</code> did in the fine-tuning
-episode, so each directory holds exactly the files its job imports. The
-copies of <code>wattbot_rag.py</code> and <code>Score.py</code> next to
-the notebook are for the scoring step at the end, which runs in the
-notebook, not in a job.</p>
+episode, so each directory holds the files its job imports and nothing
+else. The copies of <code>wattbot_rag.py</code> and
+<code>Score.py</code> next to the notebook are for the scoring step at
+the end, which runs in the notebook, not in a job.</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -782,9 +782,9 @@ be pip-installed before it runs; neither job here has one.</p>
 your notebook instance cover the notebook’s hourly cost and nothing
 else. Each Processing job below launches its own GPU instance, which is
 a separate billable resource with no tags unless we pass them at launch,
-exactly as we did for training and tuning jobs earlier in the workshop.
-An untagged job shows up in Cost Explorer as anonymous SageMaker spend
-that nobody can attribute to a team.</p>
+as with the training and tuning jobs earlier in the workshop. An
+untagged job shows up in Cost Explorer as anonymous SageMaker spend that
+nobody can attribute to a team.</p>
 <p>Define the tags once and pass <code>tags=job_tags</code> to
 <strong>every</strong> <code>HuggingFaceProcessor</code> you create. Use
 a distinct <code>Purpose</code> per job so you can tell the embedding
@@ -905,10 +905,9 @@ and run the job; it is eight minutes.</p>
 </div>
 <div class="section level3">
 <h3 id="check-on-the-running-job-in-the-aws-console">Check on the running job in the AWS Console<a class="anchor" aria-label="anchor" href="#check-on-the-running-job-in-the-aws-console"></a></h3>
-<p>To view the job running from the AWS Console, you can visit SageMaker
-AI, and then find the “Data Preparation” dropdown menu on the left side
-panel. Click that to find “Processing jobs”, or open <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs" class="external-link">this
-link</a> in the class region (change <code>us-east-2</code> in it for
+<p>In the console the job is under <strong>SageMaker AI → Data
+preparation → Processing jobs</strong>, or at <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs" class="external-link">this
+link</a> for the class region (change <code>us-east-2</code> in it for
 another region).</p>
 <p>It takes about 10 minutes in total for the job to complete: a couple
 of provisioning the instance and downloading the embedding model, eight
@@ -1209,7 +1208,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -1262,7 +1261,7 @@ done</h3>
 Predict what would happen if the RAG job were launched with
 <code>max_runtime_in_seconds=600</code> instead: what does the job
 status become, what is in the output prefix, and what did it cost? Then
-compute the most a hung job can bill under each job’s actual cap, and
+compute the most a hung job can bill under the cap each job set, and
 compare it with the cost of an <code>ml.g6e.xlarge</code> notebook
 instance left running over a weekend (64 hours).</p>
 </div>
@@ -1273,7 +1272,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
