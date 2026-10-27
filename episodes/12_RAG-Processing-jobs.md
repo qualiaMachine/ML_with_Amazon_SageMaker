@@ -27,7 +27,7 @@ Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/12_RAG-Processing-jobs
 
 The Bedrock episode is the default for RAG: per-token billing, nothing left running, two API calls. Bedrock's catalog is curated, though. It carries Amazon's models, Anthropic, Meta, Mistral, DeepSeek, and a few others, and within a family only some sizes, usually a generation behind: for Qwen, the serverless lineup is still the Qwen3 series. Hugging Face hosts well over a million open-weight checkpoints. The one you want (the newest release, a specific size, a fine-tune for scientific text, a model a paper just published) is usually not on Bedrock, and often never will be.
 
-When that happens you host the model yourself on a GPU you rent, and the question becomes *how*. There are three ways to rent a GPU on SageMaker:
+When that happens you host the model yourself on a GPU you rent, and the question is how. There are three ways to rent a GPU on SageMaker:
 
 | | Bills | Stops when | Best for |
 |---|---|---|---|
@@ -305,7 +305,7 @@ if run_embedding_job:   # False in class when the instructor's matrix was copied
 
 ### Check on the running job in the AWS Console
 
-To view the job running from the AWS Console, you can visit SageMaker AI, and then find the "Data Preparation" dropdown menu on the left side panel. Click that to find "Processing jobs", or open [this link](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs) in the class region (change `us-east-2` in it for another region).
+In the console the job is under **SageMaker AI → Data preparation → Processing jobs**, or at [this link](https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/processing-jobs) for the class region (change `us-east-2` in it for another region).
 
 It takes about 10 minutes in total for the job to complete: a couple of provisioning the instance and downloading the embedding model, eight of embedding. That startup is the cost of a job, paid once: the embedding job runs once per corpus, and the GPU bills only while it runs.
 
