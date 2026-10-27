@@ -27,7 +27,7 @@ Open the notebook from: `/ML_with_AWS_SageMaker/notebooks/08_Finetuning-BadgerSc
 
 ## Why fine-tune an LLM
 
-The training episodes so far trained small models from scratch. This episode fine-tunes a large language model with LoRA, the cheap form of fine-tuning explained below: a vision-language model with billions of parameters, pretrained on more data and compute than any lab could repeat. That is what makes it a different kind of job, in what it can do and in what it costs.
+The training episodes so far trained small models from scratch. This episode starts from a large model that someone else has already trained, a vision-language model with billions of parameters, and adapts it to our data with LoRA, a cheap form of fine-tuning explained below. A model like that can do far more than anything we could train ourselves, and it costs more to work with, so this is a different kind of job.
 
 General-purpose models are trained on the average of the internet, and research problems are rarely average. A 19th-century German hand, a lab's own annotation conventions, species names, a regional dialect, the layout of a specific archive: the largest commercial model has seen little of it, and no prompt can make up for that.
 
