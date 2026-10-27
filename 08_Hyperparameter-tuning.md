@@ -208,7 +208,7 @@ To prepare `train_nn.py` for hyperparameter tuning, we added code to log validat
 
 **Note**: It's best to use an if statement to only print out metrics periodically (e.g., every 100 epochs), so that your print time does not eat up too much of your training time. Printing every epoch is a measurable share of a step this small. On the flipside of this, you don't want to print metrics so infrequently that you lose resolution in the monitored validation accuracy. Choose a number between 100-1000 epochs or divide your total epoch count by ~25 to yield a reasonable range. 
 
-```text
+```py
 if (epoch + 1) % 100 == 0 or epoch == epochs - 1:
     print(f"validation:accuracy = {val_accuracy:.4f}", flush=True)  # Log for SageMaker metric tracking
 ```
@@ -490,7 +490,7 @@ The tuner can only vary what the script reads. Right now `train_nn.py` has no `-
 
 1. **In `train_nn.py`**: add `parser.add_argument('--batch_size', type=int, default=64)`, pass it to `train()`, and replace the full-batch step with a mini-batch loop, for example by wrapping the tensors in a `TensorDataset` and iterating over a `DataLoader(dataset, batch_size=batch_size, shuffle=True)` inside each epoch (with `optimizer.zero_grad()`, forward, loss, `backward()` and `step()` per batch).
 
-```text
+```py
 parser.add_argument('--batch_size', type=int, default=64)
 ...
 loader = DataLoader(TensorDataset(X_train, y_train), batch_size=batch_size, shuffle=True)

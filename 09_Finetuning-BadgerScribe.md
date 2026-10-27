@@ -495,7 +495,7 @@ print(os.listdir("code"))
 
 Open `code/finetune_churro_lora.py` and read it before launching it. What it does:
 
-```text
+```py
 # Only the language model's projection layers get LoRA weights.
 # The vision tower ("visual") stays frozen.
 lora = LoraConfig(
