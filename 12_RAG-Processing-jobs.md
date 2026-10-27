@@ -82,7 +82,7 @@ The four scripts the jobs need are already on this instance, in the lesson clone
 - `scripts/wattbot_rag_batch.py`: the WattBot RAG loop as a batch job: loads the inputs, runs the generator, writes `wattbot_solutions.csv`.
 - `scripts/wattbot_rag.py`: the shared pipeline logic (retrieval, prompts, answer parsing, `run_single_qa`, the scorer) that the Bedrock episode imported too. The batch script imports it, so it ships with the job; the notebook imports it for scoring.
 
-The cell below copies them out of the lesson clone into the project folder, one directory per job: `code_embed/` for the embedding job and `code_rag/` for the RAG job. The split follows from how a job gets its code. `run(source_dir=...)` uploads that whole directory into the container, the same way the training estimator's `source_dir` did in the fine-tuning episode, so each directory holds exactly the files its job imports. The copies of `wattbot_rag.py` and `Score.py` next to the notebook are for the scoring step at the end, which runs in the notebook, not in a job.
+The cell below copies them out of the lesson clone into the project folder, one directory per job: `code_embed/` for the embedding job and `code_rag/` for the RAG job. The split follows from how a job gets its code. `run(source_dir=...)` uploads that whole directory into the container, the same way the training estimator's `source_dir` did in the fine-tuning episode, so each directory holds the files its job imports and nothing else. The copies of `wattbot_rag.py` and `Score.py` next to the notebook are for the scoring step at the end, which runs in the notebook, not in a job.
 
 ```python
 !mkdir -p /home/ec2-user/SageMaker/wattbot   # the same project folder the Bedrock episode used, beside the lesson clone
@@ -206,7 +206,7 @@ Neither job installs anything. The Hugging Face container ships `transformers` a
 
 ### Cost tracking: tag every job
 
-Tags do **not** propagate in AWS. The tags you put on your notebook instance cover the notebook's hourly cost and nothing else. Each Processing job below launches its own GPU instance, which is a separate billable resource with no tags unless we pass them at launch, exactly as we did for training and tuning jobs earlier in the workshop. An untagged job shows up in Cost Explorer as anonymous SageMaker spend that nobody can attribute to a team.
+Tags do **not** propagate in AWS. The tags you put on your notebook instance cover the notebook's hourly cost and nothing else. Each Processing job below launches its own GPU instance, which is a separate billable resource with no tags unless we pass them at launch, as with the training and tuning jobs earlier in the workshop. An untagged job shows up in Cost Explorer as anonymous SageMaker spend that nobody can attribute to a team.
 
 Define the tags once and pass `tags=job_tags` to **every** `HuggingFaceProcessor` you create. Use a distinct `Purpose` per job so you can tell the embedding job from the batch RAG job on the bill.
 
