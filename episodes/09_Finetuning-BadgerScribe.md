@@ -15,7 +15,7 @@ exercises: 75
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Explain what drives the cost of a fine-tuning run (model size × tokens × epochs × number of attempts) and the four habits that hold at any size: a time cap, a small first run, checkpoints, and an estimate written down before launch.
+- Explain what drives the cost of a fine-tuning run (model size × tokens × epochs × number of attempts), and what to do before launching one at any size: set a time cap, run a small slice first, write the estimate down, and checkpoint.
 - Launch a LoRA fine-tune of a 3B vision-language model (CHURRO-3B) as a `HuggingFace` training job on a single 24 GB GPU, with tags, a unique job name and a `max_run` cap.
 - Read a job's billable time and compare it to the estimate.
 - Compare the base model and the fine-tuned model on held-out pages using the competition's own character error rate (CER).
@@ -206,7 +206,7 @@ helpers.estimate_finetune_cost(params_billions=7, examples=50_000, tokens_per_ex
                                gradient_checkpointing=False, runs=10)
 ```
 
-A project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data: five to ten runs, `$700` to `$1,400`, before anyone touches a hyperparameter sweep. That is the number for the proposal, and the four habits matter more as the model gets bigger.
+A project is not one run. The first run finds a data bug, the second a bad learning rate, then two or three are compared, then the one that worked is rerun on the final data: five to ten runs, `$700` to `$1,400`, before anyone touches a hyperparameter sweep. That is the number for the proposal. The cap, the small first run, the written estimate and the checkpoints are the same at this size; the bill for skipping them is not.
 
 :::::::::::::::::::::::::::::::::
 
@@ -268,12 +268,12 @@ Compare the classic mistake: doing all of this interactively on a `ml.g5.xlarge`
 
 ::::::::::::::::::::::::::::::::::::: callout
 
-### The four habits
+### Before any fine-tuning run
 
-1. **Cap it.** Every job gets `max_run`. Every notebook GPU instance gets stopped when you stand up.
-2. **Start small.** The first launch of any training script uses a slice of the data and a short cap. The in-class run below *is* that small first run; the homework scales it up only after it has been seen to work.
-3. **Estimate it, then check.** Write the number down. After the run, read `BillableTimeInSeconds` from the job description and compare.
-4. **Checkpoint it.** Save progress to S3 as the job runs, so that a killed, interrupted or crashed run costs one epoch, not the whole bill.
+- Set `max_run` on every job, and stop any notebook GPU instance when you stand up.
+- Make the first launch of a training script a small one: a slice of the data and a short cap. The in-class run below is that small run; the homework scales it up after it has been seen to work.
+- Write the cost estimate down before launching. Afterwards, read `BillableTimeInSeconds` from the job description and compare.
+- Save checkpoints to S3 as the job runs, so a killed or crashed run costs one epoch, not the whole bill.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -493,22 +493,31 @@ print(os.listdir("code"))
 - `finetune_churro_lora.py`: the training job entry point. Holds out 15% of pages per category, filters to the categories you ask for, scores a sample of holdout pages with the base model, trains a LoRA adapter, scores the same pages again, and saves everything.
 - `churro_transcribe_batch.py`: used in the homework. Transcribes any list of pages with the base model or with the adapter merged in, and writes `predictions.csv` in the submission format.
 
-Open `code/finetune_churro_lora.py` and read it before launching it. What it does:
+::::::::::::::::::::::::::::::::::::::: challenge
 
-```py
-# Only the language model's projection layers get LoRA weights.
-# The vision tower ("visual") stays frozen.
-lora = LoraConfig(
-    r=16, lora_alpha=32, lora_dropout=0.05, task_type="CAUSAL_LM",
-    target_modules=r"^(?!.*visual).*\.(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)$",
-)
+### Read the script before you pay for it
 
-# The loss is computed on the transcription only. Prompt and image tokens
-# are masked to -100 so the model is not graded on repeating the question.
-labels[i, :n_prompt] = -100
-```
+Open `code/finetune_churro_lora.py` in the Jupyter file browser. It is about 400 lines and you are about to launch it on a GPU. Find the answers in the file:
 
-And the one setting that controls cost more than any other:
+1. Which layers get LoRA weights, and which part of the model gets none? What would the regular expression in `target_modules` also match without its `(?!.*visual)` part?
+2. Roughly how many parameters will train? Work it out from `r=16` and the shapes of the language model's projections (36 layers; `q_proj` and `o_proj` are 2048 × 2048, `k_proj` and `v_proj` are 2048 × 256, and `gate_proj`, `up_proj` and `down_proj` are 2048 × 11008), then compare with the `trainable params:` line in the job's log once it runs.
+3. Which tokens does the loss count? Find every place `labels` are set to `-100`.
+4. The script stops itself in two situations before training a single step. Which, and why are they there?
+
+::::::::::::::::::::::::::::::::::::::: solution
+
+### Solution
+
+1. Only the language model's `q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj` and `down_proj`. Every module in the vision tower has `visual` in its name, and the negative lookahead excludes them. Without it, the vision blocks' own `gate_proj`, `up_proj` and `down_proj` would match too, and the model would be relearning how to see from 251 pages.
+2. A LoRA adapter on a matrix of shape in × out adds r × (in + out) parameters. Per layer: 16 × 4096 × 2 for `q_proj` and `o_proj`, 16 × 2304 × 2 for `k_proj` and `v_proj`, 16 × 13056 × 3 for the MLP, about 831,000; times 36 layers is about 30 million, under 1% of the 3.75 billion. The log line `trainable params: ... || all params: ... || trainable%: ...` should agree. If it said 100%, nothing was frozen and the run is a full fine-tune at a full fine-tune's memory and price.
+3. The transcription only. `labels[enc["attention_mask"] == 0] = -100` drops the padding, `labels[i, :n_prompt] = -100` drops the prompt and the image tokens, and `-100` is the value PyTorch's cross-entropy ignores. The model is graded on what it writes, not on repeating the question.
+4. Right after the adapter is attached: it raises if any trainable tensor is in the vision tower, or if more than 5% of the model is trainable. Either means the job is not the LoRA run that was estimated, so it stops before the GPU-hours are spent; a job that raises there has cost its startup minutes and nothing more.
+
+:::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::
+
+One more setting, the one that controls cost more than any other:
 
 ```python
 # Every 28x28 block of the page becomes one token. 1280 blocks ~ 1 megapixel.
@@ -650,7 +659,7 @@ Open a second browser tab on the SageMaker console: **SageMaker AI → Training 
 Things to find in the log while you wait:
 
 - `pages: 295 total -> 251 train / 44 holdout`: the split.
-- `trainable params: ...`: what fraction of the 3B parameters LoRA trains.
+- `trainable params: ...`: how many of the 3.75B parameters LoRA trains, about 30 million. The `safeguards:` line after it means the script's two checks passed.
 - `[eval before] 15 holdout pages in ...s (... s/page) -> macro CER ...`: the base model's score, and the time per page one at a time; the homework's inference jobs batch pages and are faster per page.
 - The Trainer's loss lines every 5 steps, and `[eval epoch1] ...` at the end of each epoch: the points of the curve you plot in Step 2.
 
