@@ -1208,7 +1208,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1217,7 +1217,7 @@ helper wraps:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1277,7 +1277,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1717,7 +1717,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -1795,7 +1795,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -2271,23 +2271,28 @@ across the three runs and against the DeepSeek run.</p>
 <h3 class="callout-title">What to expect, and what it cost</h3>
 <div class="callout-content">
 <p>Measured once on this corpus, 50 table and figure questions, Nova 2
-Lite throughout. Retrieval at the paper level was a tie that the text
-index won: 0.94 against 0.89 on table questions, 0.94 against 0.88 on
-figures, and 0.82 against 0.65 on quote-only questions, where a picture
-has nothing to offer. Then reading. Text chunks alone scored 0.64, with
-57% of table answers and 59% of figure answers correct. Chunks plus the
-image index’s top three crops scored 0.75, with 69% of tables and 71% of
-figures correct and citation F1 up from 0.85 to 0.93. Chunks plus the
-crops on the pages behind the top text chunks, the route the paper-level
-hit rate seemed to favour, scored 0.67. Two readings. Showing the model
-the table or figure is worth about ten points on the questions that
-depend on one, tables included, which whole pages at 100 dpi had not
-managed. And finding the paper is not finding the table: the image index
-chose better crops than the text route did, because a question about a
-table matches the picture of that table better than it matches the prose
-on the same page. Fifty questions is a small sample, so read the
-direction, not the decimals. For the bill, every crop is a few hundred
-input tokens at Nova 2 Lite’s rate on the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">pricing page</a>, so a
+Lite throughout. At the paper level the text index wins: a ground-truth
+paper is in its top 8 for 94% of table questions and 94% of figure
+questions, against 77% and 71% for the image index, and for 82% against
+55% of quote-only questions, where a picture has nothing to offer. At
+the crop level the two routes are even: the crop the answer sits in is
+among those shown for 55% of table questions by the text route and 52%
+by the image index, and for 57% against 50% of figure questions. Then
+reading. Text chunks alone scored 0.64, with 57% of table answers and
+59% of figure answers correct. Chunks plus the image index’s top three
+crops scored 0.75, with 69% of tables and 71% of figures correct and
+citation F1 up from 0.85 to 0.93. Chunks plus the crops on the pages
+behind the top text chunks, the route the paper-level hit rate seemed to
+favour, scored 0.67. Two readings. Showing the model the table or figure
+is worth about ten points on the questions that depend on one, tables
+included, which whole pages at 100 dpi had not managed. And the
+crop-level hit rates say where the image index’s lead does not come
+from: it finds the answer’s own crop no more often than the text route
+does. The difference is in what else the model is shown, three crops
+chosen by their similarity to the question against every crop on the
+pages behind the top chunks. Fifty questions is a small sample, so read
+the direction, not the decimals. For the bill, every crop is a few
+hundred input tokens at Nova 2 Lite’s rate on the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">pricing page</a>, so a
 run with images costs two to three times the control and takes three to
 four times as long: 1.6, 4.0 and 3.0 minutes for the three runs here.
 <code>vision_usage</code> holds all three runs’ usage blocks, and the
