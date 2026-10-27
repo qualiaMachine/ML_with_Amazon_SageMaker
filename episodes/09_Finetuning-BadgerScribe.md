@@ -606,7 +606,7 @@ print(f"tags:         {make_job_tags('Training')}")
 
 Next, what the script will be told to do. These hyperparameters reach the script as command-line flags (`--epochs 2 --lr 0.0002 ...`), and they are what the Step 0 estimate was built from. Three of them set the cost: the number of pages, the number of passes, and `max_pixels`. The rest shape the training: a LoRA learning rate, the adapter rank, an effective batch of four pages through gradient accumulation, and which holdout pages get scored when.
 
-One of them, `lora_r`, decides how many parameters train, and the model's own `config.json`, staged next to the weights, has what you need to work that out: the number of layers and the width of each projection LoRA attaches to. An adapter on a matrix of shape in × out adds r × (in + out) parameters.
+One of them, `lora_r`, decides how many parameters train, and the model's own `config.json` has what you need to work that out: the number of layers and the width of each projection LoRA attaches to. For any model on Hugging Face it is one click away, under **Files and versions** on the model page ([CHURRO-3B](https://huggingface.co/stanford-oval/churro-3B/tree/main), for this one), and the same page's safetensors viewer lists every weight tensor with its shape; the model card's prose is a quicker glance but not always complete, so read the file when a number matters. Here the file is staged next to the weights in the shared bucket. An adapter on a matrix of shape in × out adds r × (in + out) parameters.
 
 ```python
 s3_client.download_file(shared_bucket, f"{data_prefix}/model/churro-3B/config.json", "config.json")   # the model's architecture, from the model card
