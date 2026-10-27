@@ -227,10 +227,10 @@ The three data numbers multiply to the tokens the model trains on. Here it is on
 
 ```python
 helpers.estimate_training_cost(   # the semicolon at the end keeps Jupyter from also displaying the dictionary the function returns
-    params_billions=0.125,      # a BERT-base-sized model, 125 million parameters,
-    examples=1_000_000,         # trained on a million abstracts, one training example each,
-    tokens_per_example=256,     # each abstract about 190 words, 256 tokens,
-    epochs=3,                   # each abstract seen three times
+    params_billions=0.125,      # a BERT-base-sized model, 125 million parameters
+    examples=1_000_000,         # a million abstracts
+    tokens_per_example=256,     # 190 words per abstract, about 256 tokens
+    epochs=3,                   # three passes over the abstracts
 );
 ```
 
@@ -247,23 +247,23 @@ The function also returns the same numbers as a dictionary, so a notebook can us
 
 ### What a language model costs, before anyone launches one
 
-Run the same function on two sizes a project might be tempted by: a 1-billion-parameter model and a 7-billion one, each trained from scratch on a million documents of 2,000 tokens, one pass. Nothing is launched; the function only does the arithmetic.
+Run the same function on two sizes a project might be tempted by: a 1-billion-parameter model and a 7-billion one, each trained from scratch on a million papers, one pass. Nothing is launched; the function only does the arithmetic.
 
 ```python
 helpers.estimate_training_cost(
-    params_billions=1,          # a 1B model, the size of the smallest open-weight language models,
-    examples=1_000_000,         # trained on a million documents, one training example each,
-    tokens_per_example=2000,    # each document a short paper, about 1,500 words or 2,000 tokens,
-    epochs=1,                   # each document seen once
+    params_billions=1,          # a 1B model, the size of the smallest open-weight language models
+    examples=1_000_000,         # a million papers
+    tokens_per_example=2000,    # 1,500 words per paper, about 2,000 tokens
+    epochs=1,                   # one pass over the papers
 );
 ```
 
 ```python
 helpers.estimate_training_cost(
-    params_billions=7,          # a 7B model, the size most "small" open-weight LLMs are,
-    examples=1_000_000,         # trained on the same million documents,
-    tokens_per_example=2000,    # of 2,000 tokens each,
-    epochs=1,                   # each seen once
+    params_billions=7,          # a 7B model, the size most "small" open-weight LLMs are
+    examples=1_000_000,         # the same million papers
+    tokens_per_example=2000,    # 1,500 words per paper, about 2,000 tokens
+    epochs=1,                   # one pass
 );
 ```
 
