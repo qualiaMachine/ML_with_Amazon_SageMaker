@@ -12,12 +12,12 @@ This workshop is about running machine learning and AI work on AWS without losin
 
 **Part 1, orientation.** What the cloud offers a researcher compared with a laptop or the cluster down the hall, and what it costs. The two services the lesson uses: **SageMaker** rents machines by the second, for a notebook you work in and for jobs that run on their own and end; **Bedrock** serves hosted models by the token, with nothing to start or stop. The four things every episode uses, S3, a notebook instance, jobs and Bedrock, and how every later episode estimates and checks what a job costs.
 
-**Part 2, SageMaker: data, training, tuning and fine-tuning.**
+**Part 2, SageMaker: data, training, fine-tuning and tuning.**
 
 - Put the data in an S3 bucket and start a small notebook instance that launches everything else. The notebook is the controller, not the workhorse: the expensive compute runs on instances SageMaker rents for each job and releases when it ends.
 - Train XGBoost and PyTorch models on the Titanic data as training jobs. Estimate the cost before each launch and read the billable seconds after, compare a CPU instance with a GPU, and see what two instances buy and what they do not.
-- Run a hyperparameter tuning job that trains ten models under a budget set up front.
 - Fine-tune a 3B open-weight vision-language model with LoRA, as a training job with checkpoints and a runtime cap, for transcribing handwritten German letters (Badger Scribe), scored on held-out pages before and after.
+- Run a hyperparameter tuning job that trains ten models under a budget set up front.
 
 **Part 3, Bedrock: inference and retrieval-augmented generation.**
 
@@ -30,8 +30,8 @@ This workshop is about running machine learning and AI work on AWS without losin
 | Episodes | What they cover | Hands-on problem |
 |---|---|---|
 | 1 to 5 | Overview, S3, the notebook instance as controller, reading and writing S3, (optional) pushing notebooks to GitHub | Titanic survival data |
-| 6 to 8 | Training jobs with XGBoost and PyTorch, CPU vs. GPU, parallel instances, hyperparameter tuning | Titanic survival classifier |
-| 9 | LoRA fine-tune of CHURRO-3B as a training job, with a cost estimate checked against the bill | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
+| 6, 7 and 9 | Training jobs with XGBoost and PyTorch, CPU vs. GPU, parallel instances, hyperparameter tuning | Titanic survival classifier |
+| 8 | LoRA fine-tune of CHURRO-3B as a training job, with a cost estimate checked against the bill | [Badger Scribe](https://www.kaggle.com/competitions/badger-scribe) handwriting transcription (German Kurrent letters) |
 | 10 to 13 | RAG on Bedrock, with multimodal embeddings; RAG with Processing jobs; (optional) RAG on a notebook GPU | [WattBot](https://www.kaggle.com/competitions/WattBot2026) energy-literature Q&A |
 | 14 to 15 | (Optional) the same jobs from the terminal; resource management, monitoring and cleanup | |
 
