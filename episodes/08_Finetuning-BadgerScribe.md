@@ -144,7 +144,8 @@ Training time is arithmetic. The unit is the floating-point operation, one multi
 ```text
 tokens      = examples × tokens per example × passes over the data
 FLOPs       = 6 × parameters × tokens      (4 × for LoRA)
-GPU-seconds = FLOPs ÷ (GPU peak FLOPS × 0.25)      a training job reaches about a quarter of the peak on the data sheet```
+GPU-seconds = FLOPs ÷ (GPU peak FLOPS × 0.25)      a training job reaches about a quarter of the peak on the data sheet
+```
 
 Peak FLOPS is on the GPU's data sheet, about 70 trillion per second for an A10G, 312 for an A100, 989 for an H100. A training job reaches about a quarter of that in practice. Cost is GPU-hours times the hourly rate, plus the startup minutes every job spends pulling its container and data, which are billed too.
 
@@ -174,7 +175,8 @@ step0_estimate = helpers.estimate_finetune_cost(
     epochs=2,                    # passes over the 251 pages
     method="lora",
     instance_type="ml.g5.xlarge",
-)```
+)
+```
 
 It says about 27 minutes and `$0.64`, 17 minutes of training plus the 10 minutes of startup it assumes. The 17 is more than the 12 of the hand calculation because the estimator multiplies the FLOPs by 1.5 when gradient checkpointing is on, as it is in our script. To save memory, the forward pass is thrown away and recomputed during the backward pass, which is half the arithmetic again. In the measured run the 126 optimizer steps took about 12 minutes, so the rule without the factor landed on the number and the rule with it is a third high. The quarter-of-peak utilization is the loosest assumption in the rule, and a miss of that size is what it is good for. Hold on to `step0_estimate`; Step 2 compares it to the job's own bill.
 
@@ -184,7 +186,8 @@ The same call for the kind of run a marathon team might weigh, a 7B model on 5,0
 helpers.estimate_finetune_cost(
     params_billions=7, examples=5000, tokens_per_example=800, epochs=3,
     method="lora", runs=8,       # no instance_type: the cheapest that fits
-);```
+);
+```
 
 Batch size is not an input, and does not need to be. A bigger batch keeps the GPU busier, which is the `utilization` argument (0.25 by default; a well-fed GPU reaches 0.35 or so), and it needs more memory for activations, which is `activations_gb`.
 
@@ -211,7 +214,8 @@ When a job does need several GPUs, the training script's Hugging Face `Trainer` 
 ```python
 # The class run on a 4 × A10G instance: the gradient exchanged is the adapter's, not the model's.
 # An estimate, not a launch: a 12-minute job does not need four GPUs, and the box costs 5x the single one.
-helpers.estimate_parallel_speedup(params_billions=3.75, tokens_per_step=4 * 1600, instance_type="ml.g5.12xlarge", method="lora");```
+helpers.estimate_parallel_speedup(params_billions=3.75, tokens_per_step=4 * 1600, instance_type="ml.g5.12xlarge", method="lora");
+```
 
 Near 4x on 4 GPUs at about the same total cost, which is the case for a multi-GPU box when a LoRA run on a million pages has to finish by a deadline. It is not a reason to rent one for a run that finishes in twelve minutes, and the class account does not allow multi-GPU instances at all.
 
