@@ -13,7 +13,7 @@ exercises: 0
 
 ::::::::::::::::::::::::::::::::::::: objectives
 
-- Compare cloud compute with campus HPC and lab hardware on hardware generation, cost, efficiency and control.
+- Compare cloud compute with campus HPC and lab hardware on hardware generation, cost, control, job orchestration and efficiency.
 - Describe what S3, a notebook instance, SageMaker jobs and Bedrock each do in this lesson.
 - Say when a SageMaker job is the tool and when a Bedrock call is.
 
@@ -29,13 +29,15 @@ Cloud computing means renting compute as needed instead of buying and maintainin
 
 - **Control and data.** Local hardware gives you control over the software stack, the network and where the data sits, with no quotas and no transfer charges. In the cloud you work within account permissions and service quotas, data moved in or out crosses the network and may be charged, and sensitive data needs a governance check before it leaves campus. Cost needs attention too. An idle rented GPU costs the same as a busy one, so every job in this lesson has a runtime cap, and every resource is stopped when the work is done.
 
+- **Job orchestration.** On a cluster the researcher does the plumbing. You write the batch scripts, load the right modules or build the environment, wait in the queue, and stitch preprocessing, training, evaluation and tuning together as separate submissions, with a scheduler that knows nothing about any of them. A managed service does that part. In SageMaker a job is a script, a container with the framework installed, an instance type and the data's location, launched from Python. The service starts the machine, runs the script, saves the outputs and shuts the machine down, and a tuning job launches and tracks dozens of training jobs on its own. For a researcher without a sysadmin, that is often the strongest reason to use the cloud, and it is what most of this lesson is about.
+
 - **Energy efficiency.** The comparison depends on the hardware and on how well it is shared. Two things matter most.
 
     - **Data center overhead.** Not all of the electricity entering a data center reaches its computers. Some goes to cooling and power distribution. Large facilities run by [AWS](https://aws.amazon.com/sustainability/) and by [national HPC centers](https://arxiv.org/html/2506.19019v1) report about 15% on top of what the computing hardware draws, against 60 to 80% for typical enterprise and departmental server rooms ([Uptime Institute, 2025](https://datacenter.uptimeinstitute.com/rs/711-RIA-145/images/2025.Annual.Survey.Report.pdf?version=0)). Cooling matters more as GPUs draw more power. The newest systems, such as NVIDIA's 72-GPU GB200 racks, need liquid cooling, which removes heat with less energy than air but needs plumbing most campus data centers do not have, and the large cloud and HPC facilities are the ones that can afford to install it. These figures describe the building, not the GPUs in it.
 
     - **Hardware utilization.** A GPU does no useful work while idle. A lab's own GPUs sit unused between experiments. A campus cluster does better, because it pools demand across every group at the institution, and the national pools, such as [CHTC](https://chtc.cs.wisc.edu/)'s [OSPool](https://osg-htc.org/services/open_science_pool.html) and the [National Research Platform](https://nationalresearchplatform.org/), do better still, because they pool it across institutions, often at no direct cost to the researcher. Cloud providers pool demand across a larger customer base and across time zones, so a GPU one group releases is running someone else's job minutes later. Providers do not publish enough utilization data for a direct comparison. The research pools get much of the same sharing benefit. What they do not have is the providers' hardware budget, so they adopt each new GPU generation more slowly.
 
-There is no option that is better in every case. Campus and national research computing is often the most economical place to start, above all where it is free to the researcher. The cloud becomes the right tool when a project needs newer hardware, extra capacity for a while, or managed services that would be hard to run locally.
+There is no option that is better in every case. Campus and national research computing is often the most economical place to start, above all where it is free to the researcher. The cloud becomes the right tool when a project needs newer hardware, extra capacity for a while, or the orchestration that a managed service does for you and a cluster leaves to you.
 
 ### S3, the notebook instance, SageMaker and Bedrock
 
