@@ -59,17 +59,12 @@ The workflow is the diagram. Datasets and results live in S3. We work from a sma
 
 ### SageMaker
 
-**Amazon SageMaker runs the ML jobs.** [SageMaker](https://aws.amazon.com/sagemaker/) is AWS's managed machine learning service. Instead of setting up a server for each experiment, you give it a training or inference script, the input data and an instance type. SageMaker starts that instance, runs the script on it with the ML frameworks already installed, saves the results and shuts the instance down when the job finishes. What makes that useful for research:
+**Amazon SageMaker runs the ML jobs.** [SageMaker](https://aws.amazon.com/sagemaker/) is AWS's managed machine learning service. You give it a training or inference script, the input data and an instance type. It starts that instance, runs the script on it with the ML frameworks already installed, saves the results and shuts the instance down when the job finishes. What that gives a researcher:
 
-- **Flexible compute.** Each job picks its own hardware. A small CPU instance such as `ml.m5.large` costs about `$0.115` an hour and suits traditional ML, preprocessing and light inference. A GPU instance such as `ml.g5.xlarge` costs about `$1.41` an hour and suits deep learning and fine-tuning. The supplemental [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has the full list. Prices here and throughout the lesson are us-east-1 on-demand list prices from the AWS price list of 2026-10-16. Other regions are the same or within a few percent.
-
-- **Your own code.** SageMaker provides preconfigured containers for scikit-learn, PyTorch, TensorFlow and Hugging Face. Usually a script and a `requirements.txt` for extra packages are all you supply. A custom Docker container is there for a project that needs its own environment.
-
-- **Parallel training and hyperparameter tuning.** A large training job can run across several instances. A tuning job launches many training jobs with different hyperparameters, collects their results and picks the best configuration. Both come later in the workshop.
-
-- **Simpler job management.** On an HPC or HTC system the researcher writes the batch scripts and coordinates the preprocessing, training and evaluation jobs. SageMaker handles the machine's setup and the job's lifecycle. You launch a job from Python, watch its progress and collect the results without configuring the machine that runs it.
-
-- **Cost tracking.** Every job reports its billable runtime, and resource tags let the bill be split by project. Most research experiments are cheap at this scale. Training a hundred small or medium models, logistic regressions, random forests or small neural networks, on a dataset under 10 GB costs under `$20`.
+- **The hardware fits the job.** A CPU instance such as `ml.m5.large` (`$0.115` an hour) for classical ML and preprocessing, a GPU instance such as `ml.g5.xlarge` (`$1.41` an hour) for deep learning and fine-tuning. The [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has the list. Prices throughout the lesson are us-east-1 on-demand, from the price list of 2026-10-16.
+- **Your own code.** Preconfigured containers for scikit-learn, PyTorch, TensorFlow and Hugging Face. A script and a `requirements.txt` are usually all you supply.
+- **Jobs that manage themselves.** No batch scripts and no queue. A job is launched from Python, and a tuning job launches and tracks many training jobs on its own.
+- **A bill you can read.** Every job reports its billable seconds, and tags split the bill by project. Training a hundred small models on a dataset under 10 GB costs under `$20`.
 
 ### Bedrock
 
