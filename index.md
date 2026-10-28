@@ -47,7 +47,7 @@ Resource management and cost tracking. Cloud resources keep billing after you st
 
 :::::::::::::::::::::::::::::::::::::
 
-Every episode works with the same four pieces. S3 holds the data and every job's outputs. The small notebook instance is where you work and launches everything else. SageMaker jobs do the heavy computation on instances that exist only for the job. Bedrock is called as an API, with no instance at all.
+Every episode works with the same four pieces, which the overview episode introduces.
 
 ![S3 holds data and outputs; a small notebook instance launches SageMaker jobs that read from and write to S3 and end on their own; Bedrock is called as an API per token](fig/aws-ml-ecosystem.svg){alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API"}
 
