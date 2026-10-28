@@ -38,7 +38,7 @@ The CLI, the SDK and the console are the same API. Nothing here is more powerful
 
 1. **Authenticate with `aws sso login` only.** Never `aws configure` with an access key ID and secret. Those are long-lived, and they end up in shell histories and committed files.
 2. **Launch only jobs** (training, processing, tuning), with the same three tags and the same `MaxRuntimeInSeconds` the notebooks always set. Jobs end on their own. **Endpoints, EC2 instances and GPU notebook instances do not**, and the lesson never creates them from the CLI, or at all.
-3. **A refused `create` command is the account's rules, not a fault.** The workshop account carries a guard-rail policy that denies endpoint and EC2 creation, instance types outside the lesson's list, caps over 48 hours, and any job whose three tags are missing, blank or off the `Project` and `Purpose` lists. Do not look for a workaround. The policy is on the notebook role today, which covers every launch from an instance; a laptop CLI runs under the permission set, which gets the same policy when the Identity Center administrator attaches it, and until then these rules are yours to keep by hand from a laptop. (Instructors: the policy and its status are on the *Account preparation checklist* page.)
+3. **A refused `create` command is the account's rules, not a fault.** The workshop account carries a guard-rail policy that denies endpoint and EC2 creation, instance types outside the lesson's list, caps over 48 hours, and any job whose three tags are missing, blank or off the `Project` and `Purpose` lists. Do not look for a workaround. The policy is on the notebook role today, which covers every launch from an instance; a laptop CLI runs under the permission set, which gets the same policy when the Identity Center administrator attaches it, and until then these rules are yours to keep by hand from a laptop. (Instructors: the policy and its status are on the [Account preparation checklist](../instructors/aws-account-prep.md) page.)
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -273,7 +273,7 @@ Estimate first, compare after, as always: this is the same ~4 minutes billable o
 - `aws sagemaker create-notebook-instance` with a GPU type: a GPU notebook is `$60` a day while you are asleep. The optional GPU-notebook episode creates one through the console, where it stays visible, and deletes it the same session.
 - `aws ec2 run-instances`: bare virtual machines have no tags required, no runtime cap and no SageMaker job list to appear in.
 
-On the workshop account all three are denied on the notebook role, as is any instance type outside the lesson's list, any cap over 48 hours and any job whose tags are missing or off the lists; the permission set a laptop uses gets the same policy once the administrator attaches it. The instructor page *Account preparation checklist* has the policy. On your own account, the same denies are an afternoon's work.
+On the workshop account all three are denied on the notebook role, as is any instance type outside the lesson's list, any cap over 48 hours and any job whose tags are missing or off the lists; the permission set a laptop uses gets the same policy once the administrator attaches it. The instructor page [Account preparation checklist](../instructors/aws-account-prep.md) has the policy. On your own account, the same denies are an afternoon's work.
 
 ::::::::::::::::::::::::::::::::::::::::::::::::
 
