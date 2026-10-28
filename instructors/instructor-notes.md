@@ -25,6 +25,8 @@ After that the lesson opens up. Learners pick the episodes closest to their own 
 
 This format worked for the 2026 Marathon class in three hours. It needs participants who are willing to ask questions and work through things on their own, which is the audience the lesson assumes: intermediate, comfortable in Python and Jupyter, knowing what training, tuning, fine-tuning and RAG are, with no AWS experience required. With a group that expects to be walked through every cell, keep the lockstep going through the PyTorch episode and the Bedrock episode and leave the rest as homework.
 
+The 2026 class's feedback said the setup was easy to follow and could have gone faster, and that the bulk of the content was skimmed. The setup page now tells learners to do episodes 1 to 4 before anything else, so the next run can assign episodes 2 to 4 as pre-work, with the instructor checking in the first half hour that everyone has a bucket, a running instance and the cloned repository, and start the live session at the first training episode. That buys the training and RAG episodes the hour the setup took.
+
 ## Cleaning the account with aws-nuke
 
 Hello all! In this document, we will show you how to run an AWS Nuke script within the ML-Marathon Sagemaker server. As you progress through the Sagemaker
@@ -42,7 +44,7 @@ Here are the following steps on how to launch and run the AWS-Nuke Script:
 to live. In this case, we will choose US-East-2 (OHIO) since that's where we
 store our servers.
 3. Open CloudShell from the console toolbar.
-4. Verify exactly which account/role you are using:
+4. Verify which account and role you are using:
 
 ```bash
 aws sts get-caller-identity

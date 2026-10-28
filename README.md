@@ -35,7 +35,7 @@ Every compute-heavy exercise comes with a cost estimate, a runtime limit, and a 
 ## What it does not cover
 
 - **General ML/AI instruction.** The workshop assumes familiarity with the methods and does not teach machine learning, fine-tuning or RAG from scratch.
-- **Deploying models as endpoints.** Serving trained or fine-tuned models behind always-on APIs.
+- **Deploying models as endpoints.** Serving trained or fine-tuned models behind always-on APIs. A model trained elsewhere can still be run here for batch inference, weights in S3 and a Processing job, which the RAG with Processing Jobs episode shows.
 - **Agents and tool use.** LLM applications that call external tools, or agent frameworks such as Bedrock Agents.
 
 ## Repository layout
