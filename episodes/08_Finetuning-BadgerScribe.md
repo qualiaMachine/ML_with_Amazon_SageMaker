@@ -543,7 +543,7 @@ A 7B LoRA still fits one GPU, 22 GB on a 24 GB L4, for about `$0.50`; the full f
 
 ### A code folder for the job
 
-The three scripts the job needs are already on this instance, in the lesson clone. The job cannot use them from there: it runs in a container on another machine, and the only code it gets is the one directory named by `source_dir=` on the estimator, uploaded whole. That directory should hold what the job imports and a `requirements.txt` listing what the container has to install, and nothing else. So make a small `code/` folder here with copies of the three files, rather than pointing `source_dir` at the lesson's `scripts/` directory, which would upload every script in the lesson and need a requirements file written into the repository:
+The three scripts the job needs are already on this instance, in the lesson clone. The job cannot use them from there: it runs in a container on another machine, and the only code it gets is the one directory named by `source_dir=` on the estimator, uploaded whole. That directory should hold what the job imports and a `requirements.txt` listing what the container has to install, and nothing else. So make a small `code/` folder here with copies of the three files, instead of pointing `source_dir` at the lesson's `scripts/` directory, which would upload every script in the lesson and need a requirements file written into the repository:
 
 ```python
 import shutil
@@ -608,7 +608,7 @@ def make_job_tags(purpose: str):   # one of: Storage, Notebook, Training, Tuning
         {"Key": "Purpose", "Value": purpose},
     ])
 
-make_job_tags("Training");   # fails here, with the fix, rather than at the launch; the semicolon keeps Jupyter from also displaying the list
+make_job_tags("Training");   # fails here, with the fix, and not at the launch; the semicolon keeps Jupyter from also displaying the list
 ```
 
 ## Step 1: Launch the LoRA fine-tune
@@ -822,7 +822,7 @@ print(json.dumps(summary, indent=2))
 Both evaluations ran on the same 15 pages, so the difference is the LoRA fine-tune and nothing else.
 
 ```python
-before = pd.read_csv(os.path.join(run_dir, "eval_before.csv"), keep_default_na=False)   # empty predictions stay "" rather than NaN
+before = pd.read_csv(os.path.join(run_dir, "eval_before.csv"), keep_default_na=False)   # empty predictions stay "", not NaN
 after = pd.read_csv(os.path.join(run_dir, "eval_after.csv"), keep_default_na=False)
 
 # cer = character error rate per page: edits / characters in the reference, lower is better
