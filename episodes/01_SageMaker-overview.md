@@ -73,13 +73,9 @@ The notebook instance is not the only way to drive AWS. Everything it does can b
 **Amazon Bedrock serves hosted models.** Sometimes there is no model to train or host. You want to send a model a prompt and get a response. [Bedrock](https://aws.amazon.com/bedrock/) gives API access to models AWS already hosts, with no GPU instance to provision. What that means in practice:
 
 - **Nothing to manage.** You call the model through an API and pay for what you use, by the number of input and output tokens. There is no instance to size, start or shut down.
-
 - **A catalog of models.** Bedrock hosts models from Anthropic, DeepSeek, Amazon and others, for text generation and for embeddings. You pick one by its ID, with nothing to download or deploy.
-
 - **Cheap for small experiments.** Embedding a few thousand document chunks and answering a few dozen questions costs cents. The RAG episodes build the pipeline on Bedrock first.
-
 - **Only the catalog.** Bedrock serves only the models in its catalog. For a model it does not carry, or for control of how a model is served, SageMaker is the alternative. The RAG episodes make that move, from Bedrock to a model you run yourself.
-
 - **Cost attribution.** Bedrock calls carry no resource tags by default. The lesson routes them through tagged application inference profiles so they show up on the bill under the right project.
 
 :::::::::::::::::::::::::::::::::::::
