@@ -91,15 +91,15 @@ A SageMaker training or processing job reads only from buckets in its own region
 
 **Bucket Versioning**: leave **Disable** (the default). Versioning keeps every overwritten copy and raises storage costs; it is useful for datasets that change over time, not for this workshop.
 
-**Tags**: tags are how the bill is broken down by project, person and purpose. Add these three keys, spelled exactly (they are the account's approved cost-allocation keys, see [KB 72454](https://kb.wisc.edu/72454)), and put the same three on every resource you create in this lesson.
+**Tags**: tags are how the bill is broken down by project, person and purpose. Add these three keys, spelled exactly as shown (they are the account's approved cost-allocation keys, see [KB 72454](https://kb.wisc.edu/72454)), and use the same three on every resource you create in this lesson.
 
-- **Project**: your challenge, one of `WattBot2026`, `BadgerScribe`, `BadgerCode`, `BrainDecoding`, `PoisonedWell`, `SnapshotWI`, spelled exactly like that, or `SinkOrSwim`, the workshop's own project, if you are not on a challenge yet.
+- **Project**: your challenge, one of `WattBot2026`, `BadgerScribe`, `BadgerCode`, `BrainDecoding`, `PoisonedWell`, `SnapshotWI`, or `SinkOrSwim`, the workshop's own project, if you are not on a challenge yet.
 - **Name**: your last and first name run together, e.g. `DoeJohn`
-- **Purpose**: one of five fixed values, here `Storage`. The five let the bill be summed by kind of work. Which job it was is already in the job's name.
+- **Purpose**: one of five fixed values, here `Storage`
 
-Tag values are case-sensitive. We use capitalised words with no spaces, and the same spelling on every resource, because `SinkOrSwim` and `sinkorswim` would be two separate rows in Cost Explorer. (The bucket name is lowercase because S3 requires it. Bucket names are not tags.)
+Tag values are case-sensitive, so use capitalised words with no spaces and the same spelling everywhere. `SinkOrSwim` and `sinkorswim` would be two separate rows in Cost Explorer. (The bucket name is lowercase because S3 requires it. Bucket names are not tags.)
 
-The account checks these tags on every job and notebook instance, and refuses a launch whose tags are missing, blank or off the lists, with an `AccessDenied ... explicit deny` message that does not say which tag. It does not check them on buckets, so the bucket is on you. A mistyped tag here is not refused, and the storage shows up on the bill as nobody's. The training episode checks the tags in the notebook before each launch and names the problem; [If a Launch Is Refused](../learners/refused-launch.md) is the full list of rules and fixes, for later. The rules are not part of SageMaker. The instructor sets them from the account's administrator view, following the [AWS account preparation](../instructors/aws-account-prep.md) page.
+The account enforces these tags on every job and notebook instance. A launch with a tag missing, blank or off the lists is refused with `AccessDenied ... explicit deny`, and the message does not say which tag. Buckets are not checked, so take care here. A bucket with a wrong tag is created anyway, and its storage cannot be attributed on the bill. The training episode checks the tags in the notebook before each launch and names the problem, and [If a Launch Is Refused](../learners/refused-launch.md) has the full list of rules and fixes. The rules are not part of SageMaker. The instructor sets them up following the [AWS account preparation](../instructors/aws-account-prep.md) page.
 
 | `Purpose` | Used for |
 |---|---|
