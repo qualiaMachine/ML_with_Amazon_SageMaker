@@ -29,7 +29,7 @@ Cloud computing means renting compute as needed instead of buying and maintainin
 
 - **Control and data.** Local hardware gives you control over the software stack, the network and where the data sits, with no quotas and no transfer charges. In the cloud you work within account permissions and service quotas, data moved in or out crosses the network and may be charged, and sensitive data needs a governance check before it leaves campus. Cost needs attention too. An idle rented GPU costs the same as a busy one, so every job in this lesson has a runtime cap, and every resource is stopped when the work is done.
 
-- **Job orchestration.** On a cluster the researcher does the plumbing. You write the batch scripts, load the right modules or build the environment, wait in the queue, and stitch preprocessing, training, evaluation and tuning together as separate submissions, with a scheduler that knows nothing about any of them. A managed service does that part. In SageMaker a job is a script, a container with the framework installed, an instance type and the data's location, launched from Python. The service starts the machine, runs the script, saves the outputs and shuts the machine down, and a tuning job launches and tracks dozens of training jobs on its own. For a researcher without a sysadmin, that is often the strongest reason to use the cloud, and it is what most of this lesson is about.
+- **Job orchestration.** On a cluster the researcher does the plumbing. You write the batch scripts, load the right modules or build the environment, wait in the queue, and stitch preprocessing, training, evaluation and tuning together as separate submissions, with a scheduler that knows nothing about any of them. A managed service does that part. In SageMaker a job is a script, a container with the framework installed, an instance type and the data's location, launched from Python. The service starts the machine, runs the script, saves the outputs and shuts the machine down, and a hyperparameter tuning job launches and tracks dozens of training jobs on its own. For a researcher without a sysadmin, that is often the strongest reason to use the cloud, and it is what most of this lesson is about.
 
 - **Energy efficiency.** The comparison depends on the hardware and on how well it is shared. Two things matter most.
 
@@ -63,7 +63,7 @@ The workflow is the diagram. Datasets and results live in S3. We work from a sma
 
 - **The hardware fits the job.** A CPU instance such as `ml.m5.large` (`$0.115` an hour) for classical ML and preprocessing, a GPU instance such as `ml.g5.xlarge` (`$1.41` an hour) for deep learning and fine-tuning. The [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page has the list. Prices throughout the lesson are us-east-1 on-demand, from the price list of 2026-10-16.
 - **Your own code.** Preconfigured containers for scikit-learn, PyTorch, TensorFlow and Hugging Face. A script and a `requirements.txt` are usually all you supply.
-- **Jobs that manage themselves.** No batch scripts and no queue. A job is launched from Python, and a tuning job launches and tracks many training jobs on its own.
+- **Jobs that manage themselves.** No batch scripts and no queue. A job is launched from Python, and a hyperparameter tuning job launches and tracks many training jobs on its own.
 - **A bill you can read.** Every job reports its billable seconds, and tags split the bill by project. Training a hundred small models on a dataset under 10 GB costs under `$20`.
 
 ### Bedrock
