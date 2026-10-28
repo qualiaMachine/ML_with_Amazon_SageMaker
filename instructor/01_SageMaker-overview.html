@@ -490,28 +490,31 @@ a runtime cap.</li>
 <li>
 <strong>Efficiency comes from sharing.</strong> Two things decide
 the energy per unit of useful work: how much of the facility’s power
-reaches the hardware, and how much of the time the hardware is busy. On
-the first, power usage effectiveness (PUE, total facility power over IT
-power, 1.0 is perfect) tracks facility scale: AWS reports a global
-average of <a href="https://aws.amazon.com/sustainability/" class="external-link">1.14 for
-2025</a>, a <a href="https://arxiv.org/html/2506.19019v1" class="external-link">2025 survey of
-US research HPC</a> puts TACC at about 1.15 and MGHPCC near 1.14, while
-the <a href="https://datacenter.uptimeinstitute.com/rs/711-RIA-145/images/2025.Annual.Survey.Report.pdf?version=0" class="external-link">Uptime
-Institute’s 2025 survey</a> puts enterprise and colocation data centers
-at 1.58-1.80, where a departmental server room also sits. On the second,
-a GPU is only efficient while it is busy, and the wider the pool of
-users, the busier it stays. A lab’s own GPUs idle whenever the lab is
-not training. A campus pool fills that idle time with other groups’
-jobs, which is what UW-Madison’s <a href="https://chtc.cs.wisc.edu/" class="external-link">Center for High Throughput
-Computing</a> (CHTC) does, and national pools like the <a href="https://osg-htc.org/services/open_science_pool.html" class="external-link">OSPool</a>
-and the <a href="https://nationalresearchplatform.org/" class="external-link">National
-Research Platform</a> (NRP) do the same across universities, often at no
-cost to a research group. A cloud provider pools demand across the world
-and across time zones, so a GPU one group releases is running someone
-else’s job minutes later. Providers do not publish GPU utilization, so
-this part is reasoning, not data, but no single institution can smooth
-demand the way a global pool can. (PUE figures are self-reported and
-measure the building, not the GPUs in it.)</li>
+reaches the hardware, and how much of the time the hardware is busy.
+<ul><li>
+<strong>How much of the power reaches the hardware.</strong> The
+rest goes to cooling and power distribution. A large data center, <a href="https://aws.amazon.com/sustainability/" class="external-link">AWS’s</a> or a <a href="https://arxiv.org/html/2506.19019v1" class="external-link">national HPC center’s</a>,
+spends about 15% on top of what the hardware draws. A typical enterprise
+or departmental server room spends 60 to 80% on top (<a href="https://datacenter.uptimeinstitute.com/rs/711-RIA-145/images/2025.Annual.Survey.Report.pdf?version=0" class="external-link">Uptime
+Institute, 2025</a>). The liquid cooling the newest GPU racks need is
+part of how the large centers keep that overhead low. These figures are
+self-reported and measure the building, not the GPUs in it.</li>
+<li>
+<strong>How much of the time the hardware is busy.</strong> A GPU is
+only efficient while it is busy. A lab’s own GPUs idle whenever the lab
+is not training. A single institution’s cluster does better, because it
+pools demand across every group on campus, and the national pools (like
+<a href="https://chtc.cs.wisc.edu/" class="external-link">CHTC</a>‘s <a href="https://osg-htc.org/services/open_science_pool.html" class="external-link">OSPool</a>
+and the <a href="https://nationalresearchplatform.org/" class="external-link">NRP</a>, often
+free for a research group) do better still, because they pool it across
+institutions. At that scale they are close to what a cloud provider
+does, which is to pool demand across the world and across time zones, so
+a GPU one group releases is running someone else’s job minutes later.
+Providers do not publish GPU utilization, so this part is reasoning, not
+data. What the research pools do not have is the cloud providers’
+budget, so their hardware is a generation or two behind the newest the
+cloud rents.</li>
+</ul></li>
 </ul></div>
 <div class="section level3">
 <h3 id="s3-the-notebook-instance-sagemaker-and-bedrock">S3, the notebook instance, SageMaker and Bedrock<a class="anchor" aria-label="anchor" href="#s3-the-notebook-instance-sagemaker-and-bedrock"></a></h3>
