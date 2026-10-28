@@ -468,7 +468,12 @@ cluster or lab server is bought once, maintained by someone, and used
 for five or more years with whatever GPUs were current at purchase.
 Cloud providers offer each new generation soon after release (Blackwell
 B200 and GB200 today, Vera Rubin announced for cloud deployment in
-2026), billed per second and only while a job runs. The largest systems
+2026), billed per second and only while a job runs. Each generation is
+faster, has more memory and uses less energy per unit of work. The B200
+of 2024 does about seven times the bf16 arithmetic of the A100 of 2020
+on two and a half times the power, with more than twice the memory, so
+the energy per unit of training work roughly halved with each of the two
+generations between them (NVIDIA data sheets). The largest systems
 (72-GPU GB200 racks) are liquid-cooled; most campus data centers are
 air-cooled and cannot host them without a facility upgrade. Owned
 hardware costs the same busy or idle, so for GPUs that stay busy owning
@@ -492,15 +497,19 @@ US research HPC</a> puts TACC at about 1.15 and MGHPCC near 1.14, while
 the <a href="https://datacenter.uptimeinstitute.com/rs/711-RIA-145/images/2025.Annual.Survey.Report.pdf?version=0" class="external-link">Uptime
 Institute’s 2025 survey</a> puts enterprise and colocation data centers
 at 1.58-1.80, where a departmental server room also sits. On the second,
-a GPU is only efficient while it is busy. A lab’s own GPUs idle whenever
-the lab is not training; a campus cluster pools demand across a
-university and keeps its hardware busier, and national pools go further
-by sharing across institutions<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>; a cloud provider pools demand across the
-world and across time zones, so a GPU that one group releases is running
-someone else’s job minutes later. Providers do not publish GPU
-utilization, so this part is reasoning, not data, but a single
-institution cannot smooth demand the way a global pool can. (PUE figures
-are self-reported and measure the building, not the GPUs in it.)</li>
+a GPU is only efficient while it is busy, and the wider the pool of
+users, the busier it stays. A lab’s own GPUs idle whenever the lab is
+not training. A campus pool fills that idle time with other groups’
+jobs, which is what UW-Madison’s <a href="https://chtc.cs.wisc.edu/" class="external-link">Center for High Throughput
+Computing</a> (CHTC) does, and national pools like the <a href="https://osg-htc.org/services/open_science_pool.html" class="external-link">OSPool</a>
+and the <a href="https://nationalresearchplatform.org/" class="external-link">National
+Research Platform</a> (NRP) do the same across universities, often at no
+cost to a research group. A cloud provider pools demand across the world
+and across time zones, so a GPU one group releases is running someone
+else’s job minutes later. Providers do not publish GPU utilization, so
+this part is reasoning, not data, but no single institution can smooth
+demand the way a global pool can. (PUE figures are self-reported and
+measure the building, not the GPUs in it.)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="s3-the-notebook-instance-sagemaker-and-bedrock">S3, the notebook instance, SageMaker and Bedrock<a class="anchor" aria-label="anchor" href="#s3-the-notebook-instance-sagemaker-and-bedrock"></a></h3>
@@ -641,16 +650,6 @@ Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use.
  -->
 </div>
-<div class="footnotes footnotes-end-of-document">
-<hr><ol><li id="fn1"><p>Research computing has done this for years. UW-Madison’s
-<a href="https://chtc.cs.wisc.edu/" class="external-link">Center for High Throughput
-Computing</a> (CHTC) pools campus machines and fills their idle time
-with other groups’ jobs, and the <a href="https://osg-htc.org/services/open_science_pool.html" class="external-link">OSPool</a> it
-operates for the NSF does the same across institutions. The <a href="https://nationalresearchplatform.org/" class="external-link">National Research
-Platform</a> (NRP) shares GPUs across universities the same way. These
-are the public counterparts of what the cloud does, and often free for a
-research group.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-</ol></div>
 
 
 

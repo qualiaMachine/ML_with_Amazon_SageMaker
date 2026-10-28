@@ -520,11 +520,10 @@ needed.</p>
 <p>The cloud does cost money, but far less than most researchers assume,
 and for most research projects it is cheap. Run as written, the whole
 workshop, training jobs, a tuning job, a LoRA fine-tune on a GPU and two
-RAG pipelines, costs each learner a few dollars. What makes that true is
-habit, not luck. Every episode tags its resources, caps job runtime,
-estimates the cost before launching, checks the bill after, and cleans
-up, and the final episode covers monitoring, cleanup and the rules a
-shared account can enforce.</p>
+RAG pipelines, costs each learner a few dollars. Every episode tags its
+resources, caps job runtime, estimates the cost before launching, checks
+the bill after, and cleans up, and the final episode covers monitoring,
+cleanup and the rules a shared account can enforce.</p>
 </div>
 <div class="section level3">
 <h3 id="what-this-workshop-does-not-cover">What This Workshop Does Not Cover<a class="anchor" aria-label="anchor" href="#what-this-workshop-does-not-cover"></a></h3>
@@ -676,8 +675,8 @@ to your own bucket.</li>
 <h3 class="callout-title">Instructors, before the workshop</h3>
 <div class="callout-content">
 <p>The rules above are not part of SageMaker. They are policies you
-attach to the account, and the shared data bucket does not fill itself.
-Work through the instructor pages before the first session: the <a href="aws-account-prep.html">Account preparation checklist</a> sets the
+attach to the account, and the shared data bucket has to be staged. Work
+through the instructor pages before the first session: the <a href="aws-account-prep.html">Account preparation checklist</a> sets the
 quotas, Bedrock model access, the cost tags and the guard rails, and the
 <a href="shared-data-bucket.html">Shared data bucket</a> page stages the
 datasets and model weights the fine-tuning and RAG episodes read. The <a href="instructor-notes.html">Instructor Notes</a> index has the rest,
