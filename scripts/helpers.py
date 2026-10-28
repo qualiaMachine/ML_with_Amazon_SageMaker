@@ -607,6 +607,32 @@ def explain_refusal(minutes=60, region=None):
     return found
 
 
+def estimate_tuning_cost(train_minutes_per_job, price_per_hour, max_jobs, max_parallel_jobs=2, startup_minutes=2):
+    """Estimate a hyperparameter tuning job's bill before launching it, from the parameters the tuner takes.
+
+    train_minutes_per_job: the billable minutes one child job spends after startup (training, evaluation, model
+    upload). For a small model, time a smoke test and scale it, as the PyTorch episode did; for a large one,
+    estimate_training_cost gives it. The tuner keeps each of its max_parallel_jobs instances between child jobs,
+    so the startup (container pull and data download, startup_minutes) is paid once per parallel slot, not once
+    per job, and every later child job on a slot bills only its own minutes. The bill is the sum over child jobs;
+    the tuning job itself is free. Wall-clock is the startup plus the rounds of parallel jobs, before the unbilled
+    minute or two of provisioning.
+    """
+    slots = min(max_parallel_jobs, max_jobs)
+    rounds = -(-max_jobs // slots)                                   # ceiling division
+    billable_minutes = slots * startup_minutes + max_jobs * train_minutes_per_job
+    wall_minutes = startup_minutes + rounds * train_minutes_per_job
+    cost = billable_minutes / 60 * price_per_hour
+    max_run_seconds = int(2 * (startup_minutes + train_minutes_per_job) * 60)   # per child job, twice the estimate
+    print(f"child jobs:   {max_jobs} jobs, {slots} at a time, {rounds} round(s)")
+    print(f"billable:     {billable_minutes:.0f} min = {slots} x {startup_minutes} min startup + {max_jobs} x {train_minutes_per_job} min per job")
+    print(f"cost:         ~${cost:.2f} at ${price_per_hour}/h")
+    print(f"wall-clock:   ~{wall_minutes:.0f} min, plus a minute or two of provisioning")
+    print(f"max_run:      {max_run_seconds} s per child job")
+    return {"billable_minutes": billable_minutes, "cost": round(cost, 3), "wall_minutes": wall_minutes,
+            "rounds": rounds, "max_run_seconds": max_run_seconds}
+
+
 def estimate_parallel_speedup(params_billions, tokens_per_step, instance_type, instance_count=1, method="full",
                               trainable_fraction=None, utilization=0.25):
     """Estimate what data parallelism buys for one training step: compute time per device, gradient-exchange
