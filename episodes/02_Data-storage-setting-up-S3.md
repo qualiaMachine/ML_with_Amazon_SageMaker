@@ -91,17 +91,15 @@ A SageMaker training or processing job reads only from buckets in its own region
 
 **Bucket Versioning**: leave **Disable** (the default). Versioning keeps every overwritten copy and raises storage costs; it is useful for datasets that change over time, not for this workshop.
 
-**Tags**: tags are how the bill is broken down by project, person and purpose, so fill this section in. Add the following three keys, spelled exactly (they are the account's approved cost-allocation keys, see [KB 72454](https://kb.wisc.edu/72454)). You will put the same three keys on every resource you create in this lesson. Nothing checks them on a bucket, and the account does check them on every job and notebook instance, so the bucket is the one place where the convention is on you.
+**Tags**: tags are how the bill is broken down by project, person and purpose. Add these three keys, spelled exactly (they are the account's approved cost-allocation keys, see [KB 72454](https://kb.wisc.edu/72454)), and put the same three on every resource you create in this lesson.
 
-- **Project**: your challenge, one of `WattBot2026`, `BadgerScribe`, `BadgerCode`, `BrainDecoding`, `PoisonedWell`, `SnapshotWI`, spelled exactly like that, or `SinkOrSwim`, the workshop's own project, if you are not on a challenge yet. A job tagged with any other Project value is refused, so a typo there is caught at the first launch, not on the bill. On the bucket a typo goes through and shows up as an unallocated line.
+- **Project**: your challenge, one of `WattBot2026`, `BadgerScribe`, `BadgerCode`, `BrainDecoding`, `PoisonedWell`, `SnapshotWI`, spelled exactly like that, or `SinkOrSwim`, the workshop's own project, if you are not on a challenge yet.
 - **Name**: your last and first name run together, e.g. `DoeJohn`
-- **Purpose**: one of five fixed values, here `Storage`
+- **Purpose**: one of five fixed values, here `Storage`. The five let the bill be summed by kind of work. Which job it was is already in the job's name.
 
-AWS allows tag values of up to 256 characters made of letters, digits, spaces and `+ - = . _ : / @`, and they are case-sensitive. We use capitalised words with no spaces, and the same spelling on every resource. `SinkOrSwim` and `sinkorswim` would be separate rows in Cost Explorer, and the account accepts only the first: the `Project` and `Purpose` lists are case-sensitive, so a job tagged `sinkorswim` or `training` is refused. (The bucket name is lowercase because S3 requires it. Bucket names are not tags.)
+Tag values are case-sensitive. We use capitalised words with no spaces, and the same spelling on every resource, because `SinkOrSwim` and `sinkorswim` would be two separate rows in Cost Explorer. (The bucket name is lowercase because S3 requires it. Bucket names are not tags.)
 
-`Purpose` takes one of five values, so that the bill can be summed by kind of work. Which job it was is already in the job's name.
-
-On jobs and notebook instances these lists are enforced. The account refuses a launch whose tags are missing, blank or off the lists, and the refusal says only `AccessDenied ... explicit deny`, not which tag. The training episode checks the tags in the notebook before each launch and names the problem; [If a Launch Is Refused](../learners/refused-launch.md) is the full list of rules and fixes, for later. The rules are not part of SageMaker: the instructor sets them from the account's administrator view, and an instructor running this lesson on a new account sets them up following the [AWS account preparation](../instructors/aws-account-prep.md) page before class.
+The account checks these tags on every job and notebook instance, and refuses a launch whose tags are missing, blank or off the lists, with an `AccessDenied ... explicit deny` message that does not say which tag. It does not check them on buckets, so the bucket is on you. A mistyped tag here is not refused, and the storage shows up on the bill as nobody's. The training episode checks the tags in the notebook before each launch and names the problem; [If a Launch Is Refused](../learners/refused-launch.md) is the full list of rules and fixes, for later. The rules are not part of SageMaker. The instructor sets them from the account's administrator view, following the [AWS account preparation](../instructors/aws-account-prep.md) page.
 
 | `Purpose` | Used for |
 |---|---|
