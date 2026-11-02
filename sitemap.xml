@@ -103,6 +103,9 @@
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/LoRA-finetuning-on-a-free-GPU.html</loc>
+  </url>
+  <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/RAG-Bedrock.html</loc>
   </url>
   <url>
@@ -254,6 +257,9 @@
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/LoRA-finetuning-on-a-free-GPU.html</loc>
   </url>
   <url>
     <loc>https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/RAG-Bedrock.html</loc>
