@@ -512,7 +512,7 @@
         
 <section id="aio-01_SageMaker-overview"><p>Content from <a href="01_SageMaker-overview.html">Overview: ML on AWS</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/01_SageMaker-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 15 minutes</p>
@@ -641,9 +641,8 @@ to you.</p>
 </h3>
 <p>AWS offers many services. This workshop uses four pieces that work
 together.</p>
-<figure><img src="../fig/aws-ml-ecosystem.svg" alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API" class="figure mx-auto d-block"><div class="figcaption">S3 holds data and outputs; a small notebook
-instance launches SageMaker jobs that read from and write to S3 and end
-on their own; Bedrock is called as an API per token</div>
+<figure><img src="../fig/aws-ml-ecosystem.svg" alt="Diagram of the lesson's AWS components: S3 buckets at the top, a notebook instance on the left launching SageMaker training, tuning and processing jobs in the center, and Bedrock on the right called as an API" class="figure mx-auto d-block"><div class="figcaption"><em>The four pieces the lesson uses, and what
+moves between them</em></div>
 </figure><p>The workflow is the diagram. Datasets and results live in S3. We work
 from a small JupyterLab notebook instance. SageMaker launches the
 compute-heavy jobs on separate machines. For tasks a model AWS already
@@ -767,11 +766,10 @@ runs models AWS hosts, with no infrastructure of yours underneath.</p>
 </h3>
 <p>Through the workshop, code is written in JupyterLab, datasets and
 results go to S3, training and other heavy jobs go to SageMaker, and
-Bedrock is called when a hosted model is enough.</p>
-<p>None of this needs the notebook instance. Everything here can be done
-from Python on your own computer or from the AWS command line, and the
-optional <a href="14_CLI-equivalents.html">The Same Jobs from the
-Terminal</a> episode shows how.</p>
+Bedrock is called when a hosted model is enough. None of this needs the
+notebook instance. Everything here can be done from Python on your own
+computer or from the AWS command line, and the optional <a href="14_CLI-equivalents.html">The Same Jobs from the Terminal</a>
+episode shows how.</p>
 <div id="keypoints1" class="callout keypoints">
 <div class="callout-square">
 <i class="callout-icon" data-feather="key"></i>
@@ -801,7 +799,7 @@ any links that you are not going to use.
  -->
 </div></section><section id="aio-02_Data-storage-setting-up-S3"><p>Content from <a href="02_Data-storage-setting-up-S3.html">Data Storage: Setting up S3</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/02_Data-storage-setting-up-S3.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 20 minutes</p>
@@ -1093,7 +1091,7 @@ of SageMaker. The instructor sets them up following the <a href="aws-account-pre
 </tr>
 </tbody>
 </table>
-<figure><img src="../fig/bucket_tags2.png" alt="Screenshot showing required tags for an S3 bucket" class="figure mx-auto d-block"><div class="figcaption">Example of Tags for an S3 Bucket</div>
+<figure><img src="../fig/bucket_tags2.png" alt="Screenshot showing required tags for an S3 bucket" class="figure mx-auto d-block"><div class="figcaption"><em>Example of Tags for an S3 Bucket</em></div>
 </figure><div id="why-these-three-keys-and-why-they-must-be-spelled-exactly" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1423,7 +1421,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -1525,13 +1523,13 @@ per 1,000 = <code>$0.00004</code><br>
 </li>
 </ol>
 <p>These costs assume no request charges beyond the <code>GET</code>s
-for training.</p>
-<p>The <code>GET</code> line is the same four-thousandths of a cent at
-every size: request costs depend on how many objects you touch, not how
-big they are. The download line is about 80% of the total at every size,
-since storage and transfer both scale with gigabytes: moving a dataset
-out of AWS once costs about four times what keeping it there for a month
-does, so keep large data in the region and bring code to it.</p>
+for training. The <code>GET</code> line is the same four-thousandths of
+a cent at every size: request costs depend on how many objects you
+touch, not how big they are. The download line is about 80% of the total
+at every size, since storage and transfer both scale with gigabytes:
+moving a dataset out of AWS once costs about four times what keeping it
+there for a month does, so keep large data in the region and bring code
+to it.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>
 <strong>Wrong region, 100 GB</strong>: 100 reads x 100 GB x
@@ -1601,7 +1599,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-03_SageMaker-notebooks-as-controllers"><p>Content from <a href="03_SageMaker-notebooks-as-controllers.html">Notebooks as Controllers</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/03_SageMaker-notebooks-as-controllers.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 20 minutes</p>
@@ -1669,9 +1667,8 @@ SDK</strong> to launch larger instances for model training, batch
 processing, and hyperparameter tuning. Those instances start, run your
 script, write their results to S3, and shut themselves down, so you pay
 for powerful hardware only for the minutes a job needs it.</p>
-<figure><img src="../fig/aws-ml-ecosystem.svg" alt="Diagram from the overview episode: S3 buckets at the top, the notebook instance on the left launching SageMaker training, tuning and processing jobs, and Bedrock on the right" class="figure mx-auto d-block"><div class="figcaption">The notebook instance launches SageMaker jobs
-that read from and write to S3 and end on their own, and calls Bedrock
-as an API</div>
+<figure><img src="../fig/aws-ml-ecosystem.svg" alt="Diagram from the overview episode: S3 buckets at the top, the notebook instance on the left launching SageMaker training, tuning and processing jobs, and Bedrock on the right" class="figure mx-auto d-block"><div class="figcaption"><em>The notebook instance launches jobs and
+calls Bedrock; S3 holds the data and the outputs</em></div>
 </figure><p>The notebook is the box on the left of the diagram from the overview
 episode. Everything else in the picture is launched or called from it,
 and every later episode uses this same instance.</p>
@@ -1832,7 +1829,7 @@ itself</td>
 launch from this instance, and a value off them is refused at the first
 launch; the training episode shows what that looks like and how to check
 first.</p>
-<figure><img src="../fig/notebook_tags.PNG" alt="Screenshot showing the three required tags on a SageMaker notebook instance" class="figure mx-auto d-block"><div class="figcaption">Tag Setup Example</div>
+<figure><img src="../fig/notebook_tags.PNG" alt="Screenshot showing the three required tags on a SageMaker notebook instance" class="figure mx-auto d-block"><div class="figcaption"><em>Tag Setup Example</em></div>
 </figure>
 </li>
 <li><p>Click <strong>Create notebook instance</strong>.</p></li>
@@ -2880,7 +2877,7 @@ commit it, push with your PAT, and verify the change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -2935,7 +2932,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-06_Training-models-in-SageMaker-notebooks"><p>Content from <a href="06_Training-models-in-SageMaker-notebooks.html">Training Models in SageMaker: Intro</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/06_Training-models-in-SageMaker-notebooks.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 65 minutes</p>
@@ -4098,7 +4095,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-07_Training-models-in-SageMaker-notebooks-part2"><p>Content from <a href="07_Training-models-in-SageMaker-notebooks-part2.html">Training Models in SageMaker: PyTorch Example</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/07_Training-models-in-SageMaker-notebooks-part2.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 50 minutes</p>
@@ -4631,12 +4628,12 @@ to use.</p>
 <span id="cb17-14"><a href="#cb17-14" tabindex="-1" aria-label="code-block-17-14"></a>prices <span class="op">=</span> {<span class="st">"ml.m5.large"</span>: <span class="fl">0.115</span>, <span class="st">"ml.g4dn.xlarge"</span>: <span class="fl">0.74</span>}</span></code></pre>
 </div>
 <p>Set up the estimator for a longer run: the epochs, the instance,
-where the output goes, and a two-hour <code>max_run</code> cap.</p>
-<p>If the launch is refused with an <code>AccessDeniedException</code>
-ending in <code>explicit deny</code>, the account’s checks are the
-cause: a missing tag, an instance type outside the lesson’s list, or a
-resource kind the lesson never creates; the first training episode’s
-callout <em>If the launch is refused</em> says what to look at.</p>
+where the output goes, and a two-hour <code>max_run</code> cap. If the
+launch is refused with an <code>AccessDeniedException</code> ending in
+<code>explicit deny</code>, the account’s checks are the cause: a
+missing tag, an instance type outside the lesson’s list, or a resource
+kind the lesson never creates; the first training episode’s callout
+<em>If the launch is refused</em> says what to look at.</p>
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -4854,10 +4851,9 @@ the setup for each kind of job.</p>
 <div class="section level3">
 <h3 id="what-instance_count2-does-on-its-own">What <code>instance_count=2</code> does on its own<a class="anchor" aria-label="anchor" href="#what-instance_count2-does-on-its-own"></a>
 </h3>
-<figure><img src="../fig/instance-count-vs-data-parallel.svg" alt="Two panels comparing instance_count=2 without distribution, where each instance trains on the full data, with data parallelism, where batches are split and gradients synced" class="figure mx-auto d-block"><div class="figcaption">Left: two instances each receive the full
-dataset and run the whole script independently, same model and twice the
-bill. Right: data parallelism splits the batches across instances and
-syncs gradients each step.</div>
+<figure><img src="../fig/instance-count-vs-data-parallel.svg" alt="Two panels comparing instance_count=2 without distribution, where each instance trains on the full data, with data parallelism, where batches are split and gradients synced" class="figure mx-auto d-block"><div class="figcaption"><em>Two instances without a distribution
+strategy run the whole job twice; with data parallelism they split the
+batches and share gradients</em></div>
 </figure><p>Setting <code>instance_count=2</code> on an estimator makes SageMaker
 start two instances and run <strong>the full training script on each of
 them</strong>. Nothing is split:</p>
@@ -5185,7 +5181,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-08_Finetuning-BadgerScribe"><p>Content from <a href="08_Finetuning-BadgerScribe.html">Fine-tuning a Vision-Language Model with Training Jobs</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/08_Finetuning-BadgerScribe.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 180 minutes</p>
@@ -5274,17 +5270,11 @@ inference cost (<a href="https://arxiv.org/abs/2509.19768" class="external-link"
 Rather than using an increasingly large general-purpose model, they
 trained a smaller one to become particularly good at the task they cared
 about. The same pattern shows up in other fields:</p>
-<figure><img src="../fig/specialists-vs-large-models.png" alt="Dot plot of benchmark scores for three task-specific models against a much larger general model on the same benchmark; the specialist is ahead in each row by 6.5, 2.2 and 1.2 points" class="figure mx-auto d-block"><div class="figcaption">Three research tasks where a small specialist
-model scores above a much larger general one: CHURRO (3B) over Gemini
-2.5 Pro on historical handwriting, Goedel-Prover-V2 (8B) over
-DeepSeek-Prover-V2 on formal proofs, MedGemma (27B) over GPT-4o on
-medical questions</div>
-</figure><p>Sources: <a href="https://arxiv.org/abs/2509.19768" class="external-link">CHURRO, EMNLP
-2025</a>; <a href="https://arxiv.org/abs/2508.03613" class="external-link">Goedel-Prover-V2,
-ICLR 2026</a>; <a href="https://arxiv.org/abs/2507.05201" class="external-link">MedGemma
-technical report, 2025</a>. Scores are as reported by each model’s
-authors.</p>
-<p>That’s the approach we’ll explore in this episode. We’ll take CHURRO,
+<figure><img src="../fig/specialists-vs-large-models.png" alt="Dot plot of benchmark scores for three task-specific models against a much larger general model on the same benchmark; the specialist is ahead in each row by 6.5, 2.2 and 1.2 points" class="figure mx-auto d-block"><div class="figcaption"><em>Three specialist models against much larger
+general ones, on each task’s own benchmark. Sources: <a href="https://arxiv.org/abs/2509.19768" class="external-link">CHURRO, EMNLP 2025</a>; <a href="https://arxiv.org/abs/2508.03613" class="external-link">Goedel-Prover-V2, ICLR 2026</a>;
+<a href="https://arxiv.org/abs/2507.05201" class="external-link">MedGemma technical report,
+2025</a>. Scores as reported by each model’s authors.</em></div>
+</figure><p>That’s the approach we’ll explore in this episode. We’ll take CHURRO,
 which already specializes in historical documents, and adapt it further
 to a collection of handwritten German letters from UW-Madison’s Badger
 Scribe challenge.</p>
@@ -5318,9 +5308,9 @@ instead. <strong><em>Low-rank adaptation</em></strong>, or
 keeps the pretrained weights frozen and adds small sets of trainable
 parameters to selected layers. Rather than directly changing a large
 weight matrix, LoRA learns a much smaller adjustment to its output.</p>
-<figure><img src="../fig/lora.svg" alt="Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x." class="figure mx-auto d-block"><div class="figcaption">Full fine-tuning updates every entry of a d × d
-weight matrix; LoRA freezes it and trains two thin matrices of rank r
-whose product is added to its output</div>
+<figure><img src="../fig/lora.svg" alt="Left: a d by d weight matrix, all trained, 16 bytes per weight. Right: the same matrix frozen in bf16 plus two thin trained matrices B (d by r) and A (r by d); output is W x plus B A x." class="figure mx-auto d-block"><div class="figcaption"><em>Full fine-tuning updates the whole weight
+matrix; LoRA freezes it and trains two thin matrices beside
+it</em></div>
 </figure><p>Nothing in the original model is trained. The trained parameters are
 the new matrices, and they are a small fraction of the model’s size,
 under one percent in this episode. We still run the whole model during
@@ -5342,12 +5332,9 @@ without the expense of full fine-tuning.</p>
 <p>The GPU-hours put the three on one scale. Training from scratch is at
 the top, the full fine-tune that made CHURRO in the middle, and this
 episode’s LoRA run at the bottom.</p>
-<figure><img src="../fig/pretrain-finetune-lora.svg" alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound." class="figure mx-auto d-block"><div class="figcaption">GPU-hours on a log scale for three ways to get a
-3B model that does a task: training Llama 3.2 3B from scratch, 460,000
-GPU-hours, about a thousand H100s for three weeks and some 300 MWh; the
-full fine-tune that made CHURRO-3B, 800 GPU-hours, eight H100s for four
-days and about 500 kWh; this episode’s LoRA run, half a GPU-hour, one
-A10G for 32 minutes and about 0.2 kWh</div>
+<figure><img src="../fig/pretrain-finetune-lora.svg" alt="Horizontal bar chart on a logarithmic GPU-hours axis from 0.1 to 10 million. Training from scratch, every weight from random: 460,000 GPU-hours. Full fine-tuning, every weight from a pretrained model: 800 GPU-hours. LoRA fine-tuning, an adapter under one percent of the weights: 0.5 GPU-hours. Each bar is labelled with the GPUs, the time and the electricity. Energy is GPU electricity at the rated draw, a lower bound." class="figure mx-auto d-block"><div class="figcaption"><em>GPU-hours, on a log scale, to train a 3B
+model from scratch, to fully fine-tune it, and to LoRA fine-tune
+it</em></div>
 </figure><p>Why do the three differ so much? Training from scratch and full
 fine-tuning do the same work per step. Every parameter is updated, which
 means keeping four things in GPU memory for each one, the weight itself,
@@ -5423,12 +5410,11 @@ results, and shut down the instance when the job finishes.</p>
 <p>The entire run, including evaluation before and after fine-tuning,
 takes about 33 minutes on an <code>ml.g5.xlarge</code> instance and
 costs approximately <code>$0.75</code>, based on our measured October
-2026 run.</p>
-<p>That small cost is deliberate. Fine-tuning can become expensive when
-we move to larger models, longer datasets, or repeated experiments, so
-we’ll learn how to estimate memory and runtime requirements before
-launching the job. We’ll also set a time limit to prevent an unexpected
-training run from continuing indefinitely.</p>
+2026 run. That small cost is deliberate. Fine-tuning can become
+expensive when we move to larger models, longer datasets, or repeated
+experiments, so we’ll learn how to estimate memory and runtime
+requirements before launching the job. We’ll also set a time limit to
+prevent an unexpected training run from continuing indefinitely.</p>
 <p>By the end, we’ll have fine-tuned a vision-language model, compared
 its predictions against the original model, and checked how closely the
 actual bill matched our estimate.</p>
@@ -5469,10 +5455,8 @@ of the weight, and the two running averages Adam keeps for it, the four
 numbers per weight from the <em>How fine-tuning works</em> section
 above. A LoRA fine-tune keeps the weights frozen in 16-bit and adds a
 small adapter that carries its own gradients and optimizer state.</p>
-<figure><img src="../fig/memory-per-parameter.svg" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption">Bars of GPU memory per parameter: 1 byte for FP8
-inference, 2 for bf16 inference, about 2.5 for a LoRA fine-tune, 16 for
-a full fine-tune made of the weight, its gradient, a 32-bit copy of the
-weight and the two averages Adam keeps</div>
+<figure><img src="../fig/memory-per-parameter.svg" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory per parameter: inference, a LoRA
+fine-tune, and a full fine-tune</em></div>
 </figure><table class="table">
 <colgroup>
 <col width="33%">
@@ -5517,8 +5501,13 @@ gradients and optimizer state</td>
 <p>Multiply the bytes per parameter by the parameter count, add about 4
 GB for activations (more for long sequences or big batches), and you
 have the GPU memory the job needs. The second table does that for four
-model sizes and names the smallest SageMaker box that holds each
-one:</p>
+model sizes and names the smallest SageMaker box that holds each one.
+The inference column uses the precision people run each size at. Models
+up to about 8B are served in bf16, which is how the Processing Jobs
+episode runs Qwen3-8B. Above that the weights are quantized, FP8 for the
+27B as the GPU-notebook episode does, 4-bit for a 70B on one card.
+Training cannot be quantized that way, so the two fine-tuning columns
+are 16-bit throughout:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -5528,14 +5517,14 @@ one:</p>
 </colgroup>
 <thead><tr>
 <th>Model</th>
-<th>Inference, bf16</th>
+<th>Inference, as run in practice</th>
 <th>LoRA fine-tune</th>
 <th>Full fine-tune</th>
 </tr></thead>
 <tbody>
 <tr>
 <td>3B</td>
-<td>6 GB: <code>ml.g5.xlarge</code>, 1 × 24 GB,
+<td>bf16, 6 GB: <code>ml.g5.xlarge</code>, 1 × 24 GB,
 <code>$1.41</code>/h</td>
 <td>12 GB: <code>ml.g5.xlarge</code>
 </td>
@@ -5544,7 +5533,7 @@ one:</p>
 </tr>
 <tr>
 <td>7B</td>
-<td>14 GB: <code>ml.g5.xlarge</code>
+<td>bf16, 14 GB: <code>ml.g5.xlarge</code>
 </td>
 <td>22 GB: <code>ml.g5.xlarge</code>, with nothing to spare</td>
 <td>116 GB: <code>ml.g6e.12xlarge</code>, 4 × 48 GB,
@@ -5552,17 +5541,17 @@ one:</p>
 </tr>
 <tr>
 <td>27B</td>
-<td>54 GB: <code>ml.g5.12xlarge</code>, 4 × 24 GB,
+<td>FP8, 27 GB: <code>ml.g6e.xlarge</code>, 1 × 48 GB,
+<code>$2.61</code>/h</td>
+<td>72 GB: <code>ml.g5.12xlarge</code>, 4 × 24 GB,
 <code>$7.09</code>/h</td>
-<td>72 GB: <code>ml.g5.12xlarge</code>
-</td>
 <td>436 GB: <code>ml.p5.48xlarge</code>, 8 × 80 GB,
 <code>$63.30</code>/h</td>
 </tr>
 <tr>
 <td>70B</td>
-<td>140 GB: <code>ml.g6e.12xlarge</code>, 4 × 48 GB,
-<code>$13.12</code>/h</td>
+<td>4-bit, 35 GB: <code>ml.g6e.xlarge</code>; FP8, 70 GB:
+<code>ml.g6e.12xlarge</code>, 4 × 48 GB, <code>$13.12</code>/h</td>
 <td>179 GB: <code>ml.g6e.12xlarge</code>
 </td>
 <td>1,124 GB: two <code>ml.p5.48xlarge</code>, <code>$127</code>/h</td>
@@ -5593,10 +5582,8 @@ to find what each parameter should have done is another 2. Updating the
 parameters is another 2. A full fine-tune does all three, 6 FLOPs per
 parameter per token. LoRA leaves the base weights alone, so it skips the
 update and does 4.</p>
-<figure><img src="../fig/flops-per-token.svg" alt="A layer W with an input arrow, an output arrow, an error arrow going back and an update arrow into W, each labelled 2 FLOPs; a box totals 6 for full fine-tuning and 4 for LoRA" class="figure mx-auto d-block"><div class="figcaption">Three matrix products per token: forward (2
-FLOPs per weight), error passed back to the inputs (2), and the weight
-update (2); full fine-tuning does all three for 6, LoRA skips the update
-for 4</div>
+<figure><img src="../fig/flops-per-token.svg" alt="A layer W with an input arrow, an output arrow, an error arrow going back and an update arrow into W, each labelled 2 FLOPs; a box totals 6 for full fine-tuning and 4 for LoRA" class="figure mx-auto d-block"><div class="figcaption"><em>The three matrix products per token; a full
+fine-tune does all three, LoRA skips the weight update</em></div>
 </figure><pre class="text"><code>tokens      = examples × tokens per example × passes over the data
 FLOPs       = 6 × parameters × tokens      (4 × for LoRA)
 GPU-seconds = FLOPs ÷ (GPU speed in FLOPS × 0.25)      a training job reaches about a quarter of the speed on the data sheet</code></pre>
@@ -5927,9 +5914,9 @@ seconds per page and apply them to more passes and more pages. The 7B
 row is worked out in the challenge below, the 70B rows are
 order-of-magnitude figures, and the CHURRO row comes from a published
 review of the paper.</p>
-<figure><img src="../fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.75, homework 1.50, the full Badger Scribe train set 1.20, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption">Cost per run on a log scale, from about a dollar
-for this episode’s LoRA run to twelve thousand dollars for a 70B full
-fine-tune; a ten-run sweep shifts every bar up by one decade</div>
+<figure><img src="../fig/finetune-cost-ladder.svg" alt="Horizontal bar chart on a logarithmic dollar axis: this episode 0.75, homework 1.50, the full Badger Scribe train set 1.20, 7B full fine-tune 140, 70B LoRA 600, CHURRO-3B 6,300, 70B full fine-tune 12,000, with the ten-run sweep shown as a lighter extension of each bar" class="figure mx-auto d-block"><div class="figcaption"><em>Cost per run, on a log scale, from this
+episode’s LoRA run to a 70B full fine-tune; the lighter extension is a
+ten-run sweep</em></div>
 </figure><p>The CHURRO bar is the model you are about to fine-tune. Stanford
 spent on the order of 800 H100-hours making it, and you get the benefit
 for a dollar because you are adapting it, not retraining it. Starting
@@ -7721,7 +7708,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-09_Hyperparameter-tuning"><p>Content from <a href="09_Hyperparameter-tuning.html">Hyperparameter Tuning in SageMaker: Neural Network Example</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/09_Hyperparameter-tuning.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 60 minutes</p>
@@ -7870,8 +7857,7 @@ too).</p>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1" aria-label="code-block-3-11"></a><span class="bu">print</span>(<span class="ss">f"Name: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">, Project: </span><span class="sc">{</span>project<span class="sc">}</span><span class="ss">, Purpose: </span><span class="sc">{</span>purpose<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>Next, we’ll configure the baseline estimator that we plan to do
-hyperparameter search on.</p>
-<p>Every price in this episode is from the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
+hyperparameter search on. Every price in this episode is from the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page, us-east-1 on-demand; the tuning job’s cost is that rate
 times the sum of the child jobs’ billable minutes.</p>
 <div class="codewrapper sourceCode" id="cb4">
@@ -8091,13 +8077,12 @@ The whole search, as a dictionary, comes back too.</p>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1" aria-label="code-block-8-5"></a>    max_parallel_jobs<span class="op">=</span><span class="dv">1</span>,         <span class="co"># the tuner's max_parallel_jobs: one instance, so startup is paid once</span></span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1" aria-label="code-block-8-6"></a>)<span class="op">;</span></span></code></pre>
 </div>
-<p>One child job, about 3 billable minutes, about
-<code>$0.01</code>.</p>
-<p>If the launch is refused with an <code>AccessDeniedException</code>
-ending in <code>explicit deny</code>, the account’s checks are the
-cause: a missing tag, an instance type outside the lesson’s list, or a
-resource kind the lesson never creates; the first training episode’s
-callout <em>If the launch is refused</em> says what to look at.</p>
+<p>One child job, about 3 billable minutes, about <code>$0.01</code>. If
+the launch is refused with an <code>AccessDeniedException</code> ending
+in <code>explicit deny</code>, the account’s checks are the cause: a
+missing tag, an instance type outside the lesson’s list, or a resource
+kind the lesson never creates; the first training episode’s callout
+<em>If the launch is refused</em> says what to look at.</p>
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -8172,10 +8157,7 @@ completed trials to choose the next ones, so it spends fewer jobs on
 unpromising combinations. <strong>Setting <code>max_parallel_jobs</code>
 higher than 2-4 reduces tuning efficiency, as SageMaker’s ability to
 learn from completed jobs decreases when too many jobs run
-simultaneously.</strong></p>
-<p>With this approach, SageMaker is better able to refine configurations
-without overloading resources or risking inefficient exploration, making
-<code>max_parallel_jobs=2</code> a solid default for most use cases.</p>
+simultaneously.</strong> Two at a time is a good default.</p>
 <p>Estimate first. The same call with the new limits:</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -8623,7 +8605,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-10_RAG-overview"><p>Content from <a href="10_RAG-overview.html">Overview of RAG Workflows on AWS</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/10_RAG-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 15 minutes</p>
@@ -8692,11 +8674,8 @@ each.</p>
 </section><section><h2 class="section-heading" id="what-is-rag">What is RAG?<a class="anchor" aria-label="anchor" href="#what-is-rag"></a>
 </h2>
 <hr class="half-width">
-<figure><img src="../fig/rag-pipeline.svg" alt="Diagram of the RAG pipeline with the embedder and generator highlighted as the two model calls" class="figure mx-auto d-block"><div class="figcaption">RAG pipeline: PDFs are chunked and embedded
-once; per question, the question is embedded, the top-k chunks are
-retrieved by cosine similarity, and a generator answers from question
-plus chunks. The embedder and generator are the only parts that change
-between episodes.</div>
+<figure><img src="../fig/rag-pipeline.svg" alt="Diagram of the RAG pipeline with the embedder and generator highlighted as the two model calls" class="figure mx-auto d-block"><div class="figcaption"><em>The RAG pipeline; the embedder and the
+generator are the only parts that change between episodes</em></div>
 </figure><p>A language model cannot reliably answer questions about documents it
 has never seen. RAG connects the model to a collection of material you
 control. You break the documents into passages, turn each passage into a
@@ -8946,11 +8925,8 @@ anonymous on the bill.</li>
 <hr class="half-width">
 <p>The four differ less in what the model computes than in how long the
 hardware stays rented. Here they are in the order to try them.</p>
-<figure><img src="../fig/rag-approaches.svg" alt="Comparison table of four ways to run inference on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)." class="figure mx-auto d-block"><div class="figcaption">Four columns, Bedrock API, Processing job, GPU
-notebook and Inference endpoint, compared on where the model runs, what
-runs between calls, billing unit, latency, model choice, what you must
-remember, a cost example and which episode covers it; Bedrock is marked
-as the default and Processing jobs as the safe way to use a GPU</div>
+<figure><img src="../fig/rag-approaches.svg" alt="Comparison table of four ways to run inference on AWS: Bedrock API (default, pay per token, nothing to shut down), Processing job (batch with open models, bills per second while the job runs, terminates itself), GPU notebook (learning and debugging only, bills per hour until stopped, about $90 if forgotten over a weekend) and Inference endpoint (steady traffic only, bills 24/7, about $1,000 if idle for a month)." class="figure mx-auto d-block"><div class="figcaption"><em>Four ways to run inference on AWS,
+compared</em></div>
 </figure><div class="section level3">
 <h3 id="amazon-bedrock-the-default">1. Amazon Bedrock, the default<a class="anchor" aria-label="anchor" href="#amazon-bedrock-the-default"></a>
 </h3>
@@ -9227,7 +9203,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-11_RAG-Bedrock"><p>Content from <a href="11_RAG-Bedrock.html">RAG with Bedrock</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/11_RAG-Bedrock.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 50 minutes</p>
@@ -9461,9 +9437,9 @@ below and everything else works unchanged.</p>
 <h3 id="step-1-configure-the-notebook">Step 1 – Configure the notebook<a class="anchor" aria-label="anchor" href="#step-1-configure-the-notebook"></a>
 </h3>
 <p>Three things are new here compared with the training episodes, so the
-setup is split into four cells.</p>
-<p>The session, region and S3 client are as before, plus the execution
-role, printed because the Bedrock calls below run as it.</p>
+setup is split into four cells. The session, region and S3 client are as
+before, plus the execution role, printed because the Bedrock calls below
+run as it.</p>
 <div class="codewrapper sourceCode" id="cb1">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10004,7 +9980,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10013,7 +9989,7 @@ helper wraps:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10354,16 +10330,16 @@ when the best retrieval score is below
 <hr class="half-width">
 <p>Now we can loop over the questions, run retrieval + Bedrock
 generation, and write a <code>wattbot_solutions_bedrock.csv</code> file
-(locally and to your bucket).</p>
-<p><code>train_QA.csv</code> has 245 questions, and at two calls each
-that is about twenty minutes. For class we score a stratified sample
-instead. <code>sample_questions_by_type</code> draws ten questions from
-each evidence type (Quote, Table, Figure, Math, unanswerable,
-cross-paper, reconcile), 53 questions after overlaps and the two missing
-papers, so every row of the breakdown in the next step has something in
-it. The first 53 rows of the file would be nearly all Quote questions.
-The seed fixes the draw, and the Processing Jobs episode uses the same
-one, so the two runs are compared on the same questions. Set
+(locally and to your bucket). <code>train_QA.csv</code> has 245
+questions, and at two calls each that is about twenty minutes. For class
+we score a stratified sample instead.
+<code>sample_questions_by_type</code> draws ten questions from each
+evidence type (Quote, Table, Figure, Math, unanswerable, cross-paper,
+reconcile), 53 questions after overlaps and the two missing papers, so
+every row of the breakdown in the next step has something in it. The
+first 53 rows of the file would be nearly all Quote questions. The seed
+fixes the draw, and the Processing Jobs episode uses the same one, so
+the two runs are compared on the same questions. Set
 <code>per_type=0</code> to run the whole file.</p>
 <p>The Processing Jobs episode reuses this same loop with self-hosted
 models; the only difference there is that the embedding, answer and
@@ -11184,7 +11160,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-12_RAG-Processing-jobs"><p>Content from <a href="12_RAG-Processing-jobs.html">RAG with Processing Jobs</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/12_RAG-Processing-jobs.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 50 minutes</p>
@@ -11307,18 +11283,20 @@ trained with. <code>from_pretrained</code> downloads the weights onto
 the GPU, and <code>generate</code> writes the answer to a chat prompt,
 the self-hosted counterpart of what Bedrock does behind
 <code>converse</code>. Inference needs no gradients, so the weights are
-the memory cost, and 8B parameters at two bytes each in bf16 is about 16
-GB, which fits the 24 GB GPU of an <code>ml.g5.xlarge</code> with room
-for the KV cache. (The fine-tuning episode has the full memory
-arithmetic; the short version is that inference needs only the weights
-and training needs eight times more per parameter.)</p>
+the memory cost. An 8B model is small enough to run unquantized, 8B
+parameters at two bytes each in bf16, about 16 GB, which fits the 24 GB
+GPU of an <code>ml.g5.xlarge</code> with room for the KV cache. Larger
+models are quantized for inference, to one byte per parameter or less,
+which is how the GPU-notebook episode fits a 27B model on one card. (The
+fine-tuning episode has the full memory arithmetic; the short version is
+that inference needs only the weights and training needs eight times
+more per parameter.)</p>
 <p>Open-weight models that fit one GPU are now close to the frontier on
 the kinds of tasks research code runs, on data that never leaves your
 account. The newest of this family, Qwen3.8-27B, fits one GPU and lands
 within a few points of a frontier commercial model:</p>
-<figure><img src="../fig/qwen27b-vs-opus.png" alt="Paired horizontal bars comparing a 27B open-weight model on one GPU with a frontier commercial model; within a few points on agent tasks and science questions, ahead on chart reasoning" class="figure mx-auto d-block"><div class="figcaption">Qwen3.8-27B against Claude Opus 4.8 on three
-benchmarks: 73.0 vs 74.6 on Terminal-Bench 2.1, 89.2 vs 93.6 on GPQA
-Diamond, 83.7 vs 80.5 on CharXiv reasoning</div>
+<figure><img src="../fig/qwen27b-vs-opus.png" alt="Paired horizontal bars comparing a 27B open-weight model on one GPU with a frontier commercial model; within a few points on agent tasks and science questions, ahead on chart reasoning" class="figure mx-auto d-block"><div class="figcaption"><em>Qwen3.8-27B against Claude Opus 4.8 on three
+benchmarks, as reported by each model’s authors</em></div>
 </figure><p>Qwen figures are from the Qwen3.8-27B model card and were not
 reproduced here; Opus 4.8 figures are from its published
 evaluations.</p>
@@ -12130,9 +12108,10 @@ specific open-weight model you rent a GPU and serve it yourself.</li>
 be forgotten. It bills while the script runs and ends on its own, with
 <code>max_runtime_in_seconds</code> as the backstop. Use it for batch
 work; use Bedrock or an endpoint when you need answers in seconds.</li>
-<li>Inference needs only the weights. Qwen3-8B in bf16 is ~16 GB and
-fits one 24 GB GPU, with the rest for the prompts’ attention cache; how
-many prompts decode together is bounded by that remainder.</li>
+<li>Inference needs only the weights. Qwen3-8B is small enough to run
+unquantized, ~16 GB in bf16 on one 24 GB GPU, with the rest for the
+prompts’ attention cache; how many prompts decode together is bounded by
+that remainder. Larger models are quantized to fit.</li>
 <li>A job’s inputs and outputs are S3 prefixes mounted into the
 container; the notebook only stages files and reads results, so it stays
 a cheap CPU instance.</li>
@@ -13946,7 +13925,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-6" class="nav nav-tabs" role="tablist">
@@ -14037,7 +14016,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-15_Resource-management-cleanup"><p>Content from <a href="15_Resource-management-cleanup.html">Resource Management and Monitoring</a></p>
 <hr>
-<p>Last updated on 2026-10-28 |
+<p>Last updated on 2026-11-02 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/15_Resource-management-cleanup.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 35 minutes</p>
@@ -14320,12 +14299,11 @@ for the optional PAT episode.</li>
 <p>Every stop and delete in this list has a one-line CLI equivalent; the
 optional episode <a href="14_CLI-equivalents.html">The Same Jobs from
 the Terminal</a> collects them, for stopping something from a machine
-with no browser.</p>
-<p>In the shared workshop account, the instructors sweep the account
-with <a href="https://github.com/ekristen/aws-nuke" class="external-link">aws-nuke</a> after
-the workshop. That sweep deletes notebook instances and the learner
-buckets only, so if you forget those, they will still go. It does not
-touch Bedrock application inference profiles, so those are yours to
+with no browser. In the shared workshop account, the instructors sweep
+the account with <a href="https://github.com/ekristen/aws-nuke" class="external-link">aws-nuke</a> after the
+workshop. That sweep deletes notebook instances and the learner buckets
+only, so if you forget those, they will still go. It does not touch
+Bedrock application inference profiles, so those are yours to
 remove.</p>
 </section><section><h2 class="section-heading" id="rules-the-account-enforces-and-how-to-set-them-on-your-own">Rules the account enforces, and how to set them on your own<a class="anchor" aria-label="anchor" href="#rules-the-account-enforces-and-how-to-set-them-on-your-own"></a>
 </h2>
