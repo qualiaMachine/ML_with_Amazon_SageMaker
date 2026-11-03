@@ -486,15 +486,15 @@ to stop it. It is also a second place to work, a Jupyter session in a
 browser tab, when your code, your editor and your files are on your
 laptop.</p>
 <p>None of that is required. The notebook instance was a convenience for
-teaching. SageMaker is an API, and the AWS CLI calls the same API from a
-terminal. A job launched from your laptop needs no instance at all. The
-request goes from your terminal to SageMaker, the job runs on a machine
-rented for it and ends, and the model lands in S3. For a project that
-launches a job a day and otherwise works locally, that removes the
-notebook instance’s whole cost and the habit of stopping it. The
-terminal is also the tool for checking on a job from another machine,
-stopping something when no notebook is open, and copying results out of
-S3 in bulk.</p>
+teaching and for governance in a shared account. SageMaker is an API,
+and the AWS CLI calls the same API from a terminal. A job launched from
+your laptop needs no instance at all. The request goes from your
+terminal to SageMaker, the job runs on a machine rented for it and ends,
+and the model lands in S3. For a project that launches a job a day and
+otherwise works locally, that removes the notebook instance’s whole cost
+and the habit of stopping it. The terminal is also the tool for checking
+on a job from another machine, stopping something when no notebook is
+open, and copying results out of S3 in bulk.</p>
 <p>This episode does five things from a laptop terminal. It signs in to
 the account with Identity Center, lists what is running and reads what a
 job cost, stops your own jobs and your own notebook instance by name,
@@ -511,15 +511,22 @@ prints the most the request can bill.</p>
 launching from the notebook instance. It is required there, because
 every learner’s launches and the code behind them then sit on an
 instance the administrators can see, which is how they help when
-something goes wrong. The terminal route is for your own account. On any
-account it is the tool for looking and for stopping.</p>
+something goes wrong. Launching from the terminal is for your own
+account, and for practicing it in this episode. Checking on jobs and
+stopping them from the terminal is fine on any account.</p>
 </div>
 <div class="section level3">
 <h3 id="what-the-notebooks-did-and-the-command-that-does-the-same">What the notebooks did, and the command that does the same<a class="anchor" aria-label="anchor" href="#what-the-notebooks-did-and-the-command-that-does-the-same"></a></h3>
-<p>The CLI, the SDK and the console are one API, so every call the
-episodes made has a CLI command with the same name and the same fields.
-This table is the map. The sections below work through the rows that
-matter most.</p>
+<p>The CLI, the SageMaker SDK, <code>boto3</code> and the console all
+talk to the same AWS API. The SDK’s estimators built requests for it,
+the <code>boto3</code> calls in the cleanup and RAG episodes sent
+requests to it directly, and the console shows its results. So every
+call the episodes made has a CLI command with the same name and the same
+fields, and a <code>boto3</code> method name such as
+<code>describe_training_job</code> is the CLI command
+<code>describe-training-job</code> with the underscores swapped for
+hyphens. This table is the map. The sections below work through the rows
+that matter most.</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Episode</th>
 <th>In the notebook</th>
 <th>From the terminal</th>
@@ -621,8 +628,8 @@ file.</p>
 <div class="section level3">
 <h3 id="what-to-replace-in-the-commands">What to replace in the commands<a class="anchor" aria-label="anchor" href="#what-to-replace-in-the-commands"></a></h3>
 <p>Anything in angle brackets, <code>&lt;like this&gt;</code>, is a
-value of yours. Replace it, brackets included. This is every placeholder
-in the episode and where its value comes from.</p>
+value of yours. Replace it, brackets included. This table lists every
+placeholder in the episode and how to find its value.</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Placeholder</th>
 <th>What it is</th>
 <th>Where to find it</th>
@@ -712,10 +719,10 @@ page.)</li>
 </div>
 <section><h2 class="section-heading" id="sign-in-with-identity-center">1. Sign in with Identity Center<a class="anchor" aria-label="anchor" href="#sign-in-with-identity-center"></a></h2>
 <hr class="half-width"><p>This episode runs from your own laptop, in a terminal, so it works
-when no notebook is open. The AWS CLI is already installed in CloudShell
-and on every SageMaker notebook instance, where it uses the instance’s
-role and needs no sign-in. A laptop has neither, so two things come
-first.</p>
+when no notebook is open. CloudShell and the SageMaker notebook instance
+already have the AWS CLI installed, and on the instance it uses the
+instance’s role, so there is no sign-in. On a laptop you install the CLI
+and sign in yourself.</p>
 <ol style="list-style-type: decimal"><li>
 <strong>Install <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html" class="external-link">AWS
 CLI v2</a></strong> from the installer for your operating system. Then
@@ -732,14 +739,16 @@ the command below in the same terminal. It asks four things in turn.
 First the start URL and the region of the Identity Center sign-in page,
 the same ones you used in the browser, both in the sign-in email from
 your instructor. It then opens a browser tab for you to approve the
-device, lets you pick the account and the permission set, and finally
-asks for a default region, <code>us-east-2</code> for the workshop
-account, and a name for the profile. A profile is a named set of these
-answers, saved in <code>~/.aws/config</code> on your laptop, so that the
-CLI knows which account, role and region a command is for. One laptop
-can hold several, one per account you use. Call this one
-<code>workshop</code>, since the rest of the episode uses that
-name.</li>
+device, and comes back to the terminal to ask which account and which
+permission set. On the workshop account there is one of each, the
+account your instructor set up and the permission set your login
+carries, so pick what it offers. Finally it asks for a default region,
+<code>us-east-2</code> for the workshop account, and a name for the
+profile. A profile is a named set of these answers, saved in
+<code>~/.aws/config</code> on your laptop, so that the CLI knows which
+account, role and region a command is for. One laptop can hold several,
+one per account you use. Call this one <code>workshop</code>, since the
+rest of the episode uses that name.</li>
 </ol><div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -769,7 +778,7 @@ are, in the account you think you are in:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -778,7 +787,7 @@ are, in the account you think you are in:</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -863,7 +872,7 @@ your notebook instance:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -872,7 +881,7 @@ your notebook instance:</p>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
+<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
 <div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -920,7 +929,7 @@ key”:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -928,7 +937,7 @@ key”:</p>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
+<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1021,7 +1030,7 @@ notebook instance, so it is the one with <code>xgboost</code> in it:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1030,7 +1039,7 @@ notebook instance, so it is the one with <code>xgboost</code> in it:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a><span class="st">  --query '</span>{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}<span class="st">'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
+<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1076,7 +1085,7 @@ SageMaker refuses a name it has seen.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1122,7 +1131,7 @@ SageMaker refuses a name it has seen.</p>
 <span id="cb20-40"><a href="#cb20-40" tabindex="-1" aria-label="code-block-20-40"></a><span class="op">JSON</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
+<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1360,7 +1369,7 @@ finds something. Then run them against your own resources.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-6" class="nav nav-tabs" role="tablist">
@@ -1376,14 +1385,14 @@ finds something. Then run them against your own resources.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-6" class="tab-content">
-<div id="nav-tabpanel-6-1" class="tab-pane show active" aria-labelledby="nav-tab-6-1" role="tabpanel">
+<div id="nav-tabpanel-6-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-6-1">
 <div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" tabindex="-1" aria-label="code-block-27-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-6-2" class="tab-pane" aria-labelledby="nav-tab-6-2" role="tabpanel">
+<div id="nav-tabpanel-6-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-6-2">
 <div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
