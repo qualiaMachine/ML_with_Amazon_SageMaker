@@ -637,9 +637,8 @@ episode</td>
 <code>aws s3 ls</code> prints every bucket you can see</td>
 </tr><tr><td><code>&lt;a training job name&gt;</code></td>
 <td>Any training job you ran</td>
-<td>
-<code>aws sagemaker list-training-jobs --query 'TrainingJobSummaries[].TrainingJobName'</code>,
-newest first</td>
+<td>The list command in section 2, or the name the training notebook
+printed when <code>fit()</code> ran</td>
 </tr><tr><td><code>&lt;the training episode's xgboost job name&gt;</code></td>
 <td>The XGBoost job from the training episode, named
 <code>&lt;notebook-instance-name&gt;-xgboost-&lt;timestamp&gt;</code>
@@ -791,8 +790,16 @@ are, in the account you think you are in:</p>
 </div>
 </div>
 <p>The output names the account ID and an
-<code>AWSReservedSSO_...</code> role. The credentials expire after a few
-hours. Run <code>aws sso login</code> again when a command returns
+<code>AWSReservedSSO_...</code> role. Check the region too, since
+SageMaker resources are regional and a job in another region does not
+appear in any list:</p>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="ex">aws</span> configure get region     <span class="co"># us-east-2 for the workshop account; if it is wrong, run aws configure sso again</span></span></code></pre>
+</div>
+<p>The credentials expire after a few hours. Run
+<code>aws sso login</code> again when a command returns
 <code>ExpiredToken</code>. Nothing that would still work next month is
 written anywhere.</p>
 <p>If you are in the notebook instance’s own terminal instead
@@ -806,25 +813,25 @@ and the launch check, come back in section 5, from the lesson’s
 <code>scripts/helpers.py</code>, plain Python that runs on a laptop as
 it did on the notebook instance. Clone the lesson once and install
 <code>boto3</code>, which the module imports:</p>
-<div class="codewrapper sourceCode" id="cb5">
+<div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="fu">git</span> clone <span class="at">-q</span> https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git   <span class="co"># once, anywhere on the laptop</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a><span class="ex">pip</span> install boto3</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="fu">git</span> clone <span class="at">-q</span> https://github.com/carpentries-incubator/ML_with_AWS_SageMaker.git   <span class="co"># once, anywhere on the laptop</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a><span class="ex">pip</span> install boto3</span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="what-is-running-and-what-a-job-cost">2. What is running, and what a job cost<a class="anchor" aria-label="anchor" href="#what-is-running-and-what-a-job-cost"></a></h2>
 <hr class="half-width"><p>First the lists. Each should be short, or empty. <code>--query</code>
 is a <a href="https://jmespath.org/" class="external-link">JMESPath</a> filter that keeps the
 output to what you asked about, and the cleanup episode’s first cell ran
 the same four <code>list_*</code> calls through <code>boto3</code>.</p>
-<div class="codewrapper sourceCode" id="cb6">
+<div class="codewrapper sourceCode" id="cb7">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="ex">aws</span> sagemaker list-training-jobs   <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a><span class="ex">aws</span> sagemaker list-processing-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'ProcessingJobSummaries[].ProcessingJobName'</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a><span class="ex">aws</span> sagemaker list-hyper-parameter-tuning-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'HyperParameterTuningJobSummaries[].HyperParameterTuningJobName'</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a><span class="ex">aws</span> sagemaker list-notebook-instances <span class="at">--query</span> <span class="st">'NotebookInstances[].[NotebookInstanceName,NotebookInstanceStatus,InstanceType]'</span> <span class="at">--output</span> table</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a><span class="ex">aws</span> sagemaker list-endpoints       <span class="co"># must print an empty list on the workshop account</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="ex">aws</span> sagemaker list-training-jobs   <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1" aria-label="code-block-7-2"></a><span class="ex">aws</span> sagemaker list-processing-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'ProcessingJobSummaries[].ProcessingJobName'</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1" aria-label="code-block-7-3"></a><span class="ex">aws</span> sagemaker list-hyper-parameter-tuning-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'HyperParameterTuningJobSummaries[].HyperParameterTuningJobName'</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1" aria-label="code-block-7-4"></a><span class="ex">aws</span> sagemaker list-notebook-instances <span class="at">--query</span> <span class="st">'NotebookInstances[].[NotebookInstanceName,NotebookInstanceStatus,InstanceType]'</span> <span class="at">--output</span> table</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1" aria-label="code-block-7-5"></a><span class="ex">aws</span> sagemaker list-endpoints       <span class="co"># must print an empty list on the workshop account</span></span></code></pre>
 </div>
 <p>Then one job’s bill. <code>job_cost_report()</code> in the training
 episodes called <code>describe_training_job</code> and read four fields
@@ -832,13 +839,15 @@ from it, the status, the instance count,
 <code>BillableTimeInSeconds</code>, and the model’s S3 path, and
 computed the wall-clock from <code>CreationTime</code> and
 <code>TrainingEndTime</code>. This is the same call with the same
-fields. Pick any job name from the list below, which prints your
-training jobs newest first, and put it in place of
-<code>&lt;a training job name&gt;</code>:</p>
-<div class="codewrapper sourceCode" id="cb7">
+fields. Pick a job from the list below, newest first with its status,
+and put its full name in place of
+<code>&lt;a training job name&gt;</code>. On the shared account the list
+is everyone’s jobs, so do not take the newest. Take the one named after
+your notebook instance:</p>
+<div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1" aria-label="code-block-7-1"></a><span class="ex">aws</span> sagemaker list-training-jobs <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1" aria-label="code-block-8-1"></a><span class="ex">aws</span> sagemaker list-training-jobs <span class="at">--sort-by</span> CreationTime <span class="at">--sort-order</span> Descending <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].[TrainingJobName,TrainingJobStatus]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 <div class="tabs">
 <nav><div id="nav-tab-2" class="nav nav-tabs" role="tablist">
@@ -855,21 +864,21 @@ training jobs newest first, and put it in place of
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
 <div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb8">
+<div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1" aria-label="code-block-8-1"></a><span class="va">JOB</span><span class="op">=&lt;</span>a <span class="ex">training</span> job name<span class="op">&gt;</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1" aria-label="code-block-8-2"></a><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="va">$JOB</span> <span class="dt">\</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1" aria-label="code-block-8-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="va">JOB</span><span class="op">=&lt;</span>a <span class="ex">training</span> job name<span class="op">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="va">$JOB</span> <span class="dt">\</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 </div>
 <div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb9">
+<div class="codewrapper sourceCode" id="cb10">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb9-1"><a href="#cb9-1" tabindex="-1" aria-label="code-block-9-1"></a><span class="va">$JOB</span> <span class="op">=</span> <span class="st">"&lt;a training job name&gt;"</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1" aria-label="code-block-9-2"></a>aws sagemaker describe-training-job <span class="op">--</span>training-job-name <span class="va">$JOB</span> `</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1" aria-label="code-block-9-3"></a>  <span class="op">--</span>query <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
+<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="va">$JOB</span> <span class="op">=</span> <span class="st">"&lt;a training job name&gt;"</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a>aws sagemaker describe-training-job <span class="op">--</span>training-job-name <span class="va">$JOB</span> `</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1" aria-label="code-block-10-3"></a>  <span class="op">--</span>query <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 </div>
 </div>
@@ -877,22 +886,26 @@ training jobs newest first, and put it in place of
 <p>Cost is <code>billable_s</code> × <code>count</code> ÷ 3600 × the
 hourly rate from the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page, the arithmetic <code>job_cost_report()</code> did. The
-helper printed it. Here you do the multiplication.</p>
+helper printed it. Here you do the multiplication.
+<code>billable_s</code> is missing for a job that failed before its
+instance was ready, which is also a job that cost nothing.</p>
 <p>The other job kinds have the same shape. The Processing Jobs
 episode’s <code>job_cost()</code> read <code>CreationTime</code>,
 <code>ProcessingStartTime</code> and <code>ProcessingEndTime</code> from
 <code>describe_processing_job</code>, and the tuning episode’s
 <code>tuning_cost_report()</code> looped
 <code>describe_training_job</code> over the tuner’s child jobs:</p>
-<div class="codewrapper sourceCode" id="cb10">
+<div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1" aria-label="code-block-10-1"></a><span class="ex">aws</span> sagemaker describe-processing-job <span class="at">--processing-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --query <span class="st">'{status:ProcessingJobStatus, created:CreationTime, started:ProcessingStartTime, ended:ProcessingEndTime, instance:ProcessingResources.ClusterConfig.InstanceType}'</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1" aria-label="code-block-10-2"></a><span class="ex">aws</span> sagemaker list-training-jobs-for-hyper-parameter-tuning-job <span class="at">--hyper-parameter-tuning-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --query <span class="st">'TrainingJobSummaries[].[TrainingJobName,TrainingJobStatus,FinalHyperParameterTuningJobObjectiveMetric.Value]'</span> <span class="at">--output</span> table</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1" aria-label="code-block-10-3"></a><span class="ex">aws</span> sagemaker describe-hyper-parameter-tuning-job <span class="at">--hyper-parameter-tuning-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --query <span class="st">'BestTrainingJob.TrainingJobName'</span>   <span class="co"># tuner.best_training_job()</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="ex">aws</span> sagemaker describe-processing-job <span class="at">--processing-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --query <span class="st">'{status:ProcessingJobStatus, created:CreationTime, started:ProcessingStartTime, ended:ProcessingEndTime, instance:ProcessingResources.ClusterConfig.InstanceType}'</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a><span class="ex">aws</span> sagemaker list-training-jobs-for-hyper-parameter-tuning-job <span class="at">--hyper-parameter-tuning-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --query <span class="st">'TrainingJobSummaries[].[TrainingJobName,TrainingJobStatus,FinalHyperParameterTuningJobObjectiveMetric.Value]'</span> <span class="at">--output</span> table</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a><span class="ex">aws</span> sagemaker describe-hyper-parameter-tuning-job <span class="at">--hyper-parameter-tuning-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span> --query <span class="st">'BestTrainingJob.TrainingJobName'</span>   <span class="co"># tuner.best_training_job()</span></span></code></pre>
 </div>
-<p>Tags are returned by a separate call, which is also how you find the
-untagged job that shows on the bill under “No tag key”:</p>
+<p>Tags are returned by a separate call. The <code>Name</code> tag is
+how you confirm a job is yours before you stop it in the next section,
+and a job with no tags is the one that shows on the bill under “No tag
+key”:</p>
 <div class="tabs">
 <nav><div id="nav-tab-3" class="nav nav-tabs" role="tablist">
 <button class="nav-link active" id="nav-tab-3-1" data-bs-toggle="tab" data-bs-target="#nav-tabpanel-3-1" type="button" role="tab" aria-controls="nav-tabpanel-3-1" aria-selected="true">
@@ -908,19 +921,19 @@ untagged job that shows on the bill under “No tag key”:</p>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
 <div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb11">
+<div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="va">ARN</span><span class="op">=</span><span class="va">$(</span><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="va">$JOB</span> <span class="at">--query</span> TrainingJobArn <span class="at">--output</span> text<span class="va">)</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a><span class="va">ARN</span><span class="op">=</span><span class="va">$(</span><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="va">$JOB</span> <span class="at">--query</span> TrainingJobArn <span class="at">--output</span> text<span class="va">)</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
 <div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb12">
+<div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb12-1"><a href="#cb12-1" tabindex="-1" aria-label="code-block-12-1"></a><span class="va">$ARN</span> <span class="op">=</span> aws sagemaker describe-training-job <span class="op">--</span>training-job-name <span class="va">$JOB</span> <span class="op">--</span>query TrainingJobArn <span class="op">--</span>output text</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1" aria-label="code-block-12-2"></a>aws sagemaker list-tags <span class="op">--</span>resource-arn <span class="va">$ARN</span> <span class="op">--</span>query <span class="st">'Tags[].[Key,Value]'</span> <span class="op">--</span>output table</span></code></pre>
+<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="va">$ARN</span> <span class="op">=</span> aws sagemaker describe-training-job <span class="op">--</span>training-job-name <span class="va">$JOB</span> <span class="op">--</span>query TrainingJobArn <span class="op">--</span>output text</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a>aws sagemaker list-tags <span class="op">--</span>resource-arn <span class="va">$ARN</span> <span class="op">--</span>query <span class="st">'Tags[].[Key,Value]'</span> <span class="op">--</span>output table</span></code></pre>
 </div>
 </div>
 </div>
@@ -933,13 +946,13 @@ be yours. The lists in section 2 show everyone’s jobs and instances, and
 the lesson names each one after its owner’s notebook instance, which the
 <code>Name</code> tag confirms. Stop only what you started. Someone
 else’s job is a question for them, or for the instructor.</p>
-<div class="codewrapper sourceCode" id="cb13">
+<div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="ex">aws</span> sagemaker stop-training-job   <span class="at">--training-job-name</span>   <span class="op">&lt;</span>name<span class="op">&gt;</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1" aria-label="code-block-13-2"></a><span class="ex">aws</span> sagemaker stop-processing-job <span class="at">--processing-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1" aria-label="code-block-13-3"></a><span class="ex">aws</span> sagemaker stop-hyper-parameter-tuning-job <span class="at">--hyper-parameter-tuning-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span>   <span class="co"># stops every child job</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1" aria-label="code-block-13-4"></a><span class="ex">aws</span> sagemaker stop-notebook-instance <span class="at">--notebook-instance-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="ex">aws</span> sagemaker stop-training-job   <span class="at">--training-job-name</span>   <span class="op">&lt;</span>name<span class="op">&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">aws</span> sagemaker stop-processing-job <span class="at">--processing-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1" aria-label="code-block-14-3"></a><span class="ex">aws</span> sagemaker stop-hyper-parameter-tuning-job <span class="at">--hyper-parameter-tuning-job-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span>   <span class="co"># stops every child job</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1" aria-label="code-block-14-4"></a><span class="ex">aws</span> sagemaker stop-notebook-instance <span class="at">--notebook-instance-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span></span></code></pre>
 </div>
 <p>A stopped job keeps its logs and whatever it had already written to
 S3. A stopped notebook instance keeps
@@ -947,13 +960,13 @@ S3. A stopped notebook instance keeps
 volume. Deleting the instance is the step that stops the storage charge,
 and the cleanup episode’s last two items, the bucket and the Bedrock
 inference profiles, have their CLI forms too:</p>
-<div class="codewrapper sourceCode" id="cb14">
+<div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1" aria-label="code-block-14-1"></a><span class="ex">aws</span> sagemaker delete-notebook-instance <span class="at">--notebook-instance-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span>   <span class="co"># only after it reports Stopped</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">aws</span> s3 rb s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span> --force                                     <span class="co"># empties the bucket, then deletes it; the cleanup episode's delete_objects loop plus delete_bucket</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1" aria-label="code-block-14-3"></a><span class="ex">aws</span> bedrock list-inference-profiles <span class="at">--type-equals</span> APPLICATION <span class="at">--query</span> <span class="st">'inferenceProfileSummaries[].[inferenceProfileName,inferenceProfileArn]'</span> <span class="at">--output</span> table</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1" aria-label="code-block-14-4"></a><span class="ex">aws</span> bedrock delete-inference-profile <span class="at">--inference-profile-identifier</span> <span class="op">&lt;</span>ARN<span class="op">&gt;</span>  <span class="co"># one per profile, as the cleanup episode's loop did</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1" aria-label="code-block-15-1"></a><span class="ex">aws</span> sagemaker delete-notebook-instance <span class="at">--notebook-instance-name</span> <span class="op">&lt;</span>name<span class="op">&gt;</span>   <span class="co"># only after it reports Stopped</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1" aria-label="code-block-15-2"></a><span class="ex">aws</span> s3 rb s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span> --force                                     <span class="co"># empties the bucket, then deletes it; the cleanup episode's delete_objects loop plus delete_bucket</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1" aria-label="code-block-15-3"></a><span class="ex">aws</span> bedrock list-inference-profiles <span class="at">--type-equals</span> APPLICATION <span class="at">--query</span> <span class="st">'inferenceProfileSummaries[].[inferenceProfileName,inferenceProfileArn]'</span> <span class="at">--output</span> table</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1" aria-label="code-block-15-4"></a><span class="ex">aws</span> bedrock delete-inference-profile <span class="at">--inference-profile-identifier</span> <span class="op">&lt;</span>ARN<span class="op">&gt;</span>  <span class="co"># one per profile, as the cleanup episode's loop did</span></span></code></pre>
 </div>
 </section><section><h2 class="section-heading" id="copying-to-and-from-s3">4. Copying to and from S3<a class="anchor" aria-label="anchor" href="#copying-to-and-from-s3"></a></h2>
 <hr class="half-width"><p>The Accessing S3 episode moved single files with
@@ -961,15 +974,19 @@ inference profiles, have their CLI forms too:</p>
 the bucket with <code>helpers.show_bucket</code>. For many files, or for
 pulling a job’s outputs down to a laptop, the CLI is the better tool,
 and these are the same keys those episodes used:</p>
-<div class="codewrapper sourceCode" id="cb15">
+<div class="codewrapper sourceCode" id="cb16">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1" aria-label="code-block-15-1"></a><span class="ex">aws</span> s3 ls s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/ <span class="at">--recursive</span> <span class="at">--human-readable</span> <span class="at">--summarize</span>             <span class="co"># helpers.show_bucket, for the whole bucket</span></span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1" aria-label="code-block-15-2"></a><span class="ex">aws</span> s3 cp titanic_train.csv s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/titanic_train.csv                     <span class="co"># s3.upload_file(train_filename, bucket_name, train_filename)</span></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1" aria-label="code-block-15-3"></a><span class="ex">aws</span> s3 cp s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/xgboost/<span class="op">&lt;</span>job-name<span class="op">&gt;</span>/output/model.tar.gz model.tar.gz    <span class="co"># the download in the training episode's evaluate step</span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1" aria-label="code-block-15-4"></a><span class="ex">aws</span> s3 sync s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/xgboost/ ./xgboost-outputs/                           <span class="co"># every job's outputs under the prefix; only new or changed files move</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1" aria-label="code-block-15-5"></a><span class="ex">aws</span> s3 rm s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/scratch/ <span class="at">--recursive</span>                                    <span class="co"># delete a prefix; this one asks no questions</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a><span class="ex">aws</span> s3 ls s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/ <span class="at">--recursive</span> <span class="at">--human-readable</span> <span class="at">--summarize</span>             <span class="co"># helpers.show_bucket, for the whole bucket</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1" aria-label="code-block-16-2"></a><span class="ex">aws</span> s3 cp titanic_train.csv s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/titanic_train.csv                     <span class="co"># s3.upload_file(train_filename, bucket_name, train_filename)</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1" aria-label="code-block-16-3"></a><span class="ex">aws</span> s3 cp s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/xgboost/<span class="op">&lt;</span>job-name<span class="op">&gt;</span>/output/model.tar.gz model.tar.gz    <span class="co"># the download in the training episode's evaluate step</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1" aria-label="code-block-16-4"></a><span class="ex">aws</span> s3 sync s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/xgboost/ ./xgboost-outputs/                           <span class="co"># every job's outputs under the prefix; only new or changed files move</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1" aria-label="code-block-16-5"></a><span class="ex">aws</span> s3 rm s3://<span class="op">&lt;</span>your-bucket<span class="op">&gt;</span>/scratch/ <span class="at">--recursive</span>                                    <span class="co"># delete a prefix; this one asks no questions</span></span></code></pre>
 </div>
+<p>The last line, <code>sync --delete</code> and the
+<code>rb --force</code> in section 3 remove data for good and ask
+nothing first. Check the bucket name twice before any of them, and on
+the shared account run them only on your own bucket.</p>
 <p>Downloads to a laptop are a transfer out of AWS (<code>$0.09</code>
 per GB). For anything larger than a few hundred megabytes, keep the data
 in the region and let a job read it, which is the lesson’s pattern.</p>
@@ -983,10 +1000,10 @@ and region, and the rest of the file below is the estimator’s arguments
 under their API names.</p>
 <p>First find the job’s name. The training episode named it after your
 notebook instance, so it is the one with <code>xgboost</code> in it:</p>
-<div class="codewrapper sourceCode" id="cb16">
+<div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" tabindex="-1" aria-label="code-block-16-1"></a><span class="ex">aws</span> sagemaker list-training-jobs <span class="at">--name-contains</span> xgboost <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">aws</span> sagemaker list-training-jobs <span class="at">--name-contains</span> xgboost <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span></code></pre>
 </div>
 <p>Put that name in place of
 <code>&lt;the training episode's xgboost job name&gt;</code> below.</p>
@@ -1005,25 +1022,30 @@ notebook instance, so it is the one with <code>xgboost</code> in it:</p>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
 <div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb17">
+<div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="va">JOB</span><span class="op">=&lt;</span>the <span class="ex">training</span> episode<span class="st">'s xgboost job name&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a><span class="st">aws sagemaker describe-training-job --training-job-name $JOB \</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a><span class="st">  --query '</span>{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}<span class="st">'</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a><span class="va">JOB</span><span class="op">=&lt;</span>the <span class="ex">training</span> episode<span class="st">'s xgboost job name&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a><span class="st">aws sagemaker describe-training-job --training-job-name $JOB \</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a><span class="st">  --query '</span>{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}<span class="st">'</span></span></code></pre>
 </div>
 </div>
 <div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb18">
+<div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb18-1"><a href="#cb18-1" tabindex="-1" aria-label="code-block-18-1"></a><span class="va">$JOB</span> <span class="op">=</span> <span class="st">"&lt;the training episode's xgboost job name&gt;"</span></span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1" aria-label="code-block-18-2"></a>aws sagemaker describe-training-job <span class="op">--</span>training-job-name <span class="va">$JOB</span> `</span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="op">--</span>query <span class="st">'{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}'</span></span></code></pre>
+<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb19-1"><a href="#cb19-1" tabindex="-1" aria-label="code-block-19-1"></a><span class="va">$JOB</span> <span class="op">=</span> <span class="st">"&lt;the training episode's xgboost job name&gt;"</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1" aria-label="code-block-19-2"></a>aws sagemaker describe-training-job <span class="op">--</span>training-job-name <span class="va">$JOB</span> `</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1" aria-label="code-block-19-3"></a>  <span class="op">--</span>query <span class="st">'{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}'</span></span></code></pre>
 </div>
 </div>
 </div>
 </div>
+<p>The describe output is a description, not a request. It carries
+fields AWS fills in after the fact, so it cannot be saved and sent back
+as it is, which is why the file below is written out from the
+estimator’s arguments and takes only three values from the
+description.</p>
 <p><code>image</code> is the XGBoost 1.7-1 container that
 <code>framework_version="1.7-1"</code> picked. <code>role</code> is the
 <code>role</code> the notebook printed. <code>code</code> is where
@@ -1055,95 +1077,95 @@ SageMaker refuses a name it has seen.</p>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
 <div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb19">
+<div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" tabindex="-1" aria-label="code-block-19-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> train-xgboost.json <span class="op">&lt;&lt;'JSON'</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1" aria-label="code-block-19-2"></a><span class="st">{</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1" aria-label="code-block-19-3"></a><span class="st">  "TrainingJobName": "&lt;notebook-instance-name&gt;-xgboost-cli-1",</span></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1" aria-label="code-block-19-4"></a><span class="st">  "AlgorithmSpecification": {</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1" aria-label="code-block-19-5"></a><span class="st">    "TrainingImage": "&lt;image&gt;",</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1" aria-label="code-block-19-6"></a><span class="st">    "TrainingInputMode": "File"</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1" aria-label="code-block-19-7"></a><span class="st">  },</span></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1" aria-label="code-block-19-8"></a><span class="st">  "RoleArn": "&lt;role&gt;",</span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1" aria-label="code-block-19-9"></a><span class="st">  "HyperParameters": {</span></span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1" aria-label="code-block-19-10"></a><span class="st">    "train": "\"titanic_train.csv\"",</span></span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1" aria-label="code-block-19-11"></a><span class="st">    "max_depth": "3",</span></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1" aria-label="code-block-19-12"></a><span class="st">    "eta": "0.1",</span></span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1" aria-label="code-block-19-13"></a><span class="st">    "subsample": "0.8",</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1" aria-label="code-block-19-14"></a><span class="st">    "colsample_bytree": "0.8",</span></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1" aria-label="code-block-19-15"></a><span class="st">    "num_round": "100",</span></span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1" aria-label="code-block-19-16"></a><span class="st">    "sagemaker_program": "\"train_xgboost.py\"",</span></span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1" aria-label="code-block-19-17"></a><span class="st">    "sagemaker_submit_directory": "\"&lt;code&gt;\"",</span></span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1" aria-label="code-block-19-18"></a><span class="st">    "sagemaker_region": "\"us-east-2\"",</span></span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1" aria-label="code-block-19-19"></a><span class="st">    "sagemaker_container_log_level": "20"</span></span>
-<span id="cb19-20"><a href="#cb19-20" tabindex="-1" aria-label="code-block-19-20"></a><span class="st">  },</span></span>
-<span id="cb19-21"><a href="#cb19-21" tabindex="-1" aria-label="code-block-19-21"></a><span class="st">  "InputDataConfig": [</span></span>
-<span id="cb19-22"><a href="#cb19-22" tabindex="-1" aria-label="code-block-19-22"></a><span class="st">    {</span></span>
-<span id="cb19-23"><a href="#cb19-23" tabindex="-1" aria-label="code-block-19-23"></a><span class="st">      "ChannelName": "train",</span></span>
-<span id="cb19-24"><a href="#cb19-24" tabindex="-1" aria-label="code-block-19-24"></a><span class="st">      "ContentType": "csv",</span></span>
-<span id="cb19-25"><a href="#cb19-25" tabindex="-1" aria-label="code-block-19-25"></a><span class="st">      "DataSource": { "S3DataSource": {</span></span>
-<span id="cb19-26"><a href="#cb19-26" tabindex="-1" aria-label="code-block-19-26"></a><span class="st">        "S3DataType": "S3Prefix",</span></span>
-<span id="cb19-27"><a href="#cb19-27" tabindex="-1" aria-label="code-block-19-27"></a><span class="st">        "S3Uri": "s3://&lt;your-bucket&gt;/titanic_train.csv",</span></span>
-<span id="cb19-28"><a href="#cb19-28" tabindex="-1" aria-label="code-block-19-28"></a><span class="st">        "S3DataDistributionType": "FullyReplicated" } }</span></span>
-<span id="cb19-29"><a href="#cb19-29" tabindex="-1" aria-label="code-block-19-29"></a><span class="st">    }</span></span>
-<span id="cb19-30"><a href="#cb19-30" tabindex="-1" aria-label="code-block-19-30"></a><span class="st">  ],</span></span>
-<span id="cb19-31"><a href="#cb19-31" tabindex="-1" aria-label="code-block-19-31"></a><span class="st">  "OutputDataConfig": { "S3OutputPath": "s3://&lt;your-bucket&gt;/xgboost/" },</span></span>
-<span id="cb19-32"><a href="#cb19-32" tabindex="-1" aria-label="code-block-19-32"></a><span class="st">  "ResourceConfig": { "InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 30 },</span></span>
-<span id="cb19-33"><a href="#cb19-33" tabindex="-1" aria-label="code-block-19-33"></a><span class="st">  "StoppingCondition": { "MaxRuntimeInSeconds": 1200 },</span></span>
-<span id="cb19-34"><a href="#cb19-34" tabindex="-1" aria-label="code-block-19-34"></a><span class="st">  "Tags": [</span></span>
-<span id="cb19-35"><a href="#cb19-35" tabindex="-1" aria-label="code-block-19-35"></a><span class="st">    { "Key": "Name",    "Value": "&lt;LastnameFirstname&gt;" },</span></span>
-<span id="cb19-36"><a href="#cb19-36" tabindex="-1" aria-label="code-block-19-36"></a><span class="st">    { "Key": "Project", "Value": "&lt;ChallengeName&gt;" },</span></span>
-<span id="cb19-37"><a href="#cb19-37" tabindex="-1" aria-label="code-block-19-37"></a><span class="st">    { "Key": "Purpose", "Value": "Training" }</span></span>
-<span id="cb19-38"><a href="#cb19-38" tabindex="-1" aria-label="code-block-19-38"></a><span class="st">  ]</span></span>
-<span id="cb19-39"><a href="#cb19-39" tabindex="-1" aria-label="code-block-19-39"></a><span class="st">}</span></span>
-<span id="cb19-40"><a href="#cb19-40" tabindex="-1" aria-label="code-block-19-40"></a><span class="op">JSON</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> train-xgboost.json <span class="op">&lt;&lt;'JSON'</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a><span class="st">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a><span class="st">  "TrainingJobName": "&lt;notebook-instance-name&gt;-xgboost-cli-1",</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1" aria-label="code-block-20-4"></a><span class="st">  "AlgorithmSpecification": {</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1" aria-label="code-block-20-5"></a><span class="st">    "TrainingImage": "&lt;image&gt;",</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1" aria-label="code-block-20-6"></a><span class="st">    "TrainingInputMode": "File"</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1" aria-label="code-block-20-7"></a><span class="st">  },</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1" aria-label="code-block-20-8"></a><span class="st">  "RoleArn": "&lt;role&gt;",</span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1" aria-label="code-block-20-9"></a><span class="st">  "HyperParameters": {</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1" aria-label="code-block-20-10"></a><span class="st">    "train": "\"titanic_train.csv\"",</span></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1" aria-label="code-block-20-11"></a><span class="st">    "max_depth": "3",</span></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1" aria-label="code-block-20-12"></a><span class="st">    "eta": "0.1",</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a><span class="st">    "subsample": "0.8",</span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1" aria-label="code-block-20-14"></a><span class="st">    "colsample_bytree": "0.8",</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1" aria-label="code-block-20-15"></a><span class="st">    "num_round": "100",</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1" aria-label="code-block-20-16"></a><span class="st">    "sagemaker_program": "\"train_xgboost.py\"",</span></span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1" aria-label="code-block-20-17"></a><span class="st">    "sagemaker_submit_directory": "\"&lt;code&gt;\"",</span></span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1" aria-label="code-block-20-18"></a><span class="st">    "sagemaker_region": "\"us-east-2\"",</span></span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1" aria-label="code-block-20-19"></a><span class="st">    "sagemaker_container_log_level": "20"</span></span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1" aria-label="code-block-20-20"></a><span class="st">  },</span></span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1" aria-label="code-block-20-21"></a><span class="st">  "InputDataConfig": [</span></span>
+<span id="cb20-22"><a href="#cb20-22" tabindex="-1" aria-label="code-block-20-22"></a><span class="st">    {</span></span>
+<span id="cb20-23"><a href="#cb20-23" tabindex="-1" aria-label="code-block-20-23"></a><span class="st">      "ChannelName": "train",</span></span>
+<span id="cb20-24"><a href="#cb20-24" tabindex="-1" aria-label="code-block-20-24"></a><span class="st">      "ContentType": "csv",</span></span>
+<span id="cb20-25"><a href="#cb20-25" tabindex="-1" aria-label="code-block-20-25"></a><span class="st">      "DataSource": { "S3DataSource": {</span></span>
+<span id="cb20-26"><a href="#cb20-26" tabindex="-1" aria-label="code-block-20-26"></a><span class="st">        "S3DataType": "S3Prefix",</span></span>
+<span id="cb20-27"><a href="#cb20-27" tabindex="-1" aria-label="code-block-20-27"></a><span class="st">        "S3Uri": "s3://&lt;your-bucket&gt;/titanic_train.csv",</span></span>
+<span id="cb20-28"><a href="#cb20-28" tabindex="-1" aria-label="code-block-20-28"></a><span class="st">        "S3DataDistributionType": "FullyReplicated" } }</span></span>
+<span id="cb20-29"><a href="#cb20-29" tabindex="-1" aria-label="code-block-20-29"></a><span class="st">    }</span></span>
+<span id="cb20-30"><a href="#cb20-30" tabindex="-1" aria-label="code-block-20-30"></a><span class="st">  ],</span></span>
+<span id="cb20-31"><a href="#cb20-31" tabindex="-1" aria-label="code-block-20-31"></a><span class="st">  "OutputDataConfig": { "S3OutputPath": "s3://&lt;your-bucket&gt;/xgboost/" },</span></span>
+<span id="cb20-32"><a href="#cb20-32" tabindex="-1" aria-label="code-block-20-32"></a><span class="st">  "ResourceConfig": { "InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 30 },</span></span>
+<span id="cb20-33"><a href="#cb20-33" tabindex="-1" aria-label="code-block-20-33"></a><span class="st">  "StoppingCondition": { "MaxRuntimeInSeconds": 1200 },</span></span>
+<span id="cb20-34"><a href="#cb20-34" tabindex="-1" aria-label="code-block-20-34"></a><span class="st">  "Tags": [</span></span>
+<span id="cb20-35"><a href="#cb20-35" tabindex="-1" aria-label="code-block-20-35"></a><span class="st">    { "Key": "Name",    "Value": "&lt;LastnameFirstname&gt;" },</span></span>
+<span id="cb20-36"><a href="#cb20-36" tabindex="-1" aria-label="code-block-20-36"></a><span class="st">    { "Key": "Project", "Value": "&lt;ChallengeName&gt;" },</span></span>
+<span id="cb20-37"><a href="#cb20-37" tabindex="-1" aria-label="code-block-20-37"></a><span class="st">    { "Key": "Purpose", "Value": "Training" }</span></span>
+<span id="cb20-38"><a href="#cb20-38" tabindex="-1" aria-label="code-block-20-38"></a><span class="st">  ]</span></span>
+<span id="cb20-39"><a href="#cb20-39" tabindex="-1" aria-label="code-block-20-39"></a><span class="st">}</span></span>
+<span id="cb20-40"><a href="#cb20-40" tabindex="-1" aria-label="code-block-20-40"></a><span class="op">JSON</span></span></code></pre>
 </div>
 </div>
 <div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb20">
+<div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb20-1"><a href="#cb20-1" tabindex="-1" aria-label="code-block-20-1"></a><span class="vs">@'</span></span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1" aria-label="code-block-20-2"></a><span class="vs">{</span></span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a><span class="vs">  "TrainingJobName": "&lt;notebook-instance-name&gt;-xgboost-cli-1",</span></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1" aria-label="code-block-20-4"></a><span class="vs">  "AlgorithmSpecification": {</span></span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1" aria-label="code-block-20-5"></a><span class="vs">    "TrainingImage": "&lt;image&gt;",</span></span>
-<span id="cb20-6"><a href="#cb20-6" tabindex="-1" aria-label="code-block-20-6"></a><span class="vs">    "TrainingInputMode": "File"</span></span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1" aria-label="code-block-20-7"></a><span class="vs">  },</span></span>
-<span id="cb20-8"><a href="#cb20-8" tabindex="-1" aria-label="code-block-20-8"></a><span class="vs">  "RoleArn": "&lt;role&gt;",</span></span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1" aria-label="code-block-20-9"></a><span class="vs">  "HyperParameters": {</span></span>
-<span id="cb20-10"><a href="#cb20-10" tabindex="-1" aria-label="code-block-20-10"></a><span class="vs">    "train": "\"titanic_train.csv\"",</span></span>
-<span id="cb20-11"><a href="#cb20-11" tabindex="-1" aria-label="code-block-20-11"></a><span class="vs">    "max_depth": "3",</span></span>
-<span id="cb20-12"><a href="#cb20-12" tabindex="-1" aria-label="code-block-20-12"></a><span class="vs">    "eta": "0.1",</span></span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a><span class="vs">    "subsample": "0.8",</span></span>
-<span id="cb20-14"><a href="#cb20-14" tabindex="-1" aria-label="code-block-20-14"></a><span class="vs">    "colsample_bytree": "0.8",</span></span>
-<span id="cb20-15"><a href="#cb20-15" tabindex="-1" aria-label="code-block-20-15"></a><span class="vs">    "num_round": "100",</span></span>
-<span id="cb20-16"><a href="#cb20-16" tabindex="-1" aria-label="code-block-20-16"></a><span class="vs">    "sagemaker_program": "\"train_xgboost.py\"",</span></span>
-<span id="cb20-17"><a href="#cb20-17" tabindex="-1" aria-label="code-block-20-17"></a><span class="vs">    "sagemaker_submit_directory": "\"&lt;code&gt;\"",</span></span>
-<span id="cb20-18"><a href="#cb20-18" tabindex="-1" aria-label="code-block-20-18"></a><span class="vs">    "sagemaker_region": "\"us-east-2\"",</span></span>
-<span id="cb20-19"><a href="#cb20-19" tabindex="-1" aria-label="code-block-20-19"></a><span class="vs">    "sagemaker_container_log_level": "20"</span></span>
-<span id="cb20-20"><a href="#cb20-20" tabindex="-1" aria-label="code-block-20-20"></a><span class="vs">  },</span></span>
-<span id="cb20-21"><a href="#cb20-21" tabindex="-1" aria-label="code-block-20-21"></a><span class="vs">  "InputDataConfig": [</span></span>
-<span id="cb20-22"><a href="#cb20-22" tabindex="-1" aria-label="code-block-20-22"></a><span class="vs">    {</span></span>
-<span id="cb20-23"><a href="#cb20-23" tabindex="-1" aria-label="code-block-20-23"></a><span class="vs">      "ChannelName": "train",</span></span>
-<span id="cb20-24"><a href="#cb20-24" tabindex="-1" aria-label="code-block-20-24"></a><span class="vs">      "ContentType": "csv",</span></span>
-<span id="cb20-25"><a href="#cb20-25" tabindex="-1" aria-label="code-block-20-25"></a><span class="vs">      "DataSource": { "S3DataSource": {</span></span>
-<span id="cb20-26"><a href="#cb20-26" tabindex="-1" aria-label="code-block-20-26"></a><span class="vs">        "S3DataType": "S3Prefix",</span></span>
-<span id="cb20-27"><a href="#cb20-27" tabindex="-1" aria-label="code-block-20-27"></a><span class="vs">        "S3Uri": "s3://&lt;your-bucket&gt;/titanic_train.csv",</span></span>
-<span id="cb20-28"><a href="#cb20-28" tabindex="-1" aria-label="code-block-20-28"></a><span class="vs">        "S3DataDistributionType": "FullyReplicated" } }</span></span>
-<span id="cb20-29"><a href="#cb20-29" tabindex="-1" aria-label="code-block-20-29"></a><span class="vs">    }</span></span>
-<span id="cb20-30"><a href="#cb20-30" tabindex="-1" aria-label="code-block-20-30"></a><span class="vs">  ],</span></span>
-<span id="cb20-31"><a href="#cb20-31" tabindex="-1" aria-label="code-block-20-31"></a><span class="vs">  "OutputDataConfig": { "S3OutputPath": "s3://&lt;your-bucket&gt;/xgboost/" },</span></span>
-<span id="cb20-32"><a href="#cb20-32" tabindex="-1" aria-label="code-block-20-32"></a><span class="vs">  "ResourceConfig": { "InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 30 },</span></span>
-<span id="cb20-33"><a href="#cb20-33" tabindex="-1" aria-label="code-block-20-33"></a><span class="vs">  "StoppingCondition": { "MaxRuntimeInSeconds": 1200 },</span></span>
-<span id="cb20-34"><a href="#cb20-34" tabindex="-1" aria-label="code-block-20-34"></a><span class="vs">  "Tags": [</span></span>
-<span id="cb20-35"><a href="#cb20-35" tabindex="-1" aria-label="code-block-20-35"></a><span class="vs">    { "Key": "Name",    "Value": "&lt;LastnameFirstname&gt;" },</span></span>
-<span id="cb20-36"><a href="#cb20-36" tabindex="-1" aria-label="code-block-20-36"></a><span class="vs">    { "Key": "Project", "Value": "&lt;ChallengeName&gt;" },</span></span>
-<span id="cb20-37"><a href="#cb20-37" tabindex="-1" aria-label="code-block-20-37"></a><span class="vs">    { "Key": "Purpose", "Value": "Training" }</span></span>
-<span id="cb20-38"><a href="#cb20-38" tabindex="-1" aria-label="code-block-20-38"></a><span class="vs">  ]</span></span>
-<span id="cb20-39"><a href="#cb20-39" tabindex="-1" aria-label="code-block-20-39"></a><span class="vs">}</span></span>
-<span id="cb20-40"><a href="#cb20-40" tabindex="-1" aria-label="code-block-20-40"></a><span class="vs">'@</span> <span class="op">|</span> <span class="fu">Set-Content</span> <span class="op">-</span>Path train-xgboost<span class="op">.</span><span class="fu">json</span></span></code></pre>
+<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="vs">@'</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="vs">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a><span class="vs">  "TrainingJobName": "&lt;notebook-instance-name&gt;-xgboost-cli-1",</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="vs">  "AlgorithmSpecification": {</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1" aria-label="code-block-21-5"></a><span class="vs">    "TrainingImage": "&lt;image&gt;",</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1" aria-label="code-block-21-6"></a><span class="vs">    "TrainingInputMode": "File"</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1" aria-label="code-block-21-7"></a><span class="vs">  },</span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1" aria-label="code-block-21-8"></a><span class="vs">  "RoleArn": "&lt;role&gt;",</span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1" aria-label="code-block-21-9"></a><span class="vs">  "HyperParameters": {</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1" aria-label="code-block-21-10"></a><span class="vs">    "train": "\"titanic_train.csv\"",</span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1" aria-label="code-block-21-11"></a><span class="vs">    "max_depth": "3",</span></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1" aria-label="code-block-21-12"></a><span class="vs">    "eta": "0.1",</span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1" aria-label="code-block-21-13"></a><span class="vs">    "subsample": "0.8",</span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1" aria-label="code-block-21-14"></a><span class="vs">    "colsample_bytree": "0.8",</span></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1" aria-label="code-block-21-15"></a><span class="vs">    "num_round": "100",</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1" aria-label="code-block-21-16"></a><span class="vs">    "sagemaker_program": "\"train_xgboost.py\"",</span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1" aria-label="code-block-21-17"></a><span class="vs">    "sagemaker_submit_directory": "\"&lt;code&gt;\"",</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1" aria-label="code-block-21-18"></a><span class="vs">    "sagemaker_region": "\"us-east-2\"",</span></span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1" aria-label="code-block-21-19"></a><span class="vs">    "sagemaker_container_log_level": "20"</span></span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1" aria-label="code-block-21-20"></a><span class="vs">  },</span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1" aria-label="code-block-21-21"></a><span class="vs">  "InputDataConfig": [</span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1" aria-label="code-block-21-22"></a><span class="vs">    {</span></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1" aria-label="code-block-21-23"></a><span class="vs">      "ChannelName": "train",</span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1" aria-label="code-block-21-24"></a><span class="vs">      "ContentType": "csv",</span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1" aria-label="code-block-21-25"></a><span class="vs">      "DataSource": { "S3DataSource": {</span></span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1" aria-label="code-block-21-26"></a><span class="vs">        "S3DataType": "S3Prefix",</span></span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1" aria-label="code-block-21-27"></a><span class="vs">        "S3Uri": "s3://&lt;your-bucket&gt;/titanic_train.csv",</span></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1" aria-label="code-block-21-28"></a><span class="vs">        "S3DataDistributionType": "FullyReplicated" } }</span></span>
+<span id="cb21-29"><a href="#cb21-29" tabindex="-1" aria-label="code-block-21-29"></a><span class="vs">    }</span></span>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1" aria-label="code-block-21-30"></a><span class="vs">  ],</span></span>
+<span id="cb21-31"><a href="#cb21-31" tabindex="-1" aria-label="code-block-21-31"></a><span class="vs">  "OutputDataConfig": { "S3OutputPath": "s3://&lt;your-bucket&gt;/xgboost/" },</span></span>
+<span id="cb21-32"><a href="#cb21-32" tabindex="-1" aria-label="code-block-21-32"></a><span class="vs">  "ResourceConfig": { "InstanceType": "ml.m5.large", "InstanceCount": 1, "VolumeSizeInGB": 30 },</span></span>
+<span id="cb21-33"><a href="#cb21-33" tabindex="-1" aria-label="code-block-21-33"></a><span class="vs">  "StoppingCondition": { "MaxRuntimeInSeconds": 1200 },</span></span>
+<span id="cb21-34"><a href="#cb21-34" tabindex="-1" aria-label="code-block-21-34"></a><span class="vs">  "Tags": [</span></span>
+<span id="cb21-35"><a href="#cb21-35" tabindex="-1" aria-label="code-block-21-35"></a><span class="vs">    { "Key": "Name",    "Value": "&lt;LastnameFirstname&gt;" },</span></span>
+<span id="cb21-36"><a href="#cb21-36" tabindex="-1" aria-label="code-block-21-36"></a><span class="vs">    { "Key": "Project", "Value": "&lt;ChallengeName&gt;" },</span></span>
+<span id="cb21-37"><a href="#cb21-37" tabindex="-1" aria-label="code-block-21-37"></a><span class="vs">    { "Key": "Purpose", "Value": "Training" }</span></span>
+<span id="cb21-38"><a href="#cb21-38" tabindex="-1" aria-label="code-block-21-38"></a><span class="vs">  ]</span></span>
+<span id="cb21-39"><a href="#cb21-39" tabindex="-1" aria-label="code-block-21-39"></a><span class="vs">}</span></span>
+<span id="cb21-40"><a href="#cb21-40" tabindex="-1" aria-label="code-block-21-40"></a><span class="vs">'@</span> <span class="op">|</span> <span class="fu">Set-Content</span> <span class="op">-</span>Path train-xgboost<span class="op">.</span><span class="fu">json</span></span></code></pre>
 </div>
 </div>
 </div>
@@ -1215,12 +1237,12 @@ the lesson’s scripts folder put on the path first. These are the PyTorch
 episode’s estimate, the tuning episode’s and the fine-tuning episode’s,
 and each prints the time, the cost and the <code>max_run</code> to put
 in the request:</p>
-<div class="codewrapper sourceCode" id="cb21">
+<div class="codewrapper sourceCode" id="cb22">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import sys; sys.path.insert(0, 'ML_with_AWS_SageMaker/scripts'); import helpers; helpers.estimate_training_cost(params_billions=0.125, examples=1_000_000, tokens_per_example=256, epochs=3, instance_type='ml.g6.xlarge')"</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import sys; sys.path.insert(0, 'ML_with_AWS_SageMaker/scripts'); import helpers; helpers.estimate_tuning_cost(train_minutes_per_job=1, price_per_hour=0.115, max_jobs=8)"</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import sys; sys.path.insert(0, 'ML_with_AWS_SageMaker/scripts'); import helpers; helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_example=1600, epochs=2, instance_type='ml.g5.xlarge')"</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import sys; sys.path.insert(0, 'ML_with_AWS_SageMaker/scripts'); import helpers; helpers.estimate_training_cost(params_billions=0.125, examples=1_000_000, tokens_per_example=256, epochs=3, instance_type='ml.g6.xlarge')"</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1" aria-label="code-block-22-2"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import sys; sys.path.insert(0, 'ML_with_AWS_SageMaker/scripts'); import helpers; helpers.estimate_tuning_cost(train_minutes_per_job=1, price_per_hour=0.115, max_jobs=8)"</span></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1" aria-label="code-block-22-3"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">"import sys; sys.path.insert(0, 'ML_with_AWS_SageMaker/scripts'); import helpers; helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_example=1600, epochs=2, instance_type='ml.g5.xlarge')"</span></span></code></pre>
 </div>
 <p>Then check the request. <code>scripts/check_request.py</code> reads
 the JSON and does two things. It applies the account’s rules from
@@ -1234,10 +1256,10 @@ instance’s hourly price, and for a tuning job every child job it allows.
 With <code>--max-cost</code> it exits with an error when that worst case
 is above the amount, which is the check to put in front of every create
 call:</p>
-<div class="codewrapper sourceCode" id="cb22">
+<div class="codewrapper sourceCode" id="cb23">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1" aria-label="code-block-22-1"></a><span class="ex">python</span> ML_with_AWS_SageMaker/scripts/check_request.py train-xgboost.json <span class="at">--max-cost</span> 1</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" tabindex="-1" aria-label="code-block-23-1"></a><span class="ex">python</span> ML_with_AWS_SageMaker/scripts/check_request.py train-xgboost.json <span class="at">--max-cost</span> 1</span></code></pre>
 </div>
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1252,20 +1274,20 @@ surprises people.</p>
 <p>Then send it. This one line is <code>estimator.fit()</code>, and the
 <code>&amp;&amp;</code> in front of it means the create call runs only
 when the check passed:</p>
-<div class="codewrapper sourceCode" id="cb24">
+<div class="codewrapper sourceCode" id="cb25">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" tabindex="-1" aria-label="code-block-24-1"></a><span class="ex">python</span> ML_with_AWS_SageMaker/scripts/check_request.py train-xgboost.json <span class="at">--max-cost</span> 1 <span class="kw">&amp;&amp;</span> <span class="ex">aws</span> sagemaker create-training-job <span class="at">--cli-input-json</span> file://train-xgboost.json</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1" aria-label="code-block-25-1"></a><span class="ex">python</span> ML_with_AWS_SageMaker/scripts/check_request.py train-xgboost.json <span class="at">--max-cost</span> 1 <span class="kw">&amp;&amp;</span> <span class="ex">aws</span> sagemaker create-training-job <span class="at">--cli-input-json</span> file://train-xgboost.json</span></code></pre>
 </div>
 <p>The CLI returns the moment the request is accepted. Nothing waits,
 which is <code>fit(wait=False)</code>. To follow the job the way the
 default <code>wait=True</code> did, then read its bill as in section
 2:</p>
-<div class="codewrapper sourceCode" id="cb25">
+<div class="codewrapper sourceCode" id="cb26">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1" aria-label="code-block-25-1"></a><span class="ex">aws</span> sagemaker wait training-job-completed-or-stopped <span class="at">--training-job-name</span> <span class="op">&lt;</span>notebook-instance-name<span class="op">&gt;</span>-xgboost-cli-1   <span class="co"># blocks until it ends</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1" aria-label="code-block-25-2"></a><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="op">&lt;</span>notebook-instance-name<span class="op">&gt;</span>-xgboost-cli-1 <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, billable_s:BillableTimeInSeconds, failure:FailureReason, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" tabindex="-1" aria-label="code-block-26-1"></a><span class="ex">aws</span> sagemaker wait training-job-completed-or-stopped <span class="at">--training-job-name</span> <span class="op">&lt;</span>notebook-instance-name<span class="op">&gt;</span>-xgboost-cli-1   <span class="co"># blocks until it ends</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1" aria-label="code-block-26-2"></a><span class="ex">aws</span> sagemaker describe-training-job <span class="at">--training-job-name</span> <span class="op">&lt;</span>notebook-instance-name<span class="op">&gt;</span>-xgboost-cli-1 <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, billable_s:BillableTimeInSeconds, failure:FailureReason, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 <p>Expect the same two to three billable minutes on
 <code>ml.m5.large</code> as the notebook’s job, under a cent, and the
@@ -1355,29 +1377,29 @@ finds something. Then run them against your own resources.</p>
 </div>
 </nav><div id="nav-tabContent-6" class="tab-content">
 <div id="nav-tabpanel-6-1" class="tab-pane show active" aria-labelledby="nav-tab-6-1" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb26">
+<div class="codewrapper sourceCode" id="cb27">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" tabindex="-1" aria-label="code-block-26-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" tabindex="-1" aria-label="code-block-27-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
 <div id="nav-tabpanel-6-2" class="tab-pane" aria-labelledby="nav-tab-6-2" role="tabpanel">
-<div class="codewrapper sourceCode" id="cb27">
+<div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb27-1"><a href="#cb27-1" tabindex="-1" aria-label="code-block-27-1"></a>aws sso login <span class="op">--</span>profile workshop<span class="op">;</span> <span class="va">$env</span><span class="op">:</span><span class="va">AWS_PROFILE</span> <span class="op">=</span> <span class="st">"workshop"</span></span></code></pre>
+<pre class="sourceCode powershell" tabindex="0"><code class="sourceCode powershell"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a>aws sso login <span class="op">--</span>profile workshop<span class="op">;</span> <span class="va">$env</span><span class="op">:</span><span class="va">AWS_PROFILE</span> <span class="op">=</span> <span class="st">"workshop"</span></span></code></pre>
 </div>
 </div>
 </div>
 </div>
-<div class="codewrapper sourceCode" id="cb28">
+<div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="ex">aws</span> sagemaker list-training-jobs   <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1" aria-label="code-block-28-2"></a><span class="ex">aws</span> sagemaker list-processing-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'ProcessingJobSummaries[].ProcessingJobName'</span></span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1" aria-label="code-block-28-3"></a><span class="ex">aws</span> sagemaker list-hyper-parameter-tuning-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'HyperParameterTuningJobSummaries[].HyperParameterTuningJobName'</span></span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1" aria-label="code-block-28-4"></a><span class="ex">aws</span> sagemaker list-notebook-instances <span class="at">--query</span> <span class="st">'NotebookInstances[?NotebookInstanceStatus==`InService`].NotebookInstanceName'</span></span>
-<span id="cb28-5"><a href="#cb28-5" tabindex="-1" aria-label="code-block-28-5"></a><span class="ex">aws</span> sagemaker list-endpoints <span class="at">--query</span> <span class="st">'Endpoints[].EndpointName'</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" tabindex="-1" aria-label="code-block-29-1"></a><span class="ex">aws</span> sagemaker list-training-jobs   <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'TrainingJobSummaries[].TrainingJobName'</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1" aria-label="code-block-29-2"></a><span class="ex">aws</span> sagemaker list-processing-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'ProcessingJobSummaries[].ProcessingJobName'</span></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1" aria-label="code-block-29-3"></a><span class="ex">aws</span> sagemaker list-hyper-parameter-tuning-jobs <span class="at">--status-equals</span> InProgress <span class="at">--query</span> <span class="st">'HyperParameterTuningJobSummaries[].HyperParameterTuningJobName'</span></span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1" aria-label="code-block-29-4"></a><span class="ex">aws</span> sagemaker list-notebook-instances <span class="at">--query</span> <span class="st">'NotebookInstances[?NotebookInstanceStatus==`InService`].NotebookInstanceName'</span></span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1" aria-label="code-block-29-5"></a><span class="ex">aws</span> sagemaker list-endpoints <span class="at">--query</span> <span class="st">'Endpoints[].EndpointName'</span></span></code></pre>
 </div>
 <p>For anything the first four print, the matching <code>stop-...</code>
 command from section 3. A job you recognize as yours and expect to
