@@ -743,29 +743,48 @@ and check that it is on your path:</li>
 </div>
 <ol start="2" style="list-style-type: decimal"><li>
 <strong>Register the account’s Identity Center</strong>, once. Run
-the command below in the same terminal. It asks four things in turn.
-First the start URL and the region of the Identity Center sign-in page,
-the same ones you used in the browser, both in the sign-in email from
-your instructor. It then opens a browser tab for you to approve the
-device, and comes back to the terminal to ask which account and which
-permission set. On the workshop account there is one of each, the
-account your instructor set up and the permission set your login
-carries, so pick what it offers. The permission set is not the notebook
-role. It is the identity you sign in with, the same one the console
-uses. The notebook role, <code>ml-sagemaker-use</code>, is what a job
-runs as, and it stays in the job’s <code>RoleArn</code> in section 5.
-Finally it asks for a default region, <code>us-east-2</code> for the
-workshop account, and a name for the profile. A profile is a named set
-of these answers, saved in <code>~/.aws/config</code> on your laptop, so
-that the CLI knows which account, role and region a command is for. One
-laptop can hold several, one per account you use. Call this one
-<code>workshop</code>, since the rest of the episode uses that
-name.</li>
+the command below in the same terminal and answer its prompts in this
+order. A profile is a named set of these answers, saved in
+<code>~/.aws/config</code> on your laptop, so that the CLI knows which
+account, role and region a command is for. One laptop can hold several,
+one per account you use.</li>
 </ol><div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="ex">aws</span> configure sso</span></code></pre>
 </div>
+<table class="table"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th>Prompt</th>
+<th>Answer</th>
+</tr></thead><tbody><tr><td>SSO session name</td>
+<td><code>workshop</code></td>
+</tr><tr><td>SSO start URL</td>
+<td>Your sign-in link from the instructor’s email, up to and including
+<code>/start</code>, with nothing after it</td>
+</tr><tr><td>SSO region</td>
+<td>The region Identity Center runs in, which is in the same email. It
+is not always the account’s working region</td>
+</tr><tr><td>SSO registration scopes</td>
+<td>Enter, for the default</td>
+</tr><tr><td>A browser tab opens</td>
+<td>Approve the device code it shows</td>
+</tr><tr><td>Account</td>
+<td>There is one on the workshop account; confirm it</td>
+</tr><tr><td>Role</td>
+<td>There is one, the permission set your login carries; confirm it</td>
+</tr><tr><td>Default client region</td>
+<td>
+<code>us-east-2</code> for the workshop account</td>
+</tr><tr><td>Default output format</td>
+<td><code>json</code></td>
+</tr><tr><td>Profile name</td>
+<td>
+<code>workshop</code>, since the rest of the episode uses that
+name</td>
+</tr></tbody></table><p>The role here is the permission set, not the notebook role. The
+permission set is the identity you sign in with, the same one the
+console uses. The notebook role, <code>ml-sagemaker-use</code>, is what
+a job runs as, and it stays in the job’s <code>RoleArn</code> in section
+5.</p>
 <p>The commands in this episode are the same in Bash (macOS, Linux, Git
 Bash on Windows) and in PowerShell. Where the shell’s own syntax
 differs, variables, line continuation, writing a file, the two are shown
