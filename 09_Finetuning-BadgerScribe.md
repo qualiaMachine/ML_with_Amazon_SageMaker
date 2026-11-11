@@ -250,7 +250,7 @@ Multi-GPU instances are for jobs that do not fit on one GPU, a full fine-tune of
 
 ### What fine-tuning costs, from one dollar to ten thousand
 
-With the two rules, any run can be priced before it exists. The table does that for runs from this episode's to the ones that make a model like CHURRO, with SageMaker on-demand prices in `us-east-1` from October 2026. GPUs come in fixed boxes, so "32 H100s for 25 hours" is four `ml.p5.48xlarge` for 25 hours, 100 instance-hours at `$63.30`:
+With the two rules, any run can be priced before it exists. The table does that for runs from this episode's to the ones that make a model like CHURRO, with SageMaker on-demand prices from October 2026. GPUs come in fixed boxes, so "32 H100s for 25 hours" is four `ml.p5.48xlarge` for 25 hours, 100 instance-hours at `$63.30`:
 
 | Run | GPUs | Instances rented (price per instance-hour) | Hours | GPU-hours | Cost = instance-hours × price |
 |---|---|---|---|---|---|
@@ -629,7 +629,7 @@ A 7B LoRA still fits one GPU, 22 GB on a 24 GB L4, for under a dollar; the full 
 
 ### A code folder for the job
 
-The three scripts the job needs are already on this instance, in the lesson clone. The job cannot use them from there: it runs in a container on another machine, and the only code it gets is the one directory named by `source_dir=` on the estimator, uploaded whole. That directory should hold what the job imports and a `requirements.txt` listing what the container has to install, and nothing else. So make a small `code/` folder here with copies of the three files, instead of pointing `source_dir` at the lesson's `scripts/` directory, which would upload every script in the lesson and need a requirements file written into the repository:
+The three scripts the job needs are already on this instance, in the lesson clone. The job cannot use them from there: it runs in a container on another machine, and the only code it gets is the one directory named by `source_dir=` on the estimator, uploaded whole. That directory should hold what the job imports and a `requirements.txt` listing what the container has to install, and nothing else. The prebuilt container has PyTorch and `transformers`, and before it runs the entry point it installs whatever `requirements.txt` names, which is how `peft` gets there. So make a small `code/` folder here with copies of the three files, instead of pointing `source_dir` at the lesson's `scripts/` directory, which would upload every script in the lesson and need a requirements file written into the repository:
 
 ```python
 import shutil
@@ -646,7 +646,9 @@ print(os.listdir("code"))
 
 - `badger_scribe_helpers.py`: the prompt, image loading, and a copy of the competition's CER. Shared by the other two so the model is trained on the same prompt it is later asked.
 - `finetune_churro_lora.py`: the training job entry point. Holds out 15% of pages per category, filters to the categories you ask for, scores a sample of holdout pages with the base model, trains a LoRA adapter, scores the same pages again, and saves everything.
-- `churro_transcribe_batch.py`: used in the homework. Transcribes any list of pages with the base model or with the adapter merged in, and writes `predictions.csv` in the submission format.
+- `churro_transcribe_batch.py`: not used by the training job. It rides along because the homework's Processing job ships the same folder, and it transcribes any list of pages with the base model or with the adapter merged in, writing `predictions.csv`.
+
+The training job runs the first file, imports the second, and installs the requirements. The folder is a few kilobytes, so the unused third file costs nothing.
 
 ::::::::::::::::::::::::::::::::::::::: challenge
 
@@ -719,7 +721,7 @@ First the guard rails, each one a named variable so that the printout below show
 
 ```python
 instance_type = "ml.g5.xlarge"            # one A10G GPU, 24 GB; the GPU lives in the job, not in this notebook
-g5_price = 1.41                           # $/hour, us-east-1 on-demand, from the Instances for ML page
+g5_price = helpers.instance_price(instance_type)   # $/hour on-demand, from the lesson's price table, the same numbers as the Instances for ML page
 estimated_minutes = 27                    # the Step 0 estimate
 max_run_minutes = 65                      # about twice the estimate; SageMaker kills the job at this cap, whatever it is doing
 run_id = time.strftime("%m%d-%H%M")                                   # launch time, so every run gets a new name: job names must be unique in the account
@@ -835,7 +837,7 @@ model_output_path = f"s3://{bucket_name}/{data_prefix}/models/"   # the job's mo
 
 estimator = HuggingFace(
     entry_point="finetune_churro_lora.py",
-    source_dir="code/",                   # the whole directory ships with the job: script, badger_scribe_helpers.py, requirements.txt
+    source_dir="code/",                   # the whole folder ships with the job; the container pip-installs requirements.txt, then runs entry_point, which imports badger_scribe_helpers
     role=role,
     tags=make_job_tags("Training"),
     instance_type=instance_type,
