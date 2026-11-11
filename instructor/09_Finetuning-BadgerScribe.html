@@ -1011,9 +1011,9 @@ page-sized images. The <code>ml.g6e.xlarge</code> is 2 to 3x faster than
 either 24 GB card for less than twice the price, so it becomes cheaper
 per run once training outweighs the fixed startup.</p>
 <p>Multi-GPU instances are for jobs that do not fit on one GPU, a full
-fine-tune of a 7B model or anything at 70B. They do not make a job
-cheaper. GPU-hours are the cost, and spreading them across eight GPUs
-shortens the wall-clock time and leaves the bill alone, and only
+fine-tune of a 7B model or anything at 70B and above. They do not make a
+job cheaper. GPU-hours are the cost, and spreading them across eight
+GPUs shortens the wall-clock time and leaves the bill alone, and only
 shortens it when the job is big enough to keep all eight busy. For a job
 that fits one GPU the price goes up 5x to 45x and the job gets no
 faster. You add GPUs when the memory table says one GPU cannot hold the
