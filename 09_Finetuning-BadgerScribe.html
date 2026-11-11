@@ -491,26 +491,40 @@ Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
 <div id="joining-at-this-episode" class="callout-inner">
 <h3 class="callout-title">Joining at this episode</h3>
 <div class="callout-content">
-<p>This episode stands on its own, and these are the four things the
-earlier episodes set up that it uses. Learners coming through the whole
-lesson have seen each one.</p>
-<ul><li>
-<strong>An S3 bucket of your own</strong>, from the S3 episode,
-where every job’s outputs land. The notebook refers to it as
-<code>bucket_name</code>.</li>
+<p>This episode stands on its own, but it runs from a notebook instance
+and writes to a bucket that the earlier episodes create. If this is your
+first episode, complete these before the first cell, in this order. They
+take about half an hour. Learners coming through the whole lesson have
+done each one.</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Sign in to the account</strong>, following the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/index.html#setup" class="external-link">setup
+page</a>. On the shared UW-Madison account that is the sign-in link the
+instructors emailed; on your own account, the page says what to
+prepare.</li>
 <li>
-<strong>A notebook instance</strong>, from the controllers episode,
-a small CPU machine running JupyterLab. It launches jobs and reads
-results. The GPU is never on it.</li>
+<strong>Create an S3 bucket of your own</strong>, in <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/02_Data-storage-setting-up-S3.html" class="external-link">episode
+2</a>, with the three tags <code>Name</code>, <code>Project</code> and
+<code>Purpose</code> on it. Every job’s outputs land there, and the
+notebook refers to it as <code>bucket_name</code>. Uploading the Titanic
+data is for the other episodes and can be skipped.</li>
 <li>
-<strong>A role</strong>, <code>ml-sagemaker-use</code>, which the
-notebook instance runs as and hands to every job, so nothing here asks
-you to sign in.</li>
+<strong>Create a notebook instance</strong>, in <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/03_SageMaker-notebooks-as-controllers.html" class="external-link">episode
+3</a>, a small CPU machine running JupyterLab, with the same three tags
+and the <code>ml-sagemaker-use</code> role. The instance launches jobs
+and reads results; the GPU is never on it. The episode ends by cloning
+the lesson repository onto the instance, which is where this episode’s
+notebook, scripts and helper code come from.</li>
 <li>
-<strong>Three tags on everything</strong>, <code>Name</code>,
-<code>Project</code> and <code>Purpose</code>, which the shared account
-requires on every job and uses to attribute the bill.</li>
-</ul></div>
+<strong>Read your bucket from the notebook once</strong>, in <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/04_Accessing-S3-via-SageMaker-notebooks.html" class="external-link">episode
+4</a>, to see how a notebook lists, reads and writes S3. This episode’s
+first cells do the same with the Badger Scribe data, and this step is
+the one to skip if time is short.</li>
+</ol><p>Two things the account handles for you. The role is what the notebook
+instance runs as and hands to every job, so nothing here asks you to
+sign in again. The three tags are required on every job, and the shared
+account uses them to attribute the bill, so the launch cells below carry
+them.</p>
+</div>
 </div>
 </div>
 <section><h2 class="section-heading" id="why-fine-tune-a-model">Why fine-tune a model?<a class="anchor" aria-label="anchor" href="#why-fine-tune-a-model"></a></h2>
