@@ -1421,7 +1421,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2877,7 +2877,7 @@ commit it, push with your PAT, and verify the change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -8214,34 +8214,46 @@ machine, and bills the seconds in between.</p>
 <span id="cb33-22"><a href="#cb33-22" tabindex="-1" aria-label="code-block-33-22"></a>    hyperparameters<span class="op">=</span>hyperparameters,</span>
 <span id="cb33-23"><a href="#cb33-23" tabindex="-1" aria-label="code-block-33-23"></a>)</span></code></pre>
 </div>
-<p>Now launch. Two details in this one line matter:</p>
+<p>Now launch. The estimator described the machine and the code.
+<code>fit()</code> supplies the data and starts the job, and its first
+argument is where the model weights come in.</p>
 <ul>
 <li>
-<code>job_name</code> is the one defined with the guard rails, with
-the launch time in it: SageMaker requires training job names to be
-unique in the account, and a name that is fixed fails with
+<strong>The first argument is the input channels</strong>, a
+dictionary of names to S3 locations. SageMaker copies each location onto
+the job’s instance before the script starts, at
+<code>/opt/ml/input/data/&lt;name&gt;</code>, and tells the script where
+through an environment variable, <code>SM_CHANNEL_TRAIN</code> for a
+channel named <code>train</code>. The names are yours to choose and the
+script reads them by name. The XGBoost job in the training episode had
+one channel, <code>train</code>. This job has two. <code>train</code> is
+the pages and CSVs. <code>model</code> is the copy of CHURRO-3B your
+instructor staged in the shared bucket, and the script loads the base
+weights from that folder instead of pulling 7.5 GB from Hugging Face,
+which matters when a class launches a hundred jobs in the same minute.
+Both locations were set in Setup as <code>train_s3_uri</code> and
+<code>model_s3_uri</code>.</li>
+<li>
+<strong><code>job_name</code></strong> is the one defined with the
+guard rails, with the launch time in it. SageMaker requires training job
+names to be unique in the account, and a fixed name fails with
 <code>ResourceInUse</code> the second time the cell runs. Rerunning the
 guard-rail cell gives a new name and a new checkpoint prefix. To
 <strong>resume</strong> a job that was killed, keep the old
 <code>checkpoint_s3_uri</code> and launch under the new name.</li>
+<li>
+<strong><code>wait=True</code></strong>, the default, blocks the
+notebook until the job ends and streams its log here. For a 33-minute
+job that is the right choice. You cannot queue a second launch by
+accident while you wait, and everything worth doing in the meantime
+happens on the job’s page under <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
+jobs</a>, not in this notebook.</li>
 <li>If the launch is refused with an <code>AccessDeniedException</code>
 ending in <code>explicit deny</code>, the account’s checks are the
 cause: a missing tag, an instance type outside the lesson’s list, or a
-resource kind the lesson never creates; the first training episode’s
+resource kind the lesson never creates. The first training episode’s
 callout <em>If the launch is refused</em> says what to look at.</li>
-<li>
-<code>wait=True</code> (the default) blocks the notebook until the
-job ends and streams its log here. For a 33-minute job that is the right
-choice: you cannot accidentally queue a second launch while you wait,
-and everything worth doing in the meantime happens on the job’s page
-under <a href="https://us-east-2.console.aws.amazon.com/sagemaker/home?region=us-east-2#/training" class="external-link">Training
-jobs</a>, not in this notebook.</li>
 </ul>
-<p>The second input channel, <code>model</code>, is the copy of
-CHURRO-3B your instructor staged in the shared bucket: SageMaker mounts
-it at <code>/opt/ml/input/data/model</code> and the script loads from
-there, so a hundred jobs starting in the same minute copy 7.5 GB from S3
-instead of each pulling it from Hugging Face.</p>
 <div class="codewrapper sourceCode" id="cb34">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -12465,7 +12477,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12529,7 +12541,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
