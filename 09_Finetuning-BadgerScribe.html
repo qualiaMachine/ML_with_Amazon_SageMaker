@@ -432,7 +432,7 @@ test pages</a></li>
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Fine-tuning a Vision-Language Model with Training Jobs</h1>
-        <p>Last updated on 2026-11-04 |
+        <p>Last updated on 2026-11-11 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/09_Finetuning-BadgerScribe.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -917,11 +917,10 @@ after training, about 14 minutes the estimator does not count. Keep
 <code>step0_estimate</code>. Step 2 puts it next to the job’s own
 bill.</p>
 <p>The same call for a 7B model on 5,000 documents of about 600 words
-(800 tokens) each, three passes. Two arguments change besides the size.
-<code>runs</code> goes from 1 to 8, because a project reruns a fine-tune
-as it fixes data and tries settings, and the printout’s last line prices
-all eight. <code>instance_type</code> is left out, so the function picks
-the cheapest instance the model fits on.</p>
+(800 tokens) each, three passes, on the same card, so the two printouts
+compare. One argument changes besides the size. <code>runs</code> goes
+from 1 to 8, because a project reruns a fine-tune as it fixes data and
+tries settings, and the printout’s last line prices all eight.</p>
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -931,9 +930,17 @@ the cheapest instance the model fits on.</p>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a>    tokens_per_example<span class="op">=</span><span class="dv">800</span>,      <span class="co"># about 600 words each</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1" aria-label="code-block-3-5"></a>    epochs<span class="op">=</span><span class="dv">3</span>,                    <span class="co"># three passes over the documents</span></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1" aria-label="code-block-3-6"></a>    method<span class="op">=</span><span class="st">"lora"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1" aria-label="code-block-3-7"></a>    runs<span class="op">=</span><span class="dv">8</span>,                      <span class="co"># the eight attempts a project takes; the last cost line is for all of them</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1" aria-label="code-block-3-8"></a>)<span class="op">;</span>                               <span class="co"># no instance_type: the cheapest that fits is chosen</span></span></code></pre>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1" aria-label="code-block-3-7"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.xlarge"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1" aria-label="code-block-3-8"></a>    runs<span class="op">=</span><span class="dv">8</span>,                      <span class="co"># the eight attempts a project takes; the last cost line is for all of them</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1" aria-label="code-block-3-9"></a>)<span class="op">;</span></span></code></pre>
 </div>
+<p>About <code>$11</code> a run and <code>$92</code> for the project,
+eight hours of GPU time each. Leave <code>instance_type</code> out and
+the function picks the cheapest instance on the lesson’s list that holds
+the job, which here is <code>ml.g6.xlarge</code>, the L4 at
+<code>$1.13</code> an hour, a little slower and a little cheaper per run
+than the A10G. The class rents the <code>ml.g5.xlarge</code> because
+that is the training instance the workshop account has quota for.</p>
 <p>Batch size is not an input, and does not need to be. A bigger batch
 keeps the GPU busier, which is the <code>utilization</code> argument
 (0.25 by default; a well-fed GPU reaches 0.35 or so), and it needs more
@@ -1655,20 +1662,20 @@ launched; read the memory line and the instance it forces.</p>
 <span id="cb24-2"><a href="#cb24-2" tabindex="-1" aria-label="code-block-24-2"></a>helpers.estimate_finetune_cost(params_billions<span class="op">=</span><span class="dv">70</span>, examples<span class="op">=</span><span class="dv">251</span>, tokens_per_example<span class="op">=</span><span class="bu">int</span>(avg_tokens_per_page), epochs<span class="op">=</span><span class="dv">2</span>, method<span class="op">=</span><span class="st">"full"</span>,</span>
 <span id="cb24-3"><a href="#cb24-3" tabindex="-1" aria-label="code-block-24-3"></a>                               instance_type<span class="op">=</span><span class="st">"ml.p5.48xlarge"</span>)<span class="op">;</span>   <span class="co"># the largest box on the list: 8 x H100, 640 GB</span></span></code></pre>
 </div>
-<p>A 7B LoRA still fits one GPU, 22 GB on a 24 GB L4, for about
-<code>$0.50</code>; the full fine-tune of the same model needs 116 GB, a
-four-GPU box at <code>$13</code> an hour, and the account refuses it. At
-70B the LoRA needs 179 GB, so even the adapter run is a four-GPU job the
-account refuses, and the full fine-tune needs 1,124 GB: nothing on the
-list holds it, and the function says what the largest box would do,
-start, bill ten minutes of startup at <code>$63</code> an hour, and die
-out of memory. That run is two or more such boxes with the model sharded
-across them, which is the <code>$12,000</code> row in the cost table
-once the data is a real corpus and not 251 pages. On 251 pages the
-arithmetic is minutes everywhere, so these bills are mostly each box’s
-price for ten minutes of startup; what the four runs show is the box a
-model forces you onto, which is the first thing to find out about a
-fine-tune, before the data or the epochs.</p>
+<p>A 7B LoRA still fits one GPU, 22 GB on a 24 GB L4, for under a
+dollar; the full fine-tune of the same model needs 116 GB, a four-GPU
+box at <code>$13</code> an hour, and the account refuses it. At 70B the
+LoRA needs 179 GB, so even the adapter run is a four-GPU job the account
+refuses, and the full fine-tune needs 1,124 GB: nothing on the list
+holds it, and the function says what the largest box would do, start,
+bill ten minutes of startup at <code>$63</code> an hour, and die out of
+memory. That run is two or more such boxes with the model sharded across
+them, which is the <code>$12,000</code> row in the cost table once the
+data is a real corpus and not 251 pages. On 251 pages the arithmetic is
+minutes everywhere, so these bills are mostly each box’s price for ten
+minutes of startup; what the four runs show is the box a model forces
+you onto, which is the first thing to find out about a fine-tune, before
+the data or the epochs.</p>
 </div>
 <div class="section level3">
 <h3 id="a-code-folder-for-the-job">A code folder for the job<a class="anchor" aria-label="anchor" href="#a-code-folder-for-the-job"></a></h3>
@@ -3006,8 +3013,8 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-04",
-  "datePublished": "2026-11-10"
+  "dateModified": "2026-11-11",
+  "datePublished": "2026-11-11"
 }
 
   </script><script>
