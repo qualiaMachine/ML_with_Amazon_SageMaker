@@ -684,7 +684,8 @@ Colab</a></th>
 <td>L40S, A100, H100 or H200, 48 to 141 GB, bf16; NVLink on the A100,
 H100 and H200 servers</td>
 </tr><tr><td>Time for this run</td>
-<td>33 minutes, starts in a minute</td>
+<td>33 minutes billed, after one to ten minutes waiting for an
+instance</td>
 <td>About an hour and a half, starts at once if a GPU is free</td>
 <td>About 20 minutes, after a queue wait of minutes to hours</td>
 </tr><tr><td>Largest LoRA fine-tune</td>
@@ -914,7 +915,8 @@ sweep.</li>
 </div>
 <p>The function says about 27 minutes and <code>$0.64</code>, 17 minutes
 of training plus 10 of startup. The hand calculation said 12 minutes of
-training, and the measured run took 12. The estimator is high because it
+training, and the measured run took 17 with the two end-of-pass scorings
+inside it, about 12 of training alone. The estimator is high because it
 adds half again for gradient checkpointing, which our script uses to
 save memory by recomputing the forward pass during the backward one. A
 third either way is normal for this rule. The job you launch in Step 1
@@ -1804,14 +1806,81 @@ adapter, scores the same pages again, and saves everything.</li>
 Transcribes any list of pages with the base model or with the adapter
 merged in, and writes <code>predictions.csv</code> in the submission
 format.</li>
-</ul><div id="read-the-script-before-you-pay-for-it" class="callout challenge">
+</ul><div id="what-the-script-is-and-what-lora-adds-to-it" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="read-the-script-before-you-pay-for-it" class="callout-inner">
-<h3 class="callout-title">Read the script before you pay for it</h3>
+<div id="what-the-script-is-and-what-lora-adds-to-it" class="callout-inner">
+<h3 class="callout-title">What the script is, and what LoRA adds to
+it</h3>
 <div class="callout-content">
+<p><code>finetune_churro_lora.py</code> is an ordinary Hugging Face
+training script. It is Python on PyTorch, and it uses three libraries.
+<code>transformers</code> loads the model and its processor and provides
+the <code>Trainer</code>, the training loop that handles batching, mixed
+precision, gradient accumulation, checkpoints and logging.
+<code>peft</code> adds the LoRA adapter. <code>pandas</code> and
+<code>PIL</code> read the pages. Nothing in it is specific to SageMaker,
+Colab or CHTC beyond the paths it reads and writes, which is why the
+same file runs in all three places.</p>
+<p>Most of the script is what any fine-tune needs, LoRA or not:</p>
+<ul><li>
+<strong>A dataset class</strong> that turns one row of
+<code>train.csv</code> into a page image, the instruction prompt for its
+category, and the transcription as the answer.</li>
+<li>
+<strong>A collator</strong> that tokenizes a batch and masks
+everything but the transcription out of the loss, so the model is graded
+on what it writes and not on repeating the prompt or the image
+tokens.</li>
+<li>
+<strong>An evaluation function</strong> that transcribes held-out
+pages and computes the character error rate, run before training, after
+it, and at the end of every pass.</li>
+<li>
+<strong>The <code>Trainer</code> call</strong> with its arguments,
+and the saving of the model and the summary.</li>
+</ul><p>LoRA itself is a small addition, and this is what is new when you add
+it to a script of your own:</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Two calls from <code>peft</code>.</strong>
+<code>LoraConfig</code> names the rank, alpha, dropout and the target
+modules, and <code>get_peft_model</code> wraps the model, freezing every
+parameter and attaching the adapters. That is the whole mechanism, about
+ten lines.</li>
+<li>
+<strong>Choosing <code>target_modules</code>.</strong> Which weight
+matrices get an adapter. The usual choice for a transformer is the
+attention projections and the MLP projections in every layer of the
+language model. For a vision-language model the pattern has to exclude
+the vision tower, which is the regular expression’s
+<code>(?!.*visual)</code> here, and the names differ between model
+families, so read the model’s module names before writing it.</li>
+<li>
+<strong>The learning rate.</strong> About ten times a full
+fine-tune’s, because the adapter starts at zero and is small.</li>
+<li>
+<strong>What gets saved.</strong> <code>save_pretrained</code> on
+the wrapped model writes only the adapter, about 100 MB, with a config
+naming the base model. Inference loads the base weights and then the
+adapter on top, <code>PeftModel.from_pretrained</code>, which is what
+<code>churro_transcribe_batch.py</code> does, and can merge the two into
+one set of weights for speed.</li>
+<li>
+<strong>Memory tricks that pair with it.</strong> Gradient
+checkpointing and, on a small card, loading the frozen weights in 4-bit
+(QLoRA, <code>BitsAndBytesConfig</code> plus
+<code>prepare_model_for_kbit_training</code>). Neither is LoRA, but both
+are what make a LoRA run fit the card you have.</li>
+</ol><p>Everything else, the schedule, the warmup, mixed precision, the
+checkpointing and the resume, is standard <code>Trainer</code> use. The
+two safeguard checks after <code>get_peft_model</code> are the lesson’s
+addition, not a LoRA requirement, and are worth copying: they catch an
+adapter that landed on the wrong modules before any GPU time is
+spent.</p>
+<div class="section level3">
+<h3 id="read-the-script-before-you-pay-for-it">Read the script before you pay for it<a class="anchor" aria-label="anchor" href="#read-the-script-before-you-pay-for-it"></a></h3>
 <p>Open <code>code/finetune_churro_lora.py</code> in the Jupyter file
 browser. It is about 400 lines and you are about to launch it on a GPU.
 Find the answers in the file:</p>
@@ -1832,6 +1901,7 @@ once it runs.</li>
 <li>The script stops itself in two situations before training a single
 step. Which, and why are they there?</li>
 </ol></div>
+</div>
 </div>
 </div>
 <div id="accordionSolution3" class="accordion challenge-accordion accordion-flush">

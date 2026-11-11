@@ -671,7 +671,7 @@ hosts can do, we call Bedrock instead.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <p><strong>Amazon S3 stores the data and the results.</strong> <a href="https://aws.amazon.com/s3/" class="external-link">S3</a> is object storage, organized in
 <em>buckets</em>. Datasets stay in a bucket instead of on the notebook
 instance, every SageMaker job reads its inputs from a bucket and writes
@@ -680,7 +680,7 @@ month. You create a bucket of your own in the next episode and use it
 for the rest of the workshop. The larger datasets are already in a
 shared bucket the instructors staged.</p>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <p><strong>The SageMaker notebook instance is where you work.</strong>
 It is a small machine running JupyterLab, started at the beginning of
 the workshop and stopped at the end, and every notebook in the lesson
@@ -701,7 +701,7 @@ keeps every launched job visible, in a notebook the instructors can
 open, which is how a problem gets tracked down fast when a learner hits
 one.</p>
 </div>
-<div id="nav-tabpanel-1-3" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-3">
+<div id="nav-tabpanel-1-3" class="tab-pane" aria-labelledby="nav-tab-1-3" role="tabpanel">
 <p><strong>Amazon SageMaker runs the ML jobs.</strong> <a href="https://aws.amazon.com/sagemaker/" class="external-link">SageMaker</a> is AWS’s managed
 machine learning service. You give it a training or inference script,
 the input data and an instance type. It starts that instance, runs the
@@ -730,7 +730,7 @@ seconds, and tags split the bill by project. Training a hundred small
 models on a dataset under 10 GB costs under <code>$20</code>.</li>
 </ul>
 </div>
-<div id="nav-tabpanel-1-4" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-4">
+<div id="nav-tabpanel-1-4" class="tab-pane" aria-labelledby="nav-tab-1-4" role="tabpanel">
 <p><strong>Amazon Bedrock serves hosted models.</strong> Sometimes there
 is no model to train or host. You want to send a model a prompt and get
 a response. <a href="https://aws.amazon.com/bedrock/" class="external-link">Bedrock</a> gives
@@ -1421,7 +1421,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -3137,7 +3137,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3392,7 +3392,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -3908,7 +3908,7 @@ compared with the first job?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>The status is <code>InProgress</code> if you were quick and
 <code>Completed</code> otherwise. The cost is the same as the first run,
@@ -3946,7 +3946,7 @@ and compare the bill and the accuracy with the script version.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <p>The built-in algorithm will not run our
 <code>preprocess_data()</code> for us, and it expects a CSV with no
@@ -6369,7 +6369,8 @@ H100 and H200 servers</td>
 </tr>
 <tr>
 <td>Time for this run</td>
-<td>33 minutes, starts in a minute</td>
+<td>33 minutes billed, after one to ten minutes waiting for an
+instance</td>
 <td>About an hour and a half, starts at once if a GPU is free</td>
 <td>About 20 minutes, after a queue wait of minutes to hours</td>
 </tr>
@@ -6653,7 +6654,8 @@ sweep.</li>
 </div>
 <p>The function says about 27 minutes and <code>$0.64</code>, 17 minutes
 of training plus 10 of startup. The hand calculation said 12 minutes of
-training, and the measured run took 12. The estimator is high because it
+training, and the measured run took 17 with the two end-of-pass scorings
+inside it, about 12 of training alone. The estimator is high because it
 adds half again for gradient checkpointing, which our script uses to
 save memory by recomputing the forward pass during the backward one. A
 third either way is normal for this rule. The job you launch in Step 1
@@ -7662,14 +7664,86 @@ Transcribes any list of pages with the base model or with the adapter
 merged in, and writes <code>predictions.csv</code> in the submission
 format.</li>
 </ul>
-<div id="read-the-script-before-you-pay-for-it" class="callout challenge">
+<div id="what-the-script-is-and-what-lora-adds-to-it" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
 </div>
 <span class="callout-header">Challenge</span>
-<div id="read-the-script-before-you-pay-for-it" class="callout-inner">
-<h3 class="callout-title">Read the script before you pay for it</h3>
+<div id="what-the-script-is-and-what-lora-adds-to-it" class="callout-inner">
+<h3 class="callout-title">What the script is, and what LoRA adds to
+it</h3>
 <div class="callout-content">
+<p><code>finetune_churro_lora.py</code> is an ordinary Hugging Face
+training script. It is Python on PyTorch, and it uses three libraries.
+<code>transformers</code> loads the model and its processor and provides
+the <code>Trainer</code>, the training loop that handles batching, mixed
+precision, gradient accumulation, checkpoints and logging.
+<code>peft</code> adds the LoRA adapter. <code>pandas</code> and
+<code>PIL</code> read the pages. Nothing in it is specific to SageMaker,
+Colab or CHTC beyond the paths it reads and writes, which is why the
+same file runs in all three places.</p>
+<p>Most of the script is what any fine-tune needs, LoRA or not:</p>
+<ul>
+<li>
+<strong>A dataset class</strong> that turns one row of
+<code>train.csv</code> into a page image, the instruction prompt for its
+category, and the transcription as the answer.</li>
+<li>
+<strong>A collator</strong> that tokenizes a batch and masks
+everything but the transcription out of the loss, so the model is graded
+on what it writes and not on repeating the prompt or the image
+tokens.</li>
+<li>
+<strong>An evaluation function</strong> that transcribes held-out
+pages and computes the character error rate, run before training, after
+it, and at the end of every pass.</li>
+<li>
+<strong>The <code>Trainer</code> call</strong> with its arguments,
+and the saving of the model and the summary.</li>
+</ul>
+<p>LoRA itself is a small addition, and this is what is new when you add
+it to a script of your own:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Two calls from <code>peft</code>.</strong>
+<code>LoraConfig</code> names the rank, alpha, dropout and the target
+modules, and <code>get_peft_model</code> wraps the model, freezing every
+parameter and attaching the adapters. That is the whole mechanism, about
+ten lines.</li>
+<li>
+<strong>Choosing <code>target_modules</code>.</strong> Which weight
+matrices get an adapter. The usual choice for a transformer is the
+attention projections and the MLP projections in every layer of the
+language model. For a vision-language model the pattern has to exclude
+the vision tower, which is the regular expression’s
+<code>(?!.*visual)</code> here, and the names differ between model
+families, so read the model’s module names before writing it.</li>
+<li>
+<strong>The learning rate.</strong> About ten times a full
+fine-tune’s, because the adapter starts at zero and is small.</li>
+<li>
+<strong>What gets saved.</strong> <code>save_pretrained</code> on
+the wrapped model writes only the adapter, about 100 MB, with a config
+naming the base model. Inference loads the base weights and then the
+adapter on top, <code>PeftModel.from_pretrained</code>, which is what
+<code>churro_transcribe_batch.py</code> does, and can merge the two into
+one set of weights for speed.</li>
+<li>
+<strong>Memory tricks that pair with it.</strong> Gradient
+checkpointing and, on a small card, loading the frozen weights in 4-bit
+(QLoRA, <code>BitsAndBytesConfig</code> plus
+<code>prepare_model_for_kbit_training</code>). Neither is LoRA, but both
+are what make a LoRA run fit the card you have.</li>
+</ol>
+<p>Everything else, the schedule, the warmup, mixed precision, the
+checkpointing and the resume, is standard <code>Trainer</code> use. The
+two safeguard checks after <code>get_peft_model</code> are the lesson’s
+addition, not a LoRA requirement, and are worth copying: they catch an
+adapter that landed on the wrong modules before any GPU time is
+spent.</p>
+<div class="section level3">
+<h3 id="read-the-script-before-you-pay-for-it">Read the script before you pay for it<a class="anchor" aria-label="anchor" href="#read-the-script-before-you-pay-for-it"></a>
+</h3>
 <p>Open <code>code/finetune_churro_lora.py</code> in the Jupyter file
 browser. It is about 400 lines and you are about to launch it on a GPU.
 Find the answers in the file:</p>
@@ -7691,6 +7765,7 @@ once it runs.</li>
 <li>The script stops itself in two situations before training a single
 step. Which, and why are they there?</li>
 </ol>
+</div>
 </div>
 </div>
 </div>
@@ -12392,7 +12467,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12456,7 +12531,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -14600,7 +14675,7 @@ check finds something. Then run them.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-6" class="nav nav-tabs" role="tablist">
