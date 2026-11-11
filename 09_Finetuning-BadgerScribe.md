@@ -484,31 +484,31 @@ The cost estimate in Step 0 used 1,600 tokens per page. That number is tokens, n
 %pip install -q "transformers>=4.56"   # the processor that turns an image + text into the model's tokens; same version as the training job
 ```
 
-`badger_common.py` is the lesson's helper module for this episode, in `scripts/` beside `helpers.py` and imported from the same path. It holds the instruction prompt, the page loader with its pixel limits, and the competition's character error rate, and both the training script and the inference script import it, so the notebook, the job and the scoring all prepare a page the same way. Here it supplies the pixel limits and the prompt.
+`badger_scribe_helpers.py` is the lesson's helper module for this episode, in `scripts/` beside `helpers.py` and imported from the same path. It holds the instruction prompt, the page loader with its pixel limits, and the competition's character error rate, and both the training script and the inference script import it, so the notebook, the job and the scoring all prepare a page the same way. Here it supplies the pixel limits and the prompt.
 
 Fetch the processor's config files from the shared bucket and load the processor with the same pixel limits the training script uses. Then run one page through it twice: once with the transcription, to count everything, and once with only the prompt, to find where the transcription's tokens start. The count splits three ways: the image, the instruction prompt the script sends with every page (the transcription rules from `build_prompt` plus the chat-template markup around them, the same on every page), and the transcription itself.
 
 ```python
 from transformers import AutoProcessor
-import badger_common as bc
+import badger_scribe_helpers as bsh
 
 proc_dir = os.path.join(local_data_dir, "churro-processor")
 os.makedirs(proc_dir, exist_ok=True)
 for fname in ["config.json", "preprocessor_config.json", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
               "added_tokens.json", "vocab.json", "merges.txt", "chat_template.json", "video_preprocessor_config.json"]:
     s3_client.download_file(shared_bucket, f"{data_prefix}/model/churro-3B/{fname}", os.path.join(proc_dir, fname))
-processor = AutoProcessor.from_pretrained(proc_dir, min_pixels=bc.DEFAULT_MIN_PIXELS, max_pixels=bc.DEFAULT_MAX_PIXELS)
+processor = AutoProcessor.from_pretrained(proc_dir, min_pixels=bsh.DEFAULT_MIN_PIXELS, max_pixels=bsh.DEFAULT_MAX_PIXELS)
 ```
 
 Now the page you displayed above, prepared the way the training script prepares it: the image resized to the pixel cap, the instruction prompt built for its category, and the transcription attached as the assistant's answer. Running the prompt alone through the processor a second time tells us how many tokens come before the transcription starts.
 
 ```python
-image = bc.load_page_image(page_path, bc.DEFAULT_MAX_PIXELS)   # resized the way the training script resizes it
-prompt = bc.build_prompt(row.category)
-full = processor.apply_chat_template(bc.full_messages(prompt, row.text), tokenize=False)
+image = bsh.load_page_image(page_path, bsh.DEFAULT_MAX_PIXELS)   # resized the way the training script resizes it
+prompt = bsh.build_prompt(row.category)
+full = processor.apply_chat_template(bsh.full_messages(prompt, row.text), tokenize=False)
 enc = processor(text=[full], images=[image], return_tensors="pt")
 n_total = enc["input_ids"].shape[1]
-n_prompt = processor(text=[processor.apply_chat_template(bc.user_messages(prompt), tokenize=False, add_generation_prompt=True)],
+n_prompt = processor(text=[processor.apply_chat_template(bsh.user_messages(prompt), tokenize=False, add_generation_prompt=True)],
                      images=[image], return_tensors="pt")["input_ids"].shape[1]
 n_image = int((enc["image_grid_thw"].prod(dim=1) // 4).sum())   # Qwen-specific breakdown: 14-px patches merged 2x2, one token per 28x28 block. n_total above is the count for any model
 
@@ -531,7 +531,7 @@ for pid in sample.page_id:
     path = os.path.join(local_data_dir, f"{pid}.jpg")
     if not os.path.exists(path):
         s3_client.download_file(shared_bucket, f"{data_prefix}/images/{pid}.jpg", path)
-    grid = processor.image_processor(images=[bc.load_page_image(path, bc.DEFAULT_MAX_PIXELS)], return_tensors="pt")["image_grid_thw"]
+    grid = processor.image_processor(images=[bsh.load_page_image(path, bsh.DEFAULT_MAX_PIXELS)], return_tensors="pt")["image_grid_thw"]
     image_tokens.append(int((grid.prod(dim=1) // 4).sum()))
 ```
 
@@ -555,23 +555,35 @@ helpers.estimate_finetune_cost(params_billions=3.75, examples=251, tokens_per_ex
 
 The measured count is a tenth below the guess, and the estimate moves with it: 26 minutes and `$0.60` against 27 and `$0.64`. Step 1 keeps the 27-minute figure; a tenth either way is well inside what the rule can tell, which is about a factor of two. Multiply by pages and passes and that is the "tokens seen" in the cost table. Halve `max_pixels` and the image count halves with it; that is what Exercise 1 changes.
 
+The same steps as a function, so the count can be repeated for any model. It builds the message twice, once with the image and once without, runs the model's own processor on each, and reads the difference as the image tokens. For CHURRO it returns the numbers worked out above:
+
+```python
+def count_page_tokens(model_id, image, prompt, answer, **processor_kwargs):
+    """Tokens one page costs a vision-language model: total, image and text. model_id is a Hugging Face id or a local
+    folder of processor files. Works for any model whose processor takes image and text content blocks."""
+    proc = AutoProcessor.from_pretrained(model_id, **processor_kwargs)
+    with_image = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": prompt}]},
+                  {"role": "assistant", "content": [{"type": "text", "text": answer}]}]
+    text_only = [{"role": "user", "content": [{"type": "text", "text": prompt}]},
+                 {"role": "assistant", "content": [{"type": "text", "text": answer}]}]
+    total = proc(text=[proc.apply_chat_template(with_image, tokenize=False)], images=[image], return_tensors="pt")["input_ids"].shape[1]
+    text = len(proc.tokenizer(proc.apply_chat_template(text_only, tokenize=False))["input_ids"])
+    return {"total": total, "image": total - text, "text": text}
+
+count_page_tokens(proc_dir, image, prompt, row.text, min_pixels=bsh.DEFAULT_MIN_PIXELS, max_pixels=bsh.DEFAULT_MAX_PIXELS)
+```
+
 ::::::::::::::::::::::::::::::::::::: challenge
 
 ### Count the page for another model
 
-Pick another open vision-language model and count what the same page costs there. `llava-hf/llava-1.5-7b-hf` is not gated and its processor downloads in seconds. Before running anything, read its model card and predict two things: how many image tokens a page will take, and whether `max_pixels` will change that. Then load its processor, build the same message with its chat template, the image, the instruction and the transcription, and read the `input_ids` length. Run the text without the image to separate the two.
+Pick another open vision-language model and count what the same page costs there. `llava-hf/llava-1.5-7b-hf` is not gated and its processor downloads in seconds. Before running anything, read its model card and predict two things: how many image tokens a page will take, and whether `max_pixels` will change that. Then call `count_page_tokens` with its model id and the same page, prompt and transcription.
 
 :::::::::::::::::::::::: solution
 
 ```python
-from transformers import AutoProcessor
-llava = AutoProcessor.from_pretrained("llava-hf/llava-1.5-7b-hf")
-messages = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": prompt}]},
-            {"role": "assistant", "content": [{"type": "text", "text": row.text}]}]
-text = llava.apply_chat_template(messages, tokenize=False)
-n_llava = llava(text=[text], images=[image], return_tensors="pt")["input_ids"].shape[1]
-n_llava_text = len(llava.tokenizer(text.replace("<image>", ""))["input_ids"])
-print(f"LLaVA 1.5: {n_llava} tokens for the page, {n_llava - n_llava_text} of them for the image; CHURRO: {n_total}")
+llava = count_page_tokens("llava-hf/llava-1.5-7b-hf", image, prompt, row.text)
+print(f"LLaVA 1.5: {llava['total']} tokens for the page, {llava['image']} of them for the image; CHURRO: {n_total}")
 ```
 
 LLaVA 1.5 resizes every image to 336 × 336 pixels and cuts it into 24 × 24 patches of 14 pixels, 576 image tokens however large the page, so `max_pixels` changes nothing for it. The page comes to about 900 tokens, 576 for the image and the rest for the instruction and the German text, which its Llama tokenizer splits into a different number of pieces than Qwen's. Fewer tokens is a cheaper step. It is not a better model for this task. A 336-pixel image of a letter page is too small to read the handwriting, which is why CHURRO spends 1,280 tokens on a megapixel. The token count is cost. Accuracy has to be measured.
@@ -619,7 +631,7 @@ The three scripts the job needs are already on this instance, in the lesson clon
 import shutil
 
 os.makedirs("code", exist_ok=True)
-for f in ["badger_common.py", "finetune_churro_lora.py", "churro_transcribe_batch.py"]:
+for f in ["badger_scribe_helpers.py", "finetune_churro_lora.py", "churro_transcribe_batch.py"]:
     shutil.copy(f"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/{f}", f"code/{f}")
 
 with open("code/requirements.txt", "w") as f:  # pip-installed inside the container before the script starts
@@ -628,7 +640,7 @@ with open("code/requirements.txt", "w") as f:  # pip-installed inside the contai
 print(os.listdir("code"))
 ```
 
-- `badger_common.py`: the prompt, image loading, and a copy of the competition's CER. Shared by the other two so the model is trained on the same prompt it is later asked.
+- `badger_scribe_helpers.py`: the prompt, image loading, and a copy of the competition's CER. Shared by the other two so the model is trained on the same prompt it is later asked.
 - `finetune_churro_lora.py`: the training job entry point. Holds out 15% of pages per category, filters to the categories you ask for, scores a sample of holdout pages with the base model, trains a LoRA adapter, scores the same pages again, and saves everything.
 - `churro_transcribe_batch.py`: used in the homework. Transcribes any list of pages with the base model or with the adapter merged in, and writes `predictions.csv` in the submission format.
 
@@ -819,7 +831,7 @@ model_output_path = f"s3://{bucket_name}/{data_prefix}/models/"   # the job's mo
 
 estimator = HuggingFace(
     entry_point="finetune_churro_lora.py",
-    source_dir="code/",                   # the whole directory ships with the job: script, badger_common.py, requirements.txt
+    source_dir="code/",                   # the whole directory ships with the job: script, badger_scribe_helpers.py, requirements.txt
     role=role,
     tags=make_job_tags("Training"),
     instance_type=instance_type,
