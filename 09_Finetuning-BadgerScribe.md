@@ -41,11 +41,15 @@ This can be surprisingly effective. [CHURRO](https://github.com/stanford-oval/Ch
 
 That's the approach we'll explore in this episode. We'll take CHURRO, which already specializes in historical documents, and adapt it further to a collection of handwritten German letters from UW-Madison's Badger Scribe challenge.
 
+![*The steps that made CHURRO, from Qwen2.5-VL's pretraining to its fine-tune on 99,491 historical pages; this episode adds one more step*](fig/qwen-to-churro.png){alt="Five steps: text pretraining, vision pretraining, post-training, the released Qwen 2.5 VL 3B, and CHURRO's fine-tune on historical pages"}
+
 ### How fine-tuning works
 
 Fine-tuning uses the same basic training process we've already seen. The model makes predictions on training examples, we measure how far those predictions are from the correct answers, and gradient descent adjusts its parameters to reduce the error.
 
 The difference is where we begin. Rather than initializing the model with random weights, we start with weights learned during an earlier, much larger training process. Our examples don't need to teach the model everything about language or images. They only need to help it adapt what it already knows.
+
+![*Where a fine-tune sits in a model's life: after pretraining and post-training, on the released model*](fig/model-lifecycle-finetune.png){alt="Pipeline from pretraining through supervised fine-tuning and tuning from feedback to a released model, then a dashed arrow to your own fine-tune"}
 
 We could update every parameter in the model, which is called ***full fine-tuning***. That's how CHURRO itself was created. But even a relatively small model with 3 billion parameters is expensive to train this way, because training requires much more GPU memory than simply running the model.
 
@@ -129,12 +133,11 @@ Before launching a fine-tune, write down what it should cost. If the bill comes 
 
 Every parameter in the model takes up GPU memory, and how much depends on what you are doing with it. Running the model needs only the weight. A full fine-tune needs the weight, its gradient, a 32-bit copy of the weight, and the two running averages Adam keeps for it, the four numbers per weight from the *How fine-tuning works* section above. A LoRA fine-tune keeps the weights frozen in 16-bit and adds a small adapter that carries its own gradients and optimizer state.
 
-![*GPU memory per parameter: inference, a LoRA fine-tune, and a full fine-tune*](fig/memory-per-parameter.svg){alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning"}
+![*GPU memory per parameter: inference, a LoRA fine-tune, and a full fine-tune*](fig/memory-per-parameter.png){alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning"}
 
 | What you are doing with the model | Bytes per parameter | What has to be in memory for each parameter |
 |---|---|---|
 | Inference, FP8 | 1 | the weight, quantized |
-| Inference, bf16 | 2 | the weight |
 | LoRA fine-tune | ~2.5 | the frozen 16-bit weight, plus a share of the adapter with its gradients and optimizer state |
 | Full fine-tune, mixed precision | 16 | the 16-bit weight (2), its gradient (2), a 32-bit copy of the weight (4), Adam's two running averages (8) |
 
@@ -148,6 +151,8 @@ Multiply the bytes per parameter by the parameter count, add about 4 GB for acti
 | 70B | 4-bit, 35 GB: `ml.g6e.xlarge`; FP8, 70 GB: `ml.g6e.12xlarge`, 4 × 48 GB, `$13.12`/h | 179 GB: `ml.g6e.12xlarge` | 1,124 GB: two `ml.p5.48xlarge`, `$127`/h |
 
 A 7B model that runs on one 24 GB GPU needs 116 GB to fully fine-tune, a four-GPU box at `$13` an hour with the model sharded across the GPUs. Training cannot run on quantized weights the way inference can, because each step's update is too small for 8-bit or 4-bit numbers to hold. LoRA avoids that jump by freezing the model and training a few million adapter parameters, which is why this episode fits on one 24 GB card.
+
+![*GPU memory to fine-tune four model sizes, full and LoRA, on a log scale, against one A10G and one H100*](fig/memory-by-model-size.png){alt="Bar chart on a log scale of GPU memory for full fine-tuning and LoRA at 3B, 7B, 27B and 70B, with dashed lines at 24 GB for an A10G and 80 GB for an H100"}
 
 ### How long will it run?
 
@@ -729,6 +734,10 @@ for lora_r in (8, 16, 32):
 ```
 
 Rank 16, the lesson's choice, trains about 30 million parameters, under 1% of the model, and doubling the rank doubles it. The adapter's gradients and optimizer state, 16 bytes for each of those 30 million, come to about half a gigabyte, which is why a LoRA run fits beside the frozen 7.5 GB of weights on a 24 GB card. The job's log confirms the count in its `trainable params:` line, and the script refuses to train if more than 5% of the model turns out to be trainable.
+
+Rank is a trade between capacity and memory, and the trade is measured. On Llama-2-7B, a LoRA at rank 16 trailed a full fine-tune on a code benchmark, rank 256 matched it, and the memory for the rank-256 run was still a fifth of the full fine-tune's. For a few hundred pages, rank 16 is the usual starting point.
+
+![*On Llama-2-7B, LoRA at rank 256 matched full fine-tuning on a code benchmark with a fifth of the memory. Source: [Biderman et al., 2024](https://arxiv.org/abs/2405.09673)*](fig/lora-rank-vs-full.png){alt="Two bar charts: HumanEval accuracy and GPU memory for LoRA at ranks 16, 64 and 256 and for full fine-tuning"}
 
 ```python
 hyperparameters = {
