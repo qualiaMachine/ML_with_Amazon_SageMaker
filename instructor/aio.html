@@ -671,7 +671,7 @@ hosts can do, we call Bedrock instead.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <p><strong>Amazon S3 stores the data and the results.</strong> <a href="https://aws.amazon.com/s3/" class="external-link">S3</a> is object storage, organized in
 <em>buckets</em>. Datasets stay in a bucket instead of on the notebook
 instance, every SageMaker job reads its inputs from a bucket and writes
@@ -680,7 +680,7 @@ month. You create a bucket of your own in the next episode and use it
 for the rest of the workshop. The larger datasets are already in a
 shared bucket the instructors staged.</p>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <p><strong>The SageMaker notebook instance is where you work.</strong>
 It is a small machine running JupyterLab, started at the beginning of
 the workshop and stopped at the end, and every notebook in the lesson
@@ -701,7 +701,7 @@ keeps every launched job visible, in a notebook the instructors can
 open, which is how a problem gets tracked down fast when a learner hits
 one.</p>
 </div>
-<div id="nav-tabpanel-1-3" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-3">
+<div id="nav-tabpanel-1-3" class="tab-pane" aria-labelledby="nav-tab-1-3" role="tabpanel">
 <p><strong>Amazon SageMaker runs the ML jobs.</strong> <a href="https://aws.amazon.com/sagemaker/" class="external-link">SageMaker</a> is AWS’s managed
 machine learning service. You give it a training or inference script,
 the input data and an instance type. It starts that instance, runs the
@@ -730,7 +730,7 @@ seconds, and tags split the bill by project. Training a hundred small
 models on a dataset under 10 GB costs under <code>$20</code>.</li>
 </ul>
 </div>
-<div id="nav-tabpanel-1-4" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-4">
+<div id="nav-tabpanel-1-4" class="tab-pane" aria-labelledby="nav-tab-1-4" role="tabpanel">
 <p><strong>Amazon Bedrock serves hosted models.</strong> Sometimes there
 is no model to train or host. You want to send a model a prompt and get
 a response. <a href="https://aws.amazon.com/bedrock/" class="external-link">Bedrock</a> gives
@@ -2367,7 +2367,7 @@ task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -4593,7 +4593,7 @@ next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -4790,7 +4790,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6129,6 +6129,38 @@ to multi-GPU instances for larger models.</li>
 <p>Open the notebook from:
 <code>/ML_with_AWS_SageMaker/notebooks/09_Finetuning-BadgerScribe.ipynb</code>.
 Select the <strong><code>conda_pytorch</code></strong> kernel.</p>
+<div id="joining-at-this-episode" class="callout">
+<div class="callout-square">
+<i class="callout-icon" data-feather="bell"></i>
+</div>
+<span class="callout-header">Callout</span>
+<div id="joining-at-this-episode" class="callout-inner">
+<h3 class="callout-title">Joining at this episode</h3>
+<div class="callout-content">
+<p>This episode stands on its own, and these are the four things the
+earlier episodes set up that it uses. Learners coming through the whole
+lesson have seen each one.</p>
+<ul>
+<li>
+<strong>An S3 bucket of your own</strong>, from the S3 episode,
+where every job’s outputs land. The notebook refers to it as
+<code>bucket_name</code>.</li>
+<li>
+<strong>A notebook instance</strong>, from the controllers episode,
+a small CPU machine running JupyterLab. It launches jobs and reads
+results. The GPU is never on it.</li>
+<li>
+<strong>A role</strong>, <code>ml-sagemaker-use</code>, which the
+notebook instance runs as and hands to every job, so nothing here asks
+you to sign in.</li>
+<li>
+<strong>Three tags on everything</strong>, <code>Name</code>,
+<code>Project</code> and <code>Purpose</code>, which the shared account
+requires on every job and uses to attribute the bill.</li>
+</ul>
+</div>
+</div>
+</div>
 <section><h2 class="section-heading" id="why-fine-tune-a-model">Why fine-tune a model?<a class="anchor" aria-label="anchor" href="#why-fine-tune-a-model"></a>
 </h2>
 <hr class="half-width">
@@ -6784,60 +6816,6 @@ shortens it when the job is big enough to keep all eight busy. For a job
 that fits one GPU the price goes up 5x to 45x and the job gets no
 faster. You add GPUs when the memory table says one GPU cannot hold the
 job, not to save money.</p>
-<p>A multi-GPU box runs one job as data parallelism. Every GPU holds its
-own full copy of the model and the adapter, takes its own share of each
-batch, a page each here, and computes the gradient for that share. After
-every step the GPUs exchange their gradients and average them, so all
-four copies make the same update and stay identical. Four GPUs therefore
-get through four pages in the time one GPU gets through one. The cost
-estimator shows what that does to the run. The same class-run call as
-above, with the instance type forced to the four-GPU
-<code>ml.g5.12xlarge</code>:</p>
-<div class="codewrapper sourceCode" id="cb4">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="co"># The class run on a 4 x A10G box. An estimate, not a launch: the class account does not allow multi-GPU instances.</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a>helpers.estimate_finetune_cost(</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a>    params_billions<span class="op">=</span><span class="fl">3.75</span>, examples<span class="op">=</span><span class="dv">251</span>, tokens_per_example<span class="op">=</span><span class="dv">1600</span>, epochs<span class="op">=</span><span class="dv">2</span>, method<span class="op">=</span><span class="st">"lora"</span>,</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1" aria-label="code-block-4-4"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.12xlarge"</span>,   <span class="co"># forced: left out, the function would pick the cheapest single GPU that fits</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1" aria-label="code-block-4-5"></a>)<span class="op">;</span></span></code></pre>
-</div>
-<p>The training minutes drop to a quarter, since the function splits the
-GPU-hours evenly across the four cards, and the bill goes from
-<code>$0.64</code> to <code>$1.69</code>, because the box costs five
-times as much per hour and the ten startup minutes are now paid at the
-higher rate. That is the general shape. More GPUs shorten the wall-clock
-and never lower the bill.</p>
-<p>The even split is the best case. The training script’s Hugging Face
-<code>Trainer</code> runs this way across every GPU of the instance once
-the estimator sets
-<code>distribution={"torch_distributed": {"enabled": True}}</code>, and
-the PyTorch episode’s table of setups per kind of job has the details,
-including sharding the model with <code>fsdp=</code> when it does not
-fit one GPU. The gradient exchange after every step is time the even
-split does not count. <code>helpers.estimate_parallel_speedup</code>
-prices it. Its <code>method</code> argument is the same as the cost
-estimator’s, what the run trains, and it sets the size of the exchange:
-a full fine-tune’s gradient is the whole model’s, a LoRA run’s is the
-adapter’s, under 1% of the model, so LoRA splits across GPUs better. As
-in the PyTorch episode, it takes one step instead of the whole run,
-<code>tokens_per_step</code>, the batch size times the tokens per
-example, because the exchange happens once per step.</p>
-<div class="codewrapper sourceCode" id="cb5">
-<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
-</h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># How much of the ideal 4x does the class run get on the 4 x A10G box, once the exchange is counted?</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>helpers.estimate_parallel_speedup(</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    params_billions<span class="op">=</span><span class="fl">3.75</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a>    tokens_per_step<span class="op">=</span><span class="dv">4</span> <span class="op">*</span> <span class="dv">1600</span>,        <span class="co"># one step, not the run: the job trains 1 page per GPU, so 4 pages on 4 GPUs, x 1,600 tokens a page</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.12xlarge"</span>,  <span class="co"># the box: 4 GPUs sharing a PCIe link, which is what the exchange crosses</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1" aria-label="code-block-5-6"></a>    method<span class="op">=</span><span class="st">"lora"</span>,                   <span class="co"># what the run trains, as in the cost estimator: the exchange is the adapter's gradient</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1" aria-label="code-block-5-7"></a>)<span class="op">;</span></span></code></pre>
-</div>
-<p>Near 4x on 4 GPUs, so for a LoRA run the even split is close to
-right, which is the case for a multi-GPU box when a LoRA run on a
-million pages has to finish by a deadline. It is not a reason to rent
-one for a run that finishes in twelve minutes.</p>
 </div>
 <div class="section level3">
 <h3 id="what-fine-tuning-costs-from-one-dollar-to-ten-thousand">What fine-tuning costs, from one dollar to ten thousand<a class="anchor" aria-label="anchor" href="#what-fine-tuning-costs-from-one-dollar-to-ten-thousand"></a>
@@ -6949,9 +6927,9 @@ CHURRO row comes from a published review of the paper.</p>
 episode’s LoRA run to a 70B full fine-tune; the lighter extension is a
 ten-run sweep</em></div>
 </figure><p>The CHURRO bar is the model you are about to fine-tune. Stanford
-spent on the order of 800 H100-hours making it, and you get the benefit
-for a dollar because you are adapting it, not retraining it. Starting
-from a model that already knows most of your task is the biggest saving
+spent on the order of 800 H100-hours making it, and adapting it costs a
+dollar because the adapter trains on top of that work. Starting from a
+model that already knows most of your task is the biggest saving
 available, and it is decided before any GPU is involved. The sweep
 extension is the one that surprises research groups. A first run is
 rarely the last, so a <code>$140</code> full fine-tune is usually a
@@ -7000,12 +6978,12 @@ needs about 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8
 hours of wall-clock on 8 GPUs, about <code>$140</code> for one run (the
 “7B full fine-tune” row in the table above). The estimator gives the
 same answer:</p>
-<div class="codewrapper sourceCode" id="cb6">
+<div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a>helpers.estimate_finetune_cost(params_billions<span class="op">=</span><span class="dv">7</span>, examples<span class="op">=</span><span class="dv">50_000</span>, tokens_per_example<span class="op">=</span><span class="dv">2000</span>, epochs<span class="op">=</span><span class="dv">3</span>,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a>                               method<span class="op">=</span><span class="st">"full"</span>, instance_type<span class="op">=</span><span class="st">"ml.p4d.24xlarge"</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>                               gradient_checkpointing<span class="op">=</span><span class="va">False</span>, runs<span class="op">=</span><span class="dv">10</span>)<span class="op">;</span></span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a>helpers.estimate_finetune_cost(params_billions<span class="op">=</span><span class="dv">7</span>, examples<span class="op">=</span><span class="dv">50_000</span>, tokens_per_example<span class="op">=</span><span class="dv">2000</span>, epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1" aria-label="code-block-4-2"></a>                               method<span class="op">=</span><span class="st">"full"</span>, instance_type<span class="op">=</span><span class="st">"ml.p4d.24xlarge"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1" aria-label="code-block-4-3"></a>                               gradient_checkpointing<span class="op">=</span><span class="va">False</span>, runs<span class="op">=</span><span class="dv">10</span>)<span class="op">;</span></span></code></pre>
 </div>
 <p>A project is not one run. The first run finds a data bug, the second
 a bad learning rate, then two or three are compared, then the one that
@@ -7020,7 +6998,7 @@ at this size; the bill for skipping them is not.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="what-the-class-run-costs-phase-by-phase">What the class run costs, phase by phase<a class="anchor" aria-label="anchor" href="#what-the-class-run-costs-phase-by-phase"></a>
+<h3 id="what-the-class-run-costs-and-where-the-minutes-go">What the class run costs, and where the minutes go<a class="anchor" aria-label="anchor" href="#what-the-class-run-costs-and-where-the-minutes-go"></a>
 </h3>
 <p>A training job bills from the moment its instance is ready until the
 job ends, including the minutes spent pulling the container and
@@ -7147,29 +7125,70 @@ and a per-pass curve</td>
 costs about the same, but a notebook instance keeps billing after you
 close the tab. Forgotten over a weekend, <code>$90</code>. Forgotten for
 a month, <code>$1,029</code>. A training job ends automatically.</p>
-<div id="before-any-fine-tuning-run" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
+<p>Four habits go with every launch, a runtime cap, a unique job name,
+checkpoints to S3 and the three tags, and Step 1 sets each one where it
+is used.</p>
 </div>
-<span class="callout-header">Callout</span>
-<div id="before-any-fine-tuning-run" class="callout-inner">
-<h3 class="callout-title">Before any fine-tuning run</h3>
-<div class="callout-content">
-<ul>
-<li>Set <code>max_run</code> on every job, and stop any notebook GPU
-instance when you stand up.</li>
-<li>Make the first launch of a training script a small one, a slice of
-the data and a short cap. The in-class run below is that small run; the
-homework scales it up after it has been seen to work.</li>
-<li>Write the cost estimate down before launching. Afterwards, read
-<code>BillableTimeInSeconds</code> from the job description and
-compare.</li>
-<li>Save checkpoints to S3 as the job runs, so a killed or crashed run
-costs one epoch, not the whole bill.</li>
-</ul>
+<div class="section level3">
+<h3 id="optional-more-than-one-gpu">Optional: more than one GPU<a class="anchor" aria-label="anchor" href="#optional-more-than-one-gpu"></a>
+</h3>
+<p>This section is for a run that does not fit one GPU, or a LoRA run on
+far more data than the class’s. It is not needed for the launch
+below.</p>
+<p>A multi-GPU box runs one job as data parallelism. Every GPU holds its
+own full copy of the model and the adapter, takes its own share of each
+batch, a page each here, and computes the gradient for that share. After
+every step the GPUs exchange their gradients and average them, so all
+four copies make the same update and stay identical. Four GPUs therefore
+get through four pages in the time one GPU gets through one. The cost
+estimator shows what that does to the run. The same class-run call as
+above, with the instance type forced to the four-GPU
+<code>ml.g5.12xlarge</code>:</p>
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="co"># The class run on a 4 x A10G box. An estimate, not a launch: the class account does not allow multi-GPU instances.</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1" aria-label="code-block-5-2"></a>helpers.estimate_finetune_cost(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1" aria-label="code-block-5-3"></a>    params_billions<span class="op">=</span><span class="fl">3.75</span>, examples<span class="op">=</span><span class="dv">251</span>, tokens_per_example<span class="op">=</span><span class="dv">1600</span>, epochs<span class="op">=</span><span class="dv">2</span>, method<span class="op">=</span><span class="st">"lora"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1" aria-label="code-block-5-4"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.12xlarge"</span>,   <span class="co"># forced: left out, the function would pick the cheapest single GPU that fits</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1" aria-label="code-block-5-5"></a>)<span class="op">;</span></span></code></pre>
 </div>
+<p>The training minutes drop to a quarter, since the function splits the
+GPU-hours evenly across the four cards, and the bill goes from
+<code>$0.64</code> to <code>$1.69</code>, because the box costs five
+times as much per hour and the ten startup minutes are now paid at the
+higher rate. That is the general shape. More GPUs shorten the wall-clock
+and never lower the bill.</p>
+<p>The even split is the best case. The training script’s Hugging Face
+<code>Trainer</code> runs this way across every GPU of the instance once
+the estimator sets
+<code>distribution={"torch_distributed": {"enabled": True}}</code>, and
+the PyTorch episode’s table of setups per kind of job has the details,
+including sharding the model with <code>fsdp=</code> when it does not
+fit one GPU. The gradient exchange after every step is time the even
+split does not count. <code>helpers.estimate_parallel_speedup</code>
+prices it. Its <code>method</code> argument is the same as the cost
+estimator’s, what the run trains, and it sets the size of the exchange:
+a full fine-tune’s gradient is the whole model’s, a LoRA run’s is the
+adapter’s, under 1% of the model, so LoRA splits across GPUs better. As
+in the PyTorch episode, it takes one step instead of the whole run,
+<code>tokens_per_step</code>, the batch size times the tokens per
+example, because the exchange happens once per step.</p>
+<div class="codewrapper sourceCode" id="cb6">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="co"># How much of the ideal 4x does the class run get on the 4 x A10G box, once the exchange is counted?</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1" aria-label="code-block-6-2"></a>helpers.estimate_parallel_speedup(</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1" aria-label="code-block-6-3"></a>    params_billions<span class="op">=</span><span class="fl">3.75</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1" aria-label="code-block-6-4"></a>    tokens_per_step<span class="op">=</span><span class="dv">4</span> <span class="op">*</span> <span class="dv">1600</span>,        <span class="co"># one step, not the run: the job trains 1 page per GPU, so 4 pages on 4 GPUs, x 1,600 tokens a page</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1" aria-label="code-block-6-5"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.12xlarge"</span>,  <span class="co"># the box: 4 GPUs sharing a PCIe link, which is what the exchange crosses</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1" aria-label="code-block-6-6"></a>    method<span class="op">=</span><span class="st">"lora"</span>,                   <span class="co"># what the run trains, as in the cost estimator: the exchange is the adapter's gradient</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1" aria-label="code-block-6-7"></a>)<span class="op">;</span></span></code></pre>
 </div>
-</div>
+<p>Near 4x on 4 GPUs, so for a LoRA run the even split is close to
+right, which is the case for a multi-GPU box when a LoRA run on a
+million pages has to finish by a deadline. It is not a reason to rent
+one for a run that finishes in twelve minutes.</p>
 </div>
 </section><section><h2 class="section-heading" id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
@@ -7682,10 +7701,8 @@ same file runs in all three places.</p>
 <code>train.csv</code> into a page image, the instruction prompt for its
 category, and the transcription as the answer.</li>
 <li>
-<strong>A collator</strong> that tokenizes a batch and masks
-everything but the transcription out of the loss, so the model is graded
-on what it writes and not on repeating the prompt or the image
-tokens.</li>
+<strong>A collator</strong> that tokenizes a batch and builds the
+labels the loss is computed on.</li>
 <li>
 <strong>An evaluation function</strong> that transcribes held-out
 pages and computes the character error rate, run before training, after
@@ -7707,10 +7724,9 @@ ten lines.</li>
 <strong>Choosing <code>target_modules</code>.</strong> Which weight
 matrices get an adapter. The usual choice for a transformer is the
 attention projections and the MLP projections in every layer of the
-language model. For a vision-language model the pattern has to exclude
-the vision tower, which is the regular expression’s
-<code>(?!.*visual)</code> here, and the names differ between model
-families, so read the model’s module names before writing it.</li>
+language model. For a vision-language model the choice has to leave the
+vision tower alone, and the module names differ between model families,
+so read the model’s module names before writing the pattern.</li>
 <li>
 <strong>The learning rate.</strong> About ten times a full
 fine-tune’s, because the adapter starts at zero and is small.</li>
@@ -7730,10 +7746,8 @@ are what make a LoRA run fit the card you have.</li>
 </ol>
 <p>Everything else, the schedule, the warmup, mixed precision, the
 checkpointing and the resume, is standard <code>Trainer</code> use. The
-two safeguard checks after <code>get_peft_model</code> are the lesson’s
-addition, not a LoRA requirement, and are worth copying: they catch an
-adapter that landed on the wrong modules before any GPU time is
-spent.</p>
+exercise below asks you to find these parts in the file, and two checks
+the lesson added.</p>
 <div class="section level3">
 <h3 id="read-the-script-before-you-pay-for-it">Read the script before you pay for it<a class="anchor" aria-label="anchor" href="#read-the-script-before-you-pay-for-it"></a>
 </h3>
@@ -7863,14 +7877,11 @@ progress.</p>
 <div class="callout-content">
 <ul>
 <li>
-<strong><code>max_run</code> is the only thing standing between a
-bug and your whole budget.</strong> A training loop that diverges, hangs
-on a bad batch or waits on a dead data loader bills the same as one that
-works. The cap turns “whatever it takes” into a number you chose: here
-<strong><code>$1.53</code> worst case</strong>. Set it to about twice
-the estimate, never leave it at the default of 24 hours, and on a
-<strong><code>$25</code>-an-hour instance treat it as the price of the
-launch</strong>.</li>
+<strong><code>max_run</code> caps what a bug can cost.</strong> A
+training loop that diverges, hangs on a bad batch or waits on a dead
+data loader bills the same as one that works. The cap makes that a
+number you chose, here <code>$1.53</code> at worst. Set it to about
+twice the estimate and never leave it at the default of 24 hours.</li>
 <li>
 <strong>A unique <code>job_name</code> prevents the double
 launch.</strong> Running the launch cell twice fails with
@@ -8144,10 +8155,14 @@ launch is allowed to cost.</p>
 <span id="cb31-5"><a href="#cb31-5" tabindex="-1" aria-label="code-block-31-5"></a>    job_name<span class="op">=</span>training_job_name, checkpoint_s3_uri<span class="op">=</span>checkpoint_s3_uri, hyperparameters<span class="op">=</span>hyperparameters,</span>
 <span id="cb31-6"><a href="#cb31-6" tabindex="-1" aria-label="code-block-31-6"></a>)<span class="op">;</span></span></code></pre>
 </div>
-<p>Then the estimator: which script and folder to ship, which prebuilt
-container to run it in (the three version numbers pick a Hugging Face
-image with transformers, PyTorch and Python), which instance, the guard
-rails from above, and where the output and checkpoints go.</p>
+<p>Then the estimator. As in the training episodes, an estimator is the
+description of a training job: which script and folder to ship, which
+prebuilt container to run it in (the three version numbers pick a
+Hugging Face image with transformers, PyTorch and Python), which
+instance, the guard rails from above, and where the output and
+checkpoints go. SageMaker starts a machine of that type for the job,
+runs the script in the container, copies the output to S3 and ends the
+machine, and bills the seconds in between.</p>
 <div class="codewrapper sourceCode" id="cb32">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -8280,7 +8295,10 @@ the curve you plot in Step 2.</li>
 <p>When the cell returns, ask SageMaker what it charged for, and check
 that the job carries your tags; a job without them is spend nobody can
 attribute. The billable time is the number to compare against the
-estimate every time.</p>
+estimate every time. This is the same <code>job_cost_report</code> the
+training episodes used: one <code>describe_training_job</code> call,
+with the billable seconds, the instance and the model’s location read
+out of it.</p>
 <div class="codewrapper sourceCode" id="cb35">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -8382,12 +8400,13 @@ hand.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="how-many-passes-were-worth-paying-for">How many passes were worth paying for<a class="anchor" aria-label="anchor" href="#how-many-passes-were-worth-paying-for"></a>
+<h3 id="did-more-training-help">Did more training help?<a class="anchor" aria-label="anchor" href="#did-more-training-help"></a>
 </h3>
 <p>Before and after says whether the LoRA fine-tune helped. The curve
-says whether you bought the right amount of it. The job recorded the
-training loss every 5 steps and scored 8 of the holdout pages at the end
-of every epoch, with the base model as epoch 0.</p>
+says whether two passes was the right amount, and the holdout’s design
+says how far to trust the number. The job recorded the training loss
+every 5 steps and scored 8 of the holdout pages at the end of every
+epoch, with the base model as epoch 0.</p>
 <div class="codewrapper sourceCode" id="cb40">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -8429,70 +8448,54 @@ memorizing the training pages. Fewer passes, or more data.</li>
 the third. The third pass bought 0.008 of CER for five minutes of GPU,
 which is why the class run stops at two and the homework goes to four:
 that is the trade the curve lets you see.</p>
-<p>Eight pages is a noisy estimate (one hard page moves it), so read the
-trend, not the third decimal.</p>
-<div id="the-evaluation-sample-is-too-small-on-purpose" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<span class="callout-header">Callout</span>
-<div id="the-evaluation-sample-is-too-small-on-purpose" class="callout-inner">
-<h3 class="callout-title">The evaluation sample is too small, on
-purpose</h3>
-<div class="callout-content">
-<p>This job holds out 44 pages and scores 15 of them, 8 per curve point,
-to keep the run near half an hour. Those numbers are chosen for the
-clock, not for the statistics: one misread page moves an 8-page CER by
-several points. In your own work, keep most of the data for training,
-but score enough held-out examples that the number is not noise. Twenty
-is a floor. With a few hundred examples, 50 is a reasonable holdout;
-with thousands, 100 or more. Scoring is linear in pages (here about 18 s
-each), so score the curve on a smaller fixed sample each pass and the
-whole holdout only at the end.</p>
-</div>
-</div>
-</div>
-<div id="how-many-epochs-in-practice" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<span class="callout-header">Callout</span>
-<div id="how-many-epochs-in-practice" class="callout-inner">
-<h3 class="callout-title">How many epochs, in practice</h3>
-<div class="callout-content">
-<p>The number of passes is fixed before launch because it is the cost
-cap: <code>max_run</code> is set from it, and the learning-rate schedule
-(cosine here) is laid out over it, decaying to zero at the planned end.
-So the common practice is not to guess a magic number but to pick a
-budget, score the holdout every epoch inside it, and keep the best
-epoch:</p>
+<p>Eight pages is a noisy estimate, since one hard page moves it, so
+read the trend and not the third decimal. The job holds out 44 pages and
+scores 15 of them, 8 per curve point, to keep the run near half an hour.
+Those numbers are chosen for the clock, not for the statistics. In your
+own work, keep most of the data for training, but score enough held-out
+examples that the number is not noise. Twenty is a floor. With a few
+hundred examples, 50 is a reasonable holdout; with thousands, 100 or
+more. Scoring is linear in pages, about 18 seconds each here, so score
+the curve on a small fixed sample each pass and the whole holdout only
+at the end.</p>
+<p><strong>The holdout number flatters you.</strong> The script holds
+out 15% of <em>pages</em>, so pages from the same letter bundle appear
+in both the training and holdout halves. The competition’s hidden test
+set is split by <em>document</em>: the five test bundles are letters the
+model has never seen. All the letters are from one writer, which softens
+the gap here, but her hand, pen and paper change over a decade, so
+expect the leaderboard CER to be somewhat worse than the holdout CER. A
+document-level holdout is the fix; it is left as an exercise because
+with only four bundles in train, holding one out means giving up a
+quarter of the data.</p>
+<p><strong>How many passes to plan.</strong> The number of passes is
+fixed before launch, because <code>max_run</code> is set from it and the
+cosine learning-rate schedule is laid out over it, decaying to zero at
+the planned end. The common practice is to pick a budget, score the
+holdout every pass inside it, and keep the best pass.</p>
 <ul>
 <li>
-<strong>Small data, a few hundred to a few thousand
-examples</strong>: plan 3 to 5 passes. One pass rarely settles; ten
-usually memorizes.</li>
+<strong>A few hundred to a few thousand examples</strong>: plan 3 to
+5 passes. One pass rarely settles, and ten usually memorizes.</li>
 <li>
-<strong>Large instruction-tuning sets, tens of thousands and
-up</strong>: 1 to 3 passes. A second pass over that much data often
-helps less than it costs.</li>
+<strong>Tens of thousands of examples and up</strong>: 1 to 3
+passes. A second pass over that much data often helps less than it
+costs.</li>
 <li>
 <strong>Keep the best checkpoint, not the last.</strong> The script
-saves one per epoch; a training run that scores the holdout each epoch
-can reload the best (<code>load_best_model_at_end=True</code> in Hugging
-Face’s <code>Trainer</code>, with <code>save_strategy</code> and
-<code>eval_strategy</code> both set to <code>epoch</code>).</li>
+saves one per pass. <code>Trainer</code> can reload the best
+automatically with <code>load_best_model_at_end=True</code>, when
+<code>save_strategy</code> and <code>eval_strategy</code> are both
+<code>epoch</code>.</li>
 <li>
-<strong>Early stopping</strong> (stop when the holdout has not
-improved for N epochs, <code>EarlyStoppingCallback</code> in
-<code>Trainer</code>) is the automated form. It is used less with LLMs
-than with small models, because each evaluation costs minutes of GPU and
-because stopping early leaves the cosine schedule unfinished; most teams
-plan the budget and pick the best epoch afterwards instead.</li>
+<strong>Early stopping</strong>, ending the run when the holdout has
+not improved for a set number of passes, is
+<code>EarlyStoppingCallback</code> in <code>Trainer</code>. It is used
+less with large models than with small ones, because each evaluation
+costs minutes of GPU time and because stopping early leaves the schedule
+unfinished. Most teams plan the budget and pick the best pass
+afterwards.</li>
 </ul>
-<p>Whatever you do, the maximum is decided before launch.</p>
-</div>
-</div>
-</div>
 <div id="was-the-estimate-right" class="callout challenge">
 <div class="callout-square">
 <i class="callout-icon" data-feather="zap"></i>
@@ -8534,26 +8537,6 @@ evaluations at ~19 s are 25; four curve points are 9; startup and upload
 ratio you measured.</li>
 </ol>
 </div>
-</div>
-</div>
-</div>
-<div id="why-the-holdout-number-flatters-you" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<span class="callout-header">Callout</span>
-<div id="why-the-holdout-number-flatters-you" class="callout-inner">
-<h3 class="callout-title">Why the holdout number flatters you</h3>
-<div class="callout-content">
-<p>The script holds out 15% of <em>pages</em>, so pages from the same
-letter bundle appear in both the training and holdout halves. The
-competition’s hidden test set is split by <em>document</em>: the five
-test bundles are letters the model has never seen. All the letters are
-from one writer, which softens the gap here, but her hand, pen and paper
-change over a decade, so expect the leaderboard CER to be somewhat worse
-than the holdout CER. A document-level holdout is the fix; it is left as
-an exercise because with only four bundles in train, holding one out
-means giving up a quarter of the data.</p>
 </div>
 </div>
 </div>
@@ -8977,11 +8960,11 @@ for ML</a> page, 1.85x the price of <code>ml.g5.xlarge</code>, and runs
 this workload roughly 2.5–3x faster. It also has twice the GPU memory,
 so <code>batch_size</code> can be 2 or 4 instead of 1, which uses the
 GPU more efficiently.</p>
-<p>Using the Step 0 phase table, estimate the cost of the class job on
-<code>ml.g6e.xlarge</code>. Then do the same for the homework run (25
-min of training, 34 min of scoring, 6 min of startup and upload on the
-g5). Which phase does <em>not</em> get faster, and when does the faster
-instance save money?</p>
+<p>Using the Step 0 table of where the minutes go, estimate the cost of
+the class job on <code>ml.g6e.xlarge</code>. Then do the same for the
+homework run (25 min of training, 34 min of scoring, 6 min of startup
+and upload on the g5). Which phase does <em>not</em> get faster, and
+when does the faster instance save money?</p>
 </div>
 </div>
 </div>
@@ -10430,7 +10413,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10439,7 +10422,7 @@ helper wraps:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10502,7 +10485,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10956,7 +10939,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -11036,7 +11019,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -12458,7 +12441,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12522,7 +12505,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -15173,7 +15156,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
