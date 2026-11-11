@@ -909,7 +909,13 @@ for the image plus about 300 for the transcription, 1,600; the Setup
 section counts it with the model’s own processor, so it is not a
 guess.</li>
 <li>
-<code>epochs</code>: passes over the data. The three numbers
+<code>epochs</code>: passes over the data. You do not know in
+advance how many a model needs, so this is a budget you set, and the
+estimate scales with it. The usual budget is 3 to 5 passes for a few
+hundred to a few thousand examples and 1 to 3 for tens of thousands,
+scoring held-out data at the end of every pass and keeping the best one.
+Step 2 reads that curve for this run. The class run uses 2 to keep the
+job near half an hour, and the homework uses 4. The three numbers
 multiply to the tokens the model sees, 251 × 1,600 × 2, about 800,000.
 If you know the total tokens and not the breakdown, put the total in
 <code>examples</code> and 1 in <code>tokens_per_example</code>; the
@@ -935,7 +941,7 @@ sweep.</li>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>    params_billions<span class="op">=</span><span class="fl">3.75</span>,        <span class="co"># CHURRO-3B: the 3B language model plus its vision tower</span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a>    examples<span class="op">=</span><span class="dv">251</span>,                <span class="co"># one example = one page image with its transcription</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a>    tokens_per_example<span class="op">=</span><span class="dv">1600</span>,     <span class="co"># ~1,300 image tokens + ~300 text tokens; counted in Setup below</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>    epochs<span class="op">=</span><span class="dv">2</span>,                    <span class="co"># passes over the 251 pages</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>    epochs<span class="op">=</span><span class="dv">2</span>,                    <span class="co"># passes over the 251 pages: a budget, not a known number; see the bullet above</span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>    method<span class="op">=</span><span class="st">"lora"</span>,</span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a>    instance_type<span class="op">=</span><span class="st">"ml.g5.xlarge"</span>,</span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a>    runs<span class="op">=</span><span class="dv">1</span>,                      <span class="co"># one run today; the printout's last cost line is this times runs</span></span>
@@ -949,9 +955,9 @@ adds half again for gradient checkpointing, which our script uses to
 save memory by recomputing the forward pass during the backward one. A
 third either way is normal for this rule. The job you launch in Step 1
 bills about 32 minutes, because it also scores holdout pages before and
-after training, about 14 minutes the estimator does not count. Keep
-<code>step0_estimate</code>. Step 2 puts it next to the job’s own
-bill.</p>
+after training, about 14 minutes the estimator does not count. The cell
+above stored the estimate in <code>step0_estimate</code>, and Step 2
+reads it back to put it next to the job’s own bill.</p>
 <p>The same call for a 7B model on 5,000 documents of about 600 words
 (800 tokens) each, three passes, on the same card, so the two printouts
 compare. One argument changes besides the size. <code>runs</code> goes
