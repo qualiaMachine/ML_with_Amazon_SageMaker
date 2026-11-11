@@ -680,9 +680,11 @@ alert</a> at <code>$50</code> before you start.</li>
 workshop.</strong> New accounts have a quota of 0 for GPU instances, and
 increases can take weeks. In the console, go to <strong>Service Quotas →
 Amazon SageMaker</strong> and request:
-<code>ml.g5.xlarge for training job usage</code> (1),
-<code>ml.g4dn.xlarge for training job usage</code> (1),
-<code>ml.g5.xlarge for processing job usage</code> (2), and
+<code>ml.g5.xlarge for training job usage</code> (1), or
+<code>ml.g6.xlarge for training job usage</code> (1), the cheaper of the
+two 24 GB cards, and set <code>instance_type</code> in the fine-tuning
+episode to match, <code>ml.g4dn.xlarge for training job usage</code>
+(1), <code>ml.g5.xlarge for processing job usage</code> (2), and
 <code>ml.g6e.xlarge for notebook instance usage</code> (1, optional
 GPU-notebook episode only). A justification like “self-paced machine
 learning workshop” is enough.</li>

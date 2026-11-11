@@ -955,46 +955,61 @@ the single-GPU and multi-GPU SageMaker training instances from the price
 list; the full table, with CPU instances and notes on each GPU, is on
 the supplemental <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page:</p>
-<table class="table"><thead><tr><th>Instance</th>
+<table class="table"><colgroup><col width="20%"><col width="20%"><col width="20%"><col width="20%"><col width="20%"></colgroup><thead><tr><th>Instance</th>
 <th>GPU</th>
 <th>GPU memory</th>
+<th>Peak speed per GPU, bf16 TFLOPS</th>
 <th>
 <code>$</code>/hour</th>
 </tr></thead><tbody><tr><td><code>ml.g4dn.xlarge</code></td>
 <td>1 × T4</td>
 <td>16 GB</td>
+<td>65, fp16 only</td>
 <td><code>$0.74</code></td>
 </tr><tr><td><code>ml.g6.xlarge</code></td>
 <td>1 × L4</td>
 <td>24 GB</td>
+<td>61</td>
 <td><code>$1.13</code></td>
 </tr><tr><td><code>ml.g5.xlarge</code></td>
 <td>1 × A10G</td>
 <td>24 GB</td>
+<td>70</td>
 <td><code>$1.41</code></td>
 </tr><tr><td><code>ml.g6e.xlarge</code></td>
 <td>1 × L40S</td>
 <td>48 GB</td>
+<td>181</td>
 <td><code>$2.61</code></td>
 </tr><tr><td><code>ml.g5.12xlarge</code></td>
 <td>4 × A10G</td>
 <td>96 GB</td>
+<td>70</td>
 <td><code>$7.09</code></td>
 </tr><tr><td><code>ml.p4d.24xlarge</code></td>
 <td>8 × A100</td>
 <td>320 GB</td>
+<td>312</td>
 <td><code>$25.25</code></td>
 </tr><tr><td><code>ml.p5.48xlarge</code></td>
 <td>8 × H100</td>
 <td>640 GB</td>
+<td>989</td>
 <td><code>$63.30</code></td>
-</tr></tbody></table><p>A 3B LoRA run fits a 24 GB GPU with room to spare, so
-<code>ml.g5.xlarge</code> is the workhorse for this episode. A T4 is too
-small and too slow for a 3B vision model with page-sized images;
-<code>ml.g6.xlarge</code> is a fine substitute if g5 capacity is short;
-<code>ml.g6e.xlarge</code> is roughly 2 to 3x faster for less than twice
-the price, so it becomes cheaper per run once training outweighs the
-fixed startup.</p>
+</tr></tbody></table><p>The speed column is the dense figure from NVIDIA’s data sheets, which
+the estimator uses. The sheets’ headline numbers for the L4 and L40S are
+twice these, counted with sparsity, which training does not get.</p>
+<p>A 3B LoRA run fits a 24 GB GPU with room to spare, and the table has
+two 24 GB cards. The L4 is the cheaper per run. It is about 15% slower
+than the A10G at 20% less per hour, so a job that fits either costs a
+little less on the <code>ml.g6.xlarge</code>, and on your own account
+that is the one to request quota for. The class uses the
+<code>ml.g5.xlarge</code> because it is the training instance the
+workshop account has quota for, and the measured numbers in this episode
+are from it. The T4 is too small and too slow for a 3B vision model with
+page-sized images. The <code>ml.g6e.xlarge</code> is 2 to 3x faster than
+either 24 GB card for less than twice the price, so it becomes cheaper
+per run once training outweighs the fixed startup.</p>
 <p>Multi-GPU instances are for jobs that do not fit on one GPU, a full
 fine-tune of a 7B model or anything at 70B. They do not make a job
 cheaper. GPU-hours are the cost, and spreading them across eight GPUs

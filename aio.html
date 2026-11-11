@@ -2353,7 +2353,7 @@ task?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>One way to do it:</li>
@@ -3121,7 +3121,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3376,7 +3376,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -3892,7 +3892,7 @@ compared with the first job?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The status is <code>InProgress</code> if you were quick and
 <code>Completed</code> otherwise. The cost is the same as the first run,
@@ -3930,7 +3930,7 @@ and compare the bill and the accuracy with the script version.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>The built-in algorithm will not run our
 <code>preprocess_data()</code> for us, and it expects a CSV with no
@@ -4576,7 +4576,7 @@ next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -4773,7 +4773,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -6678,10 +6678,18 @@ list; the full table, with CPU instances and notes on each GPU, is on
 the supplemental <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
 for ML</a> page:</p>
 <table class="table">
+<colgroup>
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+</colgroup>
 <thead><tr>
 <th>Instance</th>
 <th>GPU</th>
 <th>GPU memory</th>
+<th>Peak speed per GPU, bf16 TFLOPS</th>
 <th>
 <code>$</code>/hour</th>
 </tr></thead>
@@ -6690,53 +6698,67 @@ for ML</a> page:</p>
 <td><code>ml.g4dn.xlarge</code></td>
 <td>1 × T4</td>
 <td>16 GB</td>
+<td>65, fp16 only</td>
 <td><code>$0.74</code></td>
 </tr>
 <tr>
 <td><code>ml.g6.xlarge</code></td>
 <td>1 × L4</td>
 <td>24 GB</td>
+<td>61</td>
 <td><code>$1.13</code></td>
 </tr>
 <tr>
 <td><code>ml.g5.xlarge</code></td>
 <td>1 × A10G</td>
 <td>24 GB</td>
+<td>70</td>
 <td><code>$1.41</code></td>
 </tr>
 <tr>
 <td><code>ml.g6e.xlarge</code></td>
 <td>1 × L40S</td>
 <td>48 GB</td>
+<td>181</td>
 <td><code>$2.61</code></td>
 </tr>
 <tr>
 <td><code>ml.g5.12xlarge</code></td>
 <td>4 × A10G</td>
 <td>96 GB</td>
+<td>70</td>
 <td><code>$7.09</code></td>
 </tr>
 <tr>
 <td><code>ml.p4d.24xlarge</code></td>
 <td>8 × A100</td>
 <td>320 GB</td>
+<td>312</td>
 <td><code>$25.25</code></td>
 </tr>
 <tr>
 <td><code>ml.p5.48xlarge</code></td>
 <td>8 × H100</td>
 <td>640 GB</td>
+<td>989</td>
 <td><code>$63.30</code></td>
 </tr>
 </tbody>
 </table>
-<p>A 3B LoRA run fits a 24 GB GPU with room to spare, so
-<code>ml.g5.xlarge</code> is the workhorse for this episode. A T4 is too
-small and too slow for a 3B vision model with page-sized images;
-<code>ml.g6.xlarge</code> is a fine substitute if g5 capacity is short;
-<code>ml.g6e.xlarge</code> is roughly 2 to 3x faster for less than twice
-the price, so it becomes cheaper per run once training outweighs the
-fixed startup.</p>
+<p>The speed column is the dense figure from NVIDIA’s data sheets, which
+the estimator uses. The sheets’ headline numbers for the L4 and L40S are
+twice these, counted with sparsity, which training does not get.</p>
+<p>A 3B LoRA run fits a 24 GB GPU with room to spare, and the table has
+two 24 GB cards. The L4 is the cheaper per run. It is about 15% slower
+than the A10G at 20% less per hour, so a job that fits either costs a
+little less on the <code>ml.g6.xlarge</code>, and on your own account
+that is the one to request quota for. The class uses the
+<code>ml.g5.xlarge</code> because it is the training instance the
+workshop account has quota for, and the measured numbers in this episode
+are from it. The T4 is too small and too slow for a 3B vision model with
+page-sized images. The <code>ml.g6e.xlarge</code> is 2 to 3x faster than
+either 24 GB card for less than twice the price, so it becomes cheaper
+per run once training outweighs the fixed startup.</p>
 <p>Multi-GPU instances are for jobs that do not fit on one GPU, a full
 fine-tune of a 7B model or anything at 70B. They do not make a job
 cheaper. GPU-hours are the cost, and spreading them across eight GPUs
@@ -10243,7 +10265,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10252,7 +10274,7 @@ helper wraps:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14476,7 +14498,7 @@ check finds something. Then run them.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-6" class="nav nav-tabs" role="tablist">
