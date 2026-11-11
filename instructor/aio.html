@@ -1421,7 +1421,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -4593,7 +4593,7 @@ next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -4790,7 +4790,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -5924,7 +5924,7 @@ of the search. Then run it and check (a) and (b) with
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <ul>
 <li>
@@ -5976,7 +5976,7 @@ in the notebook?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>The tuner can only vary what the script reads. Right now
 <code>train_nn.py</code> has no <code>--batch_size</code> argument and
@@ -6175,12 +6175,9 @@ general ones, on each task’s own benchmark. Sources: <a href="https://arxiv.or
 2025</a>. Scores as reported by each model’s authors.</em></div>
 </figure><p>That’s the approach we’ll explore in this episode. We’ll take CHURRO,
 which already specializes in historical documents, and adapt it further
-to a collection of handwritten German letters from UW-Madison’s Badger
-Scribe challenge.</p>
-<figure><img src="../fig/qwen-to-churro.png" alt="Five steps: text pretraining, vision pretraining, post-training, the released Qwen 2.5 VL 3B, and CHURRO's fine-tune on historical pages" class="figure mx-auto d-block"><div class="figcaption"><em>The steps that made CHURRO, from
-Qwen2.5-VL’s pretraining to its fine-tune on 99,491 historical pages;
-this episode adds one more step</em></div>
-</figure><div class="section level3">
+to a collection of handwritten German letters from UW-Madison’s <a href="https://www.kaggle.com/competitions/badger-scribe" class="external-link">Badger
+Scribe</a> challenge.</p>
+<div class="section level3">
 <h3 id="how-fine-tuning-works">How fine-tuning works<a class="anchor" aria-label="anchor" href="#how-fine-tuning-works"></a>
 </h3>
 <p>Fine-tuning uses the same basic training process we’ve already seen.
@@ -6994,7 +6991,7 @@ What does a project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5, because a full fine-tune of a 7B model
 needs about 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8
@@ -7184,7 +7181,7 @@ costs one epoch, not the whole bill.</li>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> Before class (instructor checklist) </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Students never download the data themselves; four things have to be
 in place before the session. Each is written out in the instructor
@@ -7521,7 +7518,7 @@ length. Run the text without the image to separate the two.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -7772,7 +7769,7 @@ step. Which, and why are they there?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Only the language model’s <code>q_proj</code>, <code>k_proj</code>,
@@ -8525,7 +8522,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li>Expect about 32 billed minutes. Scoring is the line most likely to
@@ -8880,15 +8877,16 @@ the 141 test pages. Keep only those rows, in the order
 <code>test.csv</code> lists them, and you have the fine-tuned model’s
 transcriptions of pages nobody has labeled.</p>
 <p>That file is not a Kaggle submission. The lesson’s data is the
-German-letter part of Badger Scribe. The competition’s training set has
-619 pages in three categories, the 295 letters plus 288 pages of
-surveyors’ field notes and 36 of 1830s account books, and its test set
-has 208 pages, the 141 letters plus 31 and 36 of the others. A
-submission needs a row for all 208. To get a leaderboard score, download
-the competition data from Kaggle, run the same fine-tune on its
-<code>train.csv</code> and images, which the script takes unchanged
-since its <code>--categories</code> default is all of them, run the
-transcriber over its <code>test.csv</code>, and build the file from its
+German-letter part of <a href="https://www.kaggle.com/competitions/badger-scribe" class="external-link">Badger
+Scribe</a>. The competition’s training set has 619 pages in three
+categories, the 295 letters plus 288 pages of surveyors’ field notes and
+36 of 1830s account books, and its test set has 208 pages, the 141
+letters plus 31 and 36 of the others. A submission needs a row for all
+208. To get a leaderboard score, download the competition data from
+Kaggle, run the same fine-tune on its <code>train.csv</code> and images,
+which the script takes unchanged since its <code>--categories</code>
+default is all of them, run the transcriber over its
+<code>test.csv</code>, and build the file from its
 <code>sample_submission.csv</code>. This step is optional, and only it
 needs a Kaggle account.</p>
 <div class="codewrapper sourceCode" id="cb54">
@@ -8953,7 +8951,7 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -8994,7 +8992,7 @@ instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution6" aria-expanded="false" aria-controls="collapseSolution6">
   <h4 class="accordion-header" id="headingSolution6"> Show me the solution </h4>
 </button>
-<div id="collapseSolution6" class="accordion-collapse collapse" aria-labelledby="headingSolution6" data-bs-parent="#accordionSolution6">
+<div id="collapseSolution6" class="accordion-collapse collapse" data-bs-parent="#accordionSolution6" aria-labelledby="headingSolution6">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
@@ -10434,7 +10432,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -10443,7 +10441,7 @@ helper wraps:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -12462,7 +12460,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12526,7 +12524,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -14045,7 +14043,7 @@ are, in the account you think you are in:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14054,7 +14052,7 @@ are, in the account you think you are in:</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14132,7 +14130,7 @@ session, after the login, and the commands use <code>$NB</code> and
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14141,7 +14139,7 @@ session, after the login, and the commands use <code>$NB</code> and
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1" aria-label="code-block-8-3"></a><span class="va">BUCKET</span><span class="op">=</span><span class="st">'&lt;your-bucket&gt;'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
+<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14186,7 +14184,7 @@ your notebook instance:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14195,7 +14193,7 @@ your notebook instance:</p>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
+<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14244,7 +14242,7 @@ key”:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14252,7 +14250,7 @@ key”:</p>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
+<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14352,7 +14350,7 @@ below.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14361,7 +14359,7 @@ below.</p>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a>  <span class="at">--query</span> <span class="st">'{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
+<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14670,7 +14668,7 @@ check finds something. Then run them.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-6" class="nav nav-tabs" role="tablist">
@@ -14686,14 +14684,14 @@ check finds something. Then run them.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-6" class="tab-content">
-<div id="nav-tabpanel-6-1" class="tab-pane show active" aria-labelledby="nav-tab-6-1" role="tabpanel">
+<div id="nav-tabpanel-6-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-6-1">
 <div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-6-2" class="tab-pane" aria-labelledby="nav-tab-6-2" role="tabpanel">
+<div id="nav-tabpanel-6-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-6-2">
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -15177,7 +15175,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
