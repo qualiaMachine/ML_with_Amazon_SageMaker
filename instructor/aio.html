@@ -671,7 +671,7 @@ hosts can do, we call Bedrock instead.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <p><strong>Amazon S3 stores the data and the results.</strong> <a href="https://aws.amazon.com/s3/" class="external-link">S3</a> is object storage, organized in
 <em>buckets</em>. Datasets stay in a bucket instead of on the notebook
 instance, every SageMaker job reads its inputs from a bucket and writes
@@ -680,7 +680,7 @@ month. You create a bucket of your own in the next episode and use it
 for the rest of the workshop. The larger datasets are already in a
 shared bucket the instructors staged.</p>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <p><strong>The SageMaker notebook instance is where you work.</strong>
 It is a small machine running JupyterLab, started at the beginning of
 the workshop and stopped at the end, and every notebook in the lesson
@@ -701,7 +701,7 @@ keeps every launched job visible, in a notebook the instructors can
 open, which is how a problem gets tracked down fast when a learner hits
 one.</p>
 </div>
-<div id="nav-tabpanel-1-3" class="tab-pane" aria-labelledby="nav-tab-1-3" role="tabpanel">
+<div id="nav-tabpanel-1-3" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-3">
 <p><strong>Amazon SageMaker runs the ML jobs.</strong> <a href="https://aws.amazon.com/sagemaker/" class="external-link">SageMaker</a> is AWS’s managed
 machine learning service. You give it a training or inference script,
 the input data and an instance type. It starts that instance, runs the
@@ -730,7 +730,7 @@ seconds, and tags split the bill by project. Training a hundred small
 models on a dataset under 10 GB costs under <code>$20</code>.</li>
 </ul>
 </div>
-<div id="nav-tabpanel-1-4" class="tab-pane" aria-labelledby="nav-tab-1-4" role="tabpanel">
+<div id="nav-tabpanel-1-4" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-4">
 <p><strong>Amazon Bedrock serves hosted models.</strong> Sometimes there
 is no model to train or host. You want to send a model a prompt and get
 a response. <a href="https://aws.amazon.com/bedrock/" class="external-link">Bedrock</a> gives
@@ -1421,7 +1421,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -3137,7 +3137,7 @@ group.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <ol style="list-style-type: decimal">
 <li><p><strong>Data Preprocessing</strong>: The script fills missing
@@ -3392,7 +3392,7 @@ data. Which instance would you pick for the training job, and why?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The table’s rule of thumb is RAM of at least 1.5× the dataset, so 20
 GB of data wants about 32 GB of memory: <code>ml.m5.2xlarge</code> (8
@@ -3908,7 +3908,7 @@ compared with the first job?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>The status is <code>InProgress</code> if you were quick and
 <code>Completed</code> otherwise. The cost is the same as the first run,
@@ -3946,7 +3946,7 @@ and compare the bill and the accuracy with the script version.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
 <div class="accordion-body">
 <p>The built-in algorithm will not run our
 <code>preprocess_data()</code> for us, and it expects a CSV with no
@@ -6177,7 +6177,10 @@ general ones, on each task’s own benchmark. Sources: <a href="https://arxiv.or
 which already specializes in historical documents, and adapt it further
 to a collection of handwritten German letters from UW-Madison’s Badger
 Scribe challenge.</p>
-<div class="section level3">
+<figure><img src="../fig/qwen-to-churro.png" alt="Five steps: text pretraining, vision pretraining, post-training, the released Qwen 2.5 VL 3B, and CHURRO's fine-tune on historical pages" class="figure mx-auto d-block"><div class="figcaption"><em>The steps that made CHURRO, from
+Qwen2.5-VL’s pretraining to its fine-tune on 99,491 historical pages;
+this episode adds one more step</em></div>
+</figure><div class="section level3">
 <h3 id="how-fine-tuning-works">How fine-tuning works<a class="anchor" aria-label="anchor" href="#how-fine-tuning-works"></a>
 </h3>
 <p>Fine-tuning uses the same basic training process we’ve already seen.
@@ -6189,7 +6192,9 @@ with random weights, we start with weights learned during an earlier,
 much larger training process. Our examples don’t need to teach the model
 everything about language or images. They only need to help it adapt
 what it already knows.</p>
-<p>We could update every parameter in the model, which is called
+<figure><img src="../fig/model-lifecycle-finetune.png" alt="Pipeline from pretraining through supervised fine-tuning and tuning from feedback to a released model, then a dashed arrow to your own fine-tune" class="figure mx-auto d-block"><div class="figcaption"><em>Where a fine-tune sits in a model’s life:
+after pretraining and post-training, on the released model</em></div>
+</figure><p>We could update every parameter in the model, which is called
 <strong><em>full fine-tuning</em></strong>. That’s how CHURRO itself was
 created. But even a relatively small model with 3 billion parameters is
 expensive to train this way, because training requires much more GPU
@@ -6440,7 +6445,7 @@ of the weight, and the two running averages Adam keeps for it, the four
 numbers per weight from the <em>How fine-tuning works</em> section
 above. A LoRA fine-tune keeps the weights frozen in 16-bit and adds a
 small adapter that carries its own gradients and optimizer state.</p>
-<figure><img src="../fig/memory-per-parameter.svg" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory per parameter: inference, a LoRA
+<figure><img src="../fig/memory-per-parameter.png" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory per parameter: inference, a LoRA
 fine-tune, and a full fine-tune</em></div>
 </figure><table class="table">
 <colgroup>
@@ -6458,11 +6463,6 @@ fine-tune, and a full fine-tune</em></div>
 <td>Inference, FP8</td>
 <td>1</td>
 <td>the weight, quantized</td>
-</tr>
-<tr>
-<td>Inference, bf16</td>
-<td>2</td>
-<td>the weight</td>
 </tr>
 <tr>
 <td>LoRA fine-tune</td>
@@ -6545,6 +6545,9 @@ way inference can, because each step’s update is too small for 8-bit or
 4-bit numbers to hold. LoRA avoids that jump by freezing the model and
 training a few million adapter parameters, which is why this episode
 fits on one 24 GB card.</p>
+<figure><img src="../fig/memory-by-model-size.png" alt="Bar chart on a log scale of GPU memory for full fine-tuning and LoRA at 3B, 7B, 27B and 70B, with dashed lines at 24 GB for an A10G and 80 GB for an H100" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory to fine-tune four model sizes,
+full and LoRA, on a log scale, against one A10G and one H100</em></div>
+</figure>
 </div>
 <div class="section level3">
 <h3 id="how-long-will-it-run">How long will it run?<a class="anchor" aria-label="anchor" href="#how-long-will-it-run"></a>
@@ -7888,7 +7891,15 @@ come to about half a gigabyte, which is why a LoRA run fits beside the
 frozen 7.5 GB of weights on a 24 GB card. The job’s log confirms the
 count in its <code>trainable params:</code> line, and the script refuses
 to train if more than 5% of the model turns out to be trainable.</p>
-<div class="codewrapper sourceCode" id="cb30">
+<p>Rank is a trade between capacity and memory, and the trade is
+measured. On Llama-2-7B, a LoRA at rank 16 trailed a full fine-tune on a
+code benchmark, rank 256 matched it, and the memory for the rank-256 run
+was still a fifth of the full fine-tune’s. For a few hundred pages, rank
+16 is the usual starting point.</p>
+<figure><img src="../fig/lora-rank-vs-full.png" alt="Two bar charts: HumanEval accuracy and GPU memory for LoRA at ranks 16, 64 and 256 and for full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>On Llama-2-7B, LoRA at rank 256 matched full
+fine-tuning on a code benchmark with a fifth of the memory. Source: <a href="https://arxiv.org/abs/2405.09673" class="external-link">Biderman et al.,
+2024</a></em></div>
+</figure><div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a>hyperparameters <span class="op">=</span> {</span>
@@ -10425,7 +10436,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -10879,7 +10890,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -10959,7 +10970,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -12381,7 +12392,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12445,7 +12456,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -13964,7 +13975,7 @@ are, in the account you think you are in:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -13973,7 +13984,7 @@ are, in the account you think you are in:</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14051,7 +14062,7 @@ session, after the login, and the commands use <code>$NB</code> and
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14060,7 +14071,7 @@ session, after the login, and the commands use <code>$NB</code> and
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1" aria-label="code-block-8-3"></a><span class="va">BUCKET</span><span class="op">=</span><span class="st">'&lt;your-bucket&gt;'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
+<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14105,7 +14116,7 @@ your notebook instance:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14114,7 +14125,7 @@ your notebook instance:</p>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
+<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14163,7 +14174,7 @@ key”:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14171,7 +14182,7 @@ key”:</p>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
+<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14271,7 +14282,7 @@ below.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14280,7 +14291,7 @@ below.</p>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a>  <span class="at">--query</span> <span class="st">'{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
+<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14605,14 +14616,14 @@ check finds something. Then run them.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-6" class="tab-content">
-<div id="nav-tabpanel-6-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-6-1">
+<div id="nav-tabpanel-6-1" class="tab-pane show active" aria-labelledby="nav-tab-6-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-6-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-6-2">
+<div id="nav-tabpanel-6-2" class="tab-pane" aria-labelledby="nav-tab-6-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -15096,7 +15107,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>

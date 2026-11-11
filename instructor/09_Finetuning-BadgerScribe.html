@@ -531,7 +531,10 @@ general ones, on each task’s own benchmark. Sources: <a href="https://arxiv.or
 which already specializes in historical documents, and adapt it further
 to a collection of handwritten German letters from UW-Madison’s Badger
 Scribe challenge.</p>
-<div class="section level3">
+<figure><img src="../fig/qwen-to-churro.png" alt="Five steps: text pretraining, vision pretraining, post-training, the released Qwen 2.5 VL 3B, and CHURRO's fine-tune on historical pages" class="figure mx-auto d-block"><div class="figcaption"><em>The steps that made CHURRO, from
+Qwen2.5-VL’s pretraining to its fine-tune on 99,491 historical pages;
+this episode adds one more step</em></div>
+</figure><div class="section level3">
 <h3 id="how-fine-tuning-works">How fine-tuning works<a class="anchor" aria-label="anchor" href="#how-fine-tuning-works"></a></h3>
 <p>Fine-tuning uses the same basic training process we’ve already seen.
 The model makes predictions on training examples, we measure how far
@@ -542,7 +545,9 @@ with random weights, we start with weights learned during an earlier,
 much larger training process. Our examples don’t need to teach the model
 everything about language or images. They only need to help it adapt
 what it already knows.</p>
-<p>We could update every parameter in the model, which is called
+<figure><img src="../fig/model-lifecycle-finetune.png" alt="Pipeline from pretraining through supervised fine-tuning and tuning from feedback to a released model, then a dashed arrow to your own fine-tune" class="figure mx-auto d-block"><div class="figcaption"><em>Where a fine-tune sits in a model’s life:
+after pretraining and post-training, on the released model</em></div>
+</figure><p>We could update every parameter in the model, which is called
 <strong><em>full fine-tuning</em></strong>. That’s how CHURRO itself was
 created. But even a relatively small model with 3 billion parameters is
 expensive to train this way, because training requires much more GPU
@@ -743,7 +748,7 @@ of the weight, and the two running averages Adam keeps for it, the four
 numbers per weight from the <em>How fine-tuning works</em> section
 above. A LoRA fine-tune keeps the weights frozen in 16-bit and adds a
 small adapter that carries its own gradients and optimizer state.</p>
-<figure><img src="../fig/memory-per-parameter.svg" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory per parameter: inference, a LoRA
+<figure><img src="../fig/memory-per-parameter.png" alt="Stacked bar chart of bytes per parameter for inference versus LoRA versus full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory per parameter: inference, a LoRA
 fine-tune, and a full fine-tune</em></div>
 </figure><table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>What you are doing with the model</th>
 <th>Bytes per parameter</th>
@@ -751,9 +756,6 @@ fine-tune, and a full fine-tune</em></div>
 </tr></thead><tbody><tr><td>Inference, FP8</td>
 <td>1</td>
 <td>the weight, quantized</td>
-</tr><tr><td>Inference, bf16</td>
-<td>2</td>
-<td>the weight</td>
 </tr><tr><td>LoRA fine-tune</td>
 <td>~2.5</td>
 <td>the frozen 16-bit weight, plus a share of the adapter with its
@@ -809,7 +811,9 @@ way inference can, because each step’s update is too small for 8-bit or
 4-bit numbers to hold. LoRA avoids that jump by freezing the model and
 training a few million adapter parameters, which is why this episode
 fits on one 24 GB card.</p>
-</div>
+<figure><img src="../fig/memory-by-model-size.png" alt="Bar chart on a log scale of GPU memory for full fine-tuning and LoRA at 3B, 7B, 27B and 70B, with dashed lines at 24 GB for an A10G and 80 GB for an H100" class="figure mx-auto d-block"><div class="figcaption"><em>GPU memory to fine-tune four model sizes,
+full and LoRA, on a log scale, against one A10G and one H100</em></div>
+</figure></div>
 <div class="section level3">
 <h3 id="how-long-will-it-run">How long will it run?<a class="anchor" aria-label="anchor" href="#how-long-will-it-run"></a></h3>
 <p>How long a job runs is how much work it does divided by how fast the
@@ -2020,7 +2024,15 @@ come to about half a gigabyte, which is why a LoRA run fits beside the
 frozen 7.5 GB of weights on a 24 GB card. The job’s log confirms the
 count in its <code>trainable params:</code> line, and the script refuses
 to train if more than 5% of the model turns out to be trainable.</p>
-<div class="codewrapper sourceCode" id="cb30">
+<p>Rank is a trade between capacity and memory, and the trade is
+measured. On Llama-2-7B, a LoRA at rank 16 trailed a full fine-tune on a
+code benchmark, rank 256 matched it, and the memory for the rank-256 run
+was still a fifth of the full fine-tune’s. For a few hundred pages, rank
+16 is the usual starting point.</p>
+<figure><img src="../fig/lora-rank-vs-full.png" alt="Two bar charts: HumanEval accuracy and GPU memory for LoRA at ranks 16, 64 and 256 and for full fine-tuning" class="figure mx-auto d-block"><div class="figcaption"><em>On Llama-2-7B, LoRA at rank 256 matched full
+fine-tuning on a code benchmark with a fifth of the memory. Source: <a href="https://arxiv.org/abs/2405.09673" class="external-link">Biderman et al.,
+2024</a></em></div>
+</figure><div class="codewrapper sourceCode" id="cb30">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" tabindex="-1" aria-label="code-block-30-1"></a>hyperparameters <span class="op">=</span> {</span>
