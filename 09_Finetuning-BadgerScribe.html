@@ -925,6 +925,17 @@ arithmetic is the same.</li>
 <li>
 <code>method</code>: <code>"lora"</code> or <code>"full"</code>,
 which sets the bytes per parameter and the FLOPs per token.</li>
+<li>The adapter rank is not an argument, because at ordinary ranks it
+changes neither number by much. Memory is the frozen weights, 2 bytes
+per parameter, plus 16 bytes for each adapter parameter, which at rank
+16 on this model is 2.1 bytes per parameter in all and at rank 64 about
+2.5, the flat figure the function uses. Compute is the forward and
+backward pass through the whole frozen model, the same at any rank, and
+the adapter’s own share is under 1%. The flat figures stop holding at
+very high ranks. At rank 256 the adapter is about 13% of this model’s
+weights, memory is about 4 bytes per parameter, 19 GB with the
+activations against the 13 GB the function reports, and you would add it
+yourself.</li>
 <li>
 <code>instance_type</code>: one of the boxes in the price list;
 leave it out and the cheapest one that fits is chosen.</li>
@@ -1180,7 +1191,7 @@ What does a project cost?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>It does not fit on the g5, because a full fine-tune of a 7B model
 needs about 112 GB plus activations, and the g5 has 24 GB. On the p4d, 8
@@ -1694,7 +1705,7 @@ prompt and transcription.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1919,7 +1930,7 @@ step. Which, and why are they there?</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Only the language model’s <code>q_proj</code>, <code>k_proj</code>,
 <code>v_proj</code>, <code>o_proj</code>, <code>gate_proj</code>,
@@ -2081,7 +2092,15 @@ frozen 7.5 GB of weights on a 24 GB card.</p>
 measured. On Llama-2-7B, a LoRA at rank 16 trailed a full fine-tune on a
 code benchmark, rank 256 matched it, and the memory for the rank-256 run
 was still a fifth of the full fine-tune’s. For a few hundred pages, rank
-16 is the usual starting point (<a href="https://arxiv.org/abs/2405.09673" class="external-link">Biderman et al., 2024</a>).</p>
+16 is the usual starting point (<a href="https://arxiv.org/abs/2405.09673" class="external-link">Biderman et al., 2024</a>). The
+rank is the first thing people raise when a run’s score is short of what
+they want, and it is usually the wrong first move. On a few hundred
+pages a large adapter memorizes the training pages sooner, which the
+holdout curve shows as rising while the training loss keeps falling, and
+at rank 256 this run’s memory goes from 13 GB to about 19 GB and the
+cost estimate no longer holds. More data, another pass, or a lower
+learning rate are cheaper first tries, and the holdout curve, not the
+training loss, says whether any of them helped.</p>
 <div class="codewrapper sourceCode" id="cb31">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -2587,7 +2606,7 @@ will compare it to the bill after the homework.</li>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution4" aria-expanded="false" aria-controls="collapseSolution4">
   <h4 class="accordion-header" id="headingSolution4"> Show me the solution </h4>
 </button>
-<div id="collapseSolution4" class="accordion-collapse collapse" data-bs-parent="#accordionSolution4" aria-labelledby="headingSolution4">
+<div id="collapseSolution4" class="accordion-collapse collapse" aria-labelledby="headingSolution4" data-bs-parent="#accordionSolution4">
 <div class="accordion-body">
 <ol style="list-style-type: decimal"><li>Expect about 32 billed minutes. Scoring is the line most likely to
 surprise: at 17 to 21 seconds a page, the two 15-page evaluations and
@@ -2980,7 +2999,7 @@ summaries, and the before/after CER. Did the extra pixels help?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution5" aria-expanded="false" aria-controls="collapseSolution5">
   <h4 class="accordion-header" id="headingSolution5"> Show me the solution </h4>
 </button>
-<div id="collapseSolution5" class="accordion-collapse collapse" data-bs-parent="#accordionSolution5" aria-labelledby="headingSolution5">
+<div id="collapseSolution5" class="accordion-collapse collapse" aria-labelledby="headingSolution5" data-bs-parent="#accordionSolution5">
 <div class="accordion-body">
 <p>Time per page roughly doubles: the sequence is twice as long and
 attention cost grows faster than linearly. On these scans the strokes
@@ -3021,7 +3040,7 @@ when does the faster instance save money?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution6" aria-expanded="false" aria-controls="collapseSolution6">
   <h4 class="accordion-header" id="headingSolution6"> Show me the solution </h4>
 </button>
-<div id="collapseSolution6" class="accordion-collapse collapse" data-bs-parent="#accordionSolution6" aria-labelledby="headingSolution6">
+<div id="collapseSolution6" class="accordion-collapse collapse" aria-labelledby="headingSolution6" data-bs-parent="#accordionSolution6">
 <div class="accordion-body">
 <p>Startup and upload (~6 min, <code>$0.26</code> at
 <code>$2.61</code>/h) do not speed up: the container pull and the S3
