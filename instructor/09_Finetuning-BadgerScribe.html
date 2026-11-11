@@ -1711,7 +1711,9 @@ out above:</p>
 <span id="cb20-10"><a href="#cb20-10" tabindex="-1" aria-label="code-block-20-10"></a>    text <span class="op">=</span> <span class="bu">len</span>(proc.tokenizer(proc.apply_chat_template(text_only, tokenize<span class="op">=</span><span class="va">False</span>))[<span class="st">"input_ids"</span>])</span>
 <span id="cb20-11"><a href="#cb20-11" tabindex="-1" aria-label="code-block-20-11"></a>    <span class="cf">return</span> {<span class="st">"total"</span>: total, <span class="st">"image"</span>: total <span class="op">-</span> text, <span class="st">"text"</span>: text}</span>
 <span id="cb20-12"><a href="#cb20-12" tabindex="-1" aria-label="code-block-20-12"></a></span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a>count_page_tokens(proc_dir, image, prompt, row.text, min_pixels<span class="op">=</span>bsh.DEFAULT_MIN_PIXELS, max_pixels<span class="op">=</span>bsh.DEFAULT_MAX_PIXELS)</span></code></pre>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a><span class="co"># The page from the cell above: `image` is it resized to the pixel cap, `prompt` the instruction for its category,</span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1" aria-label="code-block-20-14"></a><span class="co"># `row.text` its human transcription. proc_dir holds CHURRO's processor files, with the pixel limits the job uses.</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1" aria-label="code-block-20-15"></a>count_page_tokens(proc_dir, image, prompt, row.text, min_pixels<span class="op">=</span>bsh.DEFAULT_MIN_PIXELS, max_pixels<span class="op">=</span>bsh.DEFAULT_MAX_PIXELS)</span></code></pre>
 </div>
 <div id="count-the-page-for-another-model" class="callout challenge">
 <div class="callout-square">
@@ -1741,8 +1743,10 @@ prompt and transcription.</p>
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a>llava <span class="op">=</span> count_page_tokens(<span class="st">"llava-hf/llava-1.5-7b-hf"</span>, image, prompt, row.text)</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="bu">print</span>(<span class="ss">f"LLaVA 1.5: </span><span class="sc">{</span>llava[<span class="st">'total'</span>]<span class="sc">}</span><span class="ss"> tokens for the page, </span><span class="sc">{</span>llava[<span class="st">'image'</span>]<span class="sc">}</span><span class="ss"> of them for the image; CHURRO: </span><span class="sc">{</span>n_total<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="co"># The same page as above: `row` is its train.csv record, `image` the page resized to the pixel cap, `prompt` the</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="co"># instruction built for its category, `row.text` its human transcription, and `n_total` CHURRO's count for it.</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>llava <span class="op">=</span> count_page_tokens(<span class="st">"llava-hf/llava-1.5-7b-hf"</span>, image, prompt, row.text)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="bu">print</span>(<span class="ss">f"LLaVA 1.5: </span><span class="sc">{</span>llava[<span class="st">'total'</span>]<span class="sc">}</span><span class="ss"> tokens for the page, </span><span class="sc">{</span>llava[<span class="st">'image'</span>]<span class="sc">}</span><span class="ss"> of them for the image; CHURRO: </span><span class="sc">{</span>n_total<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>LLaVA 1.5 resizes every image to 336 × 336 pixels and cuts it into 24
 × 24 patches of 14 pixels, 576 image tokens however large the page, so

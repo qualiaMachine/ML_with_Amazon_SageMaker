@@ -671,7 +671,7 @@ hosts can do, we call Bedrock instead.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <p><strong>Amazon S3 stores the data and the results.</strong> <a href="https://aws.amazon.com/s3/" class="external-link">S3</a> is object storage, organized in
 <em>buckets</em>. Datasets stay in a bucket instead of on the notebook
 instance, every SageMaker job reads its inputs from a bucket and writes
@@ -680,7 +680,7 @@ month. You create a bucket of your own in the next episode and use it
 for the rest of the workshop. The larger datasets are already in a
 shared bucket the instructors staged.</p>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <p><strong>The SageMaker notebook instance is where you work.</strong>
 It is a small machine running JupyterLab, started at the beginning of
 the workshop and stopped at the end, and every notebook in the lesson
@@ -701,7 +701,7 @@ keeps every launched job visible, in a notebook the instructors can
 open, which is how a problem gets tracked down fast when a learner hits
 one.</p>
 </div>
-<div id="nav-tabpanel-1-3" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-3">
+<div id="nav-tabpanel-1-3" class="tab-pane" aria-labelledby="nav-tab-1-3" role="tabpanel">
 <p><strong>Amazon SageMaker runs the ML jobs.</strong> <a href="https://aws.amazon.com/sagemaker/" class="external-link">SageMaker</a> is AWS’s managed
 machine learning service. You give it a training or inference script,
 the input data and an instance type. It starts that instance, runs the
@@ -730,7 +730,7 @@ seconds, and tags split the bill by project. Training a hundred small
 models on a dataset under 10 GB costs under <code>$20</code>.</li>
 </ul>
 </div>
-<div id="nav-tabpanel-1-4" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-4">
+<div id="nav-tabpanel-1-4" class="tab-pane" aria-labelledby="nav-tab-1-4" role="tabpanel">
 <p><strong>Amazon Bedrock serves hosted models.</strong> Sometimes there
 is no model to train or host. You want to send a model a prompt and get
 a response. <a href="https://aws.amazon.com/bedrock/" class="external-link">Bedrock</a> gives
@@ -1421,7 +1421,7 @@ charge?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>Using the S3 Standard rate in us-east-1:</p>
 <ol style="list-style-type: decimal">
@@ -2877,7 +2877,7 @@ commit it, push with your PAT, and verify the change on GitHub.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>Still inside
 <code>/home/ec2-user/SageMaker/sagemaker-work</code>:</p>
@@ -4593,7 +4593,7 @@ next to it.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>There is no single answer; the solution is the written estimate. One
 worked example for scale: a 7B language model fully fine-tuned on 50,000
@@ -4790,7 +4790,7 @@ Explain the result.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>Typically the CPU run finishes about as fast or faster, and it is
 several times cheaper. Both jobs spend roughly the same few minutes on
@@ -7567,7 +7567,9 @@ out above:</p>
 <span id="cb20-10"><a href="#cb20-10" tabindex="-1" aria-label="code-block-20-10"></a>    text <span class="op">=</span> <span class="bu">len</span>(proc.tokenizer(proc.apply_chat_template(text_only, tokenize<span class="op">=</span><span class="va">False</span>))[<span class="st">"input_ids"</span>])</span>
 <span id="cb20-11"><a href="#cb20-11" tabindex="-1" aria-label="code-block-20-11"></a>    <span class="cf">return</span> {<span class="st">"total"</span>: total, <span class="st">"image"</span>: total <span class="op">-</span> text, <span class="st">"text"</span>: text}</span>
 <span id="cb20-12"><a href="#cb20-12" tabindex="-1" aria-label="code-block-20-12"></a></span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a>count_page_tokens(proc_dir, image, prompt, row.text, min_pixels<span class="op">=</span>bsh.DEFAULT_MIN_PIXELS, max_pixels<span class="op">=</span>bsh.DEFAULT_MAX_PIXELS)</span></code></pre>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1" aria-label="code-block-20-13"></a><span class="co"># The page from the cell above: `image` is it resized to the pixel cap, `prompt` the instruction for its category,</span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1" aria-label="code-block-20-14"></a><span class="co"># `row.text` its human transcription. proc_dir holds CHURRO's processor files, with the pixel limits the job uses.</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1" aria-label="code-block-20-15"></a>count_page_tokens(proc_dir, image, prompt, row.text, min_pixels<span class="op">=</span>bsh.DEFAULT_MIN_PIXELS, max_pixels<span class="op">=</span>bsh.DEFAULT_MAX_PIXELS)</span></code></pre>
 </div>
 <div id="count-the-page-for-another-model" class="callout challenge">
 <div class="callout-square">
@@ -7597,8 +7599,10 @@ prompt and transcription.</p>
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a>llava <span class="op">=</span> count_page_tokens(<span class="st">"llava-hf/llava-1.5-7b-hf"</span>, image, prompt, row.text)</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="bu">print</span>(<span class="ss">f"LLaVA 1.5: </span><span class="sc">{</span>llava[<span class="st">'total'</span>]<span class="sc">}</span><span class="ss"> tokens for the page, </span><span class="sc">{</span>llava[<span class="st">'image'</span>]<span class="sc">}</span><span class="ss"> of them for the image; CHURRO: </span><span class="sc">{</span>n_total<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" tabindex="-1" aria-label="code-block-21-1"></a><span class="co"># The same page as above: `row` is its train.csv record, `image` the page resized to the pixel cap, `prompt` the</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1" aria-label="code-block-21-2"></a><span class="co"># instruction built for its category, `row.text` its human transcription, and `n_total` CHURRO's count for it.</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1" aria-label="code-block-21-3"></a>llava <span class="op">=</span> count_page_tokens(<span class="st">"llava-hf/llava-1.5-7b-hf"</span>, image, prompt, row.text)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1" aria-label="code-block-21-4"></a><span class="bu">print</span>(<span class="ss">f"LLaVA 1.5: </span><span class="sc">{</span>llava[<span class="st">'total'</span>]<span class="sc">}</span><span class="ss"> tokens for the page, </span><span class="sc">{</span>llava[<span class="st">'image'</span>]<span class="sc">}</span><span class="ss"> of them for the image; CHURRO: </span><span class="sc">{</span>n_total<span class="sc">}</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>LLaVA 1.5 resizes every image to 336 × 336 pixels and cuts it into 24
 × 24 patches of 14 pixels, 576 image tokens however large the page, so
@@ -12479,7 +12483,7 @@ run?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p><code>describe_processing_job</code> returns three timestamps; the
 gap between the first two is unbilled provisioning, between the last two
@@ -12543,7 +12547,7 @@ instance left running over a weekend (64 hours).</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>With a 600-second cap the RAG job is killed by SageMaker ten minutes
 after <code>ProcessingStartTime</code>, while it is still downloading or
@@ -14062,7 +14066,7 @@ are, in the account you think you are in:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb3">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14071,7 +14075,7 @@ are, in the account you think you are in:</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="ex">aws</span> sts get-caller-identity</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
+<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb4">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14149,7 +14153,7 @@ session, after the login, and the commands use <code>$NB</code> and
 </button>
 </div>
 </nav><div id="nav-tabContent-2" class="tab-content">
-<div id="nav-tabpanel-2-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-2-1">
+<div id="nav-tabpanel-2-1" class="tab-pane show active" aria-labelledby="nav-tab-2-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb8">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14158,7 +14162,7 @@ session, after the login, and the commands use <code>$NB</code> and
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1" aria-label="code-block-8-3"></a><span class="va">BUCKET</span><span class="op">=</span><span class="st">'&lt;your-bucket&gt;'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-2-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-2-2">
+<div id="nav-tabpanel-2-2" class="tab-pane" aria-labelledby="nav-tab-2-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb9">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14203,7 +14207,7 @@ your notebook instance:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-3" class="tab-content">
-<div id="nav-tabpanel-3-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-3-1">
+<div id="nav-tabpanel-3-1" class="tab-pane show active" aria-labelledby="nav-tab-3-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14212,7 +14216,7 @@ your notebook instance:</p>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a>  <span class="at">--query</span> <span class="st">'{status:TrainingJobStatus, instance:ResourceConfig.InstanceType, count:ResourceConfig.InstanceCount, billable_s:BillableTimeInSeconds, created:CreationTime, ended:TrainingEndTime, model:ModelArtifacts.S3ModelArtifacts}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-3-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-3-2">
+<div id="nav-tabpanel-3-2" class="tab-pane" aria-labelledby="nav-tab-3-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb12">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14261,7 +14265,7 @@ key”:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-4" class="tab-content">
-<div id="nav-tabpanel-4-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-4-1">
+<div id="nav-tabpanel-4-1" class="tab-pane show active" aria-labelledby="nav-tab-4-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb14">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14269,7 +14273,7 @@ key”:</p>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1" aria-label="code-block-14-2"></a><span class="ex">aws</span> sagemaker list-tags <span class="at">--resource-arn</span> <span class="va">$ARN</span> <span class="at">--query</span> <span class="st">'Tags[].[Key,Value]'</span> <span class="at">--output</span> table</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-4-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-4-2">
+<div id="nav-tabpanel-4-2" class="tab-pane" aria-labelledby="nav-tab-4-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb15">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14369,7 +14373,7 @@ below.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-5" class="tab-content">
-<div id="nav-tabpanel-5-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-5-1">
+<div id="nav-tabpanel-5-1" class="tab-pane show active" aria-labelledby="nav-tab-5-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14378,7 +14382,7 @@ below.</p>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1" aria-label="code-block-20-3"></a>  <span class="at">--query</span> <span class="st">'{image:AlgorithmSpecification.TrainingImage, role:RoleArn, code:HyperParameters.sagemaker_submit_directory}'</span></span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-5-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-5-2">
+<div id="nav-tabpanel-5-2" class="tab-pane" aria-labelledby="nav-tab-5-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb21">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -14687,7 +14691,7 @@ check finds something. Then run them.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="tabs">
 <nav><div id="nav-tab-6" class="nav nav-tabs" role="tablist">
@@ -14703,14 +14707,14 @@ check finds something. Then run them.</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-6" class="tab-content">
-<div id="nav-tabpanel-6-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-6-1">
+<div id="nav-tabpanel-6-1" class="tab-pane show active" aria-labelledby="nav-tab-6-1" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb28">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" tabindex="-1" aria-label="code-block-28-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> workshop <span class="kw">&amp;&amp;</span> <span class="bu">export</span> <span class="va">AWS_PROFILE</span><span class="op">=</span>workshop</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-6-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-6-2">
+<div id="nav-tabpanel-6-2" class="tab-pane" aria-labelledby="nav-tab-6-2" role="tabpanel">
 <div class="codewrapper sourceCode" id="cb29">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -15194,7 +15198,7 @@ stopped your notebook instance and walked away?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <p>A complete list for someone who did every episode, including the
 optional ones:</p>
