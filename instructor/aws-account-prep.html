@@ -304,7 +304,7 @@
 <div class="accordion accordion-flush" id="accordionFlush13">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading13">
-        <a href="12_RAG-Processing-jobs.html">12. RAG Beyond the Bedrock Catalog</a>
+        <a href="12_RAG-Processing-jobs.html">12. RAG with Processing Jobs</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -516,7 +516,7 @@ data-parallel job; tuning (2 parallel jobs each)</td>
 </td>
 <td>4 each</td>
 <td>the four-GPU instances the fine-tuning episode estimates, for 70B
-LoRA runs or large datasets; enough for a few learners at once</td>
+LoRA runs or large datasets</td>
 </tr><tr><td><code>ml.g5.xlarge for processing job usage</code></td>
 <td>200</td>
 <td>Processing Jobs episode (both jobs) and fine-tuning homework (two
@@ -790,37 +790,20 @@ allows.</p>
 <span id="cb4-166"><a href="#cb4-166" tabindex="-1" aria-label="code-block-4-166"></a>      <span class="fu">}</span></span>
 <span id="cb4-167"><a href="#cb4-167" tabindex="-1" aria-label="code-block-4-167"></a>    <span class="fu">}</span><span class="ot">,</span></span>
 <span id="cb4-168"><a href="#cb4-168" tabindex="-1" aria-label="code-block-4-168"></a>    <span class="fu">{</span></span>
-<span id="cb4-169"><a href="#cb4-169" tabindex="-1" aria-label="code-block-4-169"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"FourGpuTypesCapAtFourHours"</span><span class="fu">,</span></span>
+<span id="cb4-169"><a href="#cb4-169" tabindex="-1" aria-label="code-block-4-169"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"ProcessingJobsNeedACap"</span><span class="fu">,</span></span>
 <span id="cb4-170"><a href="#cb4-170" tabindex="-1" aria-label="code-block-4-170"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Deny"</span><span class="fu">,</span></span>
 <span id="cb4-171"><a href="#cb4-171" tabindex="-1" aria-label="code-block-4-171"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb4-172"><a href="#cb4-172" tabindex="-1" aria-label="code-block-4-172"></a>        <span class="st">"sagemaker:CreateTrainingJob"</span><span class="ot">,</span></span>
-<span id="cb4-173"><a href="#cb4-173" tabindex="-1" aria-label="code-block-4-173"></a>        <span class="st">"sagemaker:CreateProcessingJob"</span></span>
-<span id="cb4-174"><a href="#cb4-174" tabindex="-1" aria-label="code-block-4-174"></a>      <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb4-175"><a href="#cb4-175" tabindex="-1" aria-label="code-block-4-175"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="st">"*"</span><span class="fu">,</span></span>
-<span id="cb4-176"><a href="#cb4-176" tabindex="-1" aria-label="code-block-4-176"></a>      <span class="dt">"Condition"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-177"><a href="#cb4-177" tabindex="-1" aria-label="code-block-4-177"></a>        <span class="dt">"ForAnyValue:StringEquals"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-178"><a href="#cb4-178" tabindex="-1" aria-label="code-block-4-178"></a>          <span class="dt">"sagemaker:InstanceTypes"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"ml.g5.12xlarge"</span><span class="ot">,</span> <span class="st">"ml.g6e.12xlarge"</span><span class="ot">]</span></span>
-<span id="cb4-179"><a href="#cb4-179" tabindex="-1" aria-label="code-block-4-179"></a>        <span class="fu">},</span></span>
-<span id="cb4-180"><a href="#cb4-180" tabindex="-1" aria-label="code-block-4-180"></a>        <span class="dt">"NumericGreaterThan"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-181"><a href="#cb4-181" tabindex="-1" aria-label="code-block-4-181"></a>          <span class="dt">"sagemaker:MaxRuntimeInSeconds"</span><span class="fu">:</span> <span class="st">"14400"</span></span>
-<span id="cb4-182"><a href="#cb4-182" tabindex="-1" aria-label="code-block-4-182"></a>        <span class="fu">}</span></span>
-<span id="cb4-183"><a href="#cb4-183" tabindex="-1" aria-label="code-block-4-183"></a>      <span class="fu">}</span></span>
-<span id="cb4-184"><a href="#cb4-184" tabindex="-1" aria-label="code-block-4-184"></a>    <span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb4-185"><a href="#cb4-185" tabindex="-1" aria-label="code-block-4-185"></a>    <span class="fu">{</span></span>
-<span id="cb4-186"><a href="#cb4-186" tabindex="-1" aria-label="code-block-4-186"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"ProcessingJobsNeedACap"</span><span class="fu">,</span></span>
-<span id="cb4-187"><a href="#cb4-187" tabindex="-1" aria-label="code-block-4-187"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Deny"</span><span class="fu">,</span></span>
-<span id="cb4-188"><a href="#cb4-188" tabindex="-1" aria-label="code-block-4-188"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb4-189"><a href="#cb4-189" tabindex="-1" aria-label="code-block-4-189"></a>        <span class="st">"sagemaker:CreateProcessingJob"</span></span>
-<span id="cb4-190"><a href="#cb4-190" tabindex="-1" aria-label="code-block-4-190"></a>      <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb4-191"><a href="#cb4-191" tabindex="-1" aria-label="code-block-4-191"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="st">"*"</span><span class="fu">,</span></span>
-<span id="cb4-192"><a href="#cb4-192" tabindex="-1" aria-label="code-block-4-192"></a>      <span class="dt">"Condition"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-193"><a href="#cb4-193" tabindex="-1" aria-label="code-block-4-193"></a>        <span class="dt">"Null"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb4-194"><a href="#cb4-194" tabindex="-1" aria-label="code-block-4-194"></a>          <span class="dt">"sagemaker:MaxRuntimeInSeconds"</span><span class="fu">:</span> <span class="st">"true"</span></span>
-<span id="cb4-195"><a href="#cb4-195" tabindex="-1" aria-label="code-block-4-195"></a>        <span class="fu">}</span></span>
-<span id="cb4-196"><a href="#cb4-196" tabindex="-1" aria-label="code-block-4-196"></a>      <span class="fu">}</span></span>
-<span id="cb4-197"><a href="#cb4-197" tabindex="-1" aria-label="code-block-4-197"></a>    <span class="fu">}</span></span>
-<span id="cb4-198"><a href="#cb4-198" tabindex="-1" aria-label="code-block-4-198"></a>  <span class="ot">]</span></span>
-<span id="cb4-199"><a href="#cb4-199" tabindex="-1" aria-label="code-block-4-199"></a><span class="fu">}</span></span></code></pre>
+<span id="cb4-172"><a href="#cb4-172" tabindex="-1" aria-label="code-block-4-172"></a>        <span class="st">"sagemaker:CreateProcessingJob"</span></span>
+<span id="cb4-173"><a href="#cb4-173" tabindex="-1" aria-label="code-block-4-173"></a>      <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-174"><a href="#cb4-174" tabindex="-1" aria-label="code-block-4-174"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="st">"*"</span><span class="fu">,</span></span>
+<span id="cb4-175"><a href="#cb4-175" tabindex="-1" aria-label="code-block-4-175"></a>      <span class="dt">"Condition"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-176"><a href="#cb4-176" tabindex="-1" aria-label="code-block-4-176"></a>        <span class="dt">"Null"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-177"><a href="#cb4-177" tabindex="-1" aria-label="code-block-4-177"></a>          <span class="dt">"sagemaker:MaxRuntimeInSeconds"</span><span class="fu">:</span> <span class="st">"true"</span></span>
+<span id="cb4-178"><a href="#cb4-178" tabindex="-1" aria-label="code-block-4-178"></a>        <span class="fu">}</span></span>
+<span id="cb4-179"><a href="#cb4-179" tabindex="-1" aria-label="code-block-4-179"></a>      <span class="fu">}</span></span>
+<span id="cb4-180"><a href="#cb4-180" tabindex="-1" aria-label="code-block-4-180"></a>    <span class="fu">}</span></span>
+<span id="cb4-181"><a href="#cb4-181" tabindex="-1" aria-label="code-block-4-181"></a>  <span class="ot">]</span></span>
+<span id="cb4-182"><a href="#cb4-182" tabindex="-1" aria-label="code-block-4-182"></a><span class="fu">}</span></span></code></pre>
 </div>
 <p>What each statement does, and what it costs you:</p>
 <ul><li>
@@ -835,13 +818,12 @@ table above exactly, including the capacity fallbacks; a type you forget
 here fails for every learner at once, from the console too. Keep
 <code>ml.g6e.xlarge</code> on the list only if you want the optional
 GPU-notebook episode to be possible. The two four-GPU types are on the
-list with their own cap, <strong>FourGpuTypesCapAtFourHours</strong>.
-Under the 48-hour cap one hung job costs <code>$125</code> on the
-largest single GPU but <code>$630</code> on an
-<code>ml.g6e.12xlarge</code>, so runs on those types are limited to four
-hours, <code>$55</code> at most. IAM ANDs the conditions within one
-statement, so the type list and the shorter cap go together in the
-second statement and the 48-hour statement is unchanged.</li>
+list for learners whose models need them. Under the 48-hour cap one hung
+job costs <code>$125</code> on the largest single GPU and
+<code>$630</code> on an <code>ml.g6e.12xlarge</code>, so the per-learner
+budget alert below matters more once they are on the list, and the
+lesson’s launch check prints what a job that runs to its cap would
+cost.</li>
 <li>
 <strong>The three tag statements</strong> refuse a job or notebook
 created without each of the cost-allocation keys.
@@ -1126,12 +1108,11 @@ ARN, or calls through the profile are denied;
 </div>
 <div class="section level3">
 <h3 id="the-custom-model-import-role">The Custom Model Import role<a class="anchor" aria-label="anchor" href="#the-custom-model-import-role"></a></h3>
-<p>Step 5 of the RAG Beyond the Bedrock Catalog episode imports a small
-open-weight model into Bedrock. The import job runs as an IAM role that
-can read the learner’s bucket, and the learner permission set cannot
-create roles, so the instructor creates one role for the account and
-runs that step in front of the class. From CloudShell, in the class
-region:</p>
+<p>The last step of the Bedrock episode imports a small open-weight
+model into Bedrock. The import job runs as an IAM role that can read the
+learner’s bucket, and the learner permission set cannot create roles, so
+the instructor creates one role for the account and runs that step in
+front of the class. From CloudShell, in the class region:</p>
 <div class="codewrapper sourceCode" id="cb11">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>

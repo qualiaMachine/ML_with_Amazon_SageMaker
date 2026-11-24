@@ -304,7 +304,7 @@
 <div class="accordion accordion-flush" id="accordionFlush13">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading13">
-        <a href="12_RAG-Processing-jobs.html">12. RAG Beyond the Bedrock Catalog</a>
+        <a href="12_RAG-Processing-jobs.html">12. RAG with Processing Jobs</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -456,10 +456,11 @@ e.g. <code>DoeJohn</code>.</td>
 <code>ml.m5.xlarge</code>, <code>ml.g4dn.xlarge</code>,
 <code>ml.g5.xlarge</code>, <code>ml.g6.xlarge</code>,
 <code>ml.g6e.xlarge</code>, <code>ml.g6e.2xlarge</code>, and the
-four-GPU <code>ml.g5.12xlarge</code> and <code>ml.g6e.12xlarge</code>,
-which are limited to 4-hour runs. A hung job costs at most about
-<code>$125</code> on a single GPU and <code>$55</code> on a four-GPU
-instance. Ask the instructor if your work needs another.</td>
+four-GPU <code>ml.g5.12xlarge</code> and <code>ml.g6e.12xlarge</code>.
+Under the 48-hour cap a hung job costs at most about <code>$125</code>
+on a single GPU and <code>$630</code> on the largest four-GPU instance,
+so set <code>max_run</code> close to your estimate. Ask the instructor
+if your work needs another.</td>
 </tr><tr><td>The runtime cap is over 48 hours</td>
 <td>
 <code>max_run</code> (training and tuning jobs) or

@@ -123,7 +123,7 @@
     <a id="search-button-nav" class="btn btn-primary" href="../instructor/aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
   </div><!--/div.container-fluid -->
 </nav><aside class="col-md-12 lesson-progress"><div class="progress incubator">
-    <div class="progress-bar incubator" role="progressbar" style="width: 67%" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">67%</div>
+    <div class="progress-bar incubator" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">68%</div>
   </div>
 </aside><div class="container">
       <div class="row">
@@ -323,7 +323,7 @@
 <div class="accordion accordion-flush" id="accordionFlush13">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading13">
-        <a href="12_RAG-Processing-jobs.html">12. RAG Beyond the Bedrock Catalog</a>
+        <a href="12_RAG-Processing-jobs.html">12. RAG with Processing Jobs</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -693,8 +693,8 @@ production chatbots.</p>
 <p>Bedrock can also serve a model that is not in its catalog.
 <strong>Custom Model Import</strong> takes an open-weight checkpoint
 from your bucket and serves it the same way, with nothing running
-between calls, for a short list of supported architectures. The RAG
-Beyond the Bedrock Catalog episode tries it.</p>
+between calls, for a short list of supported architectures. The Bedrock
+episode tries it in its last step.</p>
 </div>
 <div class="section level3">
 <h3 id="sagemaker-processing-jobs">2. SageMaker Processing jobs<a class="anchor" aria-label="anchor" href="#sagemaker-processing-jobs"></a></h3>
@@ -831,8 +831,11 @@ model (Titan, Claude, Llama, …) will do</td>
 <td><strong>Bedrock</strong></td>
 </tr><tr><td>You want an interactive chatbot or API over your documents</td>
 <td><strong>Bedrock</strong></td>
-</tr><tr><td>You need a specific open-weight model and the work is batch
-(embedding a corpus, bulk generation)</td>
+</tr><tr><td>You need a specific open-weight model and its architecture is on
+Bedrock’s import list</td>
+<td><strong>Bedrock, Custom Model Import</strong></td>
+</tr><tr><td>You need a specific open-weight model Bedrock cannot import, and the
+work is batch (embedding a corpus, bulk generation)</td>
 <td><strong>Processing jobs</strong></td>
 </tr><tr><td>You are learning how RAG works, or debugging a model step by
 step</td>
@@ -855,10 +858,11 @@ month.</p>
 <p>The next two episodes build RAG on <strong>Bedrock</strong> first,
 then on <strong>Processing jobs</strong>. The Bedrock episode is the one
 to start from. It builds the whole WattBot pipeline, chunking the corpus
-included, from a cheap CPU notebook with nothing left running afterward.
-The Processing-jobs episode reruns the same pipeline on an open-weight
-model Bedrock does not carry, as jobs that end on their own, which shows
-what Bedrock does for you and what it costs to do yourself. An optional
+included, from a cheap CPU notebook with nothing left running afterward,
+and ends by importing a small open-weight model into Bedrock. The
+Processing-jobs episode reruns the same pipeline on an open-weight model
+Bedrock does not carry, as jobs that end on their own, which shows what
+Bedrock does for you and what it costs to do yourself. An optional
 self-study episode runs the same self-hosted pipeline interactively on a
 GPU notebook instance, for the case where you need to work on a
 self-hosted model by hand, and only if you will remember to stop the
