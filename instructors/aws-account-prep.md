@@ -11,7 +11,7 @@ Everything below, as a list to work down. The sections that follow have the deta
 1. **Pick the region** and use it for everything after this (next section).
 2. **File the GPU quota increases**, three to four weeks ahead (*SageMaker service quotas*).
 3. **The notebook role.** Create `ml-sagemaker-use` if the account does not have it, then attach its three inline policies from CloudShell: `WorkshopGuardRails` from the repo's `scripts/guardrails.json`, `ReadOwnCloudTrail`, and `BedrockAccess` (*The notebook role*, *Permission set guard rails*, *Bedrock*). Run the policy simulator, then one test job of each kind from a learner sign-in.
-4. **Enable Bedrock model access** for the two models the RAG episode calls, and check their rate quotas (*Bedrock*).
+4. **Enable Bedrock model access** for the two models the RAG episode calls, check their rate quotas, and create the `BedrockImportRole` that the Bedrock episode's last step uses (*Bedrock*).
 5. **Cost allocation tags** active on the account, a Budgets alert on the class total (*Cost allocation tags*).
 6. **Stage the shared bucket** from CloudShell, following *Shared data bucket: staging before each term*.
 7. **Add the learners** to the Identity Center group and send the sign-in email (*Learner access*).
