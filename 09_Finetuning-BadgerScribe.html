@@ -432,7 +432,7 @@ test pages</a></li>
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Fine-tuning a Vision-Language Model with Training Jobs</h1>
-        <p>Last updated on 2026-11-11 |
+        <p>Last updated on 2026-11-24 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/09_Finetuning-BadgerScribe.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -951,6 +951,13 @@ the forward and backward pass through the frozen model is the same work
 at any rank and only the adapter’s own weight updates grow with it, a
 few percent of the total at rank 256. Left out, the function uses a flat
 2.5 bytes.</li>
+<li>
+<code>load_in_4bit</code>: store the frozen weights in 4-bit, half a
+byte per parameter instead of two, which is the training script’s
+<code>--load_in_4bit 1</code>. It is how a model above about 20B fits
+the 48 GB card, and it changes only the memory line: the adapter and the
+arithmetic are the same, so the time and the cost are too. The function
+says when a run needs it.</li>
 <li>
 <code>instance_type</code>: one of the boxes in the price list;
 leave it out and the cheapest one that fits is chosen.</li>
@@ -3201,7 +3208,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-11",
+  "dateModified": "2026-11-24",
   "datePublished": "2026-11-24"
 }
 
