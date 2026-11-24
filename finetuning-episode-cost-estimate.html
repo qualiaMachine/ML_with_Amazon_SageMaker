@@ -404,7 +404,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Fine-tuning episode: cost, capacity and setup</h1>
-        <p>Last updated on 2026-11-03 |
+        <p>Last updated on 2026-11-24 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/instructors/finetuning-episode-cost-estimate.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -570,6 +570,13 @@ the homework, where each student launches two jobs at once. Request
 check it is not lower than the above.</li>
 <li>If you want <code>ml.g6e.xlarge</code> for Exercise 2, request 100
 of those too.</li>
+<li>
+<code>ml.g5.12xlarge</code> and <code>ml.g6e.12xlarge</code> for
+training job usage, 4 each, for learners whose own models need a
+four-GPU instance. Those run at <code>$7</code> and <code>$13</code> an
+hour with the 48-hour cap, so a learner who uses one should set
+<code>max_run</code> close to the estimate; the launch check prints what
+the cap would cost.</li>
 </ul><p>New accounts often have these at 0 to 4. Quota increases for GPU
 instances can take days and sometimes a back-and-forth with support, so
 file them <strong>three to four weeks</strong> before class.</p>
@@ -698,7 +705,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/finetuning-episode-cost-estimate.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/finetuning-episode-cost-estimate.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-03",
+  "dateModified": "2026-11-24",
   "datePublished": "2026-11-24"
 }
 
