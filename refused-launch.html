@@ -455,9 +455,9 @@ e.g. <code>DoeJohn</code>.</td>
 <code>ml.g5.xlarge</code>, <code>ml.g6.xlarge</code>,
 <code>ml.g6e.xlarge</code>, <code>ml.g6e.2xlarge</code>, and the
 four-GPU <code>ml.g5.12xlarge</code> and <code>ml.g6e.12xlarge</code>,
-which carry a 4-hour cap of their own, so that one hung job stays near
+which are limited to 4-hour runs. A hung job costs at most about
 <code>$125</code> on a single GPU and <code>$55</code> on a four-GPU
-box. Ask the instructor if your work needs another.</td>
+instance. Ask the instructor if your work needs another.</td>
 </tr><tr><td>The runtime cap is over 48 hours</td>
 <td>
 <code>max_run</code> (training and tuning jobs) or

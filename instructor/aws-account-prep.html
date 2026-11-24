@@ -515,9 +515,8 @@ data-parallel job; tuning (2 parallel jobs each)</td>
 <code>ml.g6e.12xlarge for training job usage</code>
 </td>
 <td>4 each</td>
-<td>the four-GPU boxes the fine-tuning episode estimates; a few learners
-at once, for 70B LoRA runs or large data, under their own 4-hour
-cap</td>
+<td>the four-GPU instances the fine-tuning episode estimates, for 70B
+LoRA runs or large datasets; enough for a few learners at once</td>
 </tr><tr><td><code>ml.g5.xlarge for processing job usage</code></td>
 <td>200</td>
 <td>Processing Jobs episode (both jobs) and fine-tuning homework (two
@@ -836,14 +835,13 @@ table above exactly, including the capacity fallbacks; a type you forget
 here fails for every learner at once, from the console too. Keep
 <code>ml.g6e.xlarge</code> on the list only if you want the optional
 GPU-notebook episode to be possible. The two four-GPU types are on the
-list with a cap of their own,
-<strong>FourGpuTypesCapAtFourHours</strong>, because the brake on spend
-is time rather than instance size: under the 48-hour cap one hung job is
-<code>$125</code> on the largest single GPU, but <code>$630</code> on an
-<code>ml.g6e.12xlarge</code>, so those types are held to four hours,
-<code>$55</code> at most. IAM ANDs the conditions in one statement, so
-the type list and the cap sit together in the second statement and the
-48-hour statement stays as it is.</li>
+list with their own cap, <strong>FourGpuTypesCapAtFourHours</strong>.
+Under the 48-hour cap one hung job costs <code>$125</code> on the
+largest single GPU but <code>$630</code> on an
+<code>ml.g6e.12xlarge</code>, so runs on those types are limited to four
+hours, <code>$55</code> at most. IAM ANDs the conditions within one
+statement, so the type list and the shorter cap go together in the
+second statement and the 48-hour statement is unchanged.</li>
 <li>
 <strong>The three tag statements</strong> refuse a job or notebook
 created without each of the cost-allocation keys.
@@ -1007,7 +1005,7 @@ pm, that a running cell is interrupted when they do, and that jobs are
 not.</p>
 </div>
 <div class="section level3">
-<h3 id="a-spend-alert-per-learner-and-a-brake-on-the-class-total">2. A spend alert per learner, and a brake on the class total<a class="anchor" aria-label="anchor" href="#a-spend-alert-per-learner-and-a-brake-on-the-class-total"></a></h3>
+<h3 id="a-spend-alert-per-learner-and-a-limit-on-the-class-total">2. A spend alert per learner, and a limit on the class total<a class="anchor" aria-label="anchor" href="#a-spend-alert-per-learner-and-a-limit-on-the-class-total"></a></h3>
 <p>AWS Budgets can watch one cost-allocation tag. One budget per learner
 on the <code>Name</code> tag, at the per-person credit with an alert at
 80%, tells you who is about to run over, a day or two late because of
