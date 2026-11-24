@@ -58,6 +58,7 @@ If the jobs are still queueing at 0:50 (capacity), teach the console and the cos
 - `ml.g5.xlarge for processing job usage`: only needed for the homework, where each student launches two jobs at once. Request **200**.
 - `Maximum number of instances across all training jobs`: check it is not lower than the above.
 - If you want `ml.g6e.xlarge` for Exercise 2, request 100 of those too.
+- `ml.g5.12xlarge` and `ml.g6e.12xlarge` for training job usage, 4 each, for learners whose own models need a four-GPU instance. Those run at `$7` and `$13` an hour with the 48-hour cap, so a learner who uses one should set `max_run` close to the estimate; the launch check prints what the cap would cost.
 
 New accounts often have these at 0 to 4. Quota increases for GPU instances can take days and sometimes a back-and-forth with support, so file them **three to four weeks** before class.
 
