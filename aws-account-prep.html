@@ -304,7 +304,7 @@
 <div class="accordion accordion-flush" id="accordionFlush13">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading13">
-        <a href="12_RAG-Processing-jobs.html">12. RAG with Processing Jobs</a>
+        <a href="12_RAG-Processing-jobs.html">12. RAG Beyond the Bedrock Catalog</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -404,7 +404,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Account preparation checklist (quotas, Bedrock, tags)</h1>
-        <p>Last updated on 2026-10-28 |
+        <p>Last updated on 2026-11-24 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/instructors/aws-account-prep.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -1100,6 +1100,35 @@ ARN, or calls through the profile are denied;
 <span id="cb10-30"><a href="#cb10-30" tabindex="-1" aria-label="code-block-10-30"></a>  <span class="ot">]</span></span>
 <span id="cb10-31"><a href="#cb10-31" tabindex="-1" aria-label="code-block-10-31"></a><span class="fu">}</span></span></code></pre>
 </div>
+<div class="section level3">
+<h3 id="the-custom-model-import-role">The Custom Model Import role<a class="anchor" aria-label="anchor" href="#the-custom-model-import-role"></a></h3>
+<p>Step 5 of the RAG Beyond the Bedrock Catalog episode imports a small
+open-weight model into Bedrock. The import job runs as an IAM role that
+can read the learner’s bucket, and the learner permission set cannot
+create roles, so the instructor creates one role for the account and
+runs that step in front of the class. From CloudShell, in the class
+region:</p>
+<div class="codewrapper sourceCode" id="cb11">
+<h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1" aria-label="code-block-11-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> trust.json <span class="op">&lt;&lt;'EOF'</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1" aria-label="code-block-11-2"></a><span class="st">{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"bedrock.amazonaws.com"},"Action":"sts:AssumeRole","Condition":{"StringEquals":{"aws:SourceAccount":"ACCOUNT_ID"},"ArnEquals":{"aws:SourceArn":"arn:aws:bedrock:us-east-2:ACCOUNT_ID:model-import-job/*"}}}]}</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1" aria-label="code-block-11-3"></a><span class="op">EOF</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1" aria-label="code-block-11-4"></a><span class="fu">cat</span> <span class="op">&gt;</span> s3read.json <span class="op">&lt;&lt;'EOF'</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1" aria-label="code-block-11-5"></a><span class="st">{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject","s3:ListBucket"],"Resource":["arn:aws:s3:::*"]}]}</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1" aria-label="code-block-11-6"></a><span class="op">EOF</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1" aria-label="code-block-11-7"></a><span class="ex">aws</span> iam create-role <span class="at">--role-name</span> BedrockImportRole <span class="at">--assume-role-policy-document</span> file://trust.json</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1" aria-label="code-block-11-8"></a><span class="ex">aws</span> iam put-role-policy <span class="at">--role-name</span> BedrockImportRole <span class="at">--policy-name</span> S3Read <span class="at">--policy-document</span> file://s3read.json</span></code></pre>
+</div>
+<p>Replace <code>ACCOUNT_ID</code> with the account’s 12-digit id. The
+read policy covers every bucket in the account so the role works for
+whichever bucket holds the weights; narrow it to one prefix on an
+account that holds anything sensitive. The role’s ARN is what the
+episode’s <code>import_role_arn</code> cell takes. The import itself is
+free and the imported model bills per Custom Model Unit only while it
+answers; delete the model after class with
+<code>aws bedrock delete-imported-model</code>.</p>
+</div>
 </section><section><h2 class="section-heading" id="cost-allocation-tags">Cost allocation tags<a class="anchor" aria-label="anchor" href="#cost-allocation-tags"></a></h2>
 <hr class="half-width"><ul><li>Confirm with the Public Cloud team that <code>Name</code>,
 <code>Project</code>, <code>Purpose</code> are active cost allocation
@@ -1183,7 +1212,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/aws-account-prep.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/aws-account-prep.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-10-28",
+  "dateModified": "2026-11-24",
   "datePublished": "2026-11-24"
 }
 

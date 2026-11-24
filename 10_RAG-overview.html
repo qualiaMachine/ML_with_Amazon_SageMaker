@@ -123,7 +123,7 @@
     <a id="search-button-nav" class="btn btn-primary" href="aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
   </div><!--/div.container-fluid -->
 </nav><aside class="col-md-12 lesson-progress"><div class="progress incubator">
-    <div class="progress-bar incubator" role="progressbar" style="width: 68%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">68%</div>
+    <div class="progress-bar incubator" role="progressbar" style="width: 67%" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">67%</div>
   </div>
 </aside><div class="container">
       <div class="row">
@@ -323,7 +323,7 @@
 <div class="accordion accordion-flush" id="accordionFlush13">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading13">
-        <a href="12_RAG-Processing-jobs.html">12. RAG with Processing Jobs</a>
+        <a href="12_RAG-Processing-jobs.html">12. RAG Beyond the Bedrock Catalog</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -428,7 +428,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Overview of RAG Workflows on AWS</h1>
-        <p>Last updated on 2026-11-03 |
+        <p>Last updated on 2026-11-24 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/10_RAG-overview.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -553,7 +553,7 @@ forgetting to is a common way a research team spends its cloud budget on
 nothing. Bedrock has no such failure. Stop calling it and you stop
 paying.</p>
 <div class="section level3">
-<h3 id="what-forgetting-costs">What forgetting costs<a class="anchor" aria-label="anchor" href="#what-forgetting-costs"></a></h3>
+<h3 id="a-gpu-instance-left-running">A GPU instance left running<a class="anchor" aria-label="anchor" href="#a-gpu-instance-left-running"></a></h3>
 <p>A GPU notebook instance left running after you close your laptop
 (on-demand prices at the time of writing; the <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">instances
 page</a> has the current ones):</p>
@@ -688,6 +688,11 @@ contract.</p>
 <p><strong>Use it for:</strong> any RAG system where a catalog model
 will do, from prototypes and course projects to research tools and
 production chatbots.</p>
+<p>Bedrock can also serve a model it does not carry. <strong>Custom
+Model Import</strong> takes an open-weight checkpoint from your bucket
+and serves it the same way, with nothing running between calls, for a
+short list of supported architectures. The Processing Jobs episode tries
+it.</p>
 </div>
 <div class="section level3">
 <h3 id="sagemaker-processing-jobs">2. SageMaker Processing jobs<a class="anchor" aria-label="anchor" href="#sagemaker-processing-jobs"></a></h3>
@@ -956,7 +961,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/10_RAG-overview.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/10_RAG-overview.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-03",
+  "dateModified": "2026-11-24",
   "datePublished": "2026-11-24"
 }
 

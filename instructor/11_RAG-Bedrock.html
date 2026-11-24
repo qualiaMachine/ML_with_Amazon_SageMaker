@@ -123,7 +123,7 @@
     <a id="search-button-nav" class="btn btn-primary" href="../instructor/aio.html" role="button" aria-label="Search the All In One page">Search the All In One page</a>
   </div><!--/div.container-fluid -->
 </nav><aside class="col-md-12 lesson-progress"><div class="progress incubator">
-    <div class="progress-bar incubator" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">70%</div>
+    <div class="progress-bar incubator" role="progressbar" style="width: 69%" aria-valuenow="69" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson Progress">69%</div>
   </div>
 </aside><div class="container">
       <div class="row">
@@ -334,7 +334,7 @@ questions</a></li>
 <div class="accordion accordion-flush" id="accordionFlush13">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading13">
-        <a href="12_RAG-Processing-jobs.html">12. RAG with Processing Jobs</a>
+        <a href="12_RAG-Processing-jobs.html">12. RAG Beyond the Bedrock Catalog</a>
     </div><!--/div.accordion-header-->
 
   </div><!--/div.accordion-item-->
@@ -433,13 +433,13 @@ questions</a></li>
           Previous: Overview of RAG Workflows on AWS...
         </a>
         <a class="chapter-link float-end" href="../instructor/12_RAG-Processing-jobs.html" rel="next">
-          Next: RAG with Processing Jobs...
+          Next: RAG Beyond the Bedrock Catalog...
           <i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i>
         </a>
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>RAG with Bedrock</h1>
-        <p>Last updated on 2026-11-19 |
+        <p>Last updated on 2026-11-24 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/11_RAG-Bedrock.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -1173,7 +1173,7 @@ helper wraps:</p>
 </button>
 </div>
 </nav><div id="nav-tabContent-1" class="tab-content">
-<div id="nav-tabpanel-1-1" class="tab-pane show active" aria-labelledby="nav-tab-1-1" role="tabpanel">
+<div id="nav-tabpanel-1-1" class="tab-pane show active" role="tabpanel" aria-labelledby="nav-tab-1-1">
 <div class="codewrapper sourceCode" id="cb18">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1182,7 +1182,7 @@ helper wraps:</p>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1" aria-label="code-block-18-3"></a>  <span class="at">--tags</span> key=Name,value=DoeJohn key=Project,value=SinkOrSwim key=Purpose,value=Inference</span></code></pre>
 </div>
 </div>
-<div id="nav-tabpanel-1-2" class="tab-pane" aria-labelledby="nav-tab-1-2" role="tabpanel">
+<div id="nav-tabpanel-1-2" class="tab-pane" role="tabpanel" aria-labelledby="nav-tab-1-2">
 <div class="codewrapper sourceCode" id="cb19">
 <h3 class="code-label">POWERSHELL<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
@@ -1243,7 +1243,7 @@ month’s Bedrock spend by <code>Project</code>?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <div class="codewrapper sourceCode" id="cb20">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -1685,7 +1685,7 @@ same questions, <code>$1.41</code> an hour?</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>The two prices are from the <a href="https://aws.amazon.com/bedrock/pricing/" class="external-link">Bedrock pricing page</a>
 for DeepSeek on-demand in October 2026; update them for the model and
@@ -1763,7 +1763,7 @@ what moved the score.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution3" aria-expanded="false" aria-controls="collapseSolution3">
   <h4 class="accordion-header" id="headingSolution3"> Show me the solution </h4>
 </button>
-<div id="collapseSolution3" class="accordion-collapse collapse" aria-labelledby="headingSolution3" data-bs-parent="#accordionSolution3">
+<div id="collapseSolution3" class="accordion-collapse collapse" data-bs-parent="#accordionSolution3" aria-labelledby="headingSolution3">
 <div class="accordion-body">
 <p>Both solution cells start with
 <code>%%script false --no-raise-error</code>, which makes Jupyter skip
@@ -2272,13 +2272,15 @@ few cents.</p>
 </div>
 </section><section><h2 class="section-heading" id="wrap-up">Wrap-up<a class="anchor" aria-label="anchor" href="#wrap-up"></a></h2>
 <hr class="half-width"><p>You now have a complete WattBot evaluation on Bedrock, billed per
-token, with nothing left running. The Processing-jobs episode reruns it
-on a self-hosted model, and the optional GPU-notebook episode once more
-by hand, so by the end there are three versions of the same pipeline to
-compare, Bedrock, a Processing job and a notebook GPU. The code they
-share is the retrieval, prompting and scoring in
-<code>wattbot_rag.py</code>; what each one implements is the two
-callables, <code>embed_query</code> and <code>generate</code>.</p>
+token, with nothing left running. The next episode reruns it on a
+self-hosted model in a Processing job, then imports a small model into
+Bedrock to show the route with no GPU at all, and the optional
+GPU-notebook episode runs it once more by hand, so by the end there are
+three versions of the same pipeline to compare, Bedrock, a Processing
+job and a notebook GPU. The code they share is the retrieval, prompting
+and scoring in <code>wattbot_rag.py</code>; what each one implements is
+the two callables, <code>embed_query</code> and
+<code>generate</code>.</p>
 <p>Use Bedrock or another hosted API when a catalog model will do and
 you would rather pay per token than manage a GPU. Use a self-hosted
 model on a GPU when the work needs a model the catalog does not carry,
@@ -2339,7 +2341,7 @@ any links that you are not going to use.
           Previous: Overview of RAG Workflows on AWS...
         </a>
         <a class="chapter-link float-end" href="../instructor/12_RAG-Processing-jobs.html" rel="next">
-          Next: RAG with Processing Jobs...
+          Next: RAG Beyond the Bedrock Catalog...
           <i aria-hidden="true" class="small-arrow" data-feather="arrow-right"></i>
         </a>
       </div>
@@ -2387,7 +2389,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/11_RAG-Bedrock.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instructor/11_RAG-Bedrock.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-19",
+  "dateModified": "2026-11-24",
   "datePublished": "2026-11-24"
 }
 
