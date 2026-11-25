@@ -645,7 +645,7 @@ for f in ["badger_scribe_helpers.py", "finetune_churro_lora.py", "churro_transcr
     shutil.copy(f"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/{f}", f"code/{f}")
 
 with open("code/requirements.txt", "w") as f:  # pip-installed inside the container before the script starts
-    f.write("\n".join(["peft>=0.14", "accelerate", "pillow", "pandas"]))   # peft is Hugging Face's library of PEFT methods; it is where get_peft_model and LoraConfig come from
+    f.write("\n".join(["peft>=0.14", "accelerate", "pillow", "pandas", "bitsandbytes"]))   # peft is Hugging Face's library of PEFT methods, where get_peft_model and LoraConfig come from; bitsandbytes is only used with --load_in_4bit 1
 
 print(os.listdir("code"))
 ```

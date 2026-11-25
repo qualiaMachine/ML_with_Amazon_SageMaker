@@ -249,7 +249,7 @@ def main():
     from peft import LoraConfig, get_peft_model
     from transformers import (
         AutoProcessor,
-        Qwen2_5_VLForConditionalGeneration,
+        AutoModelForImageTextToText,   # picks the model class from config.json, so --model_id can be CHURRO or another vision-language model
         Trainer,
         TrainerCallback,
         TrainingArguments,
@@ -287,7 +287,7 @@ def main():
         # unpacked to the compute dtype when a layer runs, so the arithmetic is the same as in 16-bit
         # and only the storage shrinks, 7.5 GB to about 2 GB for this model. The adapter is not quantized.
         from transformers import BitsAndBytesConfig
-        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model = AutoModelForImageTextToText.from_pretrained(
             args.model_id, attn_implementation="sdpa", device_map={"": 0},
             quantization_config=BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                                                    bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=dtype),
@@ -298,7 +298,7 @@ def main():
         model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True,
                                                 gradient_checkpointing_kwargs={"use_reentrant": False})
     else:
-        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model = AutoModelForImageTextToText.from_pretrained(
             args.model_id, torch_dtype=dtype, attn_implementation="sdpa"
         ).to("cuda")
 
