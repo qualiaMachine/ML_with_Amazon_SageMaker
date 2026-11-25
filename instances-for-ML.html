@@ -404,7 +404,7 @@
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Instances for ML</h1>
-        <p>Last updated on 2026-11-11 |
+        <p>Last updated on 2026-11-25 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/learners/instances-for-ML.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -496,6 +496,17 @@ bill           = instance-hours × price per instance-hour</code></pre>
 <code>ml.p5.48xlarge</code> for 25 hours, 100 instance-hours, about
 <code>$6,330</code>. The same 800 GPU-hours on one box would take 100
 hours of wall-clock time and cost the same.</p>
+<p><strong>Multi-GPU instances are often unavailable on demand.</strong>
+Each region has a limited number of the four- and eight-GPU boxes, and
+they stay close to fully used, so an on-demand job that asks for one can
+wait hours in <code>Starting</code> for a box to free up. The wait is
+not billed, but it is not bounded. Single-GPU instances exist in far
+larger numbers and usually start within minutes. When a model fits one
+GPU with its weights in 4-bit, as a 27B LoRA does on an
+<code>ml.g6e.xlarge</code>, that is usually the faster way to get the
+job running, at about the same total cost. For a run that must start on
+time on a multi-GPU box, SageMaker training plans reserve the capacity
+ahead, at a higher hourly rate.</p>
 </div>
 <div class="section level4">
 <h4 id="which-instance-for-what">Which instance for what<a class="anchor" aria-label="anchor" href="#which-instance-for-what"></a></h4>
@@ -771,7 +782,7 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-11",
+  "dateModified": "2026-11-25",
   "datePublished": "2026-11-25"
 }
 

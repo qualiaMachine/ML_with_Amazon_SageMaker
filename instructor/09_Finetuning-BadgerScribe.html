@@ -1346,6 +1346,14 @@ get through four pages in the time one GPU gets through one. The cost
 estimator shows what that does to the run. The same class-run call as
 above, with the instance type forced to the four-GPU
 <code>ml.g5.12xlarge</code>:</p>
+<p>The four-GPU boxes are also scarce. Each region has few of them and
+they stay busy, so an on-demand job that asks for one can wait hours
+before it starts, while a single-GPU instance usually starts within
+minutes. A model that fits one GPU with its frozen weights in 4-bit,
+which the estimator’s <code>load_in_4bit=True</code> prices, is usually
+the quicker way to get a large LoRA running, at about the same total
+cost and a longer wall-clock. The <a href="https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html" class="external-link">Instances
+for ML</a> page says more.</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
