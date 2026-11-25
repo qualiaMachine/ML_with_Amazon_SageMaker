@@ -432,7 +432,7 @@ test pages</a></li>
       </div>
     </nav><main id="main-content" class="main-content"><div class="container lesson-content">
         <h1>Fine-tuning a Vision-Language Model with Training Jobs</h1>
-        <p>Last updated on 2026-11-24 |
+        <p>Last updated on 2026-11-25 |
 
         <a href="https://github.com/carpentries-incubator/ML_with_AWS_SageMaker/edit/main/episodes/09_Finetuning-BadgerScribe.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 
@@ -1837,7 +1837,7 @@ file written into the repository:</p>
 <span id="cb27-5"><a href="#cb27-5" tabindex="-1" aria-label="code-block-27-5"></a>    shutil.copy(<span class="ss">f"/home/ec2-user/SageMaker/ML_with_AWS_SageMaker/scripts/</span><span class="sc">{</span>f<span class="sc">}</span><span class="ss">"</span>, <span class="ss">f"code/</span><span class="sc">{</span>f<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb27-6"><a href="#cb27-6" tabindex="-1" aria-label="code-block-27-6"></a></span>
 <span id="cb27-7"><a href="#cb27-7" tabindex="-1" aria-label="code-block-27-7"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"code/requirements.txt"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:  <span class="co"># pip-installed inside the container before the script starts</span></span>
-<span id="cb27-8"><a href="#cb27-8" tabindex="-1" aria-label="code-block-27-8"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"peft&gt;=0.14"</span>, <span class="st">"accelerate"</span>, <span class="st">"pillow"</span>, <span class="st">"pandas"</span>]))   <span class="co"># peft is Hugging Face's library of PEFT methods; it is where get_peft_model and LoraConfig come from</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1" aria-label="code-block-27-8"></a>    f.write(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join([<span class="st">"peft&gt;=0.14"</span>, <span class="st">"accelerate"</span>, <span class="st">"pillow"</span>, <span class="st">"pandas"</span>, <span class="st">"bitsandbytes"</span>]))   <span class="co"># peft is Hugging Face's library of PEFT methods, where get_peft_model and LoraConfig come from; bitsandbytes is only used with --load_in_4bit 1</span></span>
 <span id="cb27-9"><a href="#cb27-9" tabindex="-1" aria-label="code-block-27-9"></a></span>
 <span id="cb27-10"><a href="#cb27-10" tabindex="-1" aria-label="code-block-27-10"></a><span class="bu">print</span>(os.listdir(<span class="st">"code"</span>))</span></code></pre>
 </div>
@@ -3210,8 +3210,8 @@ any links that you are not going to use.
   "url": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "identifier": "https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/09_Finetuning-BadgerScribe.html",
   "dateCreated": "2024-10-31",
-  "dateModified": "2026-11-24",
-  "datePublished": "2026-11-24"
+  "dateModified": "2026-11-25",
+  "datePublished": "2026-11-25"
 }
 
   </script><script>
