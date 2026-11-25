@@ -339,6 +339,8 @@ This section is for a run that does not fit one GPU, or a LoRA run on far more d
 
 A multi-GPU box runs one job as data parallelism. Every GPU holds its own full copy of the model and the adapter, takes its own share of each batch, a page each here, and computes the gradient for that share. After every step the GPUs exchange their gradients and average them, so all four copies make the same update and stay identical. Four GPUs therefore get through four pages in the time one GPU gets through one. The cost estimator shows what that does to the run. The same class-run call as above, with the instance type forced to the four-GPU `ml.g5.12xlarge`:
 
+The four-GPU boxes are also scarce. Each region has few of them and they stay busy, so an on-demand job that asks for one can wait hours before it starts, while a single-GPU instance usually starts within minutes. A model that fits one GPU with its frozen weights in 4-bit, which the estimator's `load_in_4bit=True` prices, is usually the quicker way to get a large LoRA running, at about the same total cost and a longer wall-clock. The [Instances for ML](https://carpentries-incubator.github.io/ML_with_AWS_SageMaker/instances-for-ML.html) page says more.
+
 ```python
 # The class run on a 4 x A10G instance, estimated but not launched; the single GPU is cheaper for a job this small
 helpers.estimate_finetune_cost(
