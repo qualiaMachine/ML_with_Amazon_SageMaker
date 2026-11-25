@@ -29,6 +29,8 @@ bill           = instance-hours × price per instance-hour
 
 So "32 H100s for 25 hours" is 800 GPU-hours, which is four `ml.p5.48xlarge` for 25 hours, 100 instance-hours, about `$6,330`. The same 800 GPU-hours on one box would take 100 hours of wall-clock time and cost the same.
 
+**Multi-GPU instances are often unavailable on demand.** Each region has a limited number of the four- and eight-GPU boxes, and they stay close to fully used, so an on-demand job that asks for one can wait hours in `Starting` for a box to free up. The wait is not billed, but it is not bounded. Single-GPU instances exist in far larger numbers and usually start within minutes. When a model fits one GPU with its weights in 4-bit, as a 27B LoRA does on an `ml.g6e.xlarge`, that is usually the faster way to get the job running, at about the same total cost. For a run that must start on time on a multi-GPU box, SageMaker training plans reserve the capacity ahead, at a higher hourly rate.
+
 #### Which instance for what
 
 To read the table, find the row whose memory is at least 1.5× your dataset, then move down to the first GPU row only if the task is deep learning. For the workshop, the controller is always `ml.t3.medium`, the Titanic training jobs use `ml.m5.large` or `ml.g4dn.xlarge`, the fine-tuning job uses `ml.g5.xlarge`, and the RAG Processing jobs use `ml.g5.xlarge` (embedding) and `ml.g6e.xlarge` (the 27B generator).
